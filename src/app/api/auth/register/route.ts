@@ -47,7 +47,11 @@ export async function POST(request: NextRequest) {
     // 步骤 4: 验证密码强度
     const passwordValidation = validatePasswordStrength(password);
     if (!passwordValidation.valid) {
-      return errorResponse(passwordValidation.message, ErrorCodes.VALIDATION_ERROR, 400);
+      return errorResponse(
+        passwordValidation.message || "密码格式不正确",
+        ErrorCodes.VALIDATION_ERROR,
+        400
+      );
     }
 
     // 步骤 5: 检查用户名是否已存在

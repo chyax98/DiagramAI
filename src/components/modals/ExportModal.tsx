@@ -10,12 +10,13 @@ import type { RenderLanguage } from "@/types/diagram";
 import type { KrokiDiagramType } from "@/lib/utils/kroki";
 import { KROKI_URL } from "@/lib/constants/env";
 import { copyTextToClipboard, copyImageToClipboard } from "@/lib/utils/clipboard";
-
+import { svgToPngBlob, isSvgToImageSupported } from "@/lib/utils/svg-to-image";
 import { logger } from "@/lib/utils/logger";
 interface ExportModalProps {
   isOpen: boolean;
   code: string;
   renderLanguage: RenderLanguage;
+  svgContent?: string; // 新增：已渲染的 SVG 内容
   onClose: () => void;
 }
 
@@ -30,12 +31,18 @@ async function exportWithKroki(
 
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: code,
+    headers: { "Content-Type": "application/json" },  // ✅ 修复：使用 JSON
+    body: JSON.stringify({
+      code: code,
+      language: diagramType,
+      type: format,
+    }),
   });
 
   if (!response.ok) {
-    throw new Error(`导出失败: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    logger.error(`[Export] Kroki 请求失败 ${response.status}:`, errorText);
+    throw new Error(`导出失败: ${response.status} ${errorText || response.statusText}`);
   }
 
   return await response.blob();
@@ -46,7 +53,7 @@ function generateFileName(format: "svg" | "png" | "txt"): string {
   return `diagram-${timestamp}.${format}`;
 }
 
-export function ExportModal({ isOpen, code, renderLanguage, onClose }: ExportModalProps) {
+export function ExportModal({ isOpen, code, renderLanguage, svgContent, onClose }: ExportModalProps) {
   const [svgStatus, setSvgStatus] = useState<ExportStatus>("idle");
   const [pngStatus, setPngStatus] = useState<ExportStatus>("idle");
   const [copyStatus, setCopyStatus] = useState<ExportStatus>("idle");
@@ -58,7 +65,18 @@ export function ExportModal({ isOpen, code, renderLanguage, onClose }: ExportMod
     setSvgStatus("loading");
 
     try {
-      const blob = await exportWithKroki(code, renderLanguage, "svg");
+      let blob: Blob;
+
+      // 优先使用本地 SVG（无需重新请求）
+      if (svgContent) {
+        logger.info("✨ [Export] 使用本地 SVG（无需重新请求）");
+        blob = new Blob([svgContent], { type: "image/svg+xml" });
+      } else {
+        // 降级：重新请求 Kroki API
+        logger.warn("⚠️ [Export] SVG 内容不可用，降级到重新请求");
+        blob = await exportWithKroki(code, renderLanguage, "svg");
+      }
+
       saveAs(blob, generateFileName("svg"));
       setSvgStatus("success");
       setTimeout(() => setSvgStatus("idle"), 2000);
@@ -73,7 +91,18 @@ export function ExportModal({ isOpen, code, renderLanguage, onClose }: ExportMod
     setPngStatus("loading");
 
     try {
-      const blob = await exportWithKroki(code, renderLanguage, "png");
+      let blob: Blob;
+
+      // 优先使用本地 SVG 转换（速度快，不依赖网络）
+      if (svgContent && isSvgToImageSupported()) {
+        logger.info("✨ [Export] 使用本地 SVG 转 PNG（无需重新请求）");
+        blob = await svgToPngBlob(svgContent, 2); // 2倍分辨率
+      } else {
+        // 降级：重新请求 Kroki API
+        logger.warn("⚠️ [Export] SVG 内容不可用或浏览器不支持，降级到重新请求");
+        blob = await exportWithKroki(code, renderLanguage, "png");
+      }
+
       saveAs(blob, generateFileName("png"));
       setPngStatus("success");
       setTimeout(() => setPngStatus("idle"), 2000);
@@ -102,7 +131,18 @@ export function ExportModal({ isOpen, code, renderLanguage, onClose }: ExportMod
     setCopyImageStatus("loading");
 
     try {
-      const blob = await exportWithKroki(code, renderLanguage, "png");
+      let blob: Blob;
+
+      // 优先使用本地 SVG 转换（速度快，不依赖网络）
+      if (svgContent && isSvgToImageSupported()) {
+        logger.info("✨ [Export] 使用本地 SVG 转 PNG（无需重新请求）");
+        blob = await svgToPngBlob(svgContent, 2); // 2倍分辨率
+      } else {
+        // 降级：重新请求 Kroki API
+        logger.warn("⚠️ [Export] SVG 内容不可用或浏览器不支持，降级到重新请求");
+        blob = await exportWithKroki(code, renderLanguage, "png");
+      }
+
       const success = await copyImageToClipboard(blob);
       setCopyImageStatus(success ? "success" : "error");
       setTimeout(() => setCopyImageStatus("idle"), 2000);

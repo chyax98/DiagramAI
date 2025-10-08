@@ -48,6 +48,9 @@ export default function HomePage() {
   const [adjustModalOpen, setAdjustModalOpen] = useState(false);
   const [adjustInput, setAdjustInput] = useState("");
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  
+  // SVG 内容状态（用于本地导出）
+  const [renderedSvg, setRenderedSvg] = useState<string>("");
 
   // 调整图表 - 打开模态框
   const handleAdjustClick = useCallback(() => {
@@ -132,6 +135,12 @@ export default function HomePage() {
     [setError]
   );
 
+  // 处理 SVG 渲染完成回调
+  const handleSvgRendered = useCallback((svg: string) => {
+    setRenderedSvg(svg);
+    logger.info("✅ [HomePage] SVG 已缓存，可用于本地导出");
+  }, []);
+
   return (
     <div className="flex h-screen flex-col bg-background">
       {/* 顶部工具栏 - 使用 EditorHeader 组件 */}
@@ -167,7 +176,12 @@ export default function HomePage() {
         </div>
 
         {/* 右侧预览 flex-1 */}
-        <DiagramPreview code={code} renderLanguage={renderLanguage} onError={handleDiagramError} />
+        <DiagramPreview 
+          code={code} 
+          renderLanguage={renderLanguage} 
+          onError={handleDiagramError}
+          onSvgRendered={handleSvgRendered}
+        />
       </main>
 
       {/* 调整模态框 */}
@@ -185,6 +199,7 @@ export default function HomePage() {
         isOpen={exportModalOpen}
         code={code}
         renderLanguage={renderLanguage}
+        svgContent={renderedSvg}
         onClose={() => setExportModalOpen(false)}
       />
     </div>

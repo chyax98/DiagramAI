@@ -13,6 +13,7 @@ interface DiagramPreviewProps {
   code: string;
   renderLanguage: RenderLanguage;
   onError: (error: string | null) => void;
+  onSvgRendered?: (svg: string) => void; // 新增：SVG 渲染完成回调
 }
 
 async function renderWithKroki(
@@ -73,7 +74,7 @@ function hashCode(str: string): string {
   return hash.toString(36);
 }
 
-export function DiagramPreview({ code, renderLanguage, onError }: DiagramPreviewProps) {
+export function DiagramPreview({ code, renderLanguage, onError, onSvgRendered }: DiagramPreviewProps) {
   const [svgContent, setSvgContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -118,6 +119,7 @@ export function DiagramPreview({ code, renderLanguage, onError }: DiagramPreview
       const svg = await renderWithKroki(code, renderLanguage);
 
       setSvgContent(svg);
+      onSvgRendered?.(svg); // 通知父组件 SVG 已渲染
 
       if (renderCache.current.size >= 20) {
         const firstKey = renderCache.current.keys().next().value;

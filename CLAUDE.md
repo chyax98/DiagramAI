@@ -419,17 +419,121 @@ JWT_SECRET=<64+ chars>
 # Optional
 AI_TEMPERATURE=0.7
 BCRYPT_SALT_ROUNDS=10
-NEXT_PUBLIC_KROKI_URL=https://kroki.io
+
+# Kroki Configuration
+NEXT_PUBLIC_KROKI_URL=/api/kroki           # Client-side (proxy)
+KROKI_INTERNAL_URL=https://kroki.io        # Server-side (direct)
 ```
+
+---
+
+## 📊 Kroki Architecture
+
+### Overview
+
+DiagramAI uses Kroki as the diagram rendering engine through a proxy architecture to solve CORS issues.
+
+```mermaid
+sequenceDiagram
+    participant Browser as User Browser
+    participant Next as DiagramAI (Next.js)
+    participant Kroki as Kroki Service
+    
+    Browser->>Next: GET /api/kroki/mermaid/svg/{encoded}
+    Note over Browser,Next: Client uses proxy endpoint
+    Next->>Kroki: GET /mermaid/svg/{encoded}
+    Note over Next,Kroki: Server uses KROKI_INTERNAL_URL
+    Kroki-->>Next: SVG Image
+    Next-->>Browser: SVG Image (with cache)
+```
+
+### Deployment Options
+
+| Option | Use Case | Configuration |
+|--------|----------|---------------|
+| **Public Service** | Development, Testing | `KROKI_INTERNAL_URL=https://kroki.io` |
+| **Docker Local** | Production | `KROKI_INTERNAL_URL=http://localhost:8000` |
+| **Docker Remote** | Distributed | `KROKI_INTERNAL_URL=http://kroki-server:8000` |
+
+### Why Proxy?
+
+1. **Solve CORS**: Browser can't directly access Kroki service
+2. **Unified Entry**: All requests go through Next.js API
+3. **Caching**: Implemented 1-hour cache for rendered diagrams
+4. **Security**: Kroki only needs to expose to DiagramAI server
+
+### Code Implementation
+
+**File**: `src/app/api/kroki/[[...path]]/route.ts`
+
+```typescript
+// Proxy request from client to Kroki
+export async function GET(request: NextRequest) {
+  const pathname = request.nextUrl.pathname.replace("/api/kroki", "");
+  const krokiUrl = ENV.KROKI_INTERNAL_URL;
+  const targetUrl = `${krokiUrl}${pathname}`;
+  
+  const response = await fetch(targetUrl);
+  const content = await response.arrayBuffer();
+  
+  return new NextResponse(content, {
+    headers: {
+      "Content-Type": "image/svg+xml",
+      "Cache-Control": "public, max-age=3600", // 1 hour cache
+    },
+  });
+}
+```
+
+**File**: `src/lib/utils/kroki.ts`
+
+```typescript
+// Generate Kroki URL with deflate + base64url encoding
+export function generateKrokiURL(
+  code: string,
+  diagramType: KrokiDiagramType,
+  outputFormat: KrokiOutputFormat = "svg"
+): string {
+  const compressed = pako.deflate(code, { level: 9 });
+  const encoded = base64UrlEncode(compressed);
+  return `${KROKI_URL}/${diagramType}/${outputFormat}/${encoded}`;
+  // Returns: /api/kroki/mermaid/svg/eNpL...
+}
+```
+
+### Diagram Rendering Flow
+
+```mermaid
+graph LR
+    A[DiagramPreview Component] --> B[generateKrokiURL]
+    B --> C[/api/kroki/mermaid/svg/...]
+    C --> D[Kroki API Route]
+    D --> E{Kroki Service}
+    E -->|Public| F[https://kroki.io]
+    E -->|Docker| G[http://localhost:8000]
+    E -->|Remote| H[http://kroki-server:8000]
+    F --> I[Return SVG]
+    G --> I
+    H --> I
+    I --> J[Cache & Display]
+```
+
+### Performance Optimization
+
+- **Client Cache**: 1-hour cache for rendered diagrams
+- **Compression**: Using pako.deflate (level 9) for optimal URL size
+- **Base64 URL**: URL-safe encoding for all diagram codes
 
 ---
 
 ## 📖 Additional Documentation
 
-- **README.md** - User guide and setup
+- **README.md** - Quick start and basic usage
+- **README.en.md** - English version
+- **KROKI_DEPLOYMENT.md** - Kroki deployment guide
 - **env.example** - Environment configuration
 
 ---
 
-**Version**: 1.0.0  
+**Version**: 1.1.0  
 **Last Updated**: 2025-01-08

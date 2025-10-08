@@ -52,136 +52,99 @@ npm run dev
 
 ---
 
-## 📖 使用指南
+## 🏗️ 技术栈
 
-### 1. 注册账号
+- **前端**: Next.js 15 + React 19 + TypeScript 5
+- **UI**: Tailwind CSS 4.0 + Shadcn/ui
+- **状态管理**: Zustand 5.0
+- **数据库**: SQLite (better-sqlite3)
+- **认证**: JWT + bcrypt
+- **AI**: Vercel AI SDK (多提供商)
+- **图表渲染**: Kroki
 
-首次使用需要注册账号。
-
-### 2. 配置 AI 模型
-
-进入「模型配置」页面，添加 AI 模型：
-
-- **Provider**：OpenAI / Anthropic / Google / OpenAI Compatible
-- **Model ID**：如 `gpt-4o`、`claude-3-5-sonnet-20241022`
-- **API Key**：你的 API 密钥
-- **Endpoint**：可选，自定义端点（如 DeepSeek: `https://api.deepseek.com`）
-
-### 3. 生成图表
-
-1. 选择图表语言（如 Mermaid）
-2. 选择图表类型（如流程图）
-3. 输入自然语言描述
-4. 点击「生成图表」
-
-### 4. 多轮调整
-
-生成后可继续输入调整需求：
-
-- "添加错误处理分支"
-- "使用不同的颜色"
-- "增加注释说明"
-
-系统会基于当前图表优化，无需重新生成。
-
-### 5. 导出图表
-
-支持导出格式：SVG、PNG、JSON、代码。
+详细架构和开发指南请查看 **[CLAUDE.md](CLAUDE.md)**
 
 ---
 
-## 🏗️ 技术架构
+## 🚀 生产环境部署
 
-### 技术栈
+### 快速部署（3 步）
 
-- **前端**：Next.js 15 + React 19 + TypeScript 5
-- **状态管理**：Zustand 5.0
-- **UI 框架**：Tailwind CSS 4.0 + Shadcn/ui
-- **代码编辑**：CodeMirror 6
-- **数据库**：SQLite (better-sqlite3)
-- **认证**：JWT + bcrypt
-- **AI 集成**：Vercel AI SDK
-- **图表渲染**：Kroki
-
-### 项目结构
-
-```
-DiagramAI/
-├── src/
-│   ├── app/                  # Next.js App Router
-│   │   ├── (app)/            # 主应用路由（需认证）
-│   │   ├── (auth)/           # 认证路由
-│   │   └── api/              # API 端点
-│   ├── components/           # React 组件
-│   ├── lib/                  # 核心库
-│   │   ├── ai/               # AI Provider 工厂
-│   │   ├── auth/             # 认证模块
-│   │   ├── constants/        # 常量和 Prompts
-│   │   ├── repositories/     # 数据访问层
-│   │   ├── services/         # 业务逻辑层
-│   │   ├── stores/           # Zustand 状态
-│   │   └── validations/      # Zod 验证
-│   └── types/                # TypeScript 类型
-├── data/                     # SQLite 数据库
-└── scripts/                  # 工具脚本
-
-总计：126+ 源文件，246 测试用例
-```
-
-**架构模式**：Repository + Service + Factory
-
-详细架构说明请参考 [CLAUDE.md](CLAUDE.md)（包含 Mermaid 架构图）。
-
----
-
-## 💾 数据库设计
-
-**4 张核心表**：
-
-- `users` - 用户账号（JWT + bcrypt）
-- `ai_models` - AI 模型配置
-- `generation_histories` - 生成历史
-- `chat_sessions` - 对话会话
-
-完整 Schema 请查看 `src/lib/db/schema.sql`。
-
----
-
-## 🧪 测试
+#### 1. 部署 Kroki 服务
 
 ```bash
-npm test              # 运行所有测试
-npm run test:coverage # 测试覆盖率
-npm run type-check    # TypeScript 检查
-npm run lint          # 代码检查
+# 最小化部署（推荐）
+docker run -d --name kroki --restart unless-stopped -p 8000:8000 yuzutech/kroki:latest
 ```
 
-**测试覆盖**：246+ 测试用例，覆盖组件、服务、工具函数。
+详细的 Kroki 部署方案（完整部署、远程部署等）请查看 **[KROKI_DEPLOYMENT.md](KROKI_DEPLOYMENT.md)**
+
+#### 2. 部署 DiagramAI
+
+```bash
+# 克隆并安装
+git clone https://github.com/chyax98/DiagramAI.git
+cd DiagramAI
+npm ci
+
+# 配置环境变量
+cp env.example .env.local
+# 编辑 .env.local:
+#   - JWT_SECRET: openssl rand -base64 64
+#   - BCRYPT_SALT_ROUNDS: 12
+#   - KROKI_INTERNAL_URL: http://localhost:8000
+
+# 初始化数据库
+npm run db:init
+
+# 构建并启动
+npm run build
+npm install -g pm2
+pm2 start npm --name "diagramai" -- start
+pm2 save
+```
+
+#### 3. 配置反向代理（可选）
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    location / {
+        proxy_pass http://localhost:3000;
+    }
+}
+```
+
+启用 HTTPS：`sudo certbot --nginx -d your-domain.com`
+
+### 环境变量说明
+
+```bash
+# 必须配置
+JWT_SECRET=<64+ 字符强密钥>
+BCRYPT_SALT_ROUNDS=12
+
+# Kroki 配置
+NEXT_PUBLIC_KROKI_URL=/api/kroki           # 客户端代理
+KROKI_INTERNAL_URL=http://localhost:8000   # 服务端直连
+
+# 可选配置
+AI_TEMPERATURE=0.7
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+```
+
+详细部署指南和故障排查请查看 **[KROKI_DEPLOYMENT.md](KROKI_DEPLOYMENT.md)**
 
 ---
 
-## 🔧 开发指南
+## 📖 使用指南
 
-### 代码规范
-
-- TypeScript 严格模式
-- ESLint + Prettier
-- 中文注释（必需）
-- Repository 模式（数据库操作）
-- Conventional Commits
-
-### 添加新图表语言
-
-1. 更新 `src/lib/constants/diagram-types.ts`
-2. 创建 Prompt：`src/lib/constants/prompts/`
-3. 注册 Prompt：`src/lib/constants/prompts/index.ts`
-4. 更新数据库 schema 枚举
-
-### 添加新 AI Provider
-
-1. 添加到 `src/lib/ai/provider-factory.ts`
-2. 更新数据库 schema provider 枚举
-3. 添加前端配置 UI
+1. **注册账号** - 首次使用需要注册
+2. **配置 AI 模型** - 在「模型配置」页面添加 AI Provider（OpenAI、Claude、Gemini 等）
+3. **生成图表** - 选择图表语言和类型，输入自然语言描述
+4. **多轮调整** - 基于已生成图表继续优化（"添加注释"、"改变颜色" 等）
+5. **导出图表** - 支持 SVG、PNG、JSON、代码格式
 
 ---
 
@@ -219,10 +182,11 @@ npm run lint          # 代码检查
 
 ## 📚 文档
 
-- **README.md**（本文件）- 快速开始和使用指南
+- **[README.md](README.md)** - 快速开始和基本使用
 - **[README.en.md](README.en.md)** - English version
-- **[CLAUDE.md](CLAUDE.md)** - 架构详解（含 Mermaid 图表）
-- **[env.example](env.example)** - 环境变量配置
+- **[CLAUDE.md](CLAUDE.md)** - 架构设计和开发指南
+- **[KROKI_DEPLOYMENT.md](KROKI_DEPLOYMENT.md)** - Kroki 服务部署指南
+- **[env.example](env.example)** - 环境变量配置参考
 
 ---
 

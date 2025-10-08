@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { getPlaceholder } from "@/lib/constants/placeholders";
 import type { DiagramType } from "@/lib/constants/diagram-types";
 import { MAX_INPUT_TEXT_LENGTH } from "@/lib/constants/env";
@@ -38,20 +39,15 @@ export function InputPanel({ onGenerate, isGenerating, disabled, diagramType }: 
       <div className="relative group">
         <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl opacity-0 group-focus-within:opacity-20 blur transition-opacity duration-300" />
 
-        <textarea
+        <Textarea
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={getPlaceholder(diagramType)}
           disabled={isGenerating || disabled}
-          className="relative w-full resize-none rounded-xl border border-input
-                   bg-background backdrop-blur-sm
-                   px-5 py-4 text-sm leading-relaxed text-foreground
-                   placeholder:text-muted-foreground
-                   transition-all duration-200
-                   focus:border-ring
-                   focus:outline-none focus:ring-2 focus:ring-ring/20
-                   disabled:cursor-not-allowed disabled:opacity-50
+          className="relative w-full resize-none rounded-xl
+                   backdrop-blur-sm
+                   px-5 py-4 text-sm leading-relaxed
                    shadow-lg"
           rows={6}
         />

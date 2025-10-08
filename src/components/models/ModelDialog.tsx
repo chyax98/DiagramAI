@@ -12,6 +12,15 @@ import {
 import { apiClient } from "@/lib/utils/api-client";
 import { dialog } from "@/components/ui/dialog/dialog";
 import { ProviderIcon, IconCopy, IconRefresh } from "@/components/icons";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface AIModel {
   id: number;
@@ -382,12 +391,12 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 >
                   批量输入 <span className="text-red-500">*</span>
                 </label>
-                <textarea
+                <Textarea
                   id="batch_input"
                   value={batchInput}
                   onChange={(e) => setBatchInput(e.target.value)}
                   rows={10}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm"
+                  className="font-mono text-sm"
                   placeholder="DeepSeek V3|openai-compatible|https://ai.hybgzs.com|sk-xxx|deepseek-ai/DeepSeek-V3.1&#10;GPT-4|openai|https://api.openai.com/v1|sk-xxx|gpt-4"
                 />
                 <p className="mt-1 text-xs text-slate-500">
@@ -465,13 +474,11 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
                   模型名称 <span className="text-red-500">*</span>
                 </label>
-                <input
+                <Input
                   id="name"
                   type="text"
                   {...register("name")}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    errors.name ? "border-red-500" : "border-slate-300"
-                  }`}
+                  className={errors.name ? "border-destructive focus-visible:ring-destructive" : ""}
                   placeholder="例如: GPT-4 模型"
                 />
                 {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
@@ -481,31 +488,56 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 <label htmlFor="provider" className="block text-sm font-medium text-slate-700 mb-2">
                   AI 服务商 <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    id="provider"
-                    {...register("provider")}
-                    onChange={(e) => {
-                      register("provider").onChange(e);
-                      setSelectedProvider(e.target.value);
-                    }}
-                    className={`w-full pl-12 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none ${
-                      errors.provider ? "border-red-500" : "border-slate-300"
-                    }`}
+                <Select
+                  value={selectedProvider}
+                  onValueChange={(value) => {
+                    setSelectedProvider(value);
+                    setValue("provider", value as CreateModelData["provider"], {
+                      shouldValidate: true,
+                    });
+                  }}
+                >
+                  <SelectTrigger
+                    className={`w-full transition-colors ${errors.provider ? "border-red-500" : ""}`}
+                    aria-label="选择 AI 服务商"
                   >
+                    <SelectValue>
+                      {selectedProvider && (
+                        <div className="flex items-center gap-2.5">
+                          <ProviderIcon
+                            provider={selectedProvider}
+                            className={`w-5 h-5 shrink-0 ${PROVIDER_OPTIONS.find((p) => p.value === selectedProvider)?.color || "text-gray-600"}`}
+                          />
+                          <span className="font-medium">
+                            {PROVIDER_OPTIONS.find((p) => p.value === selectedProvider)?.label}
+                          </span>
+                        </div>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+
+                  <SelectContent>
                     {PROVIDER_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        className="cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3 py-0.5">
+                          <ProviderIcon
+                            provider={option.value}
+                            className={`w-6 h-6 shrink-0 ${option.color}`}
+                          />
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-medium text-sm leading-tight text-foreground">
+                              {option.label}
+                            </span>
+                          </div>
+                        </div>
+                      </SelectItem>
                     ))}
-                  </select>
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <ProviderIcon
-                      provider={selectedProvider}
-                      className={`w-6 h-6 ${PROVIDER_OPTIONS.find((p) => p.value === selectedProvider)?.color || "text-gray-600"}`}
-                    />
-                  </div>
-                </div>
+                  </SelectContent>
+                </Select>
                 {errors.provider && (
                   <p className="mt-1 text-sm text-red-600">{errors.provider.message}</p>
                 )}
@@ -518,13 +550,13 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 >
                   API 端点 <span className="text-red-500">*</span>
                 </label>
-                <input
+                <Input
                   id="api_endpoint"
                   type="url"
                   {...register("api_endpoint")}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    errors.api_endpoint ? "border-red-500" : "border-slate-300"
-                  }`}
+                  className={
+                    errors.api_endpoint ? "border-destructive focus-visible:ring-destructive" : ""
+                  }
                   placeholder="https://api.openai.com/v1"
                 />
                 {errors.api_endpoint && (
@@ -539,13 +571,11 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                     <span className="ml-2 text-xs text-slate-500">(留空表示不修改)</span>
                   )}
                 </label>
-                <input
+                <Input
                   id="api_key"
                   type="password"
                   {...register("api_key")}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    errors.api_key ? "border-red-500" : "border-slate-300"
-                  }`}
+                  className={errors.api_key ? "border-destructive focus-visible:ring-destructive" : ""}
                   placeholder={isEditMode ? "留空表示不修改" : "输入 API 密钥"}
                 />
                 {errors.api_key && (
@@ -557,13 +587,11 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 <label htmlFor="model_id" className="block text-sm font-medium text-slate-700 mb-2">
                   模型 ID <span className="text-red-500">*</span>
                 </label>
-                <input
+                <Input
                   id="model_id"
                   type="text"
                   {...register("model_id")}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    errors.model_id ? "border-red-500" : "border-slate-300"
-                  }`}
+                  className={errors.model_id ? "border-destructive focus-visible:ring-destructive" : ""}
                   placeholder="例如: gpt-4, gemini-pro"
                 />
                 {errors.model_id && (
@@ -578,13 +606,13 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 >
                   参数 (可选, JSON 格式)
                 </label>
-                <textarea
+                <Textarea
                   id="parameters"
                   {...register("parameters")}
                   rows={3}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    errors.parameters ? "border-red-500" : "border-slate-300"
-                  }`}
+                  className={
+                    errors.parameters ? "border-destructive focus-visible:ring-destructive" : ""
+                  }
                   placeholder='{"temperature": 0.7, "max_tokens": 2000}'
                 />
                 {errors.parameters && (

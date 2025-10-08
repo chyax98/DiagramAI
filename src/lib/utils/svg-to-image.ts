@@ -27,7 +27,9 @@ export async function svgToPngBlob(svgString: string, scale = 2): Promise<Blob> 
           const ctx = canvas.getContext("2d");
           
           if (!ctx) {
-            throw new Error("无法获取 Canvas 2D 上下文");
+            const ctxError = new Error("无法获取 Canvas 2D 上下文");
+            reject(ctxError);
+            return;
           }
           
           // 4. 设置 Canvas 尺寸（应用缩放）

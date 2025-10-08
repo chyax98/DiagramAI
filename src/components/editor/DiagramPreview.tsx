@@ -3,12 +3,12 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import type { RenderLanguage } from "@/types/diagram";
-import { ZoomableContainer } from "./ZoomableContainer";
-import { generateKrokiURL, type KrokiDiagramType } from "@/lib/utils/kroki";
-import { KROKI_MAX_RETRIES, KROKI_RETRY_DELAY, KROKI_TIMEOUT } from "@/lib/constants/env";
 
+import type { RenderLanguage } from "@/types/diagram";
+import { KROKI_MAX_RETRIES, KROKI_RETRY_DELAY, KROKI_TIMEOUT } from "@/lib/constants/env";
+import { generateKrokiURL, type KrokiDiagramType } from "@/lib/utils/kroki";
 import { logger } from "@/lib/utils/logger";
+import { ZoomableContainer } from "./ZoomableContainer";
 interface DiagramPreviewProps {
   code: string;
   renderLanguage: RenderLanguage;
@@ -40,11 +40,11 @@ async function renderWithKroki(
     if (!response.ok) {
       const errorText = await response.text();
       logger.error(`❌ [Kroki] API 错误 ${response.status}:`, errorText);
-      throw new Error(`Kroki 渲染失败 (${response.status}): ${errorText || response.statusText}`);
+      const error = new Error(`Kroki 渲染失败 (${response.status}): ${errorText || response.statusText}`);
+      return Promise.reject(error);
     }
 
-    const svg = await response.text();
-    return svg;
+    return await response.text();
   } catch (error) {
     // 清除超时定时器
     clearTimeout(timeoutId);
@@ -52,7 +52,8 @@ async function renderWithKroki(
     // 检查是否是超时错误
     if (error instanceof Error && error.name === "AbortError") {
       logger.error(`⏱️ [Kroki] 请求超时 (${KROKI_TIMEOUT}ms)`);
-      throw new Error(`Kroki 渲染超时 (${KROKI_TIMEOUT}ms)`);
+      const timeoutError = new Error(`Kroki 渲染超时 (${KROKI_TIMEOUT}ms)`);
+      return Promise.reject(timeoutError);
     }
 
     logger.error(`❌ [Kroki] 渲染失败 (剩余重试: ${retries - 1})`, error);
@@ -61,7 +62,7 @@ async function renderWithKroki(
       return renderWithKroki(code, diagramType, retries - 1);
     }
 
-    throw error;
+    return Promise.reject(error);
   }
 }
 
@@ -93,7 +94,7 @@ export function DiagramPreview({ code, renderLanguage, onError, onSvgRendered }:
 
   const isRenderingRef = useRef(false);
 
-  const renderDiagram = useCallback(async () => {
+  const renderDiagram = useCallback(async (svgCallback?: (svg: string) => void) => {
     if (isRenderingRef.current) {
       return;
     }
@@ -119,7 +120,7 @@ export function DiagramPreview({ code, renderLanguage, onError, onSvgRendered }:
       const svg = await renderWithKroki(code, renderLanguage);
 
       setSvgContent(svg);
-      onSvgRendered?.(svg); // 通知父组件 SVG 已渲染
+      svgCallback?.(svg); // 通知父组件 SVG 已渲染
 
       if (renderCache.current.size >= 20) {
         const firstKey = renderCache.current.keys().next().value;
@@ -160,18 +161,18 @@ export function DiagramPreview({ code, renderLanguage, onError, onSvgRendered }:
 
     // 清除缓存，强制重新渲染
     renderCache.current.delete(codeFingerprint);
-    renderDiagram();
-  }, [codeFingerprint, renderDiagram, lastRetryTime]);
+    renderDiagram(onSvgRendered);
+  }, [codeFingerprint, renderDiagram, lastRetryTime, onSvgRendered]);
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      renderDiagram();
+      renderDiagram(onSvgRendered);
     }, 300);
 
     return () => {
       clearTimeout(debounceTimer);
     };
-  }, [renderDiagram]);
+  }, [renderDiagram, onSvgRendered]);
 
   if (!isMounted) {
     return (

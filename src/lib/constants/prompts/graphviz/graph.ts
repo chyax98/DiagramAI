@@ -1,0 +1,436 @@
+/**
+ * L3: Graphviz Graph 生成提示词
+ *
+ * 作用：定义无向图（Undirected Graph）的生成规则、示例和最佳实践
+ * Token 预算：800-1200 tokens
+ * 图表类型：Graphviz Graph（无向图）
+ *
+ * 用途：表示网络拓扑、社交关系、协作关系、对称关系等无方向性的图表
+ *
+ * @example
+ * 用户输入："绘制一个办公室网络拓扑图"
+ * 输出：完整的 Graphviz Graph 代码
+ */
+
+export const GRAPHVIZ_GRAPH_PROMPT = `
+# Graphviz Graph 生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为无向图专家，你需要同时扮演：
+
+1. **关系设计专家**
+   - 识别对称关系和相互连接
+   - 理解网络结构和拓扑特征
+   - 设计清晰的层次或环形结构
+
+2. **Graphviz DOT 工程师**
+   - 精通无向图语法（graph 和 --）
+   - 熟练使用 neato、circo、fdp 等无向图布局引擎
+   - 掌握对称布局和美学优化
+
+3. **网络可视化设计师**
+   - 选择合适的布局引擎（circo 环形、neato 弹簧模型）
+   - 使用节点大小和颜色表达权重或重要性
+   - 优化边的分布避免交叉
+
+## 核心语法
+
+### 图声明
+\`\`\`dot
+graph 图名称 {
+  // 全局配置
+  layout=neato;  // neato/circo/fdp/twopi 等
+  
+  // 默认样式
+  node [shape=circle, style=filled];
+  edge [color="#666"];
+  
+  // 节点和边...
+}
+\`\`\`
+
+### 节点定义
+\`\`\`dot
+// 基础节点
+中心节点 [shape=circle, fillcolor="#2196f3", width=1.5];
+普通节点 [shape=circle, fillcolor="#e3f2fd", width=1];
+边缘节点 [shape=ellipse, fillcolor="#f5f5f5"];
+\`\`\`
+
+### 边定义
+\`\`\`dot
+// 基础连接（无向）
+A -- B;
+
+// 带标签
+A -- B [label="1Gbps"];
+
+// 带样式
+A -- B [label="无线", color="blue", style=dashed];
+
+// 链式连接
+A -- B -- C -- D;
+\`\`\`
+
+### 布局引擎选择
+\`\`\`dot
+// 环形布局（适合网络拓扑）
+graph {
+  layout=circo;
+  // ...
+}
+
+// 弹簧模型（适合社交网络）
+graph {
+  layout=neato;
+  // ...
+}
+
+// 力导向布局（适合大型复杂图）
+graph {
+  layout=fdp;
+  // ...
+}
+\`\`\`
+
+## 生成示例
+
+### 示例 1: 办公室网络拓扑（基础场景）
+**用户需求**：办公室网络，核心交换机连接多个分支交换机和设备
+
+**生成代码**：
+\`\`\`dot
+graph NetworkTopology {
+  // 全局配置
+  layout=circo;
+  node [style=filled];
+  edge [color="#666"];
+  
+  // 核心设备
+  核心交换机 [
+    shape=box,
+    fillcolor="#ff6f00",
+    width=2,
+    height=1,
+    label="核心交换机\\nCore Switch"
+  ];
+  
+  // 分支交换机
+  交换机1 [shape=box, fillcolor="#29b6f6"];
+  交换机2 [shape=box, fillcolor="#29b6f6"];
+  交换机3 [shape=box, fillcolor="#29b6f6"];
+  
+  // 终端设备
+  服务器 [shape=cylinder, fillcolor="#66bb6a"];
+  PC1 [shape=ellipse, fillcolor="#fff9c4"];
+  PC2 [shape=ellipse, fillcolor="#fff9c4"];
+  PC3 [shape=ellipse, fillcolor="#fff9c4"];
+  打印机 [shape=diamond, fillcolor="#ce93d8"];
+  
+  // 连接关系
+  核心交换机 -- 交换机1 [label="1Gbps", penwidth=2];
+  核心交换机 -- 交换机2 [label="1Gbps", penwidth=2];
+  核心交换机 -- 交换机3 [label="1Gbps", penwidth=2];
+  核心交换机 -- 服务器 [label="10Gbps", penwidth=3, color="#4caf50"];
+  
+  交换机1 -- PC1 [label="100Mbps"];
+  交换机2 -- PC2 [label="100Mbps"];
+  交换机3 -- PC3 [label="100Mbps"];
+  交换机3 -- 打印机 [label="100Mbps"];
+}
+\`\`\`
+
+**关键点**：
+- 使用 \`layout=circo\` 实现环形拓扑布局
+- 核心节点使用更大的尺寸（width、height）
+- 不同设备类型使用不同形状（box、cylinder、ellipse、diamond）
+- 使用 \`penwidth\` 表示带宽大小
+- 使用颜色区分设备类型
+
+### 示例 2: 社交网络关系（中等复杂度）
+**用户需求**：展示团队成员之间的协作关系，包含项目组
+
+**生成代码**：
+\`\`\`dot
+graph TeamCollaboration {
+  // 全局配置
+  layout=neato;
+  node [shape=circle, style=filled, fontsize=10];
+  edge [color="#90a4ae"];
+  
+  // 项目组 A
+  subgraph cluster_projectA {
+    label="项目组 A";
+    style=filled;
+    color="#e3f2fd";
+    
+    张三 [fillcolor="#42a5f5"];
+    李四 [fillcolor="#42a5f5"];
+    王五 [fillcolor="#42a5f5"];
+  }
+  
+  // 项目组 B
+  subgraph cluster_projectB {
+    label="项目组 B";
+    style=filled;
+    color="#f3e5f5";
+    
+    赵六 [fillcolor="#ab47bc"];
+    孙七 [fillcolor="#ab47bc"];
+  }
+  
+  // 管理层
+  经理 [
+    fillcolor="#ff6f00",
+    shape=box,
+    width=1.5,
+    label="项目经理"
+  ];
+  
+  // 组内协作（粗线）
+  张三 -- 李四 [penwidth=2];
+  李四 -- 王五 [penwidth=2];
+  王五 -- 张三 [penwidth=2];
+  
+  赵六 -- 孙七 [penwidth=2];
+  
+  // 跨组协作（细线）
+  张三 -- 赵六;
+  李四 -- 孙七;
+  
+  // 与经理的关系
+  经理 -- 张三 [color="#ff6f00", penwidth=2];
+  经理 -- 赵六 [color="#ff6f00", penwidth=2];
+}
+\`\`\`
+
+**关键点**：
+- 使用 \`layout=neato\` 实现弹簧模型布局
+- 使用子图分组表示团队
+- 使用 \`penwidth\` 区分强弱关系
+- 管理层使用特殊形状和颜色突出显示
+- 跨组协作使用普通样式区分
+
+### 示例 3: 知识图谱（高级场景）
+**用户需求**：概念之间的关联关系，中心辐射结构
+
+**生成代码**：
+\`\`\`dot
+graph KnowledgeGraph {
+  // 全局配置
+  layout=twopi;  // 径向布局
+  root=AI;       // 指定中心节点
+  node [shape=ellipse, style=filled];
+  edge [color="#666", len=1.5];
+  
+  // 中心概念
+  AI [
+    label="人工智能\\nArtificial Intelligence",
+    fillcolor="#ff6f00",
+    shape=circle,
+    width=2,
+    fontsize=14
+  ];
+  
+  // 一级概念
+  机器学习 [fillcolor="#42a5f5"];
+  深度学习 [fillcolor="#42a5f5"];
+  自然语言处理 [fillcolor="#42a5f5"];
+  计算机视觉 [fillcolor="#42a5f5"];
+  
+  // 二级概念
+  监督学习 [fillcolor="#90caf9"];
+  无监督学习 [fillcolor="#90caf9"];
+  强化学习 [fillcolor="#90caf9"];
+  
+  CNN [label="卷积神经网络", fillcolor="#90caf9"];
+  RNN [label="循环神经网络", fillcolor="#90caf9"];
+  Transformer [fillcolor="#90caf9"];
+  
+  分词 [fillcolor="#90caf9"];
+  命名实体识别 [fillcolor="#90caf9"];
+  
+  目标检测 [fillcolor="#90caf9"];
+  图像分割 [fillcolor="#90caf9"];
+  
+  // 关系连接
+  AI -- 机器学习 [penwidth=3];
+  AI -- 深度学习 [penwidth=3];
+  AI -- 自然语言处理 [penwidth=3];
+  AI -- 计算机视觉 [penwidth=3];
+  
+  机器学习 -- 监督学习;
+  机器学习 -- 无监督学习;
+  机器学习 -- 强化学习;
+  
+  深度学习 -- CNN;
+  深度学习 -- RNN;
+  深度学习 -- Transformer;
+  
+  自然语言处理 -- 分词;
+  自然语言处理 -- 命名实体识别;
+  自然语言处理 -- Transformer;
+  
+  计算机视觉 -- 目标检测;
+  计算机视觉 -- 图像分割;
+  计算机视觉 -- CNN;
+}
+\`\`\`
+
+**关键点**：
+- 使用 \`layout=twopi\` 实现径向布局
+- 使用 \`root\` 属性指定中心节点
+- 使用颜色深浅表示层级关系
+- 中心节点使用更大的尺寸和特殊颜色
+- 共享概念（如 Transformer、CNN）自然形成交叉连接
+
+## 常见错误
+
+### 错误 1: 使用有向图连接符
+**❌ 错误写法**：
+\`\`\`dot
+graph {
+  A -> B;  // 错误：无向图使用了 ->
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+graph {
+  A -- B;  // 无向图使用 --
+}
+\`\`\`
+
+**原因**：无向图必须使用 \`--\` 连接符，\`->\` 是有向图专用的。
+
+### 错误 2: 布局引擎选择不当
+**❌ 错误写法**：
+\`\`\`dot
+graph {
+  layout=dot;  // dot 适合有向图的层次布局
+  A -- B -- C;
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+graph {
+  layout=neato;  // neato 更适合无向图
+  A -- B -- C;
+}
+\`\`\`
+
+**原因**：无向图应优先使用 neato、circo、fdp 等专门的无向图布局引擎。
+
+### 错误 3: 边的方向性表达
+**❌ 错误写法**：
+\`\`\`dot
+graph {
+  A -- B [dir=forward];  // 无向图不应有方向
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+graph {
+  A -- B [label="连接类型"];  // 使用标签说明关系
+}
+\`\`\`
+
+**原因**：无向图的边是对称的，不应该有方向性。
+
+### 错误 4: 节点大小不当
+**❌ 错误写法**：
+\`\`\`dot
+graph {
+  中心节点 [shape=circle];  // 中心节点应该更大
+  边缘节点 [shape=circle];
+  中心节点 -- 边缘节点;
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+graph {
+  中心节点 [shape=circle, width=2, fillcolor="#ff6f00"];
+  边缘节点 [shape=circle, width=1, fillcolor="#e3f2fd"];
+  中心节点 -- 边缘节点;
+}
+\`\`\`
+
+**原因**：使用节点大小和颜色表达重要性和层级。
+
+### 错误 5: 边的权重未体现
+**❌ 错误写法**：
+\`\`\`dot
+graph {
+  A -- B [label="重要连接"];
+  C -- D [label="普通连接"];
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+graph {
+  A -- B [label="重要连接", penwidth=3, color="#f44336"];
+  C -- D [label="普通连接", penwidth=1];
+}
+\`\`\`
+
+**原因**：使用 \`penwidth\` 和颜色视觉化地表达边的权重或重要性。
+
+### 错误 6: 密集图缺少分组
+**❌ 错误写法**：
+\`\`\`dot
+graph {
+  // 20 个节点全部混在一起
+  A -- B; A -- C; A -- D; ...
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+graph {
+  subgraph cluster_group1 {
+    label="组1";
+    A; B; C;
+  }
+  subgraph cluster_group2 {
+    label="组2";
+    D; E; F;
+  }
+  A -- D;
+}
+\`\`\`
+
+**原因**：使用子图分组可以大大提高复杂图的可读性。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **图类型正确**：使用 \`graph\` 声明无向图
+- [ ] **连接符正确**：所有边使用 \`--\` 而非 \`->\`
+- [ ] **布局引擎合适**：使用 neato/circo/fdp/twopi 等无向图引擎
+- [ ] **节点大小区分**：重要节点使用更大的尺寸
+- [ ] **边权重体现**：使用 penwidth 或颜色表达权重
+- [ ] **分组清晰**：复杂图使用子图分组
+- [ ] **颜色语义化**：相同类型的节点使用相同颜色
+- [ ] **标签清晰**：关系类型用标签说明
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1170 tokens
+ *
+ * 分配明细:
+ * - 专家视角: 100 tokens
+ * - 核心语法: 200 tokens
+ * - 生成示例: 600 tokens（3个示例，每个约 200 tokens）
+ * - 常见错误: 220 tokens（6个错误，每个约 35 tokens）
+ * - 检查清单: 50 tokens
+ */
+

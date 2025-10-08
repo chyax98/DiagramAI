@@ -1,0 +1,765 @@
+/**
+ * L3: Excalidraw Sketch 生成提示词
+ *
+ * 作用：定义手绘草图的生成规则、示例和最佳实践
+ * Token 预算：800-1200 tokens
+ * 图表类型：Excalidraw Sketch（手绘草图）
+ *
+ * 用途：快速绘制创意草图、头脑风暴、概念设计
+ *
+ * @example
+ * 用户输入："绘制一个移动应用的功能架构草图"
+ * 输出：完整的 Excalidraw JSON 代码
+ */
+
+export const EXCALIDRAW_SKETCH_PROMPT = `
+# Excalidraw Sketch 生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为手绘草图专家，你需要同时扮演：
+
+1. **创意设计师**
+   - 快速捕捉创意和概念
+   - 使用自由、松散的布局
+   - 强调视觉表现力而非精确性
+
+2. **Excalidraw JSON 工程师**
+   - 精通 JSON 格式和元素属性
+   - 熟练使用手绘风格参数
+   - 掌握颜色和样式的组合技巧
+
+3. **用户体验专家**
+   - 确保草图清晰易懂
+   - 平衡艺术性和可读性
+   - 合理使用颜色和形状引导视线
+
+## 核心语法
+
+### 基本形状元素
+
+\`\`\`json
+{
+  "type": "rectangle",
+  "id": "rect-1",
+  "x": 100,
+  "y": 100,
+  "width": 200,
+  "height": 100,
+  "strokeColor": "#1971c2",
+  "backgroundColor": "#a5d8ff",
+  "strokeWidth": 2,
+  "roughness": 2,
+  "fillStyle": "hachure"
+}
+\`\`\`
+
+### 手绘箭头
+
+\`\`\`json
+{
+  "type": "arrow",
+  "id": "arrow-1",
+  "x": 150,
+  "y": 250,
+  "width": 100,
+  "height": 50,
+  "strokeColor": "#2f9e44",
+  "strokeWidth": 2,
+  "roughness": 2,
+  "startArrowhead": null,
+  "endArrowhead": "arrow"
+}
+\`\`\`
+
+### 带标签的形状
+
+\`\`\`json
+{
+  "type": "ellipse",
+  "id": "ellipse-1",
+  "x": 400,
+  "y": 100,
+  "width": 150,
+  "height": 150,
+  "strokeColor": "#5f3dc4",
+  "backgroundColor": "#e5dbff",
+  "strokeWidth": 2,
+  "roughness": 2,
+  "label": {
+    "text": "核心功能",
+    "fontSize": 20,
+    "fontFamily": 1
+  }
+}
+\`\`\`
+
+## 生成示例
+
+### 示例 1: 移动应用功能模块草图（简单场景）
+
+**用户需求**：移动应用的三个核心功能模块
+
+**生成代码**：
+\`\`\`json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title-1",
+      "x": 200,
+      "y": 50,
+      "text": "移动应用功能架构",
+      "fontSize": 28,
+      "fontFamily": 1,
+      "strokeColor": "#1971c2"
+    },
+    {
+      "type": "rectangle",
+      "id": "module-1",
+      "x": 50,
+      "y": 150,
+      "width": 180,
+      "height": 120,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "用户管理\\n登录/注册",
+        "fontSize": 18,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "module-2",
+      "x": 280,
+      "y": 150,
+      "width": 180,
+      "height": 120,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "内容浏览\\n搜索/筛选",
+        "fontSize": 18,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "module-3",
+      "x": 510,
+      "y": 150,
+      "width": 180,
+      "height": 120,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "数据分析\\n统计/报表",
+        "fontSize": 18,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "ellipse",
+      "id": "core-1",
+      "x": 280,
+      "y": 320,
+      "width": 180,
+      "height": 100,
+      "strokeColor": "#c2255c",
+      "backgroundColor": "#ffe0eb",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "cross-hatch",
+      "label": {
+        "text": "核心数据层",
+        "fontSize": 20,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-1",
+      "x": 140,
+      "y": 270,
+      "width": 80,
+      "height": 70,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-2",
+      "x": 370,
+      "y": 270,
+      "width": 0,
+      "height": 70,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-3",
+      "x": 510,
+      "y": 270,
+      "width": 80,
+      "height": 70,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": 20
+  },
+  "files": {}
+}
+\`\`\`
+
+**关键点**：
+- 使用 \`roughness: 2\` 实现强烈的手绘效果
+- 不同模块使用不同颜色区分功能
+- 使用 \`hachure\` 和 \`cross-hatch\` 填充样式增强手绘感
+- 标题使用较大字号（28）突出重点
+
+### 示例 2: 网站信息架构草图（中等复杂度）
+
+**用户需求**：电商网站的页面结构和导航关系
+
+**生成代码**：
+\`\`\`json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "rectangle",
+      "id": "home",
+      "x": 300,
+      "y": 50,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#a5d8ff",
+      "strokeWidth": 3,
+      "roughness": 2,
+      "fillStyle": "solid",
+      "label": {
+        "text": "首页",
+        "fontSize": 24,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "products",
+      "x": 100,
+      "y": 200,
+      "width": 150,
+      "height": 70,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "商品列表",
+        "fontSize": 18,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "cart",
+      "x": 325,
+      "y": 200,
+      "width": 150,
+      "height": 70,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "购物车",
+        "fontSize": 18,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "user",
+      "x": 550,
+      "y": 200,
+      "width": 150,
+      "height": 70,
+      "strokeColor": "#5f3dc4",
+      "backgroundColor": "#e5dbff",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "个人中心",
+        "fontSize": 18,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "detail",
+      "x": 75,
+      "y": 330,
+      "width": 200,
+      "height": 60,
+      "strokeColor": "#087f5b",
+      "backgroundColor": "#c3fae8",
+      "strokeWidth": 1,
+      "roughness": 2,
+      "fillStyle": "cross-hatch",
+      "label": {
+        "text": "商品详情",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-home-products",
+      "x": 360,
+      "y": 130,
+      "width": 135,
+      "height": 70,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "strokeStyle": "solid",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-home-cart",
+      "x": 400,
+      "y": 130,
+      "width": 0,
+      "height": 70,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-home-user",
+      "x": 440,
+      "y": 130,
+      "width": 135,
+      "height": 70,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-products-detail",
+      "x": 175,
+      "y": 270,
+      "width": 0,
+      "height": 60,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 2,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "note-1",
+      "x": 50,
+      "y": 450,
+      "text": "注：虚线表示子页面关系",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#868e96"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#fffef7",
+    "gridSize": 20
+  },
+  "files": {}
+}
+\`\`\`
+
+**关键点**：
+- 首页使用粗边框（strokeWidth: 3）和 solid 填充突出层级
+- 二级页面使用较细边框和 hachure 填充
+- 虚线箭头表示子页面关系
+- 添加文字注释说明图例
+
+### 示例 3: 创意头脑风暴草图（高级场景）
+
+**用户需求**：产品功能优化的头脑风暴，包含问题、方案、优先级
+
+**生成代码**：
+\`\`\`json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "ellipse",
+      "id": "center",
+      "x": 350,
+      "y": 200,
+      "width": 180,
+      "height": 180,
+      "strokeColor": "#e03131",
+      "backgroundColor": "#ffe0e0",
+      "strokeWidth": 4,
+      "roughness": 2,
+      "fillStyle": "solid",
+      "label": {
+        "text": "用户留存\\n问题",
+        "fontSize": 24,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "idea-1",
+      "x": 100,
+      "y": 100,
+      "width": 150,
+      "height": 100,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "cross-hatch",
+      "label": {
+        "text": "优化新手\\n引导流程",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "idea-2",
+      "x": 600,
+      "y": 100,
+      "width": 150,
+      "height": 100,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "cross-hatch",
+      "label": {
+        "text": "增加每日\\n签到奖励",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "idea-3",
+      "x": 100,
+      "y": 400,
+      "width": 150,
+      "height": 100,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "cross-hatch",
+      "label": {
+        "text": "社交分享\\n功能",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "idea-4",
+      "x": 600,
+      "y": 400,
+      "width": 150,
+      "height": 100,
+      "strokeColor": "#5f3dc4",
+      "backgroundColor": "#e5dbff",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "fillStyle": "cross-hatch",
+      "label": {
+        "text": "个性化\\n推荐算法",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-1",
+      "x": 250,
+      "y": 150,
+      "width": 120,
+      "height": 100,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-2",
+      "x": 600,
+      "y": 150,
+      "width": 120,
+      "height": 100,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-3",
+      "x": 250,
+      "y": 450,
+      "width": 120,
+      "height": 100,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-4",
+      "x": 600,
+      "y": 450,
+      "width": 120,
+      "height": 100,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 2,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "priority-high",
+      "x": 80,
+      "y": 70,
+      "text": "⭐ 高优先级",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#2f9e44"
+    },
+    {
+      "type": "text",
+      "id": "priority-medium",
+      "x": 600,
+      "y": 70,
+      "text": "⭐ 中优先级",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1971c2"
+    },
+    {
+      "type": "text",
+      "id": "priority-low",
+      "x": 80,
+      "y": 530,
+      "text": "💡 待评估",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#f08c00"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#fffef0",
+    "gridSize": 20
+  },
+  "files": {}
+}
+\`\`\`
+
+**关键点**：
+- 中心问题使用醒目的椭圆和粗边框
+- 四个方案使用不同颜色，从问题发散
+- 使用 Emoji 标记优先级（⭐、💡）
+- 背景色使用温暖的米黄色营造头脑风暴氛围
+
+## 常见错误
+
+### 错误 1: 缺少完整的 JSON 结构
+
+**❌ 错误写法**：
+\`\`\`json
+{
+  "elements": [
+    {"type": "rectangle"}
+  ]
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "rectangle",
+      "id": "rect-1",
+      "x": 100,
+      "y": 100,
+      "width": 200,
+      "height": 100
+    }
+  ],
+  "appState": {},
+  "files": {}
+}
+\`\`\`
+
+**原因**：Excalidraw JSON 必须包含所有顶层必需属性。
+
+### 错误 2: 手绘效果过弱
+
+**❌ 错误写法**：
+\`\`\`json
+{
+  "type": "rectangle",
+  "roughness": 0
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`json
+{
+  "type": "rectangle",
+  "roughness": 2,
+  "fillStyle": "hachure"
+}
+\`\`\`
+
+**原因**：草图应使用 \`roughness: 2\` 和手绘填充样式增强艺术感。
+
+### 错误 3: 颜色单调缺乏层次
+
+**❌ 错误写法**：
+所有元素都使用相同的黑白配色
+
+**✅ 正确写法**：
+使用多种颜色区分不同功能模块，背景色和边框色搭配
+
+**原因**：草图需要通过颜色引导视线、区分层级。
+
+### 错误 4: 元素 ID 重复
+
+**❌ 错误写法**：
+\`\`\`json
+[
+  {"id": "rect-1", "type": "rectangle"},
+  {"id": "rect-1", "type": "ellipse"}
+]
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`json
+[
+  {"id": "rect-1", "type": "rectangle"},
+  {"id": "ellipse-1", "type": "ellipse"}
+]
+\`\`\`
+
+**原因**：每个元素的 ID 必须唯一，否则箭头绑定会出错。
+
+### 错误 5: 文本换行使用错误
+
+**❌ 错误写法**：
+\`\`\`json
+{
+  "text": "第一行<br>第二行"
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`json
+{
+  "text": "第一行\\n第二行"
+}
+\`\`\`
+
+**原因**：Excalidraw 使用 \`\\n\` 表示换行，不支持 HTML 标签。
+
+### 错误 6: 箭头坐标不合理
+
+**❌ 错误写法**：
+箭头的起点/终点坐标与连接的形状距离太远
+
+**✅ 正确写法**：
+精确计算箭头坐标，使其从形状边缘出发到另一个形状边缘
+
+**原因**：箭头应该准确连接形状，不要悬空或穿透。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **JSON 结构完整**：包含 \`type\`、\`version\`、\`source\`、\`elements\`、\`appState\`、\`files\`
+- [ ] **元素 ID 唯一**：所有元素的 \`id\` 不重复
+- [ ] **位置尺寸合理**：所有形状有 \`x\`、\`y\`、\`width\`、\`height\`
+- [ ] **手绘效果充分**：使用 \`roughness: 2\` 和 \`hachure\`/\`cross-hatch\` 填充
+- [ ] **颜色搭配和谐**：使用多种颜色，背景色和边框色搭配得当
+- [ ] **箭头连接准确**：箭头坐标合理，视觉上连接到形状
+- [ ] **文本换行正确**：使用 \`\\n\` 而非 HTML 标签
+- [ ] **JSON 格式有效**：无语法错误，可以被解析
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1180 tokens
+ *
+ * 分配明细:
+ * - 专家视角: 100 tokens
+ * - 核心语法: 150 tokens
+ * - 生成示例: 650 tokens（3个示例）
+ * - 常见错误: 220 tokens（6个错误）
+ * - 检查清单: 60 tokens
+ */
+

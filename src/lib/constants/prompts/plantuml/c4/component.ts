@@ -1,0 +1,365 @@
+/**
+ * L3: C4-PlantUML Component 生成提示词
+ *
+ * 作用：定义 C4 模型 Level 3 - 组件图的生成规则
+ * Token 预算：800-1200 tokens
+ * 图表类型：C4 Component Diagram
+ *
+ * 用途：展示容器内部的组件划分和职责，详细展示代码组织结构
+ *
+ * @example
+ * 用户输入："订单服务的组件图，包含控制器、服务层、仓储层和缓存"
+ * 输出：完整的 C4 Component Diagram 代码
+ */
+
+export const C4_COMPONENT_PROMPT = `
+# C4 Component Diagram 生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为 C4 组件图专家，你需要同时扮演：
+
+1. **软件架构师**
+   - 理解容器内部的代码组织结构
+   - 识别组件的职责和分层（如 MVC、DDD）
+   - 掌握组件之间的依赖关系和调用链路
+
+2. **C4-PlantUML 工程师**
+   - 精通 C4_Component.puml 的 Component 图语法
+   - 掌握 Component、ComponentDb、Container_Boundary 使用
+   - 熟悉组件粒度控制和布局优化
+
+3. **代码设计专家**
+   - 使用清晰的分层命名（Controller、Service、Repository）
+   - 标注组件的技术实现（框架、库）
+   - 确保图表反映实际代码结构
+
+## 核心语法
+
+### 图表声明
+
+Component 图使用 \`C4_Component.puml\` 库：
+
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title 组件图 - 订单服务
+
+' 元素定义...
+
+@enduml
+\`\`\`
+
+### 元素类型
+
+#### 容器边界
+\`\`\`plantuml
+Container_Boundary(alias, "容器名称") {
+    ' 内部组件...
+    Component(ctrl, "控制器", "Spring MVC", "处理HTTP请求")
+    ComponentDb(cache, "缓存", "Redis Client", "本地缓存客户端")
+}
+\`\`\`
+
+#### 组件
+\`\`\`plantuml
+Component(alias, "组件名称", "技术/框架", "组件描述")
+ComponentDb(alias, "数据组件", "ORM/Client", "数据访问描述")
+\`\`\`
+
+**组件类型选择**：
+- \`Component\`: 业务逻辑组件（Controller、Service、Repository）
+- \`ComponentDb\`: 数据访问组件（ORM、Redis Client、数据库连接池）
+
+#### 外部容器（可选）
+\`\`\`plantuml
+ContainerDb_Ext(db, "数据库", "PostgreSQL", "外部数据库")
+Container_Ext(otherService, "其他服务", "微服务", "外部服务")
+\`\`\`
+
+### 关系定义
+
+\`\`\`plantuml
+Rel(from, to, "描述", "调用方式")
+Rel_U(from, to, "向上", "方法调用")
+Rel_D(from, to, "向下", "接口调用")
+\`\`\`
+
+**调用方式建议**：
+- 同步调用：方法调用、接口调用、函数调用
+- 数据访问：SQL、ORM、Redis Protocol
+- 消息传递：Event、消息队列
+
+### 布局控制
+
+\`\`\`plantuml
+LAYOUT_TOP_DOWN()      ' 从上到下（推荐用于分层架构）
+LAYOUT_LEFT_RIGHT()    ' 从左到右
+SHOW_LEGEND()          ' 显示图例
+\`\`\`
+
+## 生成示例
+
+### 示例 1: 经典三层架构（基础场景）
+
+**用户需求**：订单服务的组件图，包含控制器、服务层、仓储层
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title 组件图 - 订单服务（三层架构）
+
+Container_Boundary(orderService, "订单服务") {
+    Component(controller, "Order Controller", "Spring MVC", "处理订单相关HTTP请求")
+    Component(service, "Order Service", "Spring Service", "订单业务逻辑")
+    Component(repo, "Order Repository", "Spring Data JPA", "订单数据访问")
+}
+
+ContainerDb_Ext(db, "订单数据库", "PostgreSQL", "持久化存储")
+
+Rel(controller, service, "调用", "方法调用")
+Rel(service, repo, "使用", "接口调用")
+Rel(repo, db, "查询/保存", "SQL/JDBC")
+
+LAYOUT_TOP_DOWN()
+SHOW_LEGEND()
+@enduml
+\`\`\`
+
+**关键点**：
+- 使用 \`Container_Boundary\` 定义容器边界
+- 体现经典的三层架构（Controller → Service → Repository）
+- 每个组件包含技术实现标注
+- 外部数据库使用 \`ContainerDb_Ext\`
+
+### 示例 2: DDD 分层架构（中等复杂度）
+
+**用户需求**：采用 DDD 设计的用户服务，包含接口层、应用层、领域层、基础设施层
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title 组件图 - 用户服务（DDD 架构）
+
+Container_Boundary(userService, "用户服务") {
+    Component(api, "User API", "REST Controller", "用户接口层")
+    Component(app, "Application Service", "应用服务", "用户用例编排")
+    Component(domain, "Domain Model", "领域模型", "用户聚合根和实体")
+    Component(repo, "Repository", "仓储接口", "数据访问抽象")
+    Component(repoImpl, "Repository Impl", "MyBatis", "仓储实现")
+    ComponentDb(cache, "Cache Client", "Redis Client", "缓存客户端")
+}
+
+ContainerDb_Ext(db, "用户数据库", "MySQL", "主数据库")
+ContainerDb_Ext(redis, "Redis", "Redis Cluster", "缓存服务")
+
+Rel(api, app, "调用", "方法调用")
+Rel(app, domain, "使用", "领域对象")
+Rel(app, repo, "依赖", "接口")
+Rel(repo, repoImpl, "实现", "接口实现")
+Rel(repoImpl, db, "查询", "SQL")
+Rel(app, cache, "读写", "Redis Protocol")
+Rel(cache, redis, "连接", "TCP")
+
+LAYOUT_TOP_DOWN()
+SHOW_LEGEND()
+@enduml
+\`\`\`
+
+**关键点**：
+- 体现 DDD 分层（接口层、应用层、领域层、基础设施层）
+- 展示仓储接口和实现的分离
+- 包含缓存客户端组件
+- 多个外部数据存储（数据库、Redis）
+
+### 示例 3: 微服务内部结构（高级场景）
+
+**用户需求**：完整的微服务内部结构，包含API层、业务层、数据层、消息处理、监控
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title 组件图 - 订单服务完整结构
+
+Container_Boundary(orderService, "订单服务") {
+    Component(restApi, "REST API", "Express Router", "HTTP接口")
+    Component(graphqlApi, "GraphQL API", "Apollo Server", "GraphQL接口")
+    Component(orderLogic, "Order Logic", "Business Service", "订单业务逻辑")
+    Component(paymentLogic, "Payment Logic", "Business Service", "支付逻辑")
+    Component(validator, "Validator", "Joi", "数据验证")
+    Component(orderRepo, "Order Repository", "TypeORM", "订单数据访问")
+    Component(eventPublisher, "Event Publisher", "Kafka Producer", "事件发布")
+    Component(eventHandler, "Event Handler", "Kafka Consumer", "事件处理")
+    ComponentDb(cache, "Cache Manager", "Redis Client", "缓存管理")
+    Component(logger, "Logger", "Winston", "日志记录")
+    Component(metrics, "Metrics", "Prometheus Client", "指标采集")
+}
+
+ContainerDb_Ext(db, "订单数据库", "PostgreSQL", "主数据库")
+ContainerDb_Ext(redis, "Redis", "Redis Cluster", "缓存")
+Container_Ext(kafka, "Kafka", "消息队列", "事件总线")
+Container_Ext(monitoring, "Prometheus", "监控系统", "指标收集")
+
+Rel(restApi, validator, "验证请求", "方法调用")
+Rel(graphqlApi, validator, "验证请求", "方法调用")
+Rel(restApi, orderLogic, "调用", "方法调用")
+Rel(graphqlApi, orderLogic, "调用", "方法调用")
+Rel(orderLogic, paymentLogic, "依赖", "方法调用")
+Rel(orderLogic, orderRepo, "使用", "接口调用")
+Rel(orderLogic, eventPublisher, "发布事件", "异步")
+Rel(orderRepo, db, "读写", "SQL")
+Rel(orderRepo, cache, "读写缓存", "Redis Protocol")
+Rel(cache, redis, "连接", "TCP")
+Rel(eventPublisher, kafka, "发送", "Kafka Protocol")
+Rel(eventHandler, kafka, "订阅", "Kafka Protocol")
+Rel(eventHandler, orderLogic, "触发", "方法调用")
+Rel(orderLogic, logger, "记录日志", "方法调用")
+Rel(orderLogic, metrics, "上报指标", "方法调用")
+Rel(metrics, monitoring, "推送", "HTTP")
+
+LAYOUT_TOP_DOWN()
+SHOW_LEGEND()
+@enduml
+\`\`\`
+
+**关键点**：
+- 包含多种接口类型（REST、GraphQL）
+- 完整的业务层和数据层
+- 事件驱动架构（发布/订阅）
+- 基础设施组件（日志、监控）
+
+## 常见错误
+
+### 错误 1: 使用错误的 include
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+Component(ctrl, "控制器")  ' 错误：应使用 C4_Component.puml
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+Component(ctrl, "控制器", "Spring MVC", "处理请求")
+@enduml
+\`\`\`
+
+**原因**：Component 图必须使用 \`C4_Component.puml\`。
+
+### 错误 2: 缺少容器边界
+❌ **错误写法**：
+\`\`\`plantuml
+Component(ctrl, "控制器", "Spring MVC")
+Component(service, "服务", "Spring Service")
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+Container_Boundary(app, "应用服务") {
+    Component(ctrl, "控制器", "Spring MVC", "处理请求")
+    Component(service, "服务", "Spring Service", "业务逻辑")
+}
+\`\`\`
+
+**原因**：Component 图应明确容器边界，展示哪些组件属于同一个容器。
+
+### 错误 3: 组件粒度过细
+❌ **错误写法**：为每个方法创建组件
+\`\`\`plantuml
+Component(getUser, "获取用户方法", "Java")
+Component(createUser, "创建用户方法", "Java")
+Component(updateUser, "更新用户方法", "Java")
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+Component(userService, "User Service", "Spring Service", "用户业务逻辑")
+\`\`\`
+
+**原因**：Component 图展示代码模块/类级别，不展示方法级别。
+
+### 错误 4: 缺少技术标注
+❌ **错误写法**：
+\`\`\`plantuml
+Component(ctrl, "控制器")  ' 缺少技术框架
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+Component(ctrl, "控制器", "Spring MVC", "处理HTTP请求")
+\`\`\`
+
+**原因**：Component 图必须标注技术实现（框架、库）。
+
+### 错误 5: 混用 System 元素
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component(ctrl, "控制器", "Spring MVC")
+System(other, "其他系统")  ' 错误：Component图不应有System
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component(ctrl, "控制器", "Spring MVC", "处理请求")
+Container_Ext(other, "其他服务", "微服务", "外部依赖")
+@enduml
+\`\`\`
+
+**原因**：Component 图只使用 Component、Container_Ext，不使用 System。
+
+### 错误 6: 关系描述不清晰
+❌ **错误写法**：
+\`\`\`plantuml
+Rel(ctrl, service, "使用")  ' 描述太模糊
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+Rel(ctrl, service, "调用业务逻辑", "方法调用")
+\`\`\`
+
+**原因**：Component 图需要清晰的调用描述，说明组件间如何交互。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **include 声明正确**：使用 \`C4_Component.puml\`
+- [ ] **容器边界明确**：使用 \`Container_Boundary\` 包裹组件
+- [ ] **组件类型正确**：使用 Component、ComponentDb 等
+- [ ] **技术标注完整**：所有组件包含技术框架/库标注
+- [ ] **分层清晰**：体现架构分层（MVC、DDD等）
+- [ ] **粒度合理**：组件数量 5-20 个，表示代码模块/类级别
+- [ ] **关系描述清晰**：说明组件间的调用方式
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1180 tokens
+ *
+ * 分配明细:
+ * - 专家视角: 110 tokens
+ * - 核心语法: 180 tokens
+ * - 生成示例: 600 tokens（3个示例）
+ * - 常见错误: 240 tokens（6个错误）
+ * - 检查清单: 50 tokens
+ */

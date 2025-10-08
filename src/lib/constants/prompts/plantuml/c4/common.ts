@@ -1,0 +1,221 @@
+/**
+ * L2: C4-PlantUML 语言规范
+ *
+ * 作用：定义 C4-PlantUML 扩展的通用语法和最佳实践
+ * Token 预算：200-500 tokens
+ *
+ * 适用范围：所有 C4-PlantUML 图表类型共享
+ *
+ * @example
+ * 与 L1 通用规范和 L3 图表要求组合使用
+ */
+
+export const C4_PLANTUML_LANGUAGE_PROMPT = `
+# C4-PlantUML 语言规范
+
+## 核心概念
+
+C4 模型（Context, Container, Component, Code）是一种用于可视化软件架构的分层方法。C4-PlantUML 是 PlantUML 的扩展库，专门用于绘制 C4 模型图表。
+
+### C4 模型四个层次
+
+1. **Level 1 - System Context**: 系统与外部实体的交互关系
+2. **Level 2 - Container**: 系统内部的高层技术构成（应用、数据库、服务等）
+3. **Level 3 - Component**: 容器内部的组件和职责划分
+4. **Level 4 - Code**: 代码级别的类图（通常不在 C4-PlantUML 中实现）
+
+## 基础语法
+
+### 图表声明
+
+所有 C4-PlantUML 图表必须包含以下结构：
+
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+' 图表内容...
+
+@enduml
+\`\`\`
+
+**根据图表类型选择正确的 include**：
+- **Context/Container 图**: \`C4_Container.puml\`
+- **Component 图**: \`C4_Component.puml\`
+- **Dynamic 图**: \`C4_Dynamic.puml\`
+- **Deployment 图**: \`C4_Deployment.puml\`
+
+### 元素定义
+
+#### 人员（Person）
+\`\`\`plantuml
+Person(alias, "显示名称", "可选描述")
+Person_Ext(alias, "外部人员", "外部用户描述")
+\`\`\`
+
+#### 系统（System）
+\`\`\`plantuml
+System(alias, "系统名称", "系统描述")
+System_Ext(alias, "外部系统", "外部系统描述")
+System_Boundary(alias, "边界名称") {
+    ' 内部容器...
+}
+\`\`\`
+
+#### 容器（Container）
+\`\`\`plantuml
+Container(alias, "容器名称", "技术栈", "容器描述")
+ContainerDb(alias, "数据库名称", "数据库类型", "数据描述")
+Container_Boundary(alias, "边界名称") {
+    ' 内部组件...
+}
+\`\`\`
+
+#### 组件（Component）
+\`\`\`plantuml
+Component(alias, "组件名称", "技术栈", "组件描述")
+ComponentDb(alias, "数据组件", "技术", "数据访问描述")
+\`\`\`
+
+### 关系定义
+
+#### 基础关系
+\`\`\`plantuml
+Rel(from, to, "描述", "可选技术")
+Rel_Back(from, to, "反向关系", "技术")
+\`\`\`
+
+#### 方向关系
+\`\`\`plantuml
+Rel_U(from, to, "向上", "技术")    ' Upward
+Rel_D(from, to, "向下", "技术")    ' Downward  
+Rel_L(from, to, "向左", "技术")    ' Left
+Rel_R(from, to, "向右", "技术")    ' Right
+\`\`\`
+
+### 布局和样式
+
+#### 布局方向
+\`\`\`plantuml
+LAYOUT_TOP_DOWN()      ' 从上到下（默认）
+LAYOUT_LEFT_RIGHT()    ' 从左到右
+LAYOUT_LANDSCAPE()     ' 横向布局
+\`\`\`
+
+#### 显示图例
+\`\`\`plantuml
+SHOW_LEGEND()          ' 显示图例
+HIDE_LEGEND()          ' 隐藏图例
+\`\`\`
+
+## 命名规范
+
+### 元素别名（alias）
+- 使用有意义的英文简称
+- 采用驼峰命名法或下划线命名法
+- 示例：\`webApp\`, \`authService\`, \`order_db\`
+
+### 显示名称
+- 使用清晰的中文或英文描述
+- 放在双引号中
+- 示例：\`"Web 应用"\`, \`"认证服务"\`, \`"订单数据库"\`
+
+### 技术栈标注
+- 明确指出使用的技术和框架
+- 示例：\`"React, Next.js"\`, \`"Node.js, Express"\`, \`"PostgreSQL"\`
+
+## C4 模型最佳实践
+
+### 1. 保持层次一致性
+- 每个图表只聚焦一个抽象层次
+- **Context 图**：不包含 Container 或 Component 细节
+- **Container 图**：不深入到组件级别
+- **Component 图**：不展示代码实现
+
+### 2. 明确边界
+- 使用 \`System_Boundary\` 或 \`Container_Boundary\` 清晰划分系统边界
+- 边界内的元素属于同一个系统或容器
+
+### 3. 技术标注完整
+- Container 和 Component 必须包含技术栈信息
+- 关系描述应包含通信协议或格式
+- 示例：\`"REST/JSON"\`, \`"gRPC"\`, \`"SQL/JDBC"\`
+
+### 4. 合理粒度
+- Context 图：3-10 个系统
+- Container 图：5-15 个容器
+- Component 图：5-20 个组件
+- 过多元素应考虑拆分为多个图表
+
+## 常见错误
+
+### 错误 1: 缺少 include 声明
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+Person(user, "用户")
+System(app, "应用")
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "用户")
+System(app, "应用")
+@enduml
+\`\`\`
+
+**原因**：C4-PlantUML 元素定义来自于外部库，必须先 include 才能使用。
+
+### 错误 2: 混用不同抽象层次
+❌ **错误写法**：在 Context 图中使用 Component
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "用户")
+System(app, "应用")
+Component(ctrl, "控制器", "Spring MVC")  ' 错误：Context图不应有Component
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "用户")
+System(app, "应用系统")
+System_Ext(payment, "支付系统")
+@enduml
+\`\`\`
+
+**原因**：C4 模型强调层次分离，每个图表应聚焦单一抽象层次。
+
+### 错误 3: 缺少技术栈标注
+❌ **错误写法**：
+\`\`\`plantuml
+Container(web, "Web应用")  ' 缺少技术栈
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+Container(web, "Web应用", "React, TypeScript", "前端应用")
+\`\`\`
+
+**原因**：C4 模型的 Container 和 Component 层必须包含技术栈信息，这是其核心价值。
+`;
+
+/**
+ * Token 估算: 约 480 tokens
+ *
+ * 分配明细:
+ * - 核心概念: 80 tokens
+ * - 基础语法: 180 tokens
+ * - 命名规范: 50 tokens
+ * - 最佳实践: 90 tokens
+ * - 常见错误: 80 tokens
+ */

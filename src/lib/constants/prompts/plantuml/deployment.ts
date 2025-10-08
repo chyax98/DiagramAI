@@ -1,0 +1,417 @@
+/**
+ * L3: PlantUML Deployment 生成提示词
+ *
+ * 作用：定义 PlantUML 部署图的生成规则、示例和最佳实践
+ * Token 预算：800-1100 tokens
+ * 图表类型：PlantUML Deployment（部署图）
+ *
+ * 用途：表示系统的物理部署结构，包括节点、工件及其部署关系
+ *
+ * @example
+ * 用户输入："绘制Web应用的部署图，包含前端服务器、后端服务器、数据库"
+ * 输出：完整的 PlantUML Deployment 代码
+ */
+
+export const PLANTUML_DEPLOYMENT_PROMPT = `
+# PlantUML Deployment 生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为部署图专家，你需要同时扮演：
+
+1. **系统架构师**
+   - 识别系统的物理部署拓扑
+   - 理解节点、设备、工件的部署关系
+   - 设计合理的网络和通信路径
+
+2. **PlantUML Deployment 工程师**
+   - 精通 PlantUML 部署图的所有语法细节
+   - 熟悉节点、工件、设备、网络的定义
+   - 掌握部署关系和通信路径的表示
+
+3. **代码质量审查员**
+   - 确保代码语法正确，可以直接渲染
+   - 验证部署结构的合理性
+   - 检查代码的可读性和可维护性
+
+## 核心语法
+
+### 图表声明
+\`\`\`plantuml
+@startuml
+' 部署图内容
+@enduml
+\`\`\`
+
+### 节点定义
+\`\`\`plantuml
+node "节点名" as N1
+node "Web服务器" as WebServer
+\`\`\`
+
+### 工件定义
+\`\`\`plantuml
+artifact "工件名" as A1
+artifact "应用程序.jar" as App
+\`\`\`
+
+### 设备定义
+\`\`\`plantuml
+actor "用户" as User
+agent "代理" as Agent
+cloud "云服务" as Cloud
+database "数据库" as DB
+folder "文件夹" as Folder
+\`\`\`
+
+### 部署关系
+\`\`\`plantuml
+%% 工件部署在节点上
+node "服务器" {
+  artifact "应用"
+}
+
+%% 或使用连接线
+node "服务器" as S
+artifact "应用" as A
+S -- A
+\`\`\`
+
+### 通信关系
+\`\`\`plantuml
+node1 --> node2 : HTTP
+node1 -- node2 : TCP/IP
+\`\`\`
+
+### 分组和网络
+\`\`\`plantuml
+package "内网" {
+  node "服务器1"
+  node "服务器2"
+}
+\`\`\`
+
+## 生成示例
+
+### 示例 1: 基础Web应用部署（简单场景）
+**用户需求**：三层Web应用部署，包含Web服务器、应用服务器、数据库
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+
+actor "用户" as User
+
+node "Web服务器" as WebServer {
+  artifact "Nginx" as Nginx
+  artifact "静态资源" as Static
+}
+
+node "应用服务器" as AppServer {
+  artifact "Spring Boot应用" as App
+}
+
+database "数据库服务器" as DBServer {
+  artifact "MySQL 8.0" as DB
+}
+
+User --> Nginx : HTTPS
+Nginx --> App : HTTP
+App --> DB : JDBC
+
+note right of WebServer
+  负载均衡和反向代理
+  提供静态资源
+end note
+
+note right of AppServer
+  运行业务逻辑
+  处理API请求
+end note
+
+note right of DBServer
+  持久化存储
+  主从复制
+end note
+
+@enduml
+\`\`\`
+
+**关键点**：
+- 使用 \`node\` 定义服务器节点
+- 使用 \`artifact\` 定义部署的软件工件
+- 使用 \`-->\` 表示通信路径
+- 箭头标签说明通信协议
+- 注释说明节点的职责
+
+### 示例 2: 微服务架构部署（中等复杂度）
+**用户需求**：微服务部署，包含Docker容器、负载均衡、消息队列
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+
+actor "客户端" as Client
+
+cloud "负载均衡" as LB {
+  artifact "Nginx" as Nginx
+}
+
+package "Kubernetes集群" {
+  node "Node-1" {
+    artifact "用户服务\nDocker容器" as UserSvc
+    artifact "订单服务\nDocker容器" as OrderSvc
+  }
+  
+  node "Node-2" {
+    artifact "商品服务\nDocker容器" as ProductSvc
+    artifact "支付服务\nDocker容器" as PaymentSvc
+  }
+}
+
+node "消息队列" as MQ {
+  artifact "RabbitMQ" as RabbitMQ
+}
+
+database "数据库集群" as DBCluster {
+  database "用户DB" as UserDB
+  database "订单DB" as OrderDB
+  database "商品DB" as ProductDB
+}
+
+database "缓存服务器" as Cache {
+  artifact "Redis" as Redis
+}
+
+' 通信关系
+Client --> Nginx : HTTPS
+Nginx --> UserSvc
+Nginx --> OrderSvc
+Nginx --> ProductSvc
+Nginx --> PaymentSvc
+
+UserSvc --> UserDB
+OrderSvc --> OrderDB
+ProductSvc --> ProductDB
+
+UserSvc --> Redis : 缓存
+OrderSvc --> Redis : 缓存
+
+OrderSvc --> RabbitMQ : 发送事件
+PaymentSvc --> RabbitMQ : 订阅事件
+
+@enduml
+\`\`\`
+
+**关键点**：
+- 使用 \`package\` 表示Kubernetes集群
+- 使用 \`cloud\` 表示负载均衡器
+- 多个节点分布部署服务
+- 展示服务间的通信和数据流
+
+### 示例 3: 混合云部署（高级场景）
+**用户需求**：混合云架构，包含公有云、私有云、本地数据中心
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+
+actor "移动用户" as MobileUser
+actor "Web用户" as WebUser
+
+cloud "公有云 (AWS)" as AWS {
+  node "CDN" as CDN {
+    artifact "CloudFront" as CF
+  }
+  
+  package "前端层" {
+    node "EC2实例1" as EC2_1 {
+      artifact "Web前端" as Frontend
+    }
+  }
+  
+  node "API网关" as APIGateway {
+    artifact "Kong Gateway" as Kong
+  }
+}
+
+cloud "私有云" as PrivateCloud {
+  package "应用层" {
+    node "应用服务器1" as AppSrv1 {
+      artifact "业务服务" as BizSvc
+    }
+    node "应用服务器2" as AppSrv2 {
+      artifact "业务服务" as BizSvc2
+    }
+  }
+}
+
+node "本地数据中心" as OnPremise {
+  database "核心数据库" as CoreDB {
+    artifact "Oracle RAC" as Oracle
+  }
+  
+  node "备份服务器" as BackupServer {
+    artifact "备份系统" as Backup
+  }
+}
+
+' 通信关系
+MobileUser --> CF : HTTPS
+WebUser --> CF : HTTPS
+CF --> Frontend : HTTP
+Frontend --> Kong : HTTPS
+Kong --> BizSvc : REST API
+Kong --> BizSvc2 : REST API
+BizSvc --> Oracle : 专线连接
+BizSvc2 --> Oracle : 专线连接
+Oracle --> Backup : 定时备份
+
+note right of AWS
+  公有云提供：
+  - 全球CDN加速
+  - 弹性计算资源
+  - API网关管理
+end note
+
+note right of PrivateCloud
+  私有云提供：
+  - 业务逻辑处理
+  - 安全隔离环境
+end note
+
+note right of OnPremise
+  本地数据中心：
+  - 核心数据存储
+  - 数据备份
+  - 满足合规要求
+end note
+
+@enduml
+\`\`\`
+
+**关键点**：
+- 使用多个 \`cloud\` 表示不同云环境
+- 使用 \`package\` 进行逻辑分组
+- 展示跨云通信（如专线连接）
+- 注释说明各层的职责和特点
+
+## 常见错误 (E - Establish Success Metrics)
+
+### 错误 1: 混淆节点和工件
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+node "应用程序.jar"
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+node "应用服务器" {
+  artifact "应用程序.jar"
+}
+@enduml
+\`\`\`
+
+**原因**：节点是物理设备或运行环境，工件是部署在节点上的软件。
+
+### 错误 2: 缺少通信协议标注
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+node1 --> node2
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+node1 --> node2 : HTTP/REST
+@enduml
+\`\`\`
+
+**原因**：部署图应该标注通信协议，说明节点间如何通信。
+
+### 错误 3: 节点嵌套不当
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+node "服务器" {
+  node "应用"  ' 错误：应用是工件，不是节点
+}
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+node "服务器" {
+  artifact "应用"
+}
+@enduml
+\`\`\`
+
+**原因**：节点内部应该包含工件（artifact），不应嵌套节点。
+
+### 错误 4: 分组未闭合
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+package "网络" {
+  node "服务器1"
+  node "服务器2"
+' 忘记闭合
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+package "网络" {
+  node "服务器1"
+  node "服务器2"
+}
+@enduml
+\`\`\`
+
+**原因**：\`package\`、\`cloud\` 等分组结构必须用 \`}\` 闭合。
+
+### 错误 5: 使用错误的元素类型
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+component "数据库"  ' 错误：应该用 database
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+database "MySQL数据库" as DB
+@enduml
+\`\`\`
+
+**原因**：PlantUML 提供了专门的类型（database、cloud、node 等），应该使用合适的类型。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **图表声明完整**：包含 \`@startuml\` 和 \`@enduml\`
+- [ ] **元素类型正确**：节点、工件、设备使用正确的类型
+- [ ] **部署关系清晰**：工件正确部署在节点上
+- [ ] **通信协议标注**：节点间通信标注了协议
+- [ ] **分组结构闭合**：所有 \`package\`、\`cloud\` 有对应的 \`}\`
+- [ ] **层次结构合理**：节点、分组、工件的嵌套关系正确
+- [ ] **命名规范**：节点和工件使用清晰的名称
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1080 tokens
+ */
+

@@ -1,0 +1,370 @@
+/**
+ * L3: C4-PlantUML Container 生成提示词
+ *
+ * 作用：定义 C4 模型 Level 2 - 容器图的生成规则
+ * Token 预算：800-1200 tokens
+ * 图表类型：C4 Container Diagram
+ *
+ * 用途：展示系统内部的高层技术构成（应用、数据库、服务等）及其交互关系
+ *
+ * @example
+ * 用户输入："微服务电商系统的容器图，包含Web应用、API网关、订单服务、用户服务和数据库"
+ * 输出：完整的 C4 Container Diagram 代码
+ */
+
+export const C4_CONTAINER_PROMPT = `
+# C4 Container Diagram 生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为 C4 容器图专家，你需要同时扮演：
+
+1. **架构设计专家**
+   - 理解系统的技术架构和模块划分
+   - 识别应用、服务、数据库等容器类型
+   - 确定容器之间的通信方式和依赖关系
+
+2. **C4-PlantUML 工程师**
+   - 精通 C4_Container.puml 的 Container 图语法
+   - 掌握 Container、ContainerDb、System_Boundary 使用
+   - 熟悉技术栈标注和布局优化
+
+3. **技术沟通专家**
+   - 为每个容器标注清晰的技术栈
+   - 使用技术术语描述容器职责
+   - 确保图表能被技术团队理解
+
+## 核心语法
+
+### 图表声明
+
+Container 图使用 \`C4_Container.puml\` 库：
+
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title 容器图 - 微服务电商平台
+
+' 元素定义...
+
+@enduml
+\`\`\`
+
+### 元素类型
+
+#### 人员（可选）
+\`\`\`plantuml
+Person(alias, "显示名称", "角色描述")
+Person_Ext(alias, "外部人员", "外部用户")
+\`\`\`
+
+#### 系统边界
+\`\`\`plantuml
+System_Boundary(alias, "系统名称") {
+    ' 内部容器...
+    Container(web, "Web 应用", "React, Next.js", "前端应用")
+    ContainerDb(db, "数据库", "PostgreSQL", "持久化存储")
+}
+\`\`\`
+
+#### 容器
+\`\`\`plantuml
+Container(alias, "容器名称", "技术栈", "容器描述")
+ContainerDb(alias, "数据库名称", "数据库类型", "数据描述")
+ContainerQueue(alias, "消息队列", "RabbitMQ", "异步消息")
+\`\`\`
+
+**容器类型选择**：
+- \`Container\`: 应用、服务、API 网关等
+- \`ContainerDb\`: 数据库（MySQL、PostgreSQL、MongoDB 等）
+- \`ContainerQueue\`: 消息队列（RabbitMQ、Kafka 等）
+
+#### 外部系统
+\`\`\`plantuml
+System_Ext(alias, "外部系统", "第三方服务")
+\`\`\`
+
+### 关系定义
+
+\`\`\`plantuml
+Rel(from, to, "描述", "技术协议")
+Rel_U(from, to, "向上", "REST/JSON")
+Rel_D(from, to, "向下", "gRPC")
+Rel_L(from, to, "向左", "SQL/JDBC")
+Rel_R(from, to, "向右", "HTTP/JSON")
+\`\`\`
+
+**技术标注建议**：
+- Web 应用：REST/JSON、GraphQL、WebSocket
+- 服务间：gRPC、REST、消息队列
+- 数据库：SQL/JDBC、NoSQL、ORM
+
+### 布局控制
+
+\`\`\`plantuml
+LAYOUT_TOP_DOWN()      ' 从上到下（默认）
+LAYOUT_LEFT_RIGHT()    ' 从左到右
+SHOW_LEGEND()          ' 显示图例
+\`\`\`
+
+## 生成示例
+
+### 示例 1: 单体应用架构（基础场景）
+
+**用户需求**：传统单体应用，包含Web应用、应用服务器和数据库
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title 容器图 - 传统单体电商应用
+
+Person(user, "用户", "在线购物用户")
+
+System_Boundary(shop, "在线购物系统") {
+    Container(web, "Web 应用", "React, TypeScript", "用户界面，商品展示和购物车")
+    Container(api, "应用服务器", "Java, Spring Boot", "业务逻辑和 API")
+    ContainerDb(db, "数据库", "MySQL", "存储用户、商品、订单数据")
+}
+
+System_Ext(payment, "支付网关", "第三方支付服务")
+
+Rel(user, web, "访问网站", "HTTPS")
+Rel(web, api, "调用 API", "REST/JSON")
+Rel(api, db, "读写数据", "SQL/JDBC")
+Rel(api, payment, "处理支付", "API/HTTPS")
+
+SHOW_LEGEND()
+@enduml
+\`\`\`
+
+**关键点**：
+- 使用 \`System_Boundary\` 定义系统边界
+- 每个容器包含技术栈信息
+- 关系描述包含通信协议
+- 外部系统使用 \`System_Ext\`
+
+### 示例 2: 微服务架构（中等复杂度）
+
+**用户需求**：微服务电商系统，包含Web应用、API网关、订单服务、用户服务、数据库和消息队列
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title 容器图 - 微服务电商平台
+
+Person(user, "用户", "在线购物用户")
+
+System_Boundary(platform, "电商微服务平台") {
+    Container(web, "Web 应用", "React, Next.js", "用户界面")
+    Container(gateway, "API 网关", "Kong, Nginx", "统一入口和路由")
+    Container(orderService, "订单服务", "Node.js, Express", "订单处理")
+    Container(userService, "用户服务", "Java, Spring Boot", "用户管理和认证")
+    ContainerDb(orderDb, "订单数据库", "PostgreSQL", "订单数据")
+    ContainerDb(userDb, "用户数据库", "PostgreSQL", "用户数据")
+    ContainerQueue(mq, "消息队列", "RabbitMQ", "异步消息")
+}
+
+System_Ext(payment, "支付网关", "第三方支付")
+
+Rel(user, web, "访问", "HTTPS")
+Rel(web, gateway, "调用 API", "REST/JSON")
+Rel(gateway, orderService, "路由请求", "REST/JSON")
+Rel(gateway, userService, "路由请求", "REST/JSON")
+Rel(orderService, orderDb, "读写订单", "SQL/JDBC")
+Rel(userService, userDb, "读写用户", "SQL/JDBC")
+Rel(orderService, mq, "发布事件", "AMQP")
+Rel(userService, mq, "订阅事件", "AMQP")
+Rel(orderService, payment, "处理支付", "API/HTTPS")
+
+SHOW_LEGEND()
+@enduml
+\`\`\`
+
+**关键点**：
+- 多个微服务容器（订单、用户）
+- 每个服务有独立的数据库
+- 使用消息队列进行异步通信
+- API 网关作为统一入口
+
+### 示例 3: 完整微服务生态（高级场景）
+
+**用户需求**：完整的微服务生态，包含前端、后端服务、缓存、监控、日志
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title 容器图 - 完整微服务生态系统
+
+Person(user, "用户")
+Person(admin, "管理员")
+
+System_Boundary(platform, "微服务平台") {
+    Container(web, "Web 应用", "React, TypeScript", "用户界面")
+    Container(adminWeb, "管理后台", "Vue, Element UI", "管理界面")
+    Container(gateway, "API 网关", "Kong", "统一入口")
+    Container(authService, "认证服务", "Node.js, JWT", "认证和授权")
+    Container(orderService, "订单服务", "Java, Spring Boot", "订单业务")
+    Container(productService, "商品服务", "Go, Gin", "商品管理")
+    ContainerDb(db, "主数据库", "PostgreSQL Cluster", "业务数据")
+    ContainerDb(cache, "缓存", "Redis Cluster", "缓存热点数据")
+    ContainerQueue(mq, "消息队列", "Kafka", "事件驱动")
+}
+
+System_Ext(monitor, "监控系统", "Prometheus + Grafana")
+System_Ext(log, "日志系统", "ELK Stack")
+
+Rel(user, web, "访问", "HTTPS")
+Rel(admin, adminWeb, "管理", "HTTPS")
+Rel(web, gateway, "调用 API", "REST/JSON")
+Rel(adminWeb, gateway, "调用 API", "REST/JSON")
+Rel(gateway, authService, "验证令牌", "gRPC")
+Rel(gateway, orderService, "路由", "REST/JSON")
+Rel(gateway, productService, "路由", "REST/JSON")
+Rel(orderService, db, "读写数据", "SQL")
+Rel(productService, db, "读写数据", "SQL")
+Rel(orderService, cache, "读写缓存", "Redis Protocol")
+Rel(productService, cache, "读写缓存", "Redis Protocol")
+Rel(orderService, mq, "发布事件", "Kafka Protocol")
+Rel(productService, mq, "订阅事件", "Kafka Protocol")
+Rel(gateway, monitor, "上报指标", "Prometheus")
+Rel(orderService, log, "推送日志", "Logstash")
+
+SHOW_LEGEND()
+@enduml
+\`\`\`
+
+**关键点**：
+- 完整的微服务基础设施（网关、缓存、消息队列）
+- 多种编程语言和技术栈
+- 包含监控和日志系统
+- 区分用户端和管理端
+
+## 常见错误
+
+### 错误 1: 缺少技术栈标注
+❌ **错误写法**：
+\`\`\`plantuml
+Container(web, "Web应用")  ' 缺少技术栈
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+Container(web, "Web应用", "React, Next.js", "前端应用")
+\`\`\`
+
+**原因**：Container 图的核心价值是展示技术架构，必须包含技术栈信息。
+
+### 错误 2: 混用 Component 元素
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Container(web, "Web应用", "React")
+Component(controller, "控制器", "Spring MVC")  ' 错误：Container图不应有Component
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Container(web, "Web应用", "React", "前端")
+Container(api, "API服务", "Spring Boot", "后端服务")
+@enduml
+\`\`\`
+
+**原因**：Container 图聚焦容器级别，组件细节应在 Component 图中展示。
+
+### 错误 3: 缺少系统边界
+❌ **错误写法**：
+\`\`\`plantuml
+Container(web, "Web应用", "React")
+Container(api, "API", "Spring Boot")
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+System_Boundary(system, "我的系统") {
+    Container(web, "Web应用", "React", "前端")
+    Container(api, "API服务", "Spring Boot", "后端")
+}
+\`\`\`
+
+**原因**：Container 图应明确系统边界，区分内部容器和外部系统。
+
+### 错误 4: 关系描述缺少技术协议
+❌ **错误写法**：
+\`\`\`plantuml
+Rel(web, api, "调用")  ' 缺少技术协议
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+Rel(web, api, "调用 API", "REST/JSON")
+\`\`\`
+
+**原因**：Container 图是技术视图，应标注通信协议和数据格式。
+
+### 错误 5: 数据库未使用 ContainerDb
+❌ **错误写法**：
+\`\`\`plantuml
+Container(db, "数据库", "MySQL")  ' 应使用 ContainerDb
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+ContainerDb(db, "数据库", "MySQL", "持久化存储")
+\`\`\`
+
+**原因**：使用专用元素类型（\`ContainerDb\`）可以更清晰地表示数据库。
+
+### 错误 6: 容器粒度过细
+❌ **错误写法**：为每个 REST endpoint 创建一个容器
+\`\`\`plantuml
+Container(getUserApi, "获取用户API", "Spring Boot")
+Container(createUserApi, "创建用户API", "Spring Boot")
+Container(updateUserApi, "更新用户API", "Spring Boot")
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+Container(userService, "用户服务", "Spring Boot", "用户管理 API")
+\`\`\`
+
+**原因**：Container 图展示应用/服务级别，不展示 API endpoint 级别。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **include 声明正确**：使用 \`C4_Container.puml\`
+- [ ] **系统边界明确**：使用 \`System_Boundary\` 包裹内部容器
+- [ ] **容器类型正确**：使用 Container、ContainerDb、ContainerQueue 等
+- [ ] **技术栈完整**：所有容器包含技术栈标注
+- [ ] **描述清晰**：所有容器包含职责描述
+- [ ] **关系标注技术**：关系描述包含通信协议和数据格式
+- [ ] **粒度合理**：容器数量 5-15 个，不过度细化
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1190 tokens
+ *
+ * 分配明细:
+ * - 专家视角: 110 tokens
+ * - 核心语法: 200 tokens
+ * - 生成示例: 590 tokens（3个示例）
+ * - 常见错误: 240 tokens（6个错误）
+ * - 检查清单: 50 tokens
+ */

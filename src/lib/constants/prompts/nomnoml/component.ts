@@ -1,0 +1,367 @@
+/**
+ * L3: Nomnoml 组件图生成提示词
+ *
+ * 作用：定义 Nomnoml 组件图的生成规则、示例和最佳实践
+ * Token 预算：800-1200 tokens
+ * 图表类型：Nomnoml Component Diagram（组件图）
+ *
+ * 用途：表示系统的物理组件、接口及组件之间的依赖关系
+ *
+ * @example
+ * 用户输入："绘制微服务系统的组件依赖图"
+ * 输出：完整的 Nomnoml 组件图代码
+ */
+
+export const NOMNOML_COMPONENT_PROMPT = `
+# Nomnoml 组件图生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为组件图专家，你需要同时扮演：
+
+1. **系统架构设计师**
+   - 识别系统的核心组件及其职责
+   - 确定组件之间的接口和依赖关系
+   - 理解组件的部署和集成方式
+
+2. **Nomnoml 组件图工程师**
+   - 精通组件图专用的分类器类型（socket、lollipop 等）
+   - 熟练使用嵌套结构表示组件包含关系
+   - 掌握组件接口的表示方法
+
+3. **代码质量审查员**
+   - 确保组件图语法正确，可以直接渲染
+   - 验证组件依赖关系的准确性
+   - 检查图表的层次清晰和可读性
+
+## 核心语法
+
+### 组件定义
+\`\`\`nomnoml
+// 1. 基础组件
+[UserService]
+
+// 2. 组件包（Package）
+[<package> Backend Services]
+
+// 3. 组件框架（Frame）
+[<frame> Web Application|
+  [UI Controller]
+  [Service Layer]
+]
+
+// 4. 数据库组件
+[<database> MySQL]
+
+// 5. 组件接口（Lollipop）
+[<lollipop> IUserService]
+
+// 6. 套接字接口（Socket）
+[<socket> HTTP API]
+\`\`\`
+
+### 组件关系
+\`\`\`nomnoml
+// 依赖关系（最常用）
+[ComponentA] --> [ComponentB]
+
+// 组件提供接口
+[UserService] - [<lollipop> IUserService]
+
+// 组件需要接口
+[Controller] --> [<socket> IDataService]
+
+// 组件间通信
+[Frontend] -> [Backend API]
+[Backend API] -> [<database> Database]
+\`\`\`
+
+### 嵌套结构（组件包含）
+\`\`\`nomnoml
+[<package> Backend System|
+  [User Service]
+  [Order Service]
+  [Payment Service]
+  
+  [User Service] --> [Order Service]
+]
+\`\`\`
+
+## 生成示例
+
+### 示例 1: 基础组件图 - Web 应用三层架构
+
+**用户需求**：Web 应用的前端、后端、数据库组件关系
+
+**生成代码**：
+\`\`\`nomnoml
+#direction: down
+#spacing: 40
+
+[<frame> Web Application|
+  [Frontend|
+    [React UI]
+    [Redux Store]
+  ]
+  
+  [Backend API|
+    [Express Server]
+    [REST Controller]
+  ]
+  
+  [<database> PostgreSQL]
+  
+  [React UI] --> [Redux Store]
+  [Redux Store] --> [REST Controller]
+  [REST Controller] --> [Express Server]
+  [Express Server] --> [PostgreSQL]
+]
+\`\`\`
+
+**关键点**：
+- 使用 \`<frame>\` 包裹整个系统
+- 使用嵌套结构表示组件包含关系
+- \`<database>\` 标签表示数据库组件
+- 依赖关系使用 \`-->\`
+
+### 示例 2: 中等复杂度 - 微服务架构
+
+**用户需求**：电商系统的微服务组件，包含 API 网关、多个服务和数据库
+
+**生成代码**：
+\`\`\`nomnoml
+#direction: down
+#spacing: 50
+
+[Client Application] --> [API Gateway]
+
+[<package> Microservices|
+  [User Service|
+    [User Controller]
+    [User Repository]
+  ]
+  
+  [Order Service|
+    [Order Controller]
+    [Order Repository]
+  ]
+  
+  [Payment Service|
+    [Payment Controller]
+    [Payment Gateway]
+  ]
+  
+  [Notification Service|
+    [Email Sender]
+    [SMS Sender]
+  ]
+]
+
+[API Gateway] --> [User Service]
+[API Gateway] --> [Order Service]
+[API Gateway] --> [Payment Service]
+
+[Order Service] --> [Payment Service]
+[Order Service] --> [Notification Service]
+[Payment Service] --> [Notification Service]
+
+[User Service] --> [<database> User DB]
+[Order Service] --> [<database> Order DB]
+[Payment Service] --> [<database> Payment DB]
+\`\`\`
+
+**关键点**：
+- 使用 \`<package>\` 包裹微服务集合
+- 每个微服务内部使用嵌套结构
+- API Gateway 作为入口点
+- 每个服务连接独立的数据库
+
+### 示例 3: 高级场景 - 插件化架构（带接口）
+
+**用户需求**：插件化系统，核心框架提供接口，多个插件实现接口
+
+**生成代码**：
+\`\`\`nomnoml
+#stroke: #2c3e50
+#fill: #ecf0f1
+#direction: down
+
+[<frame> Plugin-Based System|
+  [Core Framework|
+    [Plugin Manager]
+    [Event Bus]
+    [<lollipop> IPlugin]
+  ]
+  
+  [<package> Plugins|
+    [Logger Plugin] -- [<socket> IPlugin]
+    [Cache Plugin] -- [<socket> IPlugin]
+    [Auth Plugin] -- [<socket> IPlugin]
+  ]
+  
+  [Plugin Manager] --> [Event Bus]
+  [Plugin Manager] - [<lollipop> IPlugin]
+  
+  [<socket> IPlugin] -/- [<lollipop> IPlugin]
+  
+  [Logger Plugin] --> [<database> Log Storage]
+  [Cache Plugin] --> [<database> Redis]
+  [Auth Plugin] --> [<database> User Store]
+]
+
+[Application] --> [Core Framework]
+
+[<note> 插件通过 IPlugin 接口
+与核心框架解耦] -- [Plugin Manager]
+\`\`\`
+
+**关键点**：
+- 使用 \`<lollipop>\` 表示提供的接口
+- 使用 \`<socket>\` 表示需要的接口
+- \`-/-\` 表示隐藏连接（接口匹配）
+- 使用 \`<note>\` 添加架构说明
+- 样式指令定制外观
+
+## 常见错误
+
+### 错误 1: 组件和类混淆
+
+**❌ 错误写法**：在组件图中定义详细的类属性
+\`\`\`nomnoml
+[UserService|
+  username: String;
+  password: String
+|
+  login(): boolean
+]
+\`\`\`
+
+**✅ 正确写法**：组件图关注组件和接口
+\`\`\`nomnoml
+[UserService|
+  [User Controller]
+  [User Repository]
+]
+[UserService] - [<lollipop> IUserService]
+\`\`\`
+
+**原因**：组件图关注物理组件及其依赖，不是类的内部实现细节。
+
+### 错误 2: 接口表示不规范
+
+**❌ 错误写法**：
+\`\`\`nomnoml
+[Service] -> [Interface]
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[Service] - [<lollipop> Interface]
+[Client] --> [<socket> Interface]
+\`\`\`
+
+**原因**：使用 \`<lollipop>\` 表示提供的接口，\`<socket>\` 表示需要的接口。
+
+### 错误 3: 依赖方向不明确
+
+**❌ 错误写法**：
+\`\`\`nomnoml
+[ServiceA] - [ServiceB]
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[ServiceA] --> [ServiceB]    // ServiceA 依赖 ServiceB
+\`\`\`
+
+**原因**：使用箭头明确依赖方向，避免歧义。
+
+### 错误 4: 嵌套层级过深
+
+**❌ 错误写法**：
+\`\`\`nomnoml
+[System|
+  [Layer1|
+    [Layer2|
+      [Layer3|
+        [Component]
+      ]
+    ]
+  ]
+]
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[System|
+  [Component A]
+  [Component B]
+  [Component C]
+]
+\`\`\`
+
+**原因**：避免嵌套层级过深，保持 2-3 层即可，提高可读性。
+
+### 错误 5: 数据库组件标签缺失
+
+**❌ 错误写法**：
+\`\`\`nomnoml
+[Service] --> [Database]
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[Service] --> [<database> Database]
+\`\`\`
+
+**原因**：使用 \`<database>\` 标签明确标识数据库组件。
+
+### 错误 6: Package 和 Frame 混用
+
+**❌ 错误写法**：混淆 package 和 frame 的使用
+\`\`\`nomnoml
+[<package> System|
+  [Frontend]
+  [Backend]
+]
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[<frame> System|         // 系统边界使用 frame
+  [<package> Services|   // 逻辑分组使用 package
+    [Service A]
+    [Service B]
+  ]
+]
+\`\`\`
+
+**原因**：\`<frame>\` 表示系统边界或子系统，\`<package>\` 表示逻辑分组。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **组件定义清晰**：每个组件职责明确，名称规范
+- [ ] **依赖方向正确**：使用 \`-->\` 明确依赖方向
+- [ ] **接口表示规范**：使用 \`<lollipop>\` 和 \`<socket>\` 表示接口
+- [ ] **嵌套结构合理**：层级不超过 3 层，结构清晰
+- [ ] **数据库标签正确**：使用 \`<database>\` 标签
+- [ ] **Package 和 Frame 使用得当**：区分系统边界和逻辑分组
+- [ ] **布局方向合理**：使用 \`#direction\` 控制
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1150 tokens
+ *
+ * 分配明细:
+ * - 专家视角: 120 tokens
+ * - 核心语法: 200 tokens
+ * - 生成示例: 520 tokens（3个示例）
+ * - 常见错误: 240 tokens（6个错误）
+ * - 检查清单: 70 tokens
+ */
+

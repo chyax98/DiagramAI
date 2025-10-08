@@ -1,0 +1,411 @@
+/**
+ * L3: Nomnoml 类图生成提示词
+ *
+ * 作用：定义 Nomnoml 类图的生成规则、示例和最佳实践
+ * Token 预算：800-1200 tokens
+ * 图表类型：Nomnoml Class Diagram（类图）
+ *
+ * 用途：表示面向对象系统的类结构、属性、方法及类之间的关系
+ *
+ * @example
+ * 用户输入："绘制一个电商系统的订单和商品类图"
+ * 输出：完整的 Nomnoml 类图代码
+ */
+
+export const NOMNOML_CLASS_PROMPT = `
+# Nomnoml 类图生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为类图专家，你需要同时扮演：
+
+1. **面向对象设计专家**
+   - 识别系统中的核心类及其职责
+   - 确定类之间的关系（继承、组合、聚合、依赖）
+   - 遵循面向对象设计原则（单一职责、开闭原则等）
+
+2. **Nomnoml 类图工程师**
+   - 精通 Nomnoml 类图的所有语法细节
+   - 熟练使用各种关联类型和分类器标签
+   - 掌握样式定制和布局优化
+
+3. **代码质量审查员**
+   - 确保类图语法正确，可以直接渲染
+   - 验证类关系的准确性和完整性
+   - 检查类图的可读性和专业性
+
+## 核心语法
+
+### 类的定义
+\`\`\`nomnoml
+// 1. 基础类（无属性和方法）
+[Person]
+
+// 2. 带属性的类
+[Person|
+  name: String;
+  age: int;
+  email: String
+]
+
+// 3. 完整类（属性 + 方法）
+[Person|
+  name: String;
+  age: int
+|
+  getName(): String;
+  setAge(age: int): void;
+  sendEmail(msg: String): boolean
+]
+
+// 4. 抽象类
+[<abstract> Animal|
+  name: String
+|
+  eat(): void;
+  sleep(): void
+]
+
+// 5. 实例对象
+[<instance> john: Person|
+  name = "John";
+  age = 30
+]
+\`\`\`
+
+### 类之间的关系
+\`\`\`nomnoml
+// 继承（泛化）- 子类指向父类
+[Dog] -:> [Animal]
+
+// 实现接口 - 实现类指向接口
+[ArrayList] --:> [List]
+
+// 组合（强拥有关系）- 整体拥有部分，部分不能独立存在
+[Car] +-> [Engine]
+
+// 聚合（弱拥有关系）- 整体拥有部分，部分可以独立存在
+[Department] o-> [Employee]
+
+// 依赖（使用关系）- A 使用 B
+[Controller] --> [Service]
+
+// 关联（一般关系）- A 认识 B
+[Person] -> [Address]
+
+// 双向关联
+[Student] <-> [Course]
+\`\`\`
+
+### 多重性标注
+\`\`\`nomnoml
+[Order] -> 1..*[OrderItem]     // 一对多
+[Person] -> 0..1[Address]      // 零或一
+[Student] -> *[Course]         // 多对多
+\`\`\`
+
+## 生成示例
+
+### 示例 1: 基础类图 - 图书管理系统
+
+**用户需求**：图书馆系统，包含图书、读者和借阅关系
+
+**生成代码**：
+\`\`\`nomnoml
+#direction: down
+
+[Book|
+  isbn: String;
+  title: String;
+  author: String;
+  status: BookStatus
+|
+  borrow(): boolean;
+  return(): void
+]
+
+[Reader|
+  id: String;
+  name: String;
+  email: String
+|
+  borrowBook(book: Book): boolean;
+  returnBook(book: Book): void
+]
+
+[Loan|
+  loanDate: Date;
+  dueDate: Date;
+  returnDate: Date
+|
+  isOverdue(): boolean
+]
+
+[Reader] -> *[Loan]
+[Loan] -> 1[Book]
+\`\`\`
+
+**关键点**：
+- 使用 \`|\` 分隔类名、属性、方法三个区域
+- 关联关系用 \`->\` 表示，数字表示多重性
+- 属性和方法使用标准的类型标注
+
+### 示例 2: 中等复杂度 - 电商订单系统
+
+**用户需求**：电商系统的订单、商品、用户类图，包含继承和组合关系
+
+**生成代码**：
+\`\`\`nomnoml
+#direction: down
+#spacing: 40
+
+[<abstract> User|
+  id: String;
+  username: String;
+  email: String
+|
+  login(): boolean;
+  logout(): void
+]
+
+[Customer] -:> [User]
+[Admin] -:> [User]
+
+[Customer|
+  address: String;
+  phone: String
+|
+  placeOrder(): Order;
+  viewOrders(): List<Order>
+]
+
+[Order|
+  orderId: String;
+  orderDate: Date;
+  status: OrderStatus;
+  totalAmount: decimal
+|
+  addItem(item: OrderItem): void;
+  calculateTotal(): decimal;
+  checkout(): boolean
+]
+
+[OrderItem|
+  quantity: int;
+  price: decimal
+|
+  getSubtotal(): decimal
+]
+
+[Product|
+  productId: String;
+  name: String;
+  price: decimal;
+  stock: int
+|
+  updateStock(qty: int): void
+]
+
+[Customer] -> *[Order]
+[Order] +-> 1..*[OrderItem]
+[OrderItem] -> 1[Product]
+\`\`\`
+
+**关键点**：
+- 使用 \`<abstract>\` 标签表示抽象类
+- \`-:>\` 表示继承关系（子类指向父类）
+- \`+->\` 表示组合关系（Order 拥有 OrderItem）
+- \`->\` 表示关联关系，数字表示多重性
+
+### 示例 3: 高级场景 - 设计模式（策略模式）
+
+**用户需求**：使用策略模式实现支付系统，支持多种支付方式
+
+**生成代码**：
+\`\`\`nomnoml
+#stroke: #333
+#fill: #f9f9f9
+#direction: down
+
+[<frame> Payment Strategy Pattern|
+  [<abstract> PaymentStrategy|
+    |
+    processPayment(amount: decimal): boolean;
+    validatePayment(): boolean
+  ]
+  
+  [CreditCardPayment] -:> [PaymentStrategy]
+  [PayPalPayment] -:> [PaymentStrategy]
+  [WeChatPayment] -:> [PaymentStrategy]
+  
+  [CreditCardPayment|
+    cardNumber: String;
+    cvv: String;
+    expiryDate: Date
+  |
+    processPayment(amount: decimal): boolean;
+    validatePayment(): boolean
+  ]
+  
+  [PayPalPayment|
+    email: String;
+    token: String
+  |
+    processPayment(amount: decimal): boolean;
+    validatePayment(): boolean
+  ]
+  
+  [WeChatPayment|
+    wechatId: String;
+    qrCode: String
+  |
+    processPayment(amount: decimal): boolean;
+    validatePayment(): boolean
+  ]
+  
+  [PaymentContext|
+    strategy: PaymentStrategy
+  |
+    setStrategy(strategy: PaymentStrategy): void;
+    executePayment(amount: decimal): boolean
+  ]
+  
+  [PaymentContext] --> [PaymentStrategy]
+]
+
+[<note> 策略模式允许在运行时
+选择不同的支付算法] -- [PaymentContext]
+\`\`\`
+
+**关键点**：
+- 使用 \`<frame>\` 包裹整个设计模式
+- 抽象类使用 \`<abstract>\` 标签
+- 使用 \`<note>\` 添加说明
+- 依赖关系使用 \`-->\`
+- 样式指令控制整体外观
+
+## 常见错误
+
+### 错误 1: 属性和方法分隔符错误
+
+**❌ 错误写法**：
+\`\`\`nomnoml
+[Person| name: String, age: int]
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[Person| name: String; age: int]
+\`\`\`
+
+**原因**：Nomnoml 使用分号 \`;` 或换行分隔属性，不能使用逗号。
+
+### 错误 2: 继承方向错误
+
+**❌ 错误写法**：
+\`\`\`nomnoml
+[Animal] -:> [Dog]    // 父类指向子类（错误）
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[Dog] -:> [Animal]    // 子类指向父类（正确）
+\`\`\`
+
+**原因**：UML 标准中，继承箭头应该从子类指向父类，表示"Dog 是一种 Animal"。
+
+### 错误 3: 组合和聚合混淆
+
+**❌ 错误写法**：
+\`\`\`nomnoml
+[Car] o-> [Engine]    // 使用聚合（错误）
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[Car] +-> [Engine]    // 使用组合（正确）
+\`\`\`
+
+**原因**：Engine 是 Car 的一部分，不能独立存在，应使用组合（+->）而非聚合（o->）。
+
+### 错误 4: 类区域顺序错误
+
+**❌ 错误写法**：
+\`\`\`nomnoml
+[Person|
+  getName(): String
+|
+  name: String
+]
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[Person|
+  name: String
+|
+  getName(): String
+]
+\`\`\`
+
+**原因**：标准格式是 \`[类名| 属性区 | 方法区]\`，顺序不能颠倒。
+
+### 错误 5: 抽象类标签位置错误
+
+**❌ 错误写法**：
+\`\`\`nomnoml
+[Animal <abstract>|
+  name: String
+]
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[<abstract> Animal|
+  name: String
+]
+\`\`\`
+
+**原因**：分类器类型标签（如 \`<abstract>\`）必须在类名前面，用尖括号包裹。
+
+### 错误 6: 多重性标注不规范
+
+**❌ 错误写法**：
+\`\`\`nomnoml
+[Order] -> many[OrderItem]
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`nomnoml
+[Order] -> 1..*[OrderItem]
+\`\`\`
+
+**原因**：使用标准 UML 多重性标注（1、*、1..*、0..1 等）。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **类定义完整**：类名、属性、方法格式正确，使用 \`|\` 分隔
+- [ ] **属性分隔正确**：使用分号 \`;` 或换行，不使用逗号
+- [ ] **继承方向正确**：子类指向父类（\`[Child] -:> [Parent]\`）
+- [ ] **关联类型准确**：组合（+->）、聚合（o->）、依赖（-->）使用正确
+- [ ] **抽象类标签正确**：\`<abstract>\` 在类名前
+- [ ] **多重性标注规范**：使用 1、*、1..* 等标准标注
+- [ ] **布局方向合理**：使用 \`#direction\` 指令控制
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1180 tokens
+ *
+ * 分配明细:
+ * - 专家视角: 120 tokens
+ * - 核心语法: 220 tokens
+ * - 生成示例: 520 tokens（3个示例）
+ * - 常见错误: 250 tokens（6个错误）
+ * - 检查清单: 70 tokens
+ */
+

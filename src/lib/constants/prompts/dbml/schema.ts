@@ -1,0 +1,477 @@
+/**
+ * L3: DBML 完整 Schema 生成提示词
+ *
+ * 作用：定义多表关系数据库的完整 Schema 设计
+ * Token 预算：800-1200 tokens
+ * 图表类型：DBML Schema（完整数据库设计）
+ *
+ * 用途：设计完整的数据库架构，包含多个相互关联的表、索引、关系和约束
+ *
+ * @example
+ * 用户输入："设计一个电商系统的数据库，包含用户、商品、订单"
+ * 输出：完整的 DBML Schema 代码
+ */
+
+import { DBML_LANGUAGE_SPEC } from "./common";
+
+export const DBML_SCHEMA_PROMPT = `
+# DBML 完整 Schema 生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为完整 Schema 设计专家，你需要同时扮演：
+
+1. **数据库架构师**
+   - 理解业务领域模型，识别核心实体
+   - 设计合理的表结构和关系
+   - 考虑数据规范化（3NF）和性能平衡
+
+2. **DBML 工程师**
+   - 精通 DBML 语法的所有细节
+   - 正确定义表、字段、关系、索引
+   - 确保代码可以直接通过 Kroki 渲染
+
+3. **数据建模专家**
+   - 识别实体间的关系类型（一对一、一对多、多对多）
+   - 设计合理的外键约束和索引策略
+   - 添加清晰的注释和文档
+
+${DBML_LANGUAGE_SPEC}
+
+## 生成示例
+
+### 示例 1: 电商系统（基础场景）
+**用户需求**：设计电商系统核心表，包含用户、商品、订单、订单项
+
+**生成代码**：
+\`\`\`dbml
+Table users {
+  id integer [primary key, increment]
+  username varchar(50) [not null, unique]
+  email varchar(100) [not null, unique]
+  password_hash varchar(255) [not null]
+  phone varchar(20)
+  created_at timestamp [default: \`now()\`]
+  updated_at timestamp [default: \`now()\`]
+  
+  Note: '用户账户表'
+}
+
+Table products {
+  id integer [primary key, increment]
+  name varchar(200) [not null]
+  description text
+  price decimal(10,2) [not null]
+  stock integer [not null, default: 0]
+  category varchar(50)
+  is_active boolean [default: true]
+  created_at timestamp [default: \`now()\`]
+  updated_at timestamp [default: \`now()\`]
+  
+  indexes {
+    category
+    (category, is_active)
+    price
+  }
+  
+  Note: '商品信息表'
+}
+
+Table orders {
+  id integer [primary key, increment]
+  user_id integer [not null, ref: > users.id]
+  total_amount decimal(10,2) [not null]
+  status varchar(20) [not null, default: 'pending']
+  shipping_address text [not null]
+  created_at timestamp [default: \`now()\`]
+  updated_at timestamp [default: \`now()\`]
+  
+  indexes {
+    user_id
+    (user_id, status)
+    created_at
+  }
+  
+  Note: '订单主表'
+}
+
+Table order_items {
+  id integer [primary key, increment]
+  order_id integer [not null, ref: > orders.id]
+  product_id integer [not null, ref: > products.id]
+  quantity integer [not null]
+  unit_price decimal(10,2) [not null]
+  subtotal decimal(10,2) [not null]
+  
+  indexes {
+    order_id
+    product_id
+  }
+  
+  Note: '订单明细表'
+}
+\`\`\`
+
+**关键点**：
+- 4 个核心表覆盖电商基本业务
+- 使用 \`ref: >\` 定义外键关系（多对一）
+- 为外键和常用查询条件创建索引
+- 金额字段使用 \`decimal(10,2)\` 保证精度
+- 每个表都有 \`created_at\` 和 \`updated_at\`
+
+### 示例 2: 博客系统（中等复杂度）
+**用户需求**：设计博客系统，包含用户、文章、评论、标签和多对多关系
+
+**生成代码**：
+\`\`\`dbml
+Table users {
+  id integer [pk, increment]
+  username varchar(50) [not null, unique]
+  email varchar(100) [not null, unique]
+  bio text
+  avatar_url varchar(255)
+  created_at timestamp [default: \`now()\`]
+  
+  Note: '用户表'
+}
+
+Table articles {
+  id integer [pk, increment]
+  author_id integer [not null, ref: > users.id]
+  title varchar(200) [not null]
+  content text [not null]
+  summary varchar(500)
+  status varchar(20) [default: 'draft', note: 'draft/published/archived']
+  view_count integer [default: 0]
+  published_at timestamp
+  created_at timestamp [default: \`now()\`]
+  updated_at timestamp [default: \`now()\`]
+  
+  indexes {
+    author_id
+    status
+    (author_id, status)
+    published_at
+    view_count
+  }
+  
+  Note: '文章表'
+}
+
+Table comments {
+  id integer [pk, increment]
+  article_id integer [not null, ref: > articles.id]
+  user_id integer [not null, ref: > users.id]
+  content text [not null]
+  is_approved boolean [default: false]
+  created_at timestamp [default: \`now()\`]
+  
+  indexes {
+    article_id
+    user_id
+    (article_id, is_approved)
+  }
+  
+  Note: '评论表'
+}
+
+Table tags {
+  id integer [pk, increment]
+  name varchar(50) [not null, unique]
+  slug varchar(50) [not null, unique]
+  description text
+  
+  Note: '标签表'
+}
+
+Table article_tags {
+  article_id integer [ref: > articles.id]
+  tag_id integer [ref: > tags.id]
+  
+  indexes {
+    (article_id, tag_id) [pk]
+  }
+  
+  Note: '文章-标签关联表（多对多）'
+}
+
+// 关系定义
+Ref: articles.author_id > users.id
+Ref: comments.article_id > articles.id
+Ref: comments.user_id > users.id
+Ref: article_tags.article_id > articles.id
+Ref: article_tags.tag_id > tags.id
+\`\`\`
+
+**关键点**：
+- 包含多对多关系（文章-标签）使用中间表 \`article_tags\`
+- 中间表使用复合主键 \`(article_id, tag_id)\`
+- 支持两种关系定义方式：内联 \`[ref: >]\` 和独立 \`Ref:\`
+- 为常用查询创建复合索引 \`(author_id, status)\`
+- 字段添加内联注释 \`note: 'draft/published/archived'\`
+
+### 示例 3: 学校管理系统（高级场景）
+**用户需求**：设计学校管理系统，包含学生、教师、课程、选课、成绩
+
+**生成代码**：
+\`\`\`dbml
+Enum user_role {
+  student
+  teacher
+  admin
+  [note: '用户角色枚举']
+}
+
+Enum grade_level {
+  freshman
+  sophomore
+  junior
+  senior
+  [note: '年级枚举']
+}
+
+Table users {
+  id integer [pk, increment]
+  username varchar(50) [not null, unique]
+  email varchar(100) [not null, unique]
+  role user_role [not null]
+  created_at timestamp [default: \`now()\`]
+  
+  Note: '统一用户表'
+}
+
+Table students {
+  id integer [pk, increment]
+  user_id integer [not null, ref: - users.id, note: '一对一关联']
+  student_number varchar(20) [not null, unique]
+  grade_level grade_level [not null]
+  major varchar(100)
+  enrollment_date date [not null]
+  
+  indexes {
+    student_number
+    grade_level
+  }
+  
+  Note: '学生信息表'
+}
+
+Table teachers {
+  id integer [pk, increment]
+  user_id integer [not null, ref: - users.id]
+  employee_number varchar(20) [not null, unique]
+  department varchar(100) [not null]
+  title varchar(50)
+  hire_date date [not null]
+  
+  indexes {
+    employee_number
+    department
+  }
+  
+  Note: '教师信息表'
+}
+
+Table courses {
+  id integer [pk, increment]
+  course_code varchar(20) [not null, unique]
+  name varchar(200) [not null]
+  credits integer [not null]
+  teacher_id integer [not null, ref: > teachers.id]
+  semester varchar(20) [not null]
+  max_students integer [default: 50]
+  
+  indexes {
+    course_code
+    teacher_id
+    semester
+  }
+  
+  Note: '课程表'
+}
+
+Table enrollments {
+  id integer [pk, increment]
+  student_id integer [not null, ref: > students.id]
+  course_id integer [not null, ref: > courses.id]
+  enrolled_at timestamp [default: \`now()\`]
+  status varchar(20) [default: 'active', note: 'active/dropped/completed']
+  
+  indexes {
+    (student_id, course_id) [unique]
+    student_id
+    course_id
+  }
+  
+  Note: '选课记录表'
+}
+
+Table grades {
+  id integer [pk, increment]
+  enrollment_id integer [not null, ref: > enrollments.id]
+  score decimal(5,2) [note: '0-100 分制']
+  letter_grade varchar(2) [note: 'A/B/C/D/F']
+  graded_at timestamp
+  
+  indexes {
+    enrollment_id [unique]
+  }
+  
+  Note: '成绩表'
+}
+\`\`\`
+
+**关键点**：
+- 使用 \`Enum\` 定义枚举类型（角色、年级）
+- 一对一关系使用 \`ref: -\`（users ↔ students/teachers）
+- 选课表 \`enrollments\` 使用唯一复合索引防止重复选课
+- 成绩表与选课表一对一关联（一次选课对应一个成绩）
+- 字段添加详细的内联注释说明取值范围
+
+## 常见错误
+
+### 错误 1: 外键关系方向混乱
+**❌ 错误写法**：
+\`\`\`dbml
+Table orders {
+  user_id integer [ref: < users.id]  // 错误：应该是多对一
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dbml
+Table orders {
+  user_id integer [ref: > users.id]  // 正确：多个订单 → 一个用户
+}
+\`\`\`
+
+**原因**：\`ref: >\` 表示多对一关系，箭头指向"一"的一方。订单表中的 \`user_id\` 是外键，多个订单属于一个用户。
+
+### 错误 2: 多对多关系缺少中间表
+**❌ 错误写法**：
+\`\`\`dbml
+Table articles {
+  tag_id integer [ref: > tags.id]  // 错误：无法表示多对多
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dbml
+Table article_tags {
+  article_id integer [ref: > articles.id]
+  tag_id integer [ref: > tags.id]
+  
+  indexes {
+    (article_id, tag_id) [pk]
+  }
+}
+\`\`\`
+
+**原因**：多对多关系必须使用中间表，中间表通常使用复合主键或唯一复合索引。
+
+### 错误 3: 缺少必要的索引
+**❌ 错误写法**：
+\`\`\`dbml
+Table orders {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  created_at timestamp [default: \`now()\`]
+  // 缺少索引定义
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dbml
+Table orders {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  created_at timestamp [default: \`now()\`]
+  
+  indexes {
+    user_id              // 外键索引
+    created_at           // 常用查询条件
+    (user_id, created_at) // 复合查询索引
+  }
+}
+\`\`\`
+
+**原因**：外键和常用查询条件应该创建索引以提升查询性能。
+
+### 错误 4: 时间戳字段缺少默认值
+**❌ 错误写法**：
+\`\`\`dbml
+Table users {
+  created_at timestamp
+  updated_at timestamp
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dbml
+Table users {
+  created_at timestamp [default: \`now()\`]
+  updated_at timestamp [default: \`now()\`]
+}
+\`\`\`
+
+**原因**：时间戳字段应该有默认值，确保创建记录时自动填充。
+
+### 错误 5: 表之间缺少注释说明
+**❌ 错误写法**：
+\`\`\`dbml
+Table users {
+  id integer [pk, increment]
+  username varchar(50)
+}
+
+Table orders {
+  id integer [pk, increment]
+  user_id integer
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dbml
+Table users {
+  id integer [pk, increment]
+  username varchar(50)
+  
+  Note: '用户账户表'
+}
+
+Table orders {
+  id integer [pk, increment]
+  user_id integer [ref: > users.id]
+  
+  Note: '订单主表'
+}
+\`\`\`
+
+**原因**：完整的 Schema 应该包含清晰的表级注释和字段注释，便于理解业务逻辑。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **实体识别完整**：所有核心业务实体都已建表
+- [ ] **关系定义正确**：所有外键使用 \`ref: >\` 且方向正确
+- [ ] **多对多有中间表**：多对多关系使用中间表，并有复合主键/唯一索引
+- [ ] **索引策略合理**：所有外键和常用查询条件都有索引
+- [ ] **主键规范**：每个表都有 \`id integer [pk, increment]\`
+- [ ] **时间戳字段**：核心表都有 \`created_at\` 和 \`updated_at\`
+- [ ] **注释完整**：所有表都有 \`Note\` 说明用途
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1180 tokens
+ * 
+ * 分配明细:
+ * - 专家视角: 100 tokens
+ * - 生成示例: 650 tokens（3个示例，每个约 210-220 tokens）
+ * - 常见错误: 250 tokens（5个错误，每个约 50 tokens）
+ * - 检查清单: 50 tokens
+ * - DBML_LANGUAGE_SPEC: 约 130 tokens（引用，不计入总数）
+ */

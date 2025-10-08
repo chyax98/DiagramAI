@@ -1,0 +1,437 @@
+/**
+ * L3: DBML 数据库迁移生成提示词
+ *
+ * 作用：定义数据库架构演进和变更的设计
+ * Token 预算：800-1200 tokens
+ * 图表类型：DBML Migration（数据库迁移/架构演进）
+ *
+ * 用途：展示数据库架构的变更历史、版本演进、迁移策略
+ *
+ * @example
+ * 用户输入："展示订单表从 v1 到 v2 的迁移，添加了状态跟踪字段"
+ * 输出：包含旧版和新版表结构的 DBML 代码
+ */
+
+import { DBML_LANGUAGE_SPEC } from "./common";
+
+export const DBML_MIGRATION_PROMPT = `
+# DBML 数据库迁移生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为数据库迁移专家，你需要同时扮演：
+
+1. **架构演进专家**
+   - 理解数据库版本演进的需求
+   - 设计向后兼容的迁移策略
+   - 识别破坏性变更和数据迁移需求
+
+2. **DBML 迁移设计师**
+   - 使用注释清晰标注版本和变更
+   - 对比新旧表结构的差异
+   - 突出显示新增、修改、删除的字段
+
+3. **风险评估专家**
+   - 识别迁移风险（数据丢失、性能影响）
+   - 提供迁移步骤和回滚策略
+   - 添加迁移注意事项
+
+${DBML_LANGUAGE_SPEC}
+
+## 生成示例
+
+### 示例 1: 添加新字段（基础场景）
+**用户需求**：展示用户表从 v1 到 v2 的迁移，添加手机号和会员等级字段
+
+**生成代码**：
+\`\`\`dbml
+// ========== 版本 v1.0 ==========
+
+Table users_v1 {
+  id integer [pk, increment]
+  username varchar(50) [not null, unique]
+  email varchar(100) [not null, unique]
+  created_at timestamp [default: \`now()\`]
+  
+  Note: '用户表 v1.0 - 初始版本'
+}
+
+// ========== 版本 v2.0 ==========
+
+Table users_v2 {
+  id integer [pk, increment]
+  username varchar(50) [not null, unique]
+  email varchar(100) [not null, unique]
+  
+  // 🆕 新增字段
+  phone varchar(20) [note: '新增：手机号']
+  membership_level varchar(20) [default: 'basic', note: '新增：会员等级（basic/premium/vip）']
+  
+  created_at timestamp [default: \`now()\`]
+  updated_at timestamp [default: \`now()\`, note: '新增：更新时间']
+  
+  Note: '用户表 v2.0 - 添加手机号和会员等级'
+}
+
+// ========== 迁移说明 ==========
+// 变更类型：非破坏性添加（Additive, Non-Breaking）
+// 迁移策略：
+//   1. 使用 ALTER TABLE 添加新字段
+//   2. 新字段允许 NULL 或有默认值，不影响现有数据
+//   3. 应用程序可以渐进式采用新字段
+// 
+// SQL 迁移示例：
+//   ALTER TABLE users ADD COLUMN phone varchar(20);
+//   ALTER TABLE users ADD COLUMN membership_level varchar(20) DEFAULT 'basic';
+//   ALTER TABLE users ADD COLUMN updated_at timestamp DEFAULT now();
+// 
+// 回滚策略：
+//   ALTER TABLE users DROP COLUMN phone;
+//   ALTER TABLE users DROP COLUMN membership_level;
+//   ALTER TABLE users DROP COLUMN updated_at;
+\`\`\`
+
+**关键点**：
+- 使用 \`_v1\` 和 \`_v2\` 后缀区分版本
+- 新增字段使用 🆕 emoji 和注释标注
+- 添加详细的迁移说明和 SQL 示例
+- 说明变更类型（非破坏性）和回滚策略
+
+### 示例 2: 字段重命名和类型变更（中等复杂度）
+**用户需求**：展示订单表从 v1 到 v2 的迁移，重命名字段并修改类型
+
+**生成代码**：
+\`\`\`dbml
+// ========== 版本 v1.0 ==========
+
+Table orders_v1 {
+  id integer [pk, increment]
+  user_id integer [not null]
+  amount varchar(20) [note: '⚠️ v1 使用字符串存储金额']
+  order_status integer [note: '⚠️ v1 使用整数代码表示状态（1/2/3/4）']
+  create_time timestamp
+  
+  Note: '订单表 v1.0 - 使用不规范的数据类型'
+}
+
+// ========== 版本 v2.0 ==========
+
+Table orders_v2 {
+  id integer [pk, increment]
+  user_id integer [not null]
+  
+  // 🔄 字段重命名和类型变更
+  total_amount decimal(10,2) [not null, note: '重命名：amount → total_amount，类型变更：varchar → decimal']
+  status varchar(20) [not null, default: 'pending', note: '重命名：order_status → status，类型变更：integer → varchar']
+  
+  // 🔄 字段重命名
+  created_at timestamp [default: \`now()\`, note: '重命名：create_time → created_at']
+  updated_at timestamp [default: \`now()\`, note: '新增']
+  
+  Note: '订单表 v2.0 - 规范化字段命名和数据类型'
+}
+
+// ========== 迁移说明 ==========
+// 变更类型：破坏性变更（Breaking Change）
+// 
+// 迁移策略：
+//   1. 创建新表 orders_v2
+//   2. 数据迁移：
+//      - amount (varchar) → total_amount (decimal): CAST(amount AS DECIMAL(10,2))
+//      - order_status (integer) → status (varchar): 使用 CASE 映射
+//        1 → 'pending', 2 → 'processing', 3 → 'shipped', 4 → 'completed'
+//      - create_time → created_at: 直接复制
+//   3. 验证数据完整性
+//   4. 切换应用到新表
+//   5. 删除旧表（保留备份）
+// 
+// 数据迁移 SQL：
+//   INSERT INTO orders_v2 (id, user_id, total_amount, status, created_at, updated_at)
+//   SELECT 
+//     id,
+//     user_id,
+//     CAST(amount AS DECIMAL(10,2)),
+//     CASE order_status
+//       WHEN 1 THEN 'pending'
+//       WHEN 2 THEN 'processing'
+//       WHEN 3 THEN 'shipped'
+//       WHEN 4 THEN 'completed'
+//     END,
+//     create_time,
+//     NOW()
+//   FROM orders_v1;
+// 
+// ⚠️ 风险：
+//   - 需要停机或双写方案
+//   - amount 字段可能包含无效数据，需要数据清洗
+//   - 应用程序需要同步更新字段名
+// 
+// 回滚策略：
+//   1. 保留 orders_v1 表作为备份
+//   2. 如果迁移失败，切换回 orders_v1
+//   3. 等待验证通过后再删除 orders_v1
+\`\`\`
+
+**关键点**：
+- 使用 🔄 emoji 标注字段变更
+- 使用 ⚠️ emoji 标注风险和旧版本问题
+- 包含详细的数据迁移 SQL（特别是类型转换和映射）
+- 明确说明破坏性变更和风险
+- 提供回滚策略和备份建议
+
+### 示例 3: 表拆分和关系重构（高级场景）
+**用户需求**：展示用户表从 v1 到 v2 的拆分，将地址信息分离到独立表
+
+**生成代码**：
+\`\`\`dbml
+// ========== 版本 v1.0 ==========
+
+Table users_v1 {
+  id integer [pk, increment]
+  username varchar(50) [not null]
+  email varchar(100) [not null]
+  
+  // ⚠️ v1 将地址信息混在用户表中
+  address_line1 varchar(255)
+  address_line2 varchar(255)
+  city varchar(100)
+  state varchar(50)
+  zip_code varchar(20)
+  country varchar(50)
+  
+  created_at timestamp
+  
+  Note: '用户表 v1.0 - 地址信息混在用户表中'
+}
+
+// ========== 版本 v2.0 ==========
+
+Table users_v2 {
+  id integer [pk, increment]
+  username varchar(50) [not null]
+  email varchar(100) [not null]
+  created_at timestamp [default: \`now()\`]
+  
+  Note: '用户表 v2.0 - 移除地址字段，使用独立地址表'
+}
+
+Table user_addresses_v2 {
+  id integer [pk, increment]
+  user_id integer [not null]
+  
+  address_type varchar(20) [default: 'shipping', note: 'shipping/billing/other']
+  address_line1 varchar(255) [not null]
+  address_line2 varchar(255)
+  city varchar(100) [not null]
+  state varchar(50)
+  zip_code varchar(20)
+  country varchar(50) [not null]
+  
+  is_default boolean [default: false, note: '是否为默认地址']
+  
+  created_at timestamp [default: \`now()\`]
+  updated_at timestamp [default: \`now()\`]
+  
+  indexes {
+    user_id
+    (user_id, is_default)
+  }
+  
+  Note: '🆕 用户地址表 v2.0 - 支持多地址管理'
+}
+
+// 关系定义
+Ref: user_addresses_v2.user_id > users_v2.id [note: '一对多：一个用户可以有多个地址']
+
+// ========== 迁移说明 ==========
+// 变更类型：架构重构（Breaking Change - 表拆分）
+// 
+// 业务价值：
+//   - 支持用户保存多个地址（收货地址、账单地址）
+//   - 更灵活的地址管理（设置默认地址、地址类型）
+//   - 更好的数据规范化（符合 3NF）
+// 
+// 迁移策略：
+//   1. 创建新表 users_v2 和 user_addresses_v2
+//   2. 数据迁移：
+//      - 用户基本信息 → users_v2（排除地址字段）
+//      - 地址信息 → user_addresses_v2（为每个有地址的用户创建一条记录）
+//   3. 设置第一条地址为默认地址
+//   4. 验证数据完整性和关系
+//   5. 应用程序更新查询逻辑
+//   6. 删除旧表（保留备份）
+// 
+// 数据迁移 SQL：
+//   -- 迁移用户基本信息
+//   INSERT INTO users_v2 (id, username, email, created_at)
+//   SELECT id, username, email, created_at
+//   FROM users_v1;
+//   
+//   -- 迁移地址信息（只迁移有地址的用户）
+//   INSERT INTO user_addresses_v2 
+//     (user_id, address_type, address_line1, address_line2, 
+//      city, state, zip_code, country, is_default, created_at)
+//   SELECT 
+//     id,
+//     'shipping',
+//     address_line1,
+//     address_line2,
+//     city,
+//     state,
+//     zip_code,
+//     country,
+//     true,  -- 设置为默认地址
+//     NOW()
+//   FROM users_v1
+//   WHERE address_line1 IS NOT NULL;  -- 只迁移有地址的用户
+// 
+// ⚠️ 风险和注意事项：
+//   1. 应用程序需要重大修改（查询逻辑从单表变为 JOIN）
+//   2. 原先只有一个地址，现在需要处理多地址场景
+//   3. 需要测试所有涉及地址的功能
+//   4. 考虑灰度发布或蓝绿部署
+// 
+// 回滚策略：
+//   1. 保留 users_v1 表至少 30 天
+//   2. 如果需要回滚：
+//      - 从 user_addresses_v2 提取默认地址
+//      - 反向合并到 users_v1 表结构
+//      - 切换应用到旧表
+\`\`\`
+
+**关键点**：
+- 展示表拆分的架构演进（从宽表到规范化）
+- 说明业务价值（为什么要做这个变更）
+- 包含复杂的数据迁移逻辑（条件过滤、默认值设置）
+- 强调应用程序的重大修改需求
+- 提供详细的风险评估和回滚策略
+
+## 常见错误
+
+### 错误 1: 版本标识不清晰
+**❌ 错误写法**：
+\`\`\`dbml
+Table users {
+  id integer [pk]
+  name varchar(100)
+}
+
+Table users {  // 错误：重复表名，无法区分版本
+  id integer [pk]
+  name varchar(100)
+  phone varchar(20)
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dbml
+Table users_v1 {
+  id integer [pk]
+  name varchar(100)
+  
+  Note: '用户表 v1.0'
+}
+
+Table users_v2 {
+  id integer [pk]
+  name varchar(100)
+  phone varchar(20) [note: '新增']
+  
+  Note: '用户表 v2.0 - 添加手机号字段'
+}
+\`\`\`
+
+**原因**：迁移图必须清晰区分版本，使用 \`_v1\`, \`_v2\` 后缀或版本注释。
+
+### 错误 2: 缺少迁移说明
+**❌ 错误写法**：
+\`\`\`dbml
+Table orders_v1 { ... }
+Table orders_v2 { ... }
+// 没有任何迁移说明
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dbml
+Table orders_v1 { ... }
+Table orders_v2 { ... }
+
+// ========== 迁移说明 ==========
+// 变更类型：...
+// 迁移策略：...
+// SQL 示例：...
+// 风险：...
+// 回滚策略：...
+\`\`\`
+
+**原因**：迁移图的核心价值是说明"如何迁移"，必须包含详细的迁移策略、SQL、风险和回滚方案。
+
+### 错误 3: 未标注变更类型
+**❌ 错误写法**：
+\`\`\`dbml
+Table users_v2 {
+  id integer [pk]
+  phone varchar(20)        // 没有说明是新增还是修改
+  membership varchar(20)   // 没有说明是新增还是重命名
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dbml
+Table users_v2 {
+  id integer [pk]
+  phone varchar(20) [note: '🆕 新增']
+  membership varchar(20) [note: '🔄 重命名自 member_level']
+}
+\`\`\`
+
+**原因**：使用 emoji（🆕 新增、🔄 修改、❌ 删除）和注释清晰标注变更类型。
+
+### 错误 4: 破坏性变更未说明风险
+**❌ 错误写法**：
+\`\`\`dbml
+// 迁移说明：将 price 从 varchar 改为 decimal
+// SQL: ALTER TABLE products ALTER COLUMN price TYPE decimal(10,2);
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dbml
+// ⚠️ 风险：
+//   1. 类型转换可能失败（如包含非数字字符）
+//   2. 需要先数据清洗：UPDATE products SET price = '0' WHERE price = '' OR price IS NULL
+//   3. 需要锁表，影响可用性
+//   4. 建议低峰期执行
+// 
+// 回滚策略：
+//   1. 保留原表备份 products_backup
+//   2. 如果失败：DROP TABLE products; RENAME products_backup TO products;
+\`\`\`
+
+**原因**：破坏性变更必须明确说明风险、数据清洗需求、锁表影响、回滚方案。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **版本标识清晰**：使用 \`_v1\`, \`_v2\` 后缀区分版本
+- [ ] **变更标注明确**：使用 emoji 和注释标注新增/修改/删除
+- [ ] **迁移说明完整**：包含变更类型、迁移策略、SQL 示例
+- [ ] **风险评估**：破坏性变更有详细的风险说明
+- [ ] **回滚策略**：提供清晰的回滚步骤
+- [ ] **数据迁移 SQL**：复杂变更提供完整的数据迁移 SQL
+- [ ] **业务价值说明**：重大架构变更说明业务价值
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1180 tokens
+ * 
+ * 分配明细:
+ * - 专家视角: 100 tokens
+ * - 生成示例: 700 tokens（3个示例，复杂度递增）
+ * - 常见错误: 230 tokens（4个错误，每个约 55-60 tokens）
+ * - 检查清单: 50 tokens
+ * - DBML_LANGUAGE_SPEC: 约 100 tokens（引用，不计入总数）
+ */

@@ -31,8 +31,8 @@ export interface ChatParams {
   userMessage: string;
   modelId: number;
   renderLanguage: RenderLanguage;
-  sessionId?: number;
-  diagramType?: string;
+  sessionId?: number; // 初始没有生成 session Id
+  diagramType?: string; // todo 必填 除非是自己选
 }
 
 export interface ChatResult {
@@ -45,7 +45,7 @@ export class DiagramGenerationService {
   /**
    * 构建任务标记提示
    * @param isFirstGeneration - 是否为首次生成
-   * @param diagramType - 图表类型（首次生成时必需）
+   * @param diagramType - 图表类型 todo 暂时非必须
    * @returns 任务标记字符串
    */
   private _buildTaskHint(isFirstGeneration: boolean, diagramType?: string): string {
@@ -107,7 +107,7 @@ export class DiagramGenerationService {
 
     const { text: generatedCode } = await generateText({
       model,
-      system: getGeneratePrompt(params.renderLanguage, params.diagramType || "auto"),
+      system: getGeneratePrompt(params.renderLanguage, params.diagramType || "auto"), // todo 删除 auto
       messages: [
         {
           role: "user",
@@ -115,10 +115,10 @@ export class DiagramGenerationService {
         },
       ],
       temperature: AI_TEMPERATURE,
-      maxRetries: AI_MAX_RETRIES,
+      maxRetries: AI_MAX_RETRIES,// todo 需要确认是否在这里写入参数，自定义参数什么时候生效
     });
 
-    const code = cleanCode(generatedCode, params.renderLanguage);
+    const code = cleanCode(generatedCode, params.renderLanguage);  //  todo ai 生成结果如果不是 code，是否需要清理
 
     // 存储时使用原始消息（不包含任务标记）
     const sessionData: ChatSessionData = {

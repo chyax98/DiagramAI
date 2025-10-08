@@ -1,0 +1,430 @@
+/**
+ * L3: PlantUML UseCase 生成提示词
+ *
+ * 作用：定义 PlantUML 用例图的生成规则、示例和最佳实践
+ * Token 预算：800-1100 tokens
+ * 图表类型：PlantUML UseCase（用例图）
+ *
+ * 用途：表示系统功能需求，展示参与者与系统用例之间的关系
+ *
+ * @example
+ * 用户输入："绘制一个电商系统的用例图，包含用户、管理员和支付功能"
+ * 输出：完整的 PlantUML UseCase 代码
+ */
+
+export const PLANTUML_USECASE_PROMPT = `
+# PlantUML UseCase 生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为用例图专家，你需要同时扮演：
+
+1. **需求分析专家**
+   - 识别系统的核心功能和用例
+   - 理解参与者（用户、外部系统）的角色和职责
+   - 把握用例之间的包含、扩展、泛化关系
+
+2. **PlantUML UseCase 工程师**
+   - 精通 PlantUML 用例图的所有语法细节
+   - 熟悉参与者、用例、关系的定义
+   - 掌握系统边界和包的使用
+
+3. **代码质量审查员**
+   - 确保代码语法正确，可以直接渲染
+   - 验证用例关系的合理性和准确性
+   - 检查代码的可读性和可维护性
+
+## 核心语法
+
+### 图表声明
+\`\`\`plantuml
+@startuml
+' 用例图内容
+@enduml
+\`\`\`
+
+### 参与者（Actor）
+\`\`\`plantuml
+actor "用户" as User
+actor "管理员" as Admin
+actor "外部系统" as ExtSys
+\`\`\`
+
+### 用例（Use Case）
+\`\`\`plantuml
+usecase "登录系统" as UC1
+usecase "查看订单" as UC2
+(浏览商品)  ' 简化写法
+\`\`\`
+
+### 关联关系
+\`\`\`plantuml
+%% 参与者与用例的关联
+User -- UC1
+User --> UC2
+
+%% 简化写法
+User -- (浏览商品)
+\`\`\`
+
+### 包含关系（Include）
+\`\`\`plantuml
+%% A 包含 B，表示 A 执行时必然执行 B
+UC1 ..> UC_Auth : <<include>>
+(下单) ..> (验证库存) : <<include>>
+\`\`\`
+
+### 扩展关系（Extend）
+\`\`\`plantuml
+%% B 扩展 A，表示 B 是 A 的可选扩展
+UC_Coupon ..> UC_Pay : <<extend>>
+(使用优惠券) ..> (支付订单) : <<extend>>
+\`\`\`
+
+### 泛化关系（Generalization）
+\`\`\`plantuml
+%% 继承关系，子用例继承父用例
+(在线支付) --|> (支付订单)
+(货到付款) --|> (支付订单)
+\`\`\`
+
+### 系统边界
+\`\`\`plantuml
+rectangle "电商系统" {
+  usecase "浏览商品"
+  usecase "下单购买"
+  usecase "支付订单"
+}
+\`\`\`
+
+### 布局方向
+\`\`\`plantuml
+left to right direction  ' 水平布局（推荐）
+top to bottom direction  ' 垂直布局
+\`\`\`
+
+## 生成示例
+
+### 示例 1: 基础电商系统（简单场景）
+**用户需求**：电商系统基本功能，包含用户和管理员
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+left to right direction
+
+actor "用户" as Customer
+actor "管理员" as Admin
+
+rectangle "电商系统" {
+  usecase "浏览商品" as UC1
+  usecase "搜索商品" as UC2
+  usecase "查看详情" as UC3
+  usecase "加入购物车" as UC4
+  usecase "下单购买" as UC5
+  usecase "管理商品" as UC6
+  usecase "查看订单" as UC7
+}
+
+Customer -- UC1
+Customer -- UC2
+Customer -- UC3
+Customer -- UC4
+Customer -- UC5
+Customer -- UC7
+
+Admin -- UC6
+Admin -- UC7
+
+UC1 ..> UC2 : <<include>>
+UC5 ..> UC4 : <<include>>
+
+@enduml
+\`\`\`
+
+**关键点**：
+- 使用 \`left to right direction\` 设置水平布局
+- 使用 \`rectangle\` 定义系统边界
+- 使用 \`actor\` 定义参与者
+- 使用 \`--\` 表示参与者与用例的关联
+- 使用 \`..\` + \`<<include>>\` 表示包含关系
+
+### 示例 2: 在线银行系统（中等复杂度）
+**用户需求**：银行系统，包含用户、管理员，支持转账、查询、管理
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+left to right direction
+
+actor "客户" as Customer
+actor "银行职员" as Teller
+actor "系统管理员" as Admin
+
+rectangle "在线银行系统" {
+  usecase "登录系统" as Login
+  usecase "查询余额" as CheckBalance
+  usecase "转账" as Transfer
+  usecase "查看交易记录" as ViewHistory
+  usecase "申请贷款" as ApplyLoan
+  usecase "审批贷款" as ApproveLoan
+  usecase "管理用户" as ManageUser
+  usecase "生成报表" as GenerateReport
+  
+  ' 内部用例
+  usecase "身份验证" as Auth
+  usecase "发送短信通知" as SendSMS
+}
+
+' 客户用例
+Customer -- Login
+Customer -- CheckBalance
+Customer -- Transfer
+Customer -- ViewHistory
+Customer -- ApplyLoan
+
+' 职员用例
+Teller -- ApproveLoan
+Teller -- GenerateReport
+
+' 管理员用例
+Admin -- ManageUser
+
+' 包含关系
+Login ..> Auth : <<include>>
+CheckBalance ..> Auth : <<include>>
+Transfer ..> Auth : <<include>>
+ViewHistory ..> Auth : <<include>>
+
+' 扩展关系
+SendSMS ..> Transfer : <<extend>>
+
+' 泛化关系
+ApproveLoan --|> Login
+
+@enduml
+\`\`\`
+
+**关键点**：
+- 多个参与者对应不同的用例集合
+- 使用 \`<<include>>\` 表示公共功能（如身份验证）
+- 使用 \`<<extend>>\` 表示可选功能（如短信通知）
+- 使用 \`--|>\` 表示用例继承
+
+### 示例 3: 在线学习平台（高级场景）
+**用户需求**：学习平台，包含学生、教师、管理员，支持多种学习方式
+
+**生成代码**：
+\`\`\`plantuml
+@startuml
+left to right direction
+
+actor "学生" as Student
+actor "教师" as Teacher
+actor "管理员" as Admin
+actor "支付系统" as PaymentSys
+
+rectangle "在线学习平台" {
+  ' 学生用例
+  package "学习功能" {
+    usecase "浏览课程" as BrowseCourse
+    usecase "购买课程" as BuyCourse
+    usecase "观看视频" as WatchVideo
+    usecase "完成作业" as DoHomework
+    usecase "参加考试" as TakeExam
+  }
+  
+  ' 教师用例
+  package "教学功能" {
+    usecase "创建课程" as CreateCourse
+    usecase "上传视频" as UploadVideo
+    usecase "批改作业" as GradeHomework
+    usecase "发布成绩" as PublishGrade
+  }
+  
+  ' 管理用例
+  package "管理功能" {
+    usecase "审核课程" as ReviewCourse
+    usecase "管理用户" as ManageUser
+    usecase "查看统计" as ViewStats
+  }
+  
+  ' 公共用例
+  usecase "登录" as Login
+  usecase "支付处理" as Payment
+}
+
+' 学生关联
+Student -- BrowseCourse
+Student -- BuyCourse
+Student -- WatchVideo
+Student -- DoHomework
+Student -- TakeExam
+
+' 教师关联
+Teacher -- CreateCourse
+Teacher -- UploadVideo
+Teacher -- GradeHomework
+Teacher -- PublishGrade
+
+' 管理员关联
+Admin -- ReviewCourse
+Admin -- ManageUser
+Admin -- ViewStats
+
+' 外部系统
+PaymentSys -- Payment
+
+' 包含关系
+BuyCourse ..> Login : <<include>>
+BuyCourse ..> Payment : <<include>>
+WatchVideo ..> Login : <<include>>
+DoHomework ..> Login : <<include>>
+TakeExam ..> Login : <<include>>
+CreateCourse ..> Login : <<include>>
+UploadVideo ..> Login : <<include>>
+
+' 扩展关系
+TakeExam ..> DoHomework : <<extend>>
+
+@enduml
+\`\`\`
+
+**关键点**：
+- 使用 \`package\` 对相关用例进行分组
+- 包含外部系统参与者（如支付系统）
+- 清晰展示不同角色的职责范围
+- 合理使用包含和扩展关系
+
+## 常见错误 (E - Establish Success Metrics)
+
+### 错误 1: 用例名称不是动宾结构
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+usecase "用户"
+usecase "订单"
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+usecase "管理用户"
+usecase "查看订单"
+@enduml
+\`\`\`
+
+**原因**：用例应该描述一个动作或功能，通常使用"动词+名词"的形式。
+
+### 错误 2: 包含和扩展关系方向错误
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+' 应该是 A 包含 B，箭头方向错误
+(验证) ..> (登录) : <<include>>
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+' A 包含 B，箭头从 A 指向 B
+(登录) ..> (验证) : <<include>>
+@enduml
+\`\`\`
+
+**原因**：包含关系箭头从主用例指向被包含的用例，表示"登录"包含"验证"。
+
+### 错误 3: 参与者之间用关联线连接
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+actor User
+actor Admin
+User -- Admin
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+actor User
+actor Admin
+' 参与者不应直接关联，应通过用例
+User -- (管理系统)
+Admin -- (管理系统)
+@enduml
+\`\`\`
+
+**原因**：用例图中参与者之间不应该有直接关联，应该通过用例建立联系。
+
+### 错误 4: 系统边界未闭合
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+rectangle "系统" {
+  usecase "用例1"
+  usecase "用例2"
+' 括号未闭合
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+rectangle "系统" {
+  usecase "用例1"
+  usecase "用例2"
+}
+@enduml
+\`\`\`
+
+**原因**：\`rectangle\` 和 \`package\` 必须用 \`}\` 闭合。
+
+### 错误 5: 关系类型使用错误
+❌ **错误写法**：
+\`\`\`plantuml
+@startuml
+' 使用实线表示包含关系
+(登录) --> (验证) : <<include>>
+@enduml
+\`\`\`
+
+✅ **正确写法**：
+\`\`\`plantuml
+@startuml
+' 包含和扩展关系使用虚线
+(登录) ..> (验证) : <<include>>
+@enduml
+\`\`\`
+
+**原因**：包含（\`<<include>>\`）和扩展（\`<<extend>>\`）关系必须使用虚线箭头 \`..\`。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **图表声明完整**：包含 \`@startuml\` 和 \`@enduml\`
+- [ ] **用例命名规范**：使用动宾结构（如"查看订单"、"管理用户"）
+- [ ] **参与者类型正确**：使用 \`actor\` 定义参与者
+- [ ] **关联关系正确**：参与者与用例用 \`--\` 连接
+- [ ] **包含关系正确**：使用 \`..\` + \`<<include>>\`，箭头方向从主用例指向被包含用例
+- [ ] **扩展关系正确**：使用 \`..\` + \`<<extend>>\`，箭头方向从扩展用例指向基础用例
+- [ ] **系统边界闭合**：\`rectangle\` 和 \`package\` 有对应的 \`}\`
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1080 tokens
+ *
+ * 分配明细:
+ * - 专家视角: 120 tokens
+ * - 核心语法: 280 tokens
+ * - 生成示例: 480 tokens（3个示例）
+ * - 常见错误: 150 tokens（5个错误）
+ * - 检查清单: 50 tokens
+ */
+

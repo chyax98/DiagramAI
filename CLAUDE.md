@@ -438,7 +438,7 @@ sequenceDiagram
     participant Browser as User Browser
     participant Next as DiagramAI (Next.js)
     participant Kroki as Kroki Service
-    
+
     Browser->>Next: GET /api/kroki/mermaid/svg/{encoded}
     Note over Browser,Next: Client uses proxy endpoint
     Next->>Kroki: GET /mermaid/svg/{encoded}
@@ -449,11 +449,11 @@ sequenceDiagram
 
 ### Deployment Options
 
-| Option | Use Case | Configuration |
-|--------|----------|---------------|
-| **Public Service** | Development, Testing | `KROKI_INTERNAL_URL=https://kroki.io` |
-| **Docker Local** | Production | `KROKI_INTERNAL_URL=http://localhost:8000` |
-| **Docker Remote** | Distributed | `KROKI_INTERNAL_URL=http://kroki-server:8000` |
+| Option             | Use Case             | Configuration                                 |
+| ------------------ | -------------------- | --------------------------------------------- |
+| **Public Service** | Development, Testing | `KROKI_INTERNAL_URL=https://kroki.io`         |
+| **Docker Local**   | Production           | `KROKI_INTERNAL_URL=http://localhost:8000`    |
+| **Docker Remote**  | Distributed          | `KROKI_INTERNAL_URL=http://kroki-server:8000` |
 
 ### Why Proxy?
 
@@ -472,10 +472,10 @@ export async function GET(request: NextRequest) {
   const pathname = request.nextUrl.pathname.replace("/api/kroki", "");
   const krokiUrl = ENV.KROKI_INTERNAL_URL;
   const targetUrl = `${krokiUrl}${pathname}`;
-  
+
   const response = await fetch(targetUrl);
   const content = await response.arrayBuffer();
-  
+
   return new NextResponse(content, {
     headers: {
       "Content-Type": "image/svg+xml",

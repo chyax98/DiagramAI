@@ -3,10 +3,10 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
-  
+
   // 输出配置
   output: "standalone",
-  
+
   // 实验性功能
   experimental: {
     optimizeCss: true,

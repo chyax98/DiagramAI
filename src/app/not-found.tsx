@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Home, ArrowLeft } from "lucide-react";
 
 // 禁用静态生成
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function NotFound() {
   return (
@@ -21,9 +21,7 @@ export default function NotFound() {
         </div>
 
         {/* 标题 */}
-        <h2 className="mb-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
-          页面未找到
-        </h2>
+        <h2 className="mb-3 text-3xl font-bold text-slate-900 dark:text-slate-100">页面未找到</h2>
 
         {/* 描述 */}
         <p className="mb-8 text-slate-600 dark:text-slate-400">

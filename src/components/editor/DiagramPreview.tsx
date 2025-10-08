@@ -40,7 +40,9 @@ async function renderWithKroki(
     if (!response.ok) {
       const errorText = await response.text();
       logger.error(`❌ [Kroki] API 错误 ${response.status}:`, errorText);
-      const error = new Error(`Kroki 渲染失败 (${response.status}): ${errorText || response.statusText}`);
+      const error = new Error(
+        `Kroki 渲染失败 (${response.status}): ${errorText || response.statusText}`
+      );
       return Promise.reject(error);
     }
 
@@ -75,7 +77,12 @@ function hashCode(str: string): string {
   return hash.toString(36);
 }
 
-export function DiagramPreview({ code, renderLanguage, onError, onSvgRendered }: DiagramPreviewProps) {
+export function DiagramPreview({
+  code,
+  renderLanguage,
+  onError,
+  onSvgRendered,
+}: DiagramPreviewProps) {
   const [svgContent, setSvgContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -94,51 +101,54 @@ export function DiagramPreview({ code, renderLanguage, onError, onSvgRendered }:
 
   const isRenderingRef = useRef(false);
 
-  const renderDiagram = useCallback(async (svgCallback?: (svg: string) => void) => {
-    if (isRenderingRef.current) {
-      return;
-    }
-
-    if (!code.trim()) {
-      setSvgContent("");
-      onError(null);
-      return;
-    }
-
-    const cached = renderCache.current.get(codeFingerprint);
-    if (cached) {
-      setSvgContent(cached);
-      onError(null);
-      return;
-    }
-
-    isRenderingRef.current = true;
-    setIsLoading(true);
-    onError(null);
-
-    try {
-      const svg = await renderWithKroki(code, renderLanguage);
-
-      setSvgContent(svg);
-      svgCallback?.(svg); // 通知父组件 SVG 已渲染
-
-      if (renderCache.current.size >= 20) {
-        const firstKey = renderCache.current.keys().next().value;
-        if (firstKey) {
-          renderCache.current.delete(firstKey);
-        }
+  const renderDiagram = useCallback(
+    async (svgCallback?: (svg: string) => void) => {
+      if (isRenderingRef.current) {
+        return;
       }
-      renderCache.current.set(codeFingerprint, svg);
-    } catch (error) {
-      logger.error("❌ [DiagramPreview] 渲染失败:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown rendering error";
-      onError(errorMessage);
-      setSvgContent("");
-    } finally {
-      setIsLoading(false);
-      isRenderingRef.current = false;
-    }
-  }, [code, renderLanguage, onError, codeFingerprint]);
+
+      if (!code.trim()) {
+        setSvgContent("");
+        onError(null);
+        return;
+      }
+
+      const cached = renderCache.current.get(codeFingerprint);
+      if (cached) {
+        setSvgContent(cached);
+        onError(null);
+        return;
+      }
+
+      isRenderingRef.current = true;
+      setIsLoading(true);
+      onError(null);
+
+      try {
+        const svg = await renderWithKroki(code, renderLanguage);
+
+        setSvgContent(svg);
+        svgCallback?.(svg); // 通知父组件 SVG 已渲染
+
+        if (renderCache.current.size >= 20) {
+          const firstKey = renderCache.current.keys().next().value;
+          if (firstKey) {
+            renderCache.current.delete(firstKey);
+          }
+        }
+        renderCache.current.set(codeFingerprint, svg);
+      } catch (error) {
+        logger.error("❌ [DiagramPreview] 渲染失败:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown rendering error";
+        onError(errorMessage);
+        setSvgContent("");
+      } finally {
+        setIsLoading(false);
+        isRenderingRef.current = false;
+      }
+    },
+    [code, renderLanguage, onError, codeFingerprint]
+  );
 
   /**
    * 手动重试渲染

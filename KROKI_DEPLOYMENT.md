@@ -28,11 +28,11 @@ Kroki 服务 (Docker/公共服务)
 
 ### 方案对比
 
-| 方案 | 适用场景 | 优点 | 缺点 |
-|------|---------|------|------|
-| **公共服务** (kroki.io) | 开发、测试、小流量 | 零维护、开箱即用 | 网络依赖、有限流、数据经过第三方 |
-| **Docker 最小化** | 生产环境、基础需求 | 轻量、快速部署、数据私有 | 支持图表类型有限 |
-| **Docker 完整版** | 生产环境、全功能 | 支持所有图表类型、完整功能 | 资源占用较多（~2GB 内存） |
+| 方案                    | 适用场景           | 优点                       | 缺点                             |
+| ----------------------- | ------------------ | -------------------------- | -------------------------------- |
+| **公共服务** (kroki.io) | 开发、测试、小流量 | 零维护、开箱即用           | 网络依赖、有限流、数据经过第三方 |
+| **Docker 最小化**       | 生产环境、基础需求 | 轻量、快速部署、数据私有   | 支持图表类型有限                 |
+| **Docker 完整版**       | 生产环境、全功能   | 支持所有图表类型、完整功能 | 资源占用较多（~2GB 内存）        |
 
 ### 推荐方案
 
@@ -162,6 +162,7 @@ docker rm kroki
 ### 支持的图表类型
 
 最小化部署支持：
+
 - ✅ Mermaid
 - ✅ PlantUML (基础功能)
 - ✅ Graphviz
@@ -178,7 +179,7 @@ docker rm kroki
 创建 `docker-compose-kroki.yml`：
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   # Kroki 主服务
@@ -311,6 +312,7 @@ docker-compose -f docker-compose-kroki.yml up -d
 ### 支持的图表类型
 
 完整部署支持所有类型：
+
 - ✅ Mermaid (增强版)
 - ✅ PlantUML (完整功能)
 - ✅ Graphviz
@@ -379,7 +381,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        
+
         # 增大超时时间（复杂图表可能需要更长时间）
         proxy_read_timeout 60s;
         proxy_connect_timeout 60s;
@@ -413,6 +415,7 @@ docker stats
 ```
 
 **常见原因：**
+
 - 端口 8000 已被占用 → 更换端口或停止占用进程
 - 内存不足 → 增加服务器内存或减少其他服务
 - Docker 网络问题 → 重启 Docker 服务
@@ -436,6 +439,7 @@ telnet localhost 8000
 ```
 
 **常见原因：**
+
 - `KROKI_INTERNAL_URL` 配置错误
 - 防火墙阻止连接
 - Kroki 服务未启动
@@ -458,6 +462,7 @@ docker logs kroki --tail 100
 ```
 
 **常见原因：**
+
 - 图表语法错误
 - 不支持的图表类型（最小化部署）
 - 超时（复杂图表需要更长时间）
@@ -484,10 +489,10 @@ docker update --memory 2g --cpus 2 kroki
 
 ### 资源占用
 
-| 部署方案 | 内存占用 | 磁盘占用 | CPU 使用 |
-|---------|---------|---------|---------|
-| 最小化部署 | ~200MB | ~400MB | 低 |
-| 完整部署 | ~2GB | ~2GB | 中等 |
+| 部署方案   | 内存占用 | 磁盘占用 | CPU 使用 |
+| ---------- | -------- | -------- | -------- |
+| 最小化部署 | ~200MB   | ~400MB   | 低       |
+| 完整部署   | ~2GB     | ~2GB     | 中等     |
 
 ### 性能指标
 
@@ -505,7 +510,7 @@ services:
   kroki:
     image: yuzutech/kroki:latest
     deploy:
-      replicas: 3  # 运行 3 个实例
+      replicas: 3 # 运行 3 个实例
     ports:
       - "8000-8002:8000"
 ```
@@ -564,7 +569,7 @@ services:
       resources:
         limits:
           memory: 2G
-          cpus: '2'
+          cpus: "2"
 ```
 
 ---
@@ -677,11 +682,11 @@ Return SVG/PNG Image
 
 ### Comparison
 
-| Option | Use Case | Pros | Cons |
-|--------|----------|------|------|
-| **Public Service** (kroki.io) | Dev, Testing, Low Traffic | Zero maintenance, Ready to use | Network dependent, Rate limited, Third-party data |
-| **Docker Minimal** | Production, Basic Needs | Lightweight, Fast deploy, Private data | Limited diagram types |
-| **Docker Full** | Production, Complete Features | All diagram types, Full features | Higher resources (~2GB RAM) |
+| Option                        | Use Case                      | Pros                                   | Cons                                              |
+| ----------------------------- | ----------------------------- | -------------------------------------- | ------------------------------------------------- |
+| **Public Service** (kroki.io) | Dev, Testing, Low Traffic     | Zero maintenance, Ready to use         | Network dependent, Rate limited, Third-party data |
+| **Docker Minimal**            | Production, Basic Needs       | Lightweight, Fast deploy, Private data | Limited diagram types                             |
+| **Docker Full**               | Production, Complete Features | All diagram types, Full features       | Higher resources (~2GB RAM)                       |
 
 ### Recommendations
 
@@ -798,7 +803,7 @@ docker stop kroki && docker rm kroki
 Create `docker-compose-kroki.yml`:
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   kroki:

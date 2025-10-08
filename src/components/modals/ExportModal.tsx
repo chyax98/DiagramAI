@@ -32,7 +32,7 @@ async function exportWithKroki(
 
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },  // ✅ 修复：使用 JSON
+    headers: { "Content-Type": "application/json" }, // ✅ 修复：使用 JSON
     body: JSON.stringify({
       code: code,
       language: diagramType,
@@ -54,7 +54,13 @@ function generateFileName(format: "svg" | "png" | "txt"): string {
   return `diagram-${timestamp}.${format}`;
 }
 
-export function ExportModal({ isOpen, code, renderLanguage, svgContent, onClose }: ExportModalProps) {
+export function ExportModal({
+  isOpen,
+  code,
+  renderLanguage,
+  svgContent,
+  onClose,
+}: ExportModalProps) {
   const [svgStatus, setSvgStatus] = useState<ExportStatus>("idle");
   const [pngStatus, setPngStatus] = useState<ExportStatus>("idle");
   const [copyStatus, setCopyStatus] = useState<ExportStatus>("idle");

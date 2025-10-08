@@ -18,12 +18,12 @@ function base64UrlEncode(data: Uint8Array): string {
 
 /**
  * 生成 Kroki URL
- * 
+ *
  * @param code - 图表代码
  * @param diagramType - 图表类型 (mermaid, plantuml, etc.)
  * @param outputFormat - 输出格式 (svg, png, pdf, jpeg)
  * @returns Kroki API URL
- * 
+ *
  * @example
  * generateKrokiURL("graph TD\n  A-->B", "mermaid", "svg")
  * // => "/api/kroki/mermaid/svg/eNpL..."

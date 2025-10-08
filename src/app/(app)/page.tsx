@@ -48,7 +48,7 @@ export default function HomePage() {
   const [adjustModalOpen, setAdjustModalOpen] = useState(false);
   const [adjustInput, setAdjustInput] = useState("");
   const [exportModalOpen, setExportModalOpen] = useState(false);
-  
+
   // SVG 内容状态（用于本地导出）
   const [renderedSvg, setRenderedSvg] = useState<string>("");
 
@@ -176,9 +176,9 @@ export default function HomePage() {
         </div>
 
         {/* 右侧预览 flex-1 */}
-        <DiagramPreview 
-          code={code} 
-          renderLanguage={renderLanguage} 
+        <DiagramPreview
+          code={code}
+          renderLanguage={renderLanguage}
           onError={handleDiagramError}
           onSvgRendered={handleSvgRendered}
         />

@@ -1,0 +1,10 @@
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="mermaid-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF3670;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FE7139;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="128" cy="128" r="120" fill="url(#mermaid-gradient)"/>
+  <path fill="white" d="M128 48L88 88L128 128L168 88L128 48ZM128 128L88 168L128 208L168 168L128 128Z"/>
+</svg>

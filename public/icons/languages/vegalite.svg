@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <!-- 背景 -->
+  <rect width="256" height="256" rx="24" fill="#3B82F6"/>
+
+  <!-- 数据可视化 - 柱状图 -->
+  <rect x="60" y="140" width="30" height="60" rx="4" fill="white"/>
+  <rect x="100" y="100" width="30" height="100" rx="4" fill="white" opacity="0.8"/>
+  <rect x="140" y="80" width="30" height="120" rx="4" fill="white" opacity="0.9"/>
+  <rect x="180" y="120" width="30" height="80" rx="4" fill="white" opacity="0.7"/>
+
+  <!-- 坐标轴 -->
+  <line x1="50" y1="210" x2="220" y2="210" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="50" x2="50" y2="210" stroke="white" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- 趋势线 -->
+  <path d="M 75 155 Q 115 95, 155 75 Q 195 105, 195 135"
+        stroke="white" stroke-width="3" stroke-dasharray="5,5" fill="none" opacity="0.6"/>
+
+  <!-- 数据点 -->
+  <circle cx="75" cy="155" r="5" fill="#FCD34D"/>
+  <circle cx="115" cy="95" r="5" fill="#FCD34D"/>
+  <circle cx="155" cy="75" r="5" fill="#FCD34D"/>
+  <circle cx="195" cy="135" r="5" fill="#FCD34D"/>
+</svg>

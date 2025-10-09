@@ -57,19 +57,24 @@ export class DiagramGenerationService {
    *
    * 任务标记由**前端按钮类型**决定，而非 sessionId 推断
    *
+   * 设计理由：
+   * 1. 使用醒目的 <<<>>> 格式，提高 AI 识别度
+   * 2. SYSTEM_INSTRUCTION 前缀强调这是系统级指令
+   * 3. 英文关键词避免编码问题，便于跨语言场景
+   *
    * @param taskType - 任务类型（generate/adjust/fix）
    * @returns 任务标记字符串
    *
    * @example
-   * _buildTaskHint('generate') // => "[任务：生成]"
-   * _buildTaskHint('adjust')   // => "[任务：调整]"
-   * _buildTaskHint('fix')      // => "[任务：修复语法错误]"
+   * _buildTaskHint('generate') // => "<<<SYSTEM_INSTRUCTION: GENERATE_NEW_DIAGRAM>>>"
+   * _buildTaskHint('adjust')   // => "<<<SYSTEM_INSTRUCTION: ADJUST_EXISTING_DIAGRAM>>>"
+   * _buildTaskHint('fix')      // => "<<<SYSTEM_INSTRUCTION: FIX_SYNTAX_ERRORS_ONLY>>>"
    */
   private _buildTaskHint(taskType: TaskType): string {
     const taskMap: Record<TaskType, string> = {
-      generate: "[任务：生成]",
-      adjust: "[任务：调整]",
-      fix: "[任务：修复语法错误]",
+      generate: "<<<SYSTEM_INSTRUCTION: GENERATE_NEW_DIAGRAM>>>",
+      adjust: "<<<SYSTEM_INSTRUCTION: ADJUST_EXISTING_DIAGRAM>>>",
+      fix: "<<<SYSTEM_INSTRUCTION: FIX_SYNTAX_ERRORS_ONLY>>>",
     };
     return taskMap[taskType];
   }

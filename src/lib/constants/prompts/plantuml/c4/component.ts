@@ -36,7 +36,7 @@ Component 图使用 \`C4_Component.puml\` 库：
 
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include <C4/C4_Component>
 
 title 组件图 - 订单服务
 
@@ -102,7 +102,7 @@ SHOW_LEGEND()          ' 显示图例
 **生成代码**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include <C4/C4_Component>
 
 title 组件图 - 订单服务（三层架构）
 
@@ -136,7 +136,7 @@ SHOW_LEGEND()
 **生成代码**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include <C4/C4_Component>
 
 title 组件图 - 用户服务（DDD 架构）
 
@@ -178,7 +178,7 @@ SHOW_LEGEND()
 **生成代码**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include <C4/C4_Component>
 
 title 组件图 - 订单服务完整结构
 
@@ -235,7 +235,7 @@ SHOW_LEGEND()
 ❌ **错误写法**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 Component(ctrl, "控制器")  ' 错误：应使用 C4_Component.puml
 @enduml
 \`\`\`
@@ -243,7 +243,7 @@ Component(ctrl, "控制器")  ' 错误：应使用 C4_Component.puml
 ✅ **正确写法**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include <C4/C4_Component>
 Component(ctrl, "控制器", "Spring MVC", "处理请求")
 @enduml
 \`\`\`
@@ -299,7 +299,7 @@ Component(ctrl, "控制器", "Spring MVC", "处理HTTP请求")
 ❌ **错误写法**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include <C4/C4_Component>
 
 Component(ctrl, "控制器", "Spring MVC")
 System(other, "其他系统")  ' 错误：Component图不应有System
@@ -309,7 +309,7 @@ System(other, "其他系统")  ' 错误：Component图不应有System
 ✅ **正确写法**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include <C4/C4_Component>
 
 Component(ctrl, "控制器", "Spring MVC", "处理请求")
 Container_Ext(other, "其他服务", "微服务", "外部依赖")

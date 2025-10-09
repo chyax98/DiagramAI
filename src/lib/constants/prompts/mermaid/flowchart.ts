@@ -115,7 +115,7 @@ graph TD
     validate -->|成功| success[登录成功]
     validate -->|失败| error[显示错误信息]
     error --> input
-    success --> end([结束])
+    success --> finish([结束])
 \`\`\`
 
 **关键点**：
@@ -135,7 +135,7 @@ graph TD
 
     checkStock -->|库存充足| checkPayment{检查支付}
     checkStock -->|库存不足| notifyOut[通知缺货]
-    notifyOut --> end([结束])
+    notifyOut --> finish([结束])
 
     checkPayment -->|已支付| ship[发货]
     checkPayment -->|未支付| waitPayment[等待支付]
@@ -145,9 +145,9 @@ graph TD
 
     ship --> updateInventory[更新库存]
     updateInventory --> notifySuccess[通知发货成功]
-    notifySuccess --> end
+    notifySuccess --> finish
 
-    cancel --> end
+    cancel --> finish
 \`\`\`
 
 **关键点**：
@@ -170,8 +170,8 @@ graph TD
     ceoReview -->|通过| approve[申请通过]
     ceoReview -->|拒绝| reject
 
-    reject --> end([结束])
-    approve --> end
+    reject --> finish([结束])
+    approve --> finish
 
     %% 样式定义
     classDef successStyle fill:#90EE90,stroke:#333,stroke-width:2px
@@ -201,10 +201,10 @@ graph TD
 **✅ 正确写法**：
 \`\`\`mermaid
 graph TD
-    start[开始] --> end[结束]
+    start[开始] --> finish[结束]
 \`\`\`
 
-**原因**：Mermaid 节点 ID 必须是英文字母或数字，中文会导致渲染失败。中文应作为节点标签放在 \`[]\` 中。
+**原因**：Mermaid 节点 ID 必须是英文字母或数字，中文会导致渲染失败。中文应作为节点标签放在 \`[]\` 中。**注意**: \`end\` 是 Mermaid 保留关键字，不能作为节点 ID 使用，应使用 \`finish\`, \`done\`, \`complete\` 等替代。
 
 ### 错误 2: 判断节点未使用菱形语法
 **❌ 错误写法**：
@@ -255,8 +255,8 @@ graph TD
     A([开始]) --> B{判断}
     B -->|是| C[处理]
     B -->|否| D[其他处理]
-    C --> end([结束])
-    D --> end
+    C --> finish([结束])
+    D --> finish
 \`\`\`
 
 **原因**：完整的流程图应该有明确的起点和终点，所有路径最终都应该汇聚到结束节点。
@@ -281,7 +281,30 @@ graph TD
 
 **原因**：流程图应该清晰地表示步骤之间的顺序关系，避免跳跃式的连接导致流程混乱。
 
-### 错误 6: 特殊字符未转义
+### 错误 6: 使用保留关键字作为节点 ID（常见且致命）
+**❌ 错误写法**：
+\`\`\`mermaid
+graph TD
+    start[开始] --> process[处理]
+    process --> end[结束]    %% 错误：end 是保留关键字
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`mermaid
+graph TD
+    start[开始] --> process[处理]
+    process --> finish[结束]    %% 使用 finish/done/complete 替代
+\`\`\`
+
+**原因**：\`end\` 是 Mermaid 的保留关键字（用于 subgraph 等语句块的结束），不能作为节点 ID 使用。
+
+**常见保留关键字（禁止用作节点 ID）**：
+- \`end\` - 最常见的错误，必须用 \`finish\`, \`done\`, \`complete\` 等替代
+- \`graph\`, \`subgraph\`, \`flowchart\` - 图表声明关键字
+- \`class\`, \`classDef\`, \`style\` - 样式关键字
+- \`click\`, \`call\`, \`href\` - 交互关键字
+
+### 错误 7: 特殊字符未转义
 **❌ 错误写法**：
 \`\`\`mermaid
 graph TD
@@ -302,12 +325,18 @@ graph TD
 
 - [ ] **图表声明正确**：使用 \`graph TD/LR\` 或 \`flowchart TD/LR\`
 - [ ] **节点 ID 合法**：所有节点 ID 使用英文字母或数字，无中文
+- [ ] **无保留关键字**：节点 ID 不使用 \`end\`, \`graph\`, \`class\`, \`style\` 等保留关键字（**必须检查，最常见错误**）
 - [ ] **判断节点使用菱形**：所有决策点使用 \`{}\` 语法
 - [ ] **条件分支有标签**：判断节点的分支使用 \`-->|条件|\` 标注
 - [ ] **流程完整**：有明确的起点和终点，无断链
 - [ ] **无死循环**：所有循环都有退出条件
 - [ ] **连接线方向正确**：箭头方向清晰，流程逻辑合理
 - [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**❗ 重点检查项**：
+1. **禁止使用 \`end\` 作为节点 ID**（用 \`finish\`, \`done\`, \`complete\` 替代）
+2. 所有节点 ID 必须是英文字母或数字
+3. 判断节点必须使用 \`{}\` 语法
 
 **任何检查项不通过，立即修正后重新生成**
 `;

@@ -36,7 +36,7 @@ C4 时序图使用标准 PlantUML 时序图语法，结合 C4 注释：
 
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 title C4 Sequence - 用户下单流程
 
@@ -140,7 +140,7 @@ note over A,B: 这是一个重要的交互点
 **生成代码**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 title C4 Sequence - 用户登录流程
 
@@ -182,7 +182,7 @@ deactivate auth
 **生成代码**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 title C4 Sequence - 订单处理流程
 
@@ -238,7 +238,7 @@ note over mq: 异步通知发货系统
 **生成代码**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 title C4 Sequence - 微服务错误处理与重试
 

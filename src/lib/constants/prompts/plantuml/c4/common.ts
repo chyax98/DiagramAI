@@ -32,7 +32,7 @@ C4 模型（Context, Container, Component, Code）是一种用于可视化软件
 
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 ' 图表内容...
 
@@ -161,7 +161,7 @@ System(app, "应用")
 ✅ **正确写法**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 Person(user, "用户")
 System(app, "应用")
@@ -174,7 +174,7 @@ System(app, "应用")
 ❌ **错误写法**：在 Context 图中使用 Component
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 Person(user, "用户")
 System(app, "应用")
@@ -185,7 +185,7 @@ Component(ctrl, "控制器", "Spring MVC")  ' 错误：Context图不应有Compon
 ✅ **正确写法**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 Person(user, "用户")
 System(app, "应用系统")

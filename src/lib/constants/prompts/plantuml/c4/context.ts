@@ -36,7 +36,7 @@ Context 图使用 \`C4_Container.puml\` 库：
 
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 ' 图表标题（可选）
 title 系统上下文图 - 在线购物平台
@@ -99,7 +99,7 @@ SHOW_LEGEND()          ' 显示图例
 **生成代码**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 title 系统上下文图 - 在线购物平台
 
@@ -130,7 +130,7 @@ SHOW_LEGEND()
 **生成代码**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 title 系统上下文图 - 企业 ERP 系统
 
@@ -167,7 +167,7 @@ SHOW_LEGEND()
 **生成代码**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 title 系统上下文图 - 微服务电商平台
 
@@ -212,7 +212,7 @@ System(app, "应用")
 ✅ **正确写法**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 Person(user, "用户")
 System(app, "应用系统")
@@ -225,7 +225,7 @@ System(app, "应用系统")
 ❌ **错误写法**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 Person(user, "用户")
 System(app, "应用")
@@ -236,7 +236,7 @@ Container(web, "Web应用", "React")  ' 错误：Context图不应包含Container
 ✅ **正确写法**：
 \`\`\`plantuml
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include <C4/C4_Container>
 
 Person(user, "用户")
 System(app, "应用系统", "提供完整的业务功能")

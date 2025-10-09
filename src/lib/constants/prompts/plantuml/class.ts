@@ -93,22 +93,22 @@ enum OrderStatus {
 
 ### 关系类型
 \`\`\`plantuml
-%% 1. 继承 (Inheritance / Generalization)
+' 1. 继承 (Inheritance / Generalization)
 Parent <|-- Child
 
-%% 2. 实现 (Implementation)
+' 2. 实现 (Implementation)
 IInterface <|.. ConcreteClass
 
-%% 3. 组合 (Composition) - 强拥有关系
+' 3. 组合 (Composition) - 强拥有关系
 Whole *-- Part
 
-%% 4. 聚合 (Aggregation) - 弱拥有关系
+' 4. 聚合 (Aggregation) - 弱拥有关系
 Container o-- Element
 
-%% 5. 关联 (Association) - 一般关联
+' 5. 关联 (Association) - 一般关联
 ClassA --> ClassB
 
-%% 6. 依赖 (Dependency) - 使用关系
+' 6. 依赖 (Dependency) - 使用关系
 ClassA ..> ClassB
 \`\`\`
 

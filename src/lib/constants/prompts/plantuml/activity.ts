@@ -70,13 +70,13 @@ endif
 
 ### 循环
 \`\`\`plantuml
-%% repeat-while 循环
+' repeat-while 循环
 repeat
   :处理数据;
 repeat while (还有数据?) is (yes)
 ->no;
 
-%% while 循环
+' while 循环
 while (条件?) is (yes)
   :执行操作;
 endwhile (no)

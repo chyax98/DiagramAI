@@ -48,10 +48,15 @@ User --> UC1
 
 PlantUML 使用 \`skinparam\` 命令定制图表外观：
 
+⚠️ **重要**: 手写风格语法已更新
+- ❌ 旧语法: \`skinparam handwritten true\` （已废弃）
+- ✅ 新语法: \`!option handwritten true\`
+
 \`\`\`plantuml
 @startuml
+!option handwritten false
+
 skinparam backgroundColor #EEEBDC
-skinparam handwritten false
 skinparam sequenceParticipantBackgroundColor #87CEEB
 skinparam sequenceArrowColor #333333
 @enduml
@@ -73,10 +78,12 @@ Alice -> Bob #blue;line.bold : 蓝色粗线箭头
 1. **Kroki 兼容性**
    - Kroki 对语法错误零容忍，必须确保语法完全正确
    - 特殊字符（如 []、{}、()）在标签中必须用双引号包裹
+   - **手写风格**: 必须使用 \`!option handwritten true/false\`，不能使用 \`skinparam handwritten\`
 
 2. **避免实验性语法**
    - 使用稳定的、广泛支持的语法
    - 避免使用过新的实验性特性
+   - 不要使用已废弃的语法（如 \`skinparam handwritten\`）
 
 3. **方向控制**
    - 使用 \`left to right direction\` 设置水平布局

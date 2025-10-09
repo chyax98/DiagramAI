@@ -1,0 +1,187 @@
+
+## DBML 语言规范
+
+### 基础语法
+
+#### 表定义
+```dbml
+Table table_name {
+  id integer [primary key, increment]
+  field_name type [constraints]
+  
+  Note: '表级注释'
+}
+```
+
+#### 字段类型（Kroki 全支持）
+**数值类型**：
+- `integer`, `int` - 整数
+- `bigint` - 大整数
+- `smallint` - 小整数
+- `decimal(p,s)`, `numeric(p,s)` - 精确小数
+- `float`, `double` - 浮点数
+
+**字符类型**：
+- `varchar(n)` - 可变长度字符串
+- `char(n)` - 固定长度字符串
+- `text` - 长文本
+
+**日期时间类型**：
+- `date` - 日期
+- `time` - 时间
+- `timestamp`, `datetime` - 日期时间
+
+**其他类型**：
+- `boolean`, `bool` - 布尔值
+- `json`, `jsonb` - JSON 数据
+- `uuid` - UUID
+
+#### 字段约束
+- `[primary key]` 或 `[pk]` - 主键
+- `[not null]` - 非空约束
+- `[unique]` - 唯一约束
+- `[increment]` 或 `[auto_increment]` - 自增
+- `[default: value]` - 默认值
+- `[note: 'text']` - 字段注释
+
+#### 关系定义
+**三种关系类型**：
+- `[ref: > table.field]` - 多对一（Many-to-One）
+  当前表的多条记录 → 目标表的一条记录
+  示例：`order_id integer [ref: > orders.id]`
+
+- `[ref: < table.field]` - 一对多（One-to-Many）
+  目标表的一条记录 → 当前表的多条记录
+  示例：在 orders 表中：`user_id integer [ref: < users.id]`
+
+- `[ref: - table.field]` - 一对一（One-to-One）
+  示例：`profile_id integer [ref: - user_profiles.id]`
+
+**独立关系定义**（推荐用于多对多）：
+```dbml
+Ref: table1.field > table2.field
+```
+
+#### 索引定义
+```dbml
+Table table_name {
+  // 字段定义...
+  
+  indexes {
+    field_name                      // 单列索引
+    (field1, field2)               // 复合索引
+    field_name [unique]            // 唯一索引
+    (field1, field2) [pk]          // 复合主键
+    field_name [type: btree]       // 指定索引类型
+    field_name [name: 'idx_name']  // 自定义索引名
+  }
+}
+```
+
+#### 枚举定义
+```dbml
+Enum status {
+  active
+  inactive
+  pending
+  [note: '状态枚举']
+}
+
+Table users {
+  status status [not null, default: 'active']
+}
+```
+
+### 命名规范
+
+**表名**：
+- ✅ 使用复数小写：`users`, `orders`, `order_items`
+- ✅ 多个单词用下划线：`user_profiles`, `product_categories`
+- ❌ 避免驼峰命名：`userProfiles`
+
+**字段名**：
+- ✅ 使用小写下划线：`user_id`, `created_at`, `is_active`
+- ✅ 主键统一使用 `id`
+- ✅ 外键格式：`{目标表单数}_id`（如 `user_id`, `product_id`）
+- ✅ 布尔字段前缀：`is_`, `has_`, `can_`
+- ✅ 时间戳字段：`created_at`, `updated_at`, `deleted_at`
+
+**枚举命名**：
+- ✅ 使用单数小写：`status`, `role`, `order_type`
+- ✅ 值使用小写下划线：`active`, `pending_review`
+
+### 常见错误
+
+#### 错误 1: 字段类型不规范
+**❌ 错误**：
+```dbml
+Table users {
+  name string
+  age number
+}
+```
+
+**✅ 正确**：
+```dbml
+Table users {
+  name varchar(100)
+  age integer
+}
+```
+
+#### 错误 2: 外键关系方向错误
+**❌ 错误**：
+```dbml
+// orders 表的 user_id 指向 users.id（多对一）
+Table orders {
+  user_id integer [ref: < users.id]  // 错误：应该用 >
+}
+```
+
+**✅ 正确**：
+```dbml
+Table orders {
+  user_id integer [ref: > users.id]  // 正确：多个订单 → 一个用户
+}
+```
+
+#### 错误 3: 缺少主键
+**❌ 错误**：
+```dbml
+Table users {
+  username varchar(50) [unique]
+  email varchar(100)
+}
+```
+
+**✅ 正确**：
+```dbml
+Table users {
+  id integer [pk, increment]
+  username varchar(50) [unique]
+  email varchar(100)
+}
+```
+
+### 最佳实践
+
+1. **表设计**
+   - 每个表必须有主键（通常是 `id integer [pk, increment]`）
+   - 添加 `created_at` 和 `updated_at` 时间戳字段
+   - 使用 Note 添加表级和字段级注释
+
+2. **关系设计**
+   - 明确标注所有外键关系
+   - 多对多关系使用中间表
+   - 为外键字段创建索引
+
+3. **索引策略**
+   - 为所有外键创建索引
+   - 为常用查询条件创建索引
+   - 复合索引按选择性从高到低排序
+
+4. **数据类型选择**
+   - 金额使用 `decimal(10,2)`
+   - 状态使用 `varchar` 或 `enum`
+   - 大文本使用 `text`
+   - 时间戳使用 `timestamp [default: \`now()\`]`

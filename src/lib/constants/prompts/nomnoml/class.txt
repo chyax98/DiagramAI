@@ -57,6 +57,24 @@
   name = "John";
   age = 30
 ]
+
+// 6. 泛型类
+[List<T>|
+  items: T[];
+  size: int
+|
+  add(item: T): void;
+  get(index: int): T;
+  remove(index: int): T
+]
+
+// 7. 带约束的泛型类
+[Repository<T extends Entity>|
+  |
+  save(entity: T): void;
+  findById(id: String): T;
+  delete(entity: T): void
+]
 ```
 
 ### 类之间的关系
@@ -269,6 +287,74 @@
 - 使用 `<note>` 添加说明
 - 依赖关系使用 `-->`
 - 样式指令控制整体外观
+
+### 示例 4: 泛型类 - 集合类库设计
+
+**用户需求**：设计一个泛型集合类库，包含列表、集合和映射
+
+**生成代码**：
+```nomnoml
+#direction: down
+#spacing: 40
+
+[<abstract> Collection<E>|
+  size: int
+|
+  add(element: E): boolean;
+  remove(element: E): boolean;
+  contains(element: E): boolean;
+  clear(): void
+]
+
+[List<E>] -:> [Collection<E>]
+[Set<E>] -:> [Collection<E>]
+
+[ArrayList<E>|
+  elements: E[];
+  capacity: int
+|
+  add(element: E): boolean;
+  get(index: int): E;
+  set(index: int, element: E): void
+]
+
+[LinkedList<E>|
+  head: Node<E>;
+  tail: Node<E>
+|
+  addFirst(element: E): void;
+  addLast(element: E): void;
+  removeFirst(): E
+]
+
+[HashSet<E>|
+  table: HashMap<E, Object>
+|
+  add(element: E): boolean;
+  contains(element: E): boolean
+]
+
+[Map<K, V>|
+  size: int
+|
+  put(key: K, value: V): V;
+  get(key: K): V;
+  remove(key: K): V;
+  containsKey(key: K): boolean
+]
+
+[HashMap<K, V>] --:> [Map<K, V>]
+
+[ArrayList<E>] -:> [List<E>]
+[LinkedList<E>] -:> [List<E>]
+[HashSet<E>] -:> [Set<E>]
+```
+
+**关键点**：
+- 泛型类型参数使用尖括号包裹（如 `<E>`, `<K, V>`）
+- 泛型类型可用于属性和方法的类型声明
+- 泛型类之间的继承关系需保持类型参数一致
+- 多个类型参数用逗号分隔（如 `Map<K, V>`）
 
 ## 常见错误
 

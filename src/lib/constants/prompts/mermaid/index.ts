@@ -174,3 +174,21 @@ export function getSupportedMermaidTypes(): string[] {
 export function isMermaidTypeSupported(diagramType: string): boolean {
   return diagramType in DIAGRAM_PROMPT_MAP;
 }
+
+// ============================================
+// PromptConfig 导出（供主 index.ts 使用）
+// ============================================
+
+import type { PromptConfig } from "../types";
+
+/**
+ * Mermaid Prompts 配置对象
+ *
+ * 实现 PromptConfig<"mermaid"> 接口，供 DIAGRAM_PROMPTS 使用
+ * 内部使用新的三层架构（DEPTH 方法论）
+ */
+export const mermaidPrompts: PromptConfig<"mermaid"> = {
+  generate: (diagramType) => {
+    return getMermaidPrompt(diagramType);
+  },
+};

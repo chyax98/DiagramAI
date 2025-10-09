@@ -5,6 +5,12 @@
  * - C4_PLANTUML_LANGUAGE_PROMPT: L2 C4-PlantUML 语言通用规范
  * - C4_[TYPE]_PROMPT: L3 各子图类型生成要求
  * - getC4PlantUMLPrompt: 辅助函数，根据图表类型获取完整提示词
+ *
+ * 符合 diagram-types.ts 定义的 C4-PlantUML 图表类型：
+ * - context: 系统上下文图
+ * - container: 容器图
+ * - component: 组件图
+ * - sequence: C4 时序图
  */
 
 import type { DiagramType } from "@/lib/constants/diagram-types";
@@ -14,8 +20,7 @@ import { C4_PLANTUML_LANGUAGE_PROMPT } from "./common";
 import { C4_CONTEXT_PROMPT } from "./context";
 import { C4_CONTAINER_PROMPT } from "./container";
 import { C4_COMPONENT_PROMPT } from "./component";
-import { C4_DYNAMIC_PROMPT } from "./dynamic";
-import { C4_DEPLOYMENT_PROMPT } from "./deployment";
+import { C4_SEQUENCE_PROMPT } from "./sequence";
 
 // ============================================
 // L2: C4-PlantUML 语言通用规范
@@ -28,33 +33,21 @@ export { C4_PLANTUML_LANGUAGE_PROMPT };
 export { C4_CONTEXT_PROMPT };
 export { C4_CONTAINER_PROMPT };
 export { C4_COMPONENT_PROMPT };
-export { C4_DYNAMIC_PROMPT };
-export { C4_DEPLOYMENT_PROMPT };
+export { C4_SEQUENCE_PROMPT };
 
 // ============================================
 // 图表类型映射
 // ============================================
 
 /**
- * C4-PlantUML 子图类型枚举
- */
-const C4DiagramType = {
-  CONTEXT: "c4-context",
-  CONTAINER: "c4-container",
-  COMPONENT: "c4-component",
-  DYNAMIC: "c4-dynamic",
-  DEPLOYMENT: "c4-deployment",
-} as const;
-
-/**
  * C4-PlantUML 子图类型到 L3 提示词的映射
+ * 基于 diagram-types.ts 定义
  */
 const DIAGRAM_PROMPT_MAP: Record<string, string> = {
-  [C4DiagramType.CONTEXT]: C4_CONTEXT_PROMPT,
-  [C4DiagramType.CONTAINER]: C4_CONTAINER_PROMPT,
-  [C4DiagramType.COMPONENT]: C4_COMPONENT_PROMPT,
-  [C4DiagramType.DYNAMIC]: C4_DYNAMIC_PROMPT,
-  [C4DiagramType.DEPLOYMENT]: C4_DEPLOYMENT_PROMPT,
+  context: C4_CONTEXT_PROMPT,
+  container: C4_CONTAINER_PROMPT,
+  component: C4_COMPONENT_PROMPT,
+  sequence: C4_SEQUENCE_PROMPT,
 };
 
 // ============================================
@@ -64,12 +57,12 @@ const DIAGRAM_PROMPT_MAP: Record<string, string> = {
 /**
  * 获取 C4-PlantUML 图表的完整提示词（L1 + L2 PlantUML + L2 C4 + L3）
  *
- * @param diagramType - 图表类型（如 "c4-context", "c4-container"）
+ * @param diagramType - 图表类型（如 "context", "container", "component", "sequence"）
  * @returns 完整的提示词
  *
  * @example
  * ```typescript
- * const prompt = getC4PlantUMLPrompt("c4-context");
+ * const prompt = getC4PlantUMLPrompt("context");
  * // 返回: L1 通用规范 + L2 PlantUML 语言 + L2 C4 语言 + L3 Context 要求
  * ```
  */
@@ -152,3 +145,21 @@ export function getSupportedC4Types(): string[] {
 export function isC4TypeSupported(diagramType: string): boolean {
   return diagramType in DIAGRAM_PROMPT_MAP;
 }
+
+// ============================================
+// PromptConfig 导出（供主 index.ts 使用）
+// ============================================
+
+import type { PromptConfig } from "../../types";
+
+/**
+ * C4-PlantUML Prompts 配置对象
+ *
+ * 实现 PromptConfig<"c4plantuml"> 接口，供 DIAGRAM_PROMPTS 使用
+ */
+export const c4plantumlPrompts: PromptConfig<"c4plantuml"> = {
+  generate: (diagramType) => {
+    return getC4PlantUMLPrompt(diagramType);
+  },
+};
+

@@ -42,3 +42,34 @@ export {
   DBML_ERD_PROMPT,
   DBML_MIGRATION_PROMPT,
 };
+
+// ============================================
+// PromptConfig 导出（供主 index.ts 使用）
+// ============================================
+
+import type { PromptConfig } from "../types";
+import { UNIVERSAL_PROMPT } from "../common";
+
+/**
+ * 获取 DBML 图表的完整提示词（L1 + L2 + L3）
+ */
+function getDBMLPromptComplete(diagramType: DBMLDiagramType): string {
+  const l1 = UNIVERSAL_PROMPT;
+  const l2 = DBML_LANGUAGE_SPEC;
+  const l3 = getDBMLPrompt(diagramType);
+  
+  return [l1, l2, l3]
+    .filter((p) => p.length > 0)
+    .join("\n\n---\n\n");
+}
+
+/**
+ * DBML Prompts 配置对象
+ * 
+ * 实现 PromptConfig<"dbml"> 接口，供 DIAGRAM_PROMPTS 使用
+ */
+export const dbmlPrompts: PromptConfig<"dbml"> = {
+  generate: (diagramType) => {
+    return getDBMLPromptComplete(diagramType as DBMLDiagramType);
+  },
+};

@@ -27,6 +27,14 @@ interface PrepareResult {
   };
 }
 
+/**
+ * 任务类型定义
+ * - generate: 从零开始生成新图表
+ * - adjust: 基于现有代码进行调整优化
+ * - fix: 修复语法错误（保持逻辑不变）
+ */
+export type TaskType = "generate" | "adjust" | "fix";
+
 export interface ChatParams {
   userId: number;
   userMessage: string;
@@ -34,6 +42,7 @@ export interface ChatParams {
   renderLanguage: RenderLanguage;
   sessionId?: number; // 初始没有生成 session Id
   diagramType?: string; // todo 必填 除非是自己选
+  taskType?: TaskType; // ⭐ 任务类型（由前端按钮决定）
 }
 
 export interface ChatResult {
@@ -46,21 +55,23 @@ export class DiagramGenerationService {
   /**
    * 构建任务标记提示
    *
-   * 任务标记用于帮助 AI 识别当前任务类型，统一格式与 L1 UNIVERSAL_PROMPT 保持一致
+   * 任务标记由**前端按钮类型**决定，而非 sessionId 推断
    *
-   * @param isFirstGeneration - 是否为首次生成
+   * @param taskType - 任务类型（generate/adjust/fix）
    * @returns 任务标记字符串
    *
    * @example
-   * // 首次生成
-   * _buildTaskHint(true) // => "[任务：生成]"
-   *
-   * // 多轮调整
-   * _buildTaskHint(false) // => "[任务：调整]"
+   * _buildTaskHint('generate') // => "[任务：生成]"
+   * _buildTaskHint('adjust')   // => "[任务：调整]"
+   * _buildTaskHint('fix')      // => "[任务：修复语法错误]"
    */
-  private _buildTaskHint(isFirstGeneration: boolean): string {
-    // ✅ 修复：统一格式，移除图表类型信息（图表类型已在 system prompt 中指定）
-    return isFirstGeneration ? `[任务：生成]` : `[任务：调整]`;
+  private _buildTaskHint(taskType: TaskType): string {
+    const taskMap: Record<TaskType, string> = {
+      generate: "[任务：生成]",
+      adjust: "[任务：调整]",
+      fix: "[任务：修复语法错误]",
+    };
+    return taskMap[taskType];
   }
 
   private async validateAndPrepare(userId: number, modelId: number): Promise<PrepareResult> {
@@ -88,7 +99,7 @@ export class DiagramGenerationService {
     return { model, modelConfig };
   }
 
-  /** 统一对话接口 - 无 sessionId 创建新会话,有 sessionId 继续对话 */
+  /** 统一对话接口 - 任务类型由前端按钮决定，而非 sessionId 推断 */
   async chat(params: ChatParams): Promise<ChatResult> {
     if (params.userMessage.length > MAX_INPUT_TEXT_LENGTH) {
       throw new Error(`输入文本超过 ${MAX_INPUT_TEXT_LENGTH.toLocaleString()} 字符限制`);
@@ -98,31 +109,38 @@ export class DiagramGenerationService {
     const db = getDatabaseInstance();
     const sessionRepo = new ChatSessionRepository(db);
 
-    if (!params.sessionId) {
-      return this._generateFirst(params, model, sessionRepo);
+    // ⭐ 决策逻辑：优先使用 taskType，否则根据 sessionId 推断（向后兼容）
+    const taskType: TaskType = params.taskType || (!params.sessionId ? "generate" : "adjust");
+
+    // 根据任务类型路由
+    if (taskType === "generate") {
+      return this._generateFirst(params, taskType, model, sessionRepo);
     } else {
-      return this._continueChat(params, model, sessionRepo);
+      // adjust 或 fix 都走 continueChat（区别在任务标记）
+      return this._continueChat(params, taskType, model, sessionRepo);
     }
   }
 
   private async _generateFirst(
     params: ChatParams,
+    taskType: TaskType,
     model: LanguageModel,
     sessionRepo: ChatSessionRepository
   ): Promise<ChatResult> {
-    // 构建任务标记（传递给 AI）
-    const taskHint = this._buildTaskHint(true);
+    // 构建任务标记（由按钮类型决定）
+    const taskHint = this._buildTaskHint(taskType);
 
     // ✅ 开发环境验证：任务标记注入
     if (process.env.NODE_ENV === "development") {
-      logger.debug("[DiagramGenerationService] 首次生成 - 任务标记:", taskHint);
-      logger.debug("[DiagramGenerationService] 首次生成 - 用户消息:", params.userMessage);
+      logger.debug("[DiagramGenerationService] 生成 - 任务类型:", taskType);
+      logger.debug("[DiagramGenerationService] 生成 - 任务标记:", taskHint);
+      logger.debug("[DiagramGenerationService] 生成 - 用户消息:", params.userMessage);
       logger.debug(
-        "[DiagramGenerationService] 首次生成 - 注入内容:",
+        "[DiagramGenerationService] 生成 - 注入内容:",
         `${taskHint}\n${params.userMessage}`
       );
-      logger.debug("[DiagramGenerationService] 首次生成 - 图表类型:", params.diagramType);
-      logger.debug("[DiagramGenerationService] 首次生成 - 渲染语言:", params.renderLanguage);
+      logger.debug("[DiagramGenerationService] 生成 - 图表类型:", params.diagramType);
+      logger.debug("[DiagramGenerationService] 生成 - 渲染语言:", params.renderLanguage);
     }
 
     const { text: generatedCode } = await generateText({
@@ -173,6 +191,7 @@ export class DiagramGenerationService {
 
   private async _continueChat(
     params: ChatParams,
+    taskType: TaskType,
     model: LanguageModel,
     sessionRepo: ChatSessionRepository
   ): Promise<ChatResult> {
@@ -198,19 +217,20 @@ export class DiagramGenerationService {
       });
     });
 
-    // 构建任务标记（传递给 AI）
-    const taskHint = this._buildTaskHint(false);
+    // 构建任务标记（由按钮类型决定）
+    const taskHint = this._buildTaskHint(taskType);
 
     // ✅ 开发环境验证：任务标记注入
     if (process.env.NODE_ENV === "development") {
-      logger.debug("[DiagramGenerationService] 多轮调整 - 任务标记:", taskHint);
-      logger.debug("[DiagramGenerationService] 多轮调整 - 用户消息:", params.userMessage);
+      logger.debug("[DiagramGenerationService] 多轮对话 - 任务类型:", taskType);
+      logger.debug("[DiagramGenerationService] 多轮对话 - 任务标记:", taskHint);
+      logger.debug("[DiagramGenerationService] 多轮对话 - 用户消息:", params.userMessage);
       logger.debug(
-        "[DiagramGenerationService] 多轮调整 - 注入内容:",
+        "[DiagramGenerationService] 多轮对话 - 注入内容:",
         `${taskHint}\n${params.userMessage}`
       );
-      logger.debug("[DiagramGenerationService] 多轮调整 - 会话轮次:", currentRound + 1);
-      logger.debug("[DiagramGenerationService] 多轮调整 - 历史消息数:", messages.length);
+      logger.debug("[DiagramGenerationService] 多轮对话 - 会话轮次:", currentRound + 1);
+      logger.debug("[DiagramGenerationService] 多轮对话 - 历史消息数:", messages.length);
     }
 
     messages.push({

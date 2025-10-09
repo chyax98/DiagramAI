@@ -47,6 +47,7 @@ export function useEditorActions() {
           renderLanguage,
           diagramType,
           modelId: selectedModelId,
+          taskType: "generate", // ⭐ 显式指定：生成按钮
         });
 
         const { code: generatedCode, sessionId } = result;
@@ -128,6 +129,7 @@ export function useEditorActions() {
           userMessage: adjustInput,
           renderLanguage: renderLanguage,
           modelId: selectedModelId,
+          taskType: "adjust", // ⭐ 显式指定：调整按钮
         });
 
         const { code: newCode, sessionId } = result;
@@ -197,6 +199,7 @@ ${renderError}
           userMessage: fixMessage, // ✅ 使用优化后的修复消息
           renderLanguage: renderLanguage,
           modelId: selectedModelId,
+          taskType: "fix", // ⭐ 显式指定：修复按钮
         });
 
         const { code: fixedCode, sessionId } = result;

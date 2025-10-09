@@ -3,12 +3,15 @@
  *
  * 包含：
  * - L2 语言规范（common.ts）
- * - L3 图表类型（digraph.ts、graph.ts）
+ * - L3 图表类型（flowchart.ts、state.ts、tree.ts、architecture.ts、network.ts）
  */
 
 export { GRAPHVIZ_COMMON_PROMPT } from './common';
-export { GRAPHVIZ_DIGRAPH_PROMPT } from './digraph';
-export { GRAPHVIZ_GRAPH_PROMPT } from './graph';
+export { GRAPHVIZ_FLOWCHART_PROMPT } from './flowchart';
+export { GRAPHVIZ_STATE_PROMPT } from './state';
+export { GRAPHVIZ_TREE_PROMPT } from './tree';
+export { GRAPHVIZ_ARCHITECTURE_PROMPT } from './architecture';
+export { GRAPHVIZ_NETWORK_PROMPT } from './network';
 
 // ============================================
 // PromptConfig 导出（供主 index.ts 使用）
@@ -18,28 +21,36 @@ import type { DiagramType } from "@/lib/constants/diagram-types";
 import type { PromptConfig } from "../types";
 import { UNIVERSAL_PROMPT } from "../common";
 import { GRAPHVIZ_COMMON_PROMPT } from "./common";
-import { GRAPHVIZ_DIGRAPH_PROMPT } from "./digraph";
-import { GRAPHVIZ_GRAPH_PROMPT } from "./graph";
+import { GRAPHVIZ_FLOWCHART_PROMPT } from "./flowchart";
+import { GRAPHVIZ_STATE_PROMPT } from "./state";
+import { GRAPHVIZ_TREE_PROMPT } from "./tree";
+import { GRAPHVIZ_ARCHITECTURE_PROMPT } from "./architecture";
+import { GRAPHVIZ_NETWORK_PROMPT } from "./network";
 
 /**
  * 根据图表类型选择合适的 L3 提示词
+ * 每种图表类型对应一个专用的 L3 Prompt
  */
 function getGraphvizL3Prompt(diagramType: string): string {
   switch (diagramType) {
     case "flowchart":
+      return GRAPHVIZ_FLOWCHART_PROMPT;
+
     case "state":
+      return GRAPHVIZ_STATE_PROMPT;
+
     case "tree":
+      return GRAPHVIZ_TREE_PROMPT;
+
     case "architecture":
-      // 有向图类型使用 digraph prompt
-      return GRAPHVIZ_DIGRAPH_PROMPT;
-    
+      return GRAPHVIZ_ARCHITECTURE_PROMPT;
+
     case "network":
-      // 网络拓扑使用 graph prompt（无向图）
-      return GRAPHVIZ_GRAPH_PROMPT;
-    
+      return GRAPHVIZ_NETWORK_PROMPT;
+
     default:
-      // 默认使用有向图
-      return GRAPHVIZ_DIGRAPH_PROMPT;
+      // 默认使用流程图
+      return GRAPHVIZ_FLOWCHART_PROMPT;
   }
 }
 

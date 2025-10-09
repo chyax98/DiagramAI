@@ -1,0 +1,355 @@
+/**
+ * L3: Graphviz Flowchart 生成提示词
+ *
+ * 作用：定义流程图的生成规则、示例和最佳实践
+ * Token 预算：900-1200 tokens
+ * 图表类型：Graphviz Flowchart（流程图）
+ *
+ * 用途：表示业务流程、算法步骤、决策路径等有顺序的操作流程
+ *
+ * @example
+ * 用户输入："绘制一个订单处理流程，从下单到完成"
+ * 输出：完整的 Graphviz DOT 代码
+ */
+
+export const GRAPHVIZ_FLOWCHART_PROMPT = `
+# Graphviz Flowchart 生成要求
+
+## 专家视角 (Simplified DEPTH - D)
+
+作为流程图专家，你需要同时扮演：
+
+1. **业务流程设计专家**
+   - 识别流程中的关键步骤和决策点
+   - 理解业务逻辑的顺序和分支
+   - 确保流程的完整性（有明确的开始和结束）
+
+2. **Graphviz DOT 工程师**
+   - 精通 DOT 语言的流程图语法
+   - 熟练使用 rankdir 控制流程方向
+   - 掌握节点形状和样式的最佳实践
+
+3. **可视化设计师**
+   - 选择合适的布局方向（TB/LR）
+   - 使用节点形状表达步骤类型
+   - 使用颜色区分正常流程和异常处理
+
+## 核心语法
+
+### 图声明
+\`\`\`dot
+digraph FlowchartName {
+  // 布局方向
+  rankdir=TB;    // TB(上→下) 适合垂直流程
+  rankdir=LR;    // LR(左→右) 适合水平流程
+
+  // 默认样式
+  node [shape=box, style=filled, fillcolor="#e3f2fd"];
+  edge [color="#1976d2", fontsize=10];
+
+  // 节点和流程...
+}
+\`\`\`
+
+### 流程图专用节点形状
+\`\`\`dot
+// 开始/结束
+start [label="开始", shape=circle, fillcolor="#4caf50"];
+end [label="结束", shape=doublecircle, fillcolor="#4caf50"];
+
+// 处理步骤
+process [label="处理订单", shape=box, fillcolor="#2196f3"];
+
+// 判断/决策
+decision [label="库存充足?", shape=diamond, fillcolor="#ff9800"];
+
+// 输入/输出
+input [label="用户输入", shape=parallelogram, fillcolor="#9c27b0"];
+output [label="显示结果", shape=parallelogram, fillcolor="#9c27b0"];
+
+// 数据库操作
+db [label="查询数据库", shape=cylinder, fillcolor="#00bcd4"];
+\`\`\`
+
+### 流程连接
+\`\`\`dot
+// 顺序流程
+A -> B -> C;
+
+// 条件分支
+decision -> success [label="是"];
+decision -> fail [label="否", color="red", style=dashed];
+
+// 回到前面步骤（循环）
+retry -> check [label="重试", constraint=false, color="blue", style=dashed];
+\`\`\`
+
+## 生成示例
+
+### 示例 1: 用户登录流程（基础场景）
+**用户需求**：用户登录流程，包含验证和错误处理
+
+**生成代码**：
+\`\`\`dot
+digraph LoginFlow {
+  rankdir=TB;
+  node [shape=box, style=filled, fillcolor="#e3f2fd"];
+  edge [color="#333"];
+
+  // 节点定义
+  start [label="开始", shape=circle, fillcolor="#4caf50"];
+  input [label="输入用户名密码", shape=parallelogram, fillcolor="#9c27b0"];
+  validate [label="验证身份", shape=diamond, fillcolor="#ff9800"];
+  success [label="登录成功", shape=box, fillcolor="#4caf50"];
+  error [label="显示错误", shape=box, fillcolor="#f44336"];
+  end [label="结束", shape=doublecircle, fillcolor="#4caf50"];
+
+  // 流程连接
+  start -> input;
+  input -> validate;
+  validate -> success [label="验证通过"];
+  validate -> error [label="验证失败", color="red", style=dashed];
+  error -> input [label="重新输入", constraint=false, style=dashed];
+  success -> end;
+}
+\`\`\`
+
+**关键点**：
+- 使用 \`rankdir=TB\` 实现从上到下的流程
+- 判断节点使用菱形 \`shape=diamond\`
+- 开始/结束使用圆形区分
+- 失败路径使用红色虚线
+- 循环使用 \`constraint=false\` 避免布局混乱
+
+### 示例 2: 订单处理流程（中等复杂度）
+**用户需求**：电商订单处理，包含库存检查、支付、发货
+
+**生成代码**：
+\`\`\`dot
+digraph OrderProcess {
+  rankdir=LR;  // 水平布局适合长流程
+  node [shape=box, style="rounded,filled", fillcolor="#e3f2fd"];
+  edge [color="#1976d2"];
+
+  // 节点定义
+  start [label="开始", shape=circle, fillcolor="#4caf50"];
+  create [label="创建订单"];
+
+  checkStock [label="检查库存?", shape=diamond, fillcolor="#fff9c4"];
+  checkPay [label="已支付?", shape=diamond, fillcolor="#fff9c4"];
+
+  pay [label="等待支付"];
+  ship [label="发货"];
+  complete [label="完成", shape=doublecircle, fillcolor="#4caf50"];
+  cancel [label="取消订单", fillcolor="#ffcdd2"];
+
+  // 流程连接
+  start -> create;
+  create -> checkStock;
+
+  checkStock -> checkPay [label="有库存"];
+  checkStock -> cancel [label="无库存", color="red", style=dashed];
+
+  checkPay -> ship [label="是"];
+  checkPay -> pay [label="否"];
+
+  pay -> checkPay [label="支付完成", constraint=false, color="blue"];
+
+  ship -> complete;
+  cancel -> complete [style=dashed];
+}
+\`\`\`
+
+**关键点**：
+- 使用 \`rankdir=LR\` 实现水平流程布局
+- 多个判断节点清晰展示业务逻辑
+- 支付循环使用 \`constraint=false\`
+- 所有路径最终汇聚到结束节点
+
+### 示例 3: 文件上传处理流程（高级场景）
+**用户需求**：文件上传、验证、处理、存储的完整流程
+
+**生成代码**：
+\`\`\`dot
+digraph FileUploadFlow {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled"];
+  edge [color="#333", fontsize=9];
+
+  // 开始
+  start [label="开始", shape=circle, fillcolor="#4caf50"];
+
+  // 上传阶段
+  upload [label="选择文件", shape=parallelogram, fillcolor="#ce93d8"];
+  checkSize [label="大小 < 10MB?", shape=diamond, fillcolor="#fff9c4"];
+  checkType [label="类型合法?", shape=diamond, fillcolor="#fff9c4"];
+
+  // 处理阶段
+  process [label="处理文件", fillcolor="#90caf9"];
+  compress [label="压缩", fillcolor="#90caf9"];
+
+  // 存储阶段
+  saveDB [label="保存到数据库", shape=cylinder, fillcolor="#80deea"];
+  saveFile [label="保存文件", shape=cylinder, fillcolor="#80deea"];
+
+  // 结果
+  success [label="上传成功", fillcolor="#a5d6a7"];
+  sizeError [label="文件过大", fillcolor="#ef9a9a"];
+  typeError [label="类型错误", fillcolor="#ef9a9a"];
+  end [label="结束", shape=doublecircle, fillcolor="#4caf50"];
+
+  // 流程连接
+  start -> upload;
+  upload -> checkSize;
+
+  checkSize -> checkType [label="是"];
+  checkSize -> sizeError [label="否", color="red", style=dashed];
+
+  checkType -> process [label="是"];
+  checkType -> typeError [label="否", color="red", style=dashed];
+
+  process -> compress;
+  compress -> saveDB;
+  saveDB -> saveFile;
+  saveFile -> success;
+
+  success -> end;
+  sizeError -> end [style=dashed];
+  typeError -> end [style=dashed];
+}
+\`\`\`
+
+**关键点**：
+- 使用不同颜色区分流程阶段
+- 数据库操作使用 \`cylinder\` 形状
+- 输入/输出使用 \`parallelogram\` 形状
+- 错误路径清晰标识并汇聚到结束
+
+## 常见错误
+
+### 错误 1: 流程没有明确的结束点
+**❌ 错误写法**：
+\`\`\`dot
+digraph {
+  start -> process -> check;
+  check -> success;
+  check -> fail;
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+digraph {
+  start -> process -> check;
+  check -> success;
+  check -> fail;
+  success -> end;
+  fail -> end;
+  end [shape=doublecircle];
+}
+\`\`\`
+
+**原因**：完整的流程图应该有明确的结束节点，所有路径都应该收敛。
+
+### 错误 2: 判断节点未使用菱形
+**❌ 错误写法**：
+\`\`\`dot
+digraph {
+  check [label="是否通过?", shape=box];
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+digraph {
+  check [label="是否通过?", shape=diamond];
+}
+\`\`\`
+
+**原因**：菱形是流程图中表示判断/决策的标准形状。
+
+### 错误 3: 循环流程导致布局混乱
+**❌ 错误写法**：
+\`\`\`dot
+digraph {
+  A -> B -> C;
+  C -> A [label="重试"];
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+digraph {
+  A -> B -> C;
+  C -> A [label="重试", constraint=false, style=dashed];
+}
+\`\`\`
+
+**原因**：使用 \`constraint=false\` 让回退边不参与布局计算。
+
+### 错误 4: 布局方向选择不当
+**❌ 错误写法**：
+\`\`\`dot
+digraph {
+  rankdir=TB;  // 垂直布局
+  step1 -> step2 -> step3 -> step4 -> step5 -> step6;
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+digraph {
+  rankdir=LR;  // 水平布局更适合长流程
+  step1 -> step2 -> step3 -> step4 -> step5 -> step6;
+}
+\`\`\`
+
+**原因**：长流程使用水平布局更清晰，避免图表过高。
+
+### 错误 5: 条件分支缺少标签
+**❌ 错误写法**：
+\`\`\`dot
+digraph {
+  check -> success;
+  check -> fail;
+}
+\`\`\`
+
+**✅ 正确写法**：
+\`\`\`dot
+digraph {
+  check -> success [label="是"];
+  check -> fail [label="否"];
+}
+\`\`\`
+
+**原因**：判断分支应该明确标注条件，让流程更清晰。
+
+## 生成检查清单 (Simplified DEPTH - H)
+
+生成代码后，逐项检查：
+
+- [ ] **图类型正确**：使用 \`digraph\` 声明
+- [ ] **有明确起点**：开始节点使用 circle 形状
+- [ ] **有明确终点**：结束节点使用 doublecircle 形状
+- [ ] **判断节点用菱形**：所有决策点使用 diamond 形状
+- [ ] **条件分支有标签**：判断节点的分支标注条件
+- [ ] **流程完整收敛**：所有路径最终到达结束节点
+- [ ] **布局方向合理**：长流程用 LR，短流程用 TB
+- [ ] **循环处理正确**：使用 \`constraint=false\` 避免布局混乱
+- [ ] **颜色语义化**：正常/异常流程使用不同颜色
+- [ ] **代码可渲染**：语法正确，可直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+`;
+
+/**
+ * Token 估算: 约 1150 tokens
+ *
+ * 分配明细:
+ * - 专家视角: 100 tokens
+ * - 核心语法: 250 tokens
+ * - 生成示例: 550 tokens（3个示例，每个约 180 tokens）
+ * - 常见错误: 200 tokens（5个错误，每个约 40 tokens）
+ * - 检查清单: 50 tokens
+ */

@@ -1,38 +1,38 @@
 /**
- * L3: Graphviz Graph 生成提示词
+ * L3: Graphviz Network Topology 生成提示词
  *
- * 作用：定义无向图（Undirected Graph）的生成规则、示例和最佳实践
- * Token 预算：800-1200 tokens
- * 图表类型：Graphviz Graph（无向图）
+ * 作用：定义网络拓扑图的生成规则、示例和最佳实践
+ * Token 预算：900-1200 tokens
+ * 图表类型：Graphviz Network Topology（网络拓扑图）
  *
- * 用途：表示网络拓扑、社交关系、协作关系、对称关系等无方向性的图表
+ * 用途：表示网络连接、设备拓扑、基础设施布局等无方向性的网络结构
  *
  * @example
  * 用户输入："绘制一个办公室网络拓扑图"
- * 输出：完整的 Graphviz Graph 代码
+ * 输出：完整的 Graphviz 无向图代码
  */
 
-export const GRAPHVIZ_GRAPH_PROMPT = `
-# Graphviz Graph 生成要求
+export const GRAPHVIZ_NETWORK_PROMPT = `
+# Graphviz Network Topology 生成要求
 
 ## 专家视角 (Simplified DEPTH - D)
 
-作为无向图专家，你需要同时扮演：
+作为网络拓扑图专家，你需要同时扮演：
 
-1. **关系设计专家**
-   - 识别对称关系和相互连接
-   - 理解网络结构和拓扑特征
-   - 设计清晰的层次或环形结构
+1. **网络架构设计专家**
+   - 识别网络设备和连接关系
+   - 理解网络拓扑结构和层次特征
+   - 设计清晰的星型、环型或网状布局
 
 2. **Graphviz DOT 工程师**
    - 精通无向图语法（graph 和 --）
-   - 熟练使用 neato、circo、fdp 等无向图布局引擎
-   - 掌握对称布局和美学优化
+   - 熟练使用 circo、neato、fdp 等布局引擎
+   - 掌握网络拓扑的美学优化
 
 3. **网络可视化设计师**
-   - 选择合适的布局引擎（circo 环形、neato 弹簧模型）
-   - 使用节点大小和颜色表达权重或重要性
-   - 优化边的分布避免交叉
+   - 选择合适的布局引擎（circo 环形拓扑、neato 平衡布局）
+   - 使用节点形状区分设备类型（交换机、路由器、终端）
+   - 使用边的粗细表达网络带宽
 
 ## 核心语法
 

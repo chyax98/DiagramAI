@@ -30,14 +30,14 @@ vegalite/
 
 ## 🎯 图表类型覆盖
 
-| 图表类型 | 文件 | Token | 优先级 | 用途 |
-|---------|------|-------|--------|------|
-| **Bar Chart** | bar.ts | 1180 | P0 | 分类数据对比、排名展示 |
-| **Line Chart** | line.ts | 1150 | P0 | 时间序列、趋势分析 |
-| **Scatter Plot** | scatter.ts | 1140 | P1 | 相关性分析、分布展示 |
-| **Area Chart** | area.ts | 1120 | P1 | 累积趋势、堆叠对比 |
-| **Pie Chart** | pie.ts | 1150 | P1 | 比例展示、构成分析 |
-| **Heatmap** | heatmap.ts | 1170 | P2 | 二维数据密度、相关性矩阵 |
+| 图表类型         | 文件       | Token | 优先级 | 用途                     |
+| ---------------- | ---------- | ----- | ------ | ------------------------ |
+| **Bar Chart**    | bar.ts     | 1180  | P0     | 分类数据对比、排名展示   |
+| **Line Chart**   | line.ts    | 1150  | P0     | 时间序列、趋势分析       |
+| **Scatter Plot** | scatter.ts | 1140  | P1     | 相关性分析、分布展示     |
+| **Area Chart**   | area.ts    | 1120  | P1     | 累积趋势、堆叠对比       |
+| **Pie Chart**    | pie.ts     | 1150  | P1     | 比例展示、构成分析       |
+| **Heatmap**      | heatmap.ts | 1170  | P2     | 二维数据密度、相关性矩阵 |
 
 ---
 
@@ -68,6 +68,7 @@ L3: 各子图要求 (bar.ts, line.ts, ...)
 ### Token 预算分配
 
 **L2 (common.ts)**: 450 tokens
+
 - JSON 基本结构: 50 tokens
 - 核心概念: 250 tokens
 - 命名规范: 50 tokens
@@ -75,6 +76,7 @@ L3: 各子图要求 (bar.ts, line.ts, ...)
 - 常见错误: 30 tokens
 
 **L3 (各子图)**: 800-1200 tokens
+
 - 专家视角: 110 tokens
 - 核心语法: 240-280 tokens
 - 生成示例: 510-560 tokens (3个示例)
@@ -140,12 +142,14 @@ Vega-Lite 使用声明式 JSON 格式定义图表：
 ### 2. 核心概念
 
 **数据类型 (type)**:
+
 - `quantitative`: 数值型（连续数据）
 - `temporal`: 时间型
 - `ordinal`: 序数型（有序分类）
 - `nominal`: 类别型（无序分类）
 
 **标记类型 (mark)**:
+
 - `bar`: 柱状图
 - `line`: 折线图
 - `point`: 散点图
@@ -154,6 +158,7 @@ Vega-Lite 使用声明式 JSON 格式定义图表：
 - `rect`: 热力图
 
 **编码通道 (encoding)**:
+
 - 位置: `x`, `y`, `x2`, `y2`
 - 视觉: `color`, `size`, `shape`, `opacity`
 - 文本: `text`, `tooltip`
@@ -162,6 +167,7 @@ Vega-Lite 使用声明式 JSON 格式定义图表：
 ### 3. Kroki 支持
 
 所有 prompt 严格按照 Kroki 渲染要求编写：
+
 - ✅ 必须包含 `$schema` 声明
 - ✅ `data.values` 必须是对象数组
 - ✅ 所有 `encoding` 必须指定 `field` 和 `type`
@@ -176,19 +182,20 @@ Vega-Lite 使用声明式 JSON 格式定义图表：
 **用户输入**: "展示 A、B、C、D、E 五个类别的销售数量"
 
 **生成代码**:
+
 ```json
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "data": {
     "values": [
-      {"category": "A", "sales": 28},
-      {"category": "B", "sales": 55}
+      { "category": "A", "sales": 28 },
+      { "category": "B", "sales": 55 }
     ]
   },
   "mark": "bar",
   "encoding": {
-    "x": {"field": "category", "type": "ordinal"},
-    "y": {"field": "sales", "type": "quantitative"}
+    "x": { "field": "category", "type": "ordinal" },
+    "y": { "field": "sales", "type": "quantitative" }
   }
 }
 ```
@@ -198,19 +205,20 @@ Vega-Lite 使用声明式 JSON 格式定义图表：
 **用户输入**: "2024年1-6月的用户增长趋势"
 
 **生成代码**:
+
 ```json
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "data": {
     "values": [
-      {"month": "2024-01", "users": 1000},
-      {"month": "2024-02", "users": 1500}
+      { "month": "2024-01", "users": 1000 },
+      { "month": "2024-02", "users": 1500 }
     ]
   },
-  "mark": {"type": "line", "point": true},
+  "mark": { "type": "line", "point": true },
   "encoding": {
-    "x": {"field": "month", "type": "temporal", "timeUnit": "yearmonth"},
-    "y": {"field": "users", "type": "quantitative"}
+    "x": { "field": "month", "type": "temporal", "timeUnit": "yearmonth" },
+    "y": { "field": "users", "type": "quantitative" }
   }
 }
 ```
@@ -220,21 +228,22 @@ Vega-Lite 使用声明式 JSON 格式定义图表：
 **用户输入**: "市场份额分布，A公司 40%，B公司 30%"
 
 **生成代码**:
+
 ```json
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "data": {
     "values": [
-      {"company": "A公司", "share": 40},
-      {"company": "B公司", "share": 30}
+      { "company": "A公司", "share": 40 },
+      { "company": "B公司", "share": 30 }
     ]
   },
-  "mark": {"type": "arc", "tooltip": true},
+  "mark": { "type": "arc", "tooltip": true },
   "encoding": {
-    "theta": {"field": "share", "type": "quantitative"},
-    "color": {"field": "company", "type": "nominal"}
+    "theta": { "field": "share", "type": "quantitative" },
+    "color": { "field": "company", "type": "nominal" }
   },
-  "view": {"stroke": null}
+  "view": { "stroke": null }
 }
 ```
 
@@ -244,24 +253,24 @@ Vega-Lite 使用声明式 JSON 格式定义图表：
 
 每个 prompt 都经过以下维度评估：
 
-| 维度 | 标准 | 目标分数 |
-|------|------|---------|
-| **框架完整性** | 完整实现 DEPTH 五要素 | ≥ 8/10 |
-| **示例质量** | 可渲染、有代表性、难度递增 | ≥ 9/10 |
-| **错误覆盖** | 覆盖常见错误、说明清晰 | ≥ 8/10 |
-| **Token 效率** | 在预算内且无冗余 | ≥ 7/10 |
+| 维度           | 标准                       | 目标分数 |
+| -------------- | -------------------------- | -------- |
+| **框架完整性** | 完整实现 DEPTH 五要素      | ≥ 8/10   |
+| **示例质量**   | 可渲染、有代表性、难度递增 | ≥ 9/10   |
+| **错误覆盖**   | 覆盖常见错误、说明清晰     | ≥ 8/10   |
+| **Token 效率** | 在预算内且无冗余           | ≥ 7/10   |
 
 ### 自我评估结果
 
-| 文件 | 框架完整性 | 示例质量 | 错误覆盖 | Token 效率 | 总分 |
-|------|-----------|---------|---------|-----------|------|
-| common.ts | 9/10 | N/A | 8/10 | 9/10 | 8.7/10 |
-| bar.ts | 9/10 | 10/10 | 9/10 | 8/10 | 9.0/10 |
-| line.ts | 9/10 | 10/10 | 9/10 | 8/10 | 9.0/10 |
-| scatter.ts | 9/10 | 10/10 | 8/10 | 8/10 | 8.8/10 |
-| area.ts | 9/10 | 9/10 | 8/10 | 8/10 | 8.5/10 |
-| pie.ts | 9/10 | 10/10 | 9/10 | 8/10 | 9.0/10 |
-| heatmap.ts | 9/10 | 9/10 | 8/10 | 8/10 | 8.5/10 |
+| 文件       | 框架完整性 | 示例质量 | 错误覆盖 | Token 效率 | 总分   |
+| ---------- | ---------- | -------- | -------- | ---------- | ------ |
+| common.ts  | 9/10       | N/A      | 8/10     | 9/10       | 8.7/10 |
+| bar.ts     | 9/10       | 10/10    | 9/10     | 8/10       | 9.0/10 |
+| line.ts    | 9/10       | 10/10    | 9/10     | 8/10       | 9.0/10 |
+| scatter.ts | 9/10       | 10/10    | 8/10     | 8/10       | 8.8/10 |
+| area.ts    | 9/10       | 9/10     | 8/10     | 8/10       | 8.5/10 |
+| pie.ts     | 9/10       | 10/10    | 9/10     | 8/10       | 9.0/10 |
+| heatmap.ts | 9/10       | 9/10     | 8/10     | 8/10       | 8.5/10 |
 
 **平均分**: 8.8/10 ✅
 
@@ -272,31 +281,37 @@ Vega-Lite 使用声明式 JSON 格式定义图表：
 ### 基础测试场景
 
 **Bar Chart**:
+
 1. 简单分类对比（3-5 个类别）
 2. 分组柱状图（2个维度）
 3. 水平柱状图（排名展示）
 
 **Line Chart**:
+
 1. 单系列时间趋势（6个月）
 2. 多系列对比（2-3条线）
 3. 平滑曲线（温度变化）
 
 **Scatter Plot**:
+
 1. 基础散点图（身高体重）
 2. 分类散点图（不同班级）
 3. 气泡图（3个维度）
 
 **Area Chart**:
+
 1. 基础面积图（累积趋势）
 2. 堆叠面积图（多系列）
 3. 流图（Streamgraph）
 
 **Pie Chart**:
+
 1. 基础饼图（4个类别）
 2. 环形图（Donut Chart）
 3. 带百分比标签饼图
 
 **Heatmap**:
+
 1. 基础热力图（3x3 矩阵）
 2. 时间热力图（周×时段）
 3. 相关性矩阵
@@ -315,11 +330,13 @@ Vega-Lite 使用声明式 JSON 格式定义图表：
 ## 📚 参考资源
 
 ### 官方文档
+
 - [Vega-Lite 官方文档](https://vega.github.io/vega-lite/)
 - [Vega-Lite 示例库](https://vega.github.io/vega-lite/examples/)
 - [Kroki Vega-Lite 支持](https://kroki.io/#vegalite)
 
 ### 项目文档
+
 - [PROMPT_WRITING_GUIDE.md](../../../claudedocs/PROMPT_WRITING_GUIDE.md)
 - [PROMPT_TEAM_TASKS.md](../../../claudedocs/PROMPT_TEAM_TASKS.md)
 - [CLAUDE.md](../../../CLAUDE.md)
@@ -331,22 +348,25 @@ Vega-Lite 使用声明式 JSON 格式定义图表：
 ### 集成到系统
 
 1. **更新主 index.ts**
+
    ```typescript
    // src/lib/constants/prompts/index.ts
    export * from "./vegalite";
    ```
 
 2. **更新类型定义**
+
    ```typescript
    // src/types/diagram.ts
    export type VegaliteType = "bar" | "line" | "scatter" | "area" | "pie" | "heatmap";
    ```
 
 3. **集成到服务层**
+
    ```typescript
    // src/lib/services/DiagramGenerationService.ts
    import { getVegalitePrompt } from "@/lib/constants/prompts/vegalite";
-   
+
    const prompt = getVegalitePrompt(diagramType);
    ```
 

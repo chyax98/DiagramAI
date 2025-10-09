@@ -1,11 +1,9 @@
 /**
- * L2: Mermaid 语言通用提示词
+ * Mermaid 语言通用规范
  *
- * 作用：定义 Mermaid 语言的通用语法规范和最佳实践
- * Token 预算：200-500 tokens
- * 适用范围：所有 Mermaid 图表类型（flowchart、sequence、class 等）
+ * 定义 Mermaid 语言的通用语法规范、命名规范和常见错误。
+ * 适用于所有 Mermaid 图表类型（flowchart、sequence、class 等）。
  *
- * 注：此层可选，如果语法规范可以在 L3 中简洁说明则可省略
  */
 
 export const MERMAID_LANGUAGE_PROMPT = `
@@ -145,13 +143,3 @@ graph TD
 
 **原因**: 保持代码结构清晰，先定义结构，后设置样式
 `;
-
-/**
- * Token 估算: 约 450 tokens
- *
- * 分配明细:
- * - 语法要求: 80 tokens
- * - 命名规范: 100 tokens
- * - 样式系统: 70 tokens
- * - 常见错误: 200 tokens
- */

@@ -1,11 +1,5 @@
 /**
- * L3: Mermaid Quadrant Chart 生成提示词
- *
- * 作用：定义 Mermaid 象限图的生成规则、示例和最佳实践
- * Token 预算：700-900 tokens
- * 图表类型：Mermaid Quadrant Chart（象限图）
- *
- * 用途：表示优先级矩阵、竞品分析、风险评估
+ * Mermaid Quadrant Chart 生成提示词
  *
  * @example
  * 用户输入："绘制任务优先级矩阵"
@@ -187,8 +181,3 @@ quadrantChart
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 850 tokens
- */
-

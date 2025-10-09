@@ -1,11 +1,5 @@
 /**
- * L3: Graphviz Network Topology 生成提示词
- *
- * 作用：定义网络拓扑图的生成规则、示例和最佳实践
- * Token 预算：900-1200 tokens
- * 图表类型：Graphviz Network Topology（网络拓扑图）
- *
- * 用途：表示网络连接、设备拓扑、基础设施布局等无方向性的网络结构
+ * Graphviz Network Topology 生成提示词
  *
  * @example
  * 用户输入："绘制一个办公室网络拓扑图"
@@ -422,15 +416,3 @@ graph {
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1170 tokens
- *
- * 分配明细:
- * - 专家视角: 100 tokens
- * - 核心语法: 200 tokens
- * - 生成示例: 600 tokens（3个示例，每个约 200 tokens）
- * - 常见错误: 220 tokens（6个错误，每个约 35 tokens）
- * - 检查清单: 50 tokens
- */
-

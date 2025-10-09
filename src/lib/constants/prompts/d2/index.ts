@@ -30,29 +30,48 @@ import { D2_ARCHITECTURE_PROMPT } from "./architecture";
 import { D2_NETWORK_PROMPT } from "./network";
 
 /**
- * 获取 D2 图表的完整提示词（L1 + L2 + L3）
+ * 获取 D2 图表的完整提示词（任务上下文 + L1 + L2 + L3）
  */
 function getD2Prompt(diagramType: DiagramType): string {
+  const taskContext = buildTaskContext("d2", diagramType);
   const l1 = UNIVERSAL_PROMPT;
   const l2 = D2_COMMON_PROMPT;
-  
+
   const promptMap: Record<string, string> = {
     flowchart: D2_FLOWCHART_PROMPT,
     sequence: D2_SEQUENCE_PROMPT,
     architecture: D2_ARCHITECTURE_PROMPT,
     network: D2_NETWORK_PROMPT,
   };
-  
+
   const l3 = promptMap[diagramType] || D2_FLOWCHART_PROMPT;
-  
-  return [l1, l2, l3]
-    .filter((p) => p.length > 0)
-    .join("\n\n---\n\n");
+
+  return [taskContext, l1, l2, l3].filter((p) => p.length > 0).join("\n\n---\n\n");
+}
+
+/**
+ * 构建任务上下文
+ */
+function buildTaskContext(renderLanguage: string, diagramType: string): string {
+  return `# 当前任务
+
+你正在生成 **${renderLanguage.toUpperCase()} ${diagramType}** 代码。
+
+## 任务参数
+
+- **渲染语言**: ${renderLanguage}
+- **图表类型**: ${diagramType}
+- **渲染引擎**: Kroki
+- **输出格式**: \`\`\`${renderLanguage}\n[你的代码]\n\`\`\`
+
+## 执行要求
+
+请基于以上任务参数，严格执行下方的生成规范。`;
 }
 
 /**
  * D2 Prompts 配置对象
- * 
+ *
  * 实现 PromptConfig<"d2"> 接口，供 DIAGRAM_PROMPTS 使用
  */
 export const d2Prompts: PromptConfig<"d2"> = {
@@ -60,4 +79,3 @@ export const d2Prompts: PromptConfig<"d2"> = {
     return getD2Prompt(diagramType);
   },
 };
-

@@ -55,18 +55,21 @@ const DIAGRAM_PROMPT_MAP: Record<string, string> = {
 // ============================================
 
 /**
- * 获取 C4-PlantUML 图表的完整提示词（L1 + L2 PlantUML + L2 C4 + L3）
+ * 获取 C4-PlantUML 图表的完整提示词（任务上下文 + L1 + L2 PlantUML + L2 C4 + L3）
  *
  * @param diagramType - 图表类型（如 "context", "container", "component", "sequence"）
- * @returns 完整的提示词
+ * @returns 完整的提示词（包含任务上下文）
  *
  * @example
  * ```typescript
  * const prompt = getC4PlantUMLPrompt("context");
- * // 返回: L1 通用规范 + L2 PlantUML 语言 + L2 C4 语言 + L3 Context 要求
+ * // 返回: 任务上下文 + L1 通用规范 + L2 PlantUML 语言 + L2 C4 语言 + L3 Context 要求
  * ```
  */
 export function getC4PlantUMLPrompt(diagramType: DiagramType): string {
+  // 任务上下文：明确告知 AI 当前任务的具体参数
+  const taskContext = buildTaskContext("c4plantuml", diagramType);
+
   // L1: 通用规范（所有图表共享）
   const l1 = UNIVERSAL_PROMPT;
 
@@ -81,18 +84,40 @@ export function getC4PlantUMLPrompt(diagramType: DiagramType): string {
 
   // 如果找不到对应的 L3 提示词，使用默认提示
   if (!l3) {
-    console.warn(
-      `[C4-PlantUML Prompt] 未找到图表类型 "${diagramType}" 的 L3 提示词，使用默认提示`
-    );
-    return [l1, l2a, l2b, getDefaultC4Prompt(diagramType)]
+    console.warn(`[C4-PlantUML Prompt] 未找到图表类型 "${diagramType}" 的 L3 提示词，使用默认提示`);
+    return [taskContext, l1, l2a, l2b, getDefaultC4Prompt(diagramType)]
       .filter((p) => p.length > 0)
       .join("\n\n---\n\n");
   }
 
-  // 组合提示词
-  return [l1, l2a, l2b, l3]
-    .filter((p) => p.length > 0)
-    .join("\n\n---\n\n");
+  // 组合：任务上下文 + 提示词
+  return [taskContext, l1, l2a, l2b, l3].filter((p) => p.length > 0).join("\n\n---\n\n");
+}
+
+/**
+ * 构建任务上下文
+ *
+ * 明确告知 AI 当前的渲染语言、图表类型、输出格式等关键信息。
+ *
+ * @param renderLanguage - 渲染语言（如 "c4plantuml"）
+ * @param diagramType - 图表类型（如 "context"）
+ * @returns 任务上下文字符串
+ */
+function buildTaskContext(renderLanguage: string, diagramType: string): string {
+  return `# 当前任务
+
+你正在生成 **${renderLanguage.toUpperCase()} ${diagramType}** 代码。
+
+## 任务参数
+
+- **渲染语言**: ${renderLanguage}
+- **图表类型**: ${diagramType}
+- **渲染引擎**: Kroki
+- **输出格式**: \`\`\`${renderLanguage}\n[你的代码]\n\`\`\`
+
+## 执行要求
+
+请基于以上任务参数，严格执行下方的生成规范。`;
 }
 
 /**
@@ -162,4 +187,3 @@ export const c4plantumlPrompts: PromptConfig<"c4plantuml"> = {
     return getC4PlantUMLPrompt(diagramType);
   },
 };
-

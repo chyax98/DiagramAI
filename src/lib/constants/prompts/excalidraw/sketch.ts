@@ -1,11 +1,5 @@
 /**
- * L3: Excalidraw Sketch 生成提示词
- *
- * 作用：定义手绘草图的生成规则、示例和最佳实践
- * Token 预算：800-1200 tokens
- * 图表类型：Excalidraw Sketch（手绘草图）
- *
- * 用途：快速绘制创意草图、头脑风暴、概念设计
+ * Excalidraw Sketch 生成提示词
  *
  * @example
  * 用户输入："绘制一个移动应用的功能架构草图"
@@ -751,15 +745,3 @@ export const EXCALIDRAW_SKETCH_PROMPT = `
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1180 tokens
- *
- * 分配明细:
- * - 专家视角: 100 tokens
- * - 核心语法: 150 tokens
- * - 生成示例: 650 tokens（3个示例）
- * - 常见错误: 220 tokens（6个错误）
- * - 检查清单: 60 tokens
- */
-

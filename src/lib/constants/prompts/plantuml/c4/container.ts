@@ -1,11 +1,5 @@
 /**
- * L3: C4-PlantUML Container 生成提示词
- *
- * 作用：定义 C4 模型 Level 2 - 容器图的生成规则
- * Token 预算：800-1200 tokens
- * 图表类型：C4 Container Diagram
- *
- * 用途：展示系统内部的高层技术构成（应用、数据库、服务等）及其交互关系
+ * C4-PlantUML Container 生成提示词
  *
  * @example
  * 用户输入："微服务电商系统的容器图，包含Web应用、API网关、订单服务、用户服务和数据库"
@@ -357,14 +351,3 @@ Container(userService, "用户服务", "Spring Boot", "用户管理 API")
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1190 tokens
- *
- * 分配明细:
- * - 专家视角: 110 tokens
- * - 核心语法: 200 tokens
- * - 生成示例: 590 tokens（3个示例）
- * - 常见错误: 240 tokens（6个错误）
- * - 检查清单: 50 tokens
- */

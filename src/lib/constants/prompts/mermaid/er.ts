@@ -1,11 +1,5 @@
 /**
- * L3: Mermaid ER Diagram 生成提示词
- *
- * 作用：定义 Mermaid 实体关系图的生成规则、示例和最佳实践
- * Token 预算：900-1200 tokens
- * 图表类型：Mermaid ER Diagram（实体关系图）
- *
- * 用途：表示数据库表结构、实体关系、数据模型设计
+ * Mermaid ER Diagram 生成提示词
  *
  * @example
  * 用户输入："绘制电商系统的用户、订单、商品的ER图"
@@ -389,15 +383,3 @@ erDiagram
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1150 tokens
- *
- * 分配明细:
- * - 专家视角: 120 tokens
- * - 核心语法: 300 tokens
- * - 生成示例: 450 tokens（3个示例）
- * - 常见错误: 220 tokens（6个错误）
- * - 检查清单: 60 tokens
- */
-

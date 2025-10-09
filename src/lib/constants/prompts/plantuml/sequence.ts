@@ -1,11 +1,5 @@
 /**
- * L3: PlantUML Sequence 生成提示词
- *
- * 作用：定义 PlantUML 时序图的生成规则、示例和最佳实践
- * Token 预算：900-1200 tokens
- * 图表类型：PlantUML Sequence（时序图）
- *
- * 用途：表示系统中对象之间的交互顺序和消息传递
+ * PlantUML Sequence 生成提示词
  *
  * @example
  * 用户输入："绘制用户登录的时序图，包含前端、后端和数据库"
@@ -407,15 +401,3 @@ A -> B: "GET /api/users[id]"
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1150 tokens
- *
- * 分配明细:
- * - 专家视角: 120 tokens
- * - 核心语法: 300 tokens
- * - 生成示例: 500 tokens（3个示例，每个约 160-170 tokens）
- * - 常见错误: 180 tokens（5个错误，每个约 35-40 tokens）
- * - 检查清单: 50 tokens
- */
-

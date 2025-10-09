@@ -1,11 +1,5 @@
 /**
- * L3: PlantUML Class 生成提示词
- *
- * 作用：定义 PlantUML 类图的生成规则、示例和最佳实践
- * Token 预算：900-1200 tokens
- * 图表类型：PlantUML Class（类图）
- *
- * 用途：表示系统的静态结构，包括类、接口、属性、方法及其关系
+ * PlantUML Class 生成提示词
  *
  * @example
  * 用户输入："绘制一个电商系统的类图，包含用户、订单、商品"
@@ -450,15 +444,3 @@ abstract class AbstractClass {
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1180 tokens
- *
- * 分配明细:
- * - 专家视角: 120 tokens
- * - 核心语法: 320 tokens
- * - 生成示例: 500 tokens（3个示例，每个约 160-170 tokens）
- * - 常见错误: 190 tokens（5个错误，每个约 35-40 tokens）
- * - 检查清单: 50 tokens
- */
-

@@ -1,11 +1,5 @@
 /**
- * L3: Graphviz Flowchart 生成提示词
- *
- * 作用：定义流程图的生成规则、示例和最佳实践
- * Token 预算：900-1200 tokens
- * 图表类型：Graphviz Flowchart（流程图）
- *
- * 用途：表示业务流程、算法步骤、决策路径等有顺序的操作流程
+ * Graphviz Flowchart 生成提示词
  *
  * @example
  * 用户输入："绘制一个订单处理流程，从下单到完成"
@@ -342,14 +336,3 @@ digraph {
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1150 tokens
- *
- * 分配明细:
- * - 专家视角: 100 tokens
- * - 核心语法: 250 tokens
- * - 生成示例: 550 tokens（3个示例，每个约 180 tokens）
- * - 常见错误: 200 tokens（5个错误，每个约 40 tokens）
- * - 检查清单: 50 tokens
- */

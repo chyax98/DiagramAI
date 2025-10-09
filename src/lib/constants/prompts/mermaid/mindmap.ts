@@ -1,11 +1,5 @@
 /**
- * L3: Mermaid Mindmap 生成提示词
- *
- * 作用：定义 Mermaid 思维导图的生成规则、示例和最佳实践
- * Token 预算：800-1000 tokens
- * 图表类型：Mermaid Mindmap（思维导图）
- *
- * 用途：表示概念层级、知识结构、头脑风暴
+ * Mermaid Mindmap 生成提示词
  *
  * @example
  * 用户输入："绘制软件架构设计的思维导图"
@@ -236,8 +230,3 @@ mindmap
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 900 tokens
- */
-

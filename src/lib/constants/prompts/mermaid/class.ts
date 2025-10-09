@@ -1,11 +1,5 @@
 /**
- * L3: Mermaid Class Diagram 生成提示词
- *
- * 作用：定义 Mermaid 类图的生成规则、示例和最佳实践
- * Token 预算：900-1200 tokens
- * 图表类型：Mermaid Class Diagram（类图）
- *
- * 用途：表示类的结构、属性、方法和类之间的关系
+ * Mermaid Class Diagram 生成提示词
  *
  * @example
  * 用户输入："绘制一个电商系统的类图，包括用户、订单和商品"
@@ -390,7 +384,3 @@ classDiagram
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1150 tokens
- */

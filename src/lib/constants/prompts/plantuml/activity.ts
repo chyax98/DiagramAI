@@ -1,11 +1,5 @@
 /**
- * L3: PlantUML Activity 生成提示词
- *
- * 作用：定义 PlantUML 活动图的生成规则、示例和最佳实践
- * Token 预算：800-1100 tokens
- * 图表类型：PlantUML Activity（活动图）
- *
- * 用途：表示业务流程、工作流、算法逻辑等动态行为
+ * PlantUML Activity 生成提示词
  *
  * @example
  * 用户输入："绘制用户注册流程的活动图，包含验证和错误处理"
@@ -421,15 +415,3 @@ stop
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1050 tokens
- *
- * 分配明细:
- * - 专家视角: 120 tokens
- * - 核心语法: 280 tokens
- * - 生成示例: 450 tokens（3个示例）
- * - 常见错误: 150 tokens（5个错误）
- * - 检查清单: 50 tokens
- */
-

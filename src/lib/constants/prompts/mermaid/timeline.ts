@@ -1,11 +1,5 @@
 /**
- * L3: Mermaid Timeline 生成提示词
- *
- * 作用：定义 Mermaid 时间线的生成规则、示例和最佳实践
- * Token 预算：700-900 tokens
- * 图表类型：Mermaid Timeline（时间线）
- *
- * 用途：表示历史事件、产品演进、项目里程碑
+ * Mermaid Timeline 生成提示词
  *
  * @example
  * 用户输入："绘制公司发展历程的时间线"
@@ -175,8 +169,3 @@ timeline
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 800 tokens
- */
-

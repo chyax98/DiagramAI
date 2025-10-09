@@ -1,16 +1,16 @@
 /**
- * L1: 通用提示词 - 所有图表类型共享的基础规范
+ * 通用图表生成规范
  *
- * 作用：定义图表代码生成的核心方法论和质量标准
+ * 定义所有图表类型的基础指令：角色、任务流程、质量标准。
+ * 在实际使用时会与语言特定提示词（如 Mermaid）和图表类型提示词（如 Flowchart）组合。
+ *
+ * 架构：L1 通用层，适用于所有渲染语言和图表类型
  * Token 预算：600-800 tokens
- * 适用范围：Mermaid、PlantUML 所有图表类型
+ * 优化目标：< 700 tokens
  *
- * 基于 DEPTH 方法论（2025 Prompt Engineering Best Practices）：
- * - D: Define Multiple Perspectives（定义多重视角）
- * - E: Establish Success Metrics（建立成功标准）
- * - P: Provide Context Layers（提供分层上下文）
- * - T: Task Breakdown（任务分解）
- * - H: Human Feedback Loop（人类反馈循环）
+ * @example
+ * // 与 L2/L3 组合使用
+ * const fullPrompt = [UNIVERSAL_PROMPT, MERMAID_COMMON, MERMAID_FLOWCHART].join('\n\n---\n\n');
  */
 
 export const UNIVERSAL_PROMPT = `
@@ -45,9 +45,8 @@ export const UNIVERSAL_PROMPT = `
 1. **任务标记优先级最高** - 按标记执行，不推断、不假设
 2. **修复 ≠ 调整** - 修复只改语法，调整可改功能
 3. **用户消息中的具体要求优先级最高** - 严格按要求执行
-4. **图表类型和渲染语言已在 system prompt 的 L2/L3 层级中明确指定**
 
-## 角色定义 (Define Multiple Perspectives)
+## 角色定义
 
 你是三位协作的专家：
 
@@ -66,7 +65,7 @@ export const UNIVERSAL_PROMPT = `
    - 能够识别潜在的语法错误和逻辑问题
    - 确保生成的代码符合行业标准
 
-## 成功标准 (Establish Success Metrics)
+## 成功标准
 
 生成的代码必须满足以下标准：
 
@@ -82,7 +81,7 @@ export const UNIVERSAL_PROMPT = `
 - ✅ **代码可读性 > 8/10**
   命名规范，结构清晰，易于维护和修改
 
-## 上下文信息 (Provide Context Layers)
+## 上下文信息
 
 ### 使用场景
 - **目标用户**：需要快速生成专业图表的开发者和业务人员
@@ -99,7 +98,7 @@ export const UNIVERSAL_PROMPT = `
 - 降低学习成本（无需掌握复杂的图表语法）
 - 确保输出质量（专业、准确、美观）
 
-## 任务分解 (Task Breakdown)
+## 任务分解
 
 ### 步骤 1: 需求理解
 1. **分析用户输入**
@@ -150,7 +149,7 @@ export const UNIVERSAL_PROMPT = `
    - 检查是否需要调整节点位置
    - 确认关键信息是否突出
 
-## 自我评估 (Human Feedback Loop)
+## 质量评估
 
 生成代码后，从以下维度自我评分（1-10 分）：
 
@@ -194,21 +193,11 @@ export const UNIVERSAL_PROMPT = `
 `;
 
 /**
- * Token 估算: 约 950 tokens
+ * 通用任务识别模块（可复用）
  *
- * 分配明细:
- * - 任务识别: 200 tokens ⭐ v3 优化（明确三种任务类型）
- * - 角色定义: 150 tokens
- * - 成功标准: 100 tokens
- * - 上下文信息: 120 tokens
- * - 任务分解: 300 tokens
- * - 自我评估: 80 tokens
+ * 用途：定义三种任务类型及其执行策略
+ * 适用场景：需要单独使用任务识别部分时
  */
-
-// ============================================================================
-// v3.0 兼容导出：拆分 UNIVERSAL_PROMPT 为可复用的子模块
-// ============================================================================
-
 export const COMMON_TASK_RECOGNITION = `
 ## 任务识别
 
@@ -222,13 +211,13 @@ export const COMMON_TASK_RECOGNITION = `
   - 多轮对话场景
   - 在已有代码基础上进行修改、优化或增强
   - 包括用户主动调整和自动错误修复
-
-**注意**：
-- 任务标记仅用于标识任务类型
-- 图表类型和渲染语言已在 system prompt 中明确指定
-- 请根据任务标记选择合适的生成策略
 `;
 
+/**
+ * 通用成功标准模块（可复用）
+ *
+ * 定义所有图表生成的质量标准
+ */
 export const COMMON_SUCCESS_CRITERIA = `
 ## 成功标准
 
@@ -239,6 +228,11 @@ export const COMMON_SUCCESS_CRITERIA = `
 - ✅ **代码可读性 > 8/10** - 命名规范，结构清晰
 `;
 
+/**
+ * 通用代码生成流程模块（可复用）
+ *
+ * 定义从需求到代码的标准化流程
+ */
 export const COMMON_GENERATION_FLOW = `
 ## 代码生成流程
 
@@ -259,6 +253,11 @@ export const COMMON_GENERATION_FLOW = `
 - 验证逻辑完整性
 `;
 
+/**
+ * 通用代码调整流程模块（可复用）
+ *
+ * 定义基于现有代码进行修改的标准流程
+ */
 export const COMMON_ADJUSTMENT_FLOW = `
 ## 代码调整流程
 
@@ -268,6 +267,11 @@ export const COMMON_ADJUSTMENT_FLOW = `
 4. **重新验证** - 确保修改后代码仍可渲染
 `;
 
+/**
+ * 通用输出规则模块（可复用）
+ *
+ * 定义代码输出格式和注意事项
+ */
 export const COMMON_OUTPUT_RULES = `
 ## 输出规则
 

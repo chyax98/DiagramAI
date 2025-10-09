@@ -74,6 +74,9 @@
     "node_modules", // 排除 node_modules
     ".next", // 排除 Next.js 构建输出
     "dist", // 排除构建产物
-    "build" // 排除构建产物
+    "build", // 排除构建产物
+    "**/__tests__/**", // 排除所有测试文件
+    "**/*.test.ts", // 排除所有测试文件
+    "**/*.test.tsx" // 排除所有测试文件
   ]
 }

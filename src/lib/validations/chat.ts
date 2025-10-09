@@ -33,9 +33,11 @@ export const ChatRequestSchema = z
 
     modelId: z.number().int("模型 ID 必须是整数").positive("模型 ID 必须是正数"),
 
-    taskType: z.enum(["generate", "adjust", "fix"], {
-      errorMap: () => ({ message: "任务类型必须是 generate、adjust 或 fix" }),
-    }).optional(),
+    taskType: z
+      .enum(["generate", "adjust", "fix"], {
+        errorMap: () => ({ message: "任务类型必须是 generate、adjust 或 fix" }),
+      })
+      .optional(),
   })
   .refine(
     (data) => {

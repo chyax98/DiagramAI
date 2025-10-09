@@ -1,11 +1,5 @@
 /**
- * L3: PlantUML Object 生成提示词
- *
- * 作用：定义 PlantUML 对象图的生成规则、示例和最佳实践
- * Token 预算：700-1000 tokens
- * 图表类型：PlantUML Object（对象图）
- *
- * 用途：表示系统在某一时刻的对象实例及其关系
+ * PlantUML Object 生成提示词
  *
  * @example
  * 用户输入："绘制订单系统的对象图，包含订单、用户、商品实例"
@@ -343,8 +337,3 @@ object "user1" as u1 : User
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 950 tokens
- */
-

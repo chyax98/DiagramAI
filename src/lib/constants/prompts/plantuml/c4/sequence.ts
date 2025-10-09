@@ -1,11 +1,5 @@
 /**
- * L3: C4-PlantUML Sequence 生成提示词
- *
- * 作用：定义 C4 时序图的生成规则（展示系统组件间的交互流程）
- * Token 预算：800-1200 tokens
- * 图表类型：C4 Sequence Diagram
- *
- * 用途：展示 C4 架构中容器或组件之间的交互顺序和消息传递
+ * C4-PlantUML Sequence 生成提示词
  *
  * @example
  * 用户输入："用户下单流程的 C4 时序图"
@@ -429,15 +423,3 @@ participant A
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1150 tokens
- *
- * 分配明细:
- * - 专家视角: 110 tokens
- * - 核心语法: 200 tokens
- * - 生成示例: 550 tokens（3个示例）
- * - 常见错误: 240 tokens（6个错误）
- * - 检查清单: 50 tokens
- */
-

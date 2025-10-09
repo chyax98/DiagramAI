@@ -1,11 +1,5 @@
 /**
- * L3: WaveDrom Register 寄存器图生成提示词
- *
- * 作用：定义寄存器位字段图的生成规则、示例和最佳实践
- * Token 预算：800-1200 tokens
- * 图表类型：WaveDrom Register Diagram（寄存器图/位字段图）
- *
- * 用途：表示寄存器、指令编码、数据结构的位字段布局，用于硬件寄存器定义、指令集架构、协议帧格式等
+ * WaveDrom Register 寄存器图生成提示词
  *
  * @example
  * 用户输入："绘制 32 位状态寄存器的位字段定义"
@@ -294,15 +288,3 @@ export const WAVEDROM_REGISTER_PROMPT = `
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1150 tokens
- *
- * 分配明细:
- * - 专家视角: 100 tokens
- * - 核心语法: 220 tokens
- * - 生成示例: 530 tokens（4个示例）
- * - 常见错误: 230 tokens（6个错误）
- * - 检查清单: 70 tokens
- */
-

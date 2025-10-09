@@ -1,10 +1,7 @@
 /**
- * L2: Excalidraw 语言规范
+ * Excalidraw 语言规范
  *
- * 作用：定义 Excalidraw JSON 格式的通用规则和最佳实践
- * Token 预算：200-500 tokens
- *
- * 适用范围：所有 Excalidraw 图表类型（sketch、wireframe、diagram）
+ * 定义 Excalidraw JSON 格式的通用规则和最佳实践,适用于所有 Excalidraw 图表类型。
  */
 
 export const EXCALIDRAW_COMMON_PROMPT = `
@@ -112,8 +109,3 @@ Excalidraw 使用标准 JSON 格式，必须包含以下顶层属性：
 - \`1\` - 标准手绘（推荐默认值）
 - \`2\` - 强烈手绘（适合草图）
 `;
-
-/**
- * Token 估算: 约 450 tokens
- */
-

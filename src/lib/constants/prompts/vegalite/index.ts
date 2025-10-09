@@ -120,21 +120,40 @@ import type { PromptConfig } from "../types";
 import { UNIVERSAL_PROMPT } from "../common";
 
 /**
- * 获取 Vega-Lite 图表的完整提示词（L1 + L2 + L3）
+ * 获取 Vega-Lite 图表的完整提示词（任务上下文 + L1 + L2 + L3）
  */
 function getVegalitePromptComplete(diagramType: string): string {
+  const taskContext = buildTaskContext("vegalite", diagramType);
   const l1 = UNIVERSAL_PROMPT;
   const l2 = VEGALITE_COMMON_SPEC;
   const l3 = getVegalitePrompt(diagramType);
-  
-  return [l1, l2, l3]
-    .filter((p) => p.length > 0)
-    .join("\n\n---\n\n");
+
+  return [taskContext, l1, l2, l3].filter((p) => p.length > 0).join("\n\n---\n\n");
+}
+
+/**
+ * 构建任务上下文
+ */
+function buildTaskContext(renderLanguage: string, diagramType: string): string {
+  return `# 当前任务
+
+你正在生成 **${renderLanguage.toUpperCase()} ${diagramType}** 代码。
+
+## 任务参数
+
+- **渲染语言**: ${renderLanguage}
+- **图表类型**: ${diagramType}
+- **渲染引擎**: Kroki
+- **输出格式**: \`\`\`${renderLanguage}\n[你的代码]\n\`\`\`
+
+## 执行要求
+
+请基于以上任务参数，严格执行下方的生成规范。`;
 }
 
 /**
  * Vega-Lite Prompts 配置对象
- * 
+ *
  * 实现 PromptConfig<"vegalite"> 接口，供 DIAGRAM_PROMPTS 使用
  */
 export const vegalitePrompts: PromptConfig<"vegalite"> = {
@@ -142,4 +161,3 @@ export const vegalitePrompts: PromptConfig<"vegalite"> = {
     return getVegalitePromptComplete(diagramType);
   },
 };
-

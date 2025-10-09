@@ -38,65 +38,80 @@ c4/
 ## 🎯 各子图类型说明
 
 ### 1. Context (系统上下文图)
+
 **文件**: `context.ts`  
 **用途**: 展示系统与外部用户、外部系统的交互关系  
-**适用场景**: 
+**适用场景**:
+
 - 系统整体概览
 - 向非技术人员展示系统边界
 - 识别外部依赖
 
 **关键元素**:
+
 - `Person` / `Person_Ext`: 用户
 - `System` / `System_Ext`: 系统
 
 ### 2. Container (容器图)
+
 **文件**: `container.ts`  
 **用途**: 展示系统内部的高层技术构成（应用、服务、数据库等）  
 **适用场景**:
+
 - 微服务架构设计
 - 技术栈选型说明
 - 系统模块划分
 
 **关键元素**:
+
 - `Container`: 应用、服务
 - `ContainerDb`: 数据库
 - `ContainerQueue`: 消息队列
 - `System_Boundary`: 系统边界
 
 ### 3. Component (组件图)
+
 **文件**: `component.ts`  
 **用途**: 展示容器内部的组件划分和代码结构  
 **适用场景**:
+
 - 代码架构设计
 - 分层架构说明（MVC、DDD）
 - 组件职责划分
 
 **关键元素**:
+
 - `Component`: 业务组件
 - `ComponentDb`: 数据组件
 - `Container_Boundary`: 容器边界
 
 ### 4. Dynamic (动态图)
+
 **文件**: `dynamic.ts`  
 **用途**: 展示特定场景下的运行时交互和时序  
 **适用场景**:
+
 - 业务流程说明
 - 时序交互展示
 - 调用链路分析
 
 **关键元素**:
+
 - `RelIndex`: 带序号的关系
 - 所有 Context/Container/Component 元素
 
 ### 5. Deployment (部署图)
+
 **文件**: `deployment.ts`  
 **用途**: 展示系统在物理基础设施上的部署架构  
 **适用场景**:
+
 - 生产环境架构
 - 云服务部署方案
 - 容器编排（K8s）
 
 **关键元素**:
+
 - `Deployment_Node`: 部署节点（服务器、虚拟机、集群）
 - `Container`: 运行的应用实例
 
@@ -105,22 +120,22 @@ c4/
 ### 基础用法
 
 ```typescript
-import { getC4PlantUMLPrompt } from './index';
+import { getC4PlantUMLPrompt } from "./index";
 
 // 获取 Context 图的完整提示词
-const contextPrompt = getC4PlantUMLPrompt('c4-context');
+const contextPrompt = getC4PlantUMLPrompt("c4-context");
 
 // 获取 Container 图的完整提示词
-const containerPrompt = getC4PlantUMLPrompt('c4-container');
+const containerPrompt = getC4PlantUMLPrompt("c4-container");
 ```
 
 ### 检查支持
 
 ```typescript
-import { isC4TypeSupported, getSupportedC4Types } from './index';
+import { isC4TypeSupported, getSupportedC4Types } from "./index";
 
 // 检查是否支持特定类型
-if (isC4TypeSupported('c4-context')) {
+if (isC4TypeSupported("c4-context")) {
   // 支持
 }
 
@@ -131,16 +146,16 @@ const types = getSupportedC4Types();
 
 ## 📊 Token 预算
 
-| 层级 | 文件 | Token 数 | 状态 |
-|------|------|----------|------|
-| L1 | common.ts (根目录) | ~750 | ✅ |
-| L2a | plantuml/common.ts | ~450 | ✅ |
-| L2b | c4/common.ts | ~480 | ✅ |
-| L3 | context.ts | ~1180 | ✅ |
-| L3 | container.ts | ~1190 | ✅ |
-| L3 | component.ts | ~1180 | ✅ |
-| L3 | dynamic.ts | ~1160 | ✅ |
-| L3 | deployment.ts | ~1180 | ✅ |
+| 层级 | 文件               | Token 数 | 状态 |
+| ---- | ------------------ | -------- | ---- |
+| L1   | common.ts (根目录) | ~750     | ✅   |
+| L2a  | plantuml/common.ts | ~450     | ✅   |
+| L2b  | c4/common.ts       | ~480     | ✅   |
+| L3   | context.ts         | ~1180    | ✅   |
+| L3   | container.ts       | ~1190    | ✅   |
+| L3   | component.ts       | ~1180    | ✅   |
+| L3   | dynamic.ts         | ~1160    | ✅   |
+| L3   | deployment.ts      | ~1180    | ✅   |
 
 **总预算**: 约 1680-2900 tokens（L1 + L2a + L2b + L3）
 
@@ -149,6 +164,7 @@ const types = getSupportedC4Types();
 所有提示词均符合 PROMPT_WRITING_GUIDE.md 规范：
 
 ### DEPTH 框架实现
+
 - ✅ **D** (Define Multiple Perspectives): 3 个专家角色
 - ✅ **E** (Establish Success Metrics): 可量化的成功标准
 - ✅ **P** (Provide Context Layers): 分层上下文（L1 + L2 + L3）
@@ -156,6 +172,7 @@ const types = getSupportedC4Types();
 - ✅ **H** (Human Feedback Loop): 生成检查清单
 
 ### 内容完整性
+
 - ✅ 专家视角（3 个角色）
 - ✅ 核心语法说明
 - ✅ 生成示例（2-3 个）
@@ -163,18 +180,21 @@ const types = getSupportedC4Types();
 - ✅ 检查清单（5-8 个检查点）
 
 ### Token 控制
+
 - ✅ L2: 480 tokens (预算 200-500)
 - ✅ L3: 1160-1190 tokens (预算 800-1200)
 
 ## 🔗 相关资源
 
 ### 官方文档
+
 - [C4 Model 官方网站](https://c4model.com/)
 - [C4-PlantUML GitHub](https://github.com/plantuml-stdlib/C4-PlantUML)
 - [PlantUML 官方文档](https://plantuml.com/)
 - [Kroki 渲染服务](https://kroki.io/)
 
 ### 项目文档
+
 - [PROMPT_WRITING_GUIDE.md](../../../../../../../../claudedocs/PROMPT_WRITING_GUIDE.md) - 提示词编写规范
 - [PROMPT_TEAM_TASKS.md](../../../../../../../../claudedocs/PROMPT_TEAM_TASKS.md) - 团队任务分配
 
@@ -185,6 +205,7 @@ const types = getSupportedC4Types();
 **版本**: v1.0
 
 ### 完成内容
+
 - ✅ L2: C4-PlantUML 语言规范
 - ✅ L3: Context 子图 prompt
 - ✅ L3: Container 子图 prompt
@@ -194,6 +215,7 @@ const types = getSupportedC4Types();
 - ✅ 统一导出和辅助函数
 
 ### 测试状态
+
 - ⏳ 待进行人工测试（3 个场景 × 5 种子图）
 - ⏳ 待验证 Kroki 渲染
 - ⏳ 待集成到主系统
@@ -201,6 +223,7 @@ const types = getSupportedC4Types();
 ## 🎓 最佳实践
 
 ### 1. 选择合适的图表类型
+
 - **Context**: 系统边界和外部交互
 - **Container**: 技术架构和模块划分
 - **Component**: 代码结构和组件设计
@@ -208,16 +231,19 @@ const types = getSupportedC4Types();
 - **Deployment**: 部署架构和基础设施
 
 ### 2. 保持层次一致性
+
 - 每个图表聚焦单一抽象层次
 - 不在 Context 图中使用 Container 元素
 - 不在 Container 图中使用 Component 元素
 
 ### 3. 完整的技术标注
+
 - Container 和 Component 必须包含技术栈
 - Deployment 必须标注环境和实例数
 - 关系描述应包含通信协议
 
 ### 4. 合理的粒度控制
+
 - Context: 5-10 个系统
 - Container: 5-15 个容器
 - Component: 5-20 个组件

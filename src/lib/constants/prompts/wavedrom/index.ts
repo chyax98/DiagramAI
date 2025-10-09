@@ -53,18 +53,21 @@ const DIAGRAM_PROMPT_MAP: Record<string, string> = {
 // ============================================
 
 /**
- * 获取 WaveDrom 图表的完整提示词（L1 + L2 + L3）
+ * 获取 WaveDrom 图表的完整提示词（任务上下文 + L1 + L2 + L3）
  *
  * @param diagramType - 图表类型（如 "timing", "signal", "register"）
- * @returns 完整的三层提示词
+ * @returns 完整的提示词（包含任务上下文）
  *
  * @example
  * ```typescript
  * const prompt = getWaveDromPrompt("timing");
- * // 返回: L1 通用规范 + L2 WaveDrom 语言 + L3 Timing 要求
+ * // 返回: 任务上下文 + L1 通用规范 + L2 WaveDrom 语言 + L3 Timing 要求
  * ```
  */
 export function getWaveDromPrompt(diagramType: DiagramType): string {
+  // 任务上下文：明确告知 AI 当前任务的具体参数
+  const taskContext = buildTaskContext("wavedrom", diagramType);
+
   // L1: 通用规范（所有图表共享）
   const l1 = UNIVERSAL_PROMPT;
 
@@ -76,18 +79,40 @@ export function getWaveDromPrompt(diagramType: DiagramType): string {
 
   // 如果找不到对应的 L3 提示词，使用默认提示
   if (!l3) {
-    console.warn(
-      `[WaveDrom Prompt] 未找到图表类型 "${diagramType}" 的 L3 提示词，使用默认提示`
-    );
-    return [l1, l2, getDefaultWaveDromPrompt(diagramType)]
+    console.warn(`[WaveDrom Prompt] 未找到图表类型 "${diagramType}" 的 L3 提示词，使用默认提示`);
+    return [taskContext, l1, l2, getDefaultWaveDromPrompt(diagramType)]
       .filter((p) => p.length > 0)
       .join("\n\n---\n\n");
   }
 
-  // 组合三层提示词
-  return [l1, l2, l3]
-    .filter((p) => p.length > 0)
-    .join("\n\n---\n\n");
+  // 组合：任务上下文 + 三层提示词
+  return [taskContext, l1, l2, l3].filter((p) => p.length > 0).join("\n\n---\n\n");
+}
+
+/**
+ * 构建任务上下文
+ *
+ * 明确告知 AI 当前的渲染语言、图表类型、输出格式等关键信息。
+ *
+ * @param renderLanguage - 渲染语言（如 "wavedrom"）
+ * @param diagramType - 图表类型（如 "timing"）
+ * @returns 任务上下文字符串
+ */
+function buildTaskContext(renderLanguage: string, diagramType: string): string {
+  return `# 当前任务
+
+你正在生成 **${renderLanguage.toUpperCase()} ${diagramType}** 代码。
+
+## 任务参数
+
+- **渲染语言**: ${renderLanguage}
+- **图表类型**: ${diagramType}
+- **渲染引擎**: Kroki
+- **输出格式**: \`\`\`${renderLanguage}\n[你的代码]\n\`\`\`
+
+## 执行要求
+
+请基于以上任务参数，严格执行下方的生成规范。`;
 }
 
 /**
@@ -155,4 +180,3 @@ export const wavedromPrompts: PromptConfig<"wavedrom"> = {
     return getWaveDromPrompt(diagramType);
   },
 };
-

@@ -1,13 +1,7 @@
 /**
- * L2: PlantUML 语言规范
+ * PlantUML 语言通用规范
  *
- * 作用：定义 PlantUML 通用语法和最佳实践
- * Token 预算：200-500 tokens
- *
- * 适用范围：所有 PlantUML 图表类型共享
- *
- * @example
- * 与 L1 通用规范和 L3 图表要求组合使用
+ * 定义 PlantUML 通用语法和最佳实践,适用于所有 PlantUML 图表类型。
  */
 
 export const PLANTUML_LANGUAGE_PROMPT = `
@@ -143,14 +137,3 @@ User -> System: 请求
 
 **原因**：元素 ID 应使用英文，中文应作为标签放在双引号中，或使用 \`as\` 定义别名。
 `;
-
-/**
- * Token 估算: 约 450 tokens
- *
- * 分配明细:
- * - 核心语法: 150 tokens
- * - 样式系统: 100 tokens
- * - 渲染注意事项: 100 tokens
- * - 常见错误: 100 tokens
- */
-

@@ -1,15 +1,7 @@
 /**
- * L2: Vega-Lite 语言规范
+ * Vega-Lite 语言规范
  *
- * 作用：定义 Vega-Lite JSON Schema 的通用语法规则和最佳实践
- * Token 预算：200-500 tokens
- * 适用范围：所有 Vega-Lite 图表类型（bar、line、scatter、area、pie、heatmap 等）
- *
- * Vega-Lite 特点：
- * - 声明式可视化语法
- * - JSON 格式规范
- * - 基于数据字段和编码通道
- * - Kroki 完全支持
+ * 定义 Vega-Lite JSON Schema 的通用语法规则和最佳实践,适用于所有 Vega-Lite 图表类型。
  */
 
 export const VEGALITE_COMMON_SPEC = `
@@ -190,14 +182,3 @@ Vega-Lite 使用声明式 JSON 格式定义图表，基本结构：
 **✅ 正确**：encoding 必须同时包含 \`field\` 和 \`type\`
 **原因**：type 是必需字段，Kroki 会渲染失败
 `;
-
-/**
- * Token 估算: 约 450 tokens
- *
- * 分配明细:
- * - JSON 基本结构: 50 tokens
- * - 核心概念: 250 tokens
- * - 命名规范: 50 tokens
- * - 样式系统: 70 tokens
- * - 常见错误: 30 tokens
- */

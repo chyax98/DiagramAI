@@ -1,11 +1,5 @@
 /**
- * L3: Nomnoml 类图生成提示词
- *
- * 作用：定义 Nomnoml 类图的生成规则、示例和最佳实践
- * Token 预算：800-1200 tokens
- * 图表类型：Nomnoml Class Diagram（类图）
- *
- * 用途：表示面向对象系统的类结构、属性、方法及类之间的关系
+ * Nomnoml 类图生成提示词
  *
  * @example
  * 用户输入："绘制一个电商系统的订单和商品类图"
@@ -397,15 +391,3 @@ export const NOMNOML_CLASS_PROMPT = `
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1180 tokens
- *
- * 分配明细:
- * - 专家视角: 120 tokens
- * - 核心语法: 220 tokens
- * - 生成示例: 520 tokens（3个示例）
- * - 常见错误: 250 tokens（6个错误）
- * - 检查清单: 70 tokens
- */
-

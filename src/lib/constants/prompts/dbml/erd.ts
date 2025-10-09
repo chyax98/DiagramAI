@@ -413,14 +413,3 @@ Ref: categories.parent_id > categories.id [note: '自引用：父子分类关系
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1150 tokens
- * 
- * 分配明细:
- * - 专家视角: 100 tokens
- * - 生成示例: 650 tokens（3个示例，每个约 210-220 tokens）
- * - 常见错误: 250 tokens（5个错误，每个约 50 tokens）
- * - 检查清单: 50 tokens
- * - DBML_LANGUAGE_SPEC: 约 100 tokens（引用，不计入总数）
- */

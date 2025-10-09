@@ -431,14 +431,3 @@ export const VEGALITE_LINE_PROMPT = `
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1150 tokens
- *
- * 分配明细:
- * - 专家视角: 110 tokens
- * - 核心语法: 260 tokens
- * - 生成示例: 520 tokens（3个示例，每个约 170-180 tokens）
- * - 常见错误: 200 tokens（5个错误，每个约 40 tokens）
- * - 检查清单: 60 tokens
- */

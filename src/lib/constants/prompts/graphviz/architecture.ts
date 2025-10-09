@@ -1,11 +1,5 @@
 /**
- * L3: Graphviz Architecture Diagram 生成提示词
- *
- * 作用:定义架构图的生成规则、示例和最佳实践
- * Token 预算:900-1200 tokens
- * 图表类型:Graphviz Architecture Diagram(架构图/系统设计图)
- *
- * 用途:表示软件架构、系统组件、技术栈、部署架构等系统设计
+ * Graphviz Architecture Diagram 生成提示词
  *
  * @example
  * 用户输入:"绘制微服务架构图"
@@ -497,14 +491,3 @@ digraph {
 
 **任何检查项不通过,立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1180 tokens
- *
- * 分配明细:
- * - 专家视角: 100 tokens
- * - 核心语法: 240 tokens
- * - 生成示例: 600 tokens(3个示例,每个约 200 tokens)
- * - 常见错误: 190 tokens(5个错误,每个约 38 tokens)
- * - 检查清单: 50 tokens
- */

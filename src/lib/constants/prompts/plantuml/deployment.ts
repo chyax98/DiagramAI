@@ -1,11 +1,5 @@
 /**
- * L3: PlantUML Deployment 生成提示词
- *
- * 作用：定义 PlantUML 部署图的生成规则、示例和最佳实践
- * Token 预算：800-1100 tokens
- * 图表类型：PlantUML Deployment（部署图）
- *
- * 用途：表示系统的物理部署结构，包括节点、工件及其部署关系
+ * PlantUML Deployment 生成提示词
  *
  * @example
  * 用户输入："绘制Web应用的部署图，包含前端服务器、后端服务器、数据库"
@@ -410,8 +404,3 @@ database "MySQL数据库" as DB
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1080 tokens
- */
-

@@ -1,11 +1,5 @@
 /**
- * L3: WaveDrom Signal 信号图生成提示词
- *
- * 作用：定义简化信号波形图的生成规则、示例和最佳实践
- * Token 预算：800-1200 tokens
- * 图表类型：WaveDrom Signal Diagram（信号图）
- *
- * 用途：表示简化的数字信号变化，适用于快速展示信号逻辑、状态转换、基本协议流程
+ * WaveDrom Signal 信号图生成提示词
  *
  * @example
  * 用户输入："绘制握手信号的基本流程"
@@ -297,15 +291,3 @@ export const WAVEDROM_SIGNAL_PROMPT = `
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1100 tokens
- *
- * 分配明细:
- * - 专家视角: 90 tokens
- * - 核心语法: 150 tokens
- * - 生成示例: 550 tokens（4个示例）
- * - 常见错误: 230 tokens（6个错误）
- * - 检查清单: 80 tokens
- */
-

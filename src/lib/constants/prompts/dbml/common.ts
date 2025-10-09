@@ -1,12 +1,7 @@
 /**
- * L2: DBML 语言规范
+ * DBML 语言规范
  *
- * 作用：定义 DBML (Database Markup Language) 的通用规则和最佳实践
- * Token 预算：200-500 tokens
- * 适用范围：所有 DBML 图表类型
- *
- * DBML 是一个开源的 DSL 语言，用于定义和文档化数据库结构
- * 官方文档：https://dbml.dbdiagram.io/docs/
+ * 定义 DBML (Database Markup Language) 的通用规则和最佳实践,适用于所有 DBML 图表类型。
  */
 
 export const DBML_LANGUAGE_SPEC = `
@@ -197,13 +192,3 @@ Table users {
    - 大文本使用 \`text\`
    - 时间戳使用 \`timestamp [default: \\\`now()\\\`]\`
 `;
-
-/**
- * Token 估算: 约 450 tokens
- * 
- * 分配明细:
- * - 基础语法: 200 tokens
- * - 命名规范: 80 tokens
- * - 常见错误: 100 tokens
- * - 最佳实践: 70 tokens
- */

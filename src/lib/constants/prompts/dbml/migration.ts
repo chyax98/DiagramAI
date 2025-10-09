@@ -424,14 +424,3 @@ Table users_v2 {
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1180 tokens
- * 
- * 分配明细:
- * - 专家视角: 100 tokens
- * - 生成示例: 700 tokens（3个示例，复杂度递增）
- * - 常见错误: 230 tokens（4个错误，每个约 55-60 tokens）
- * - 检查清单: 50 tokens
- * - DBML_LANGUAGE_SPEC: 约 100 tokens（引用，不计入总数）
- */

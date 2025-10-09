@@ -1,11 +1,5 @@
 /**
- * L3: Mermaid Sankey Diagram 生成提示词
- *
- * 作用：定义 Mermaid 桑基图的生成规则、示例和最佳实践
- * Token 预算：700-900 tokens
- * 图表类型：Mermaid Sankey Diagram（桑基图）
- *
- * 用途：表示流量分布、能量转换、用户路径
+ * Mermaid Sankey Diagram 生成提示词
  *
  * @example
  * 用户输入："绘制网站流量来源和转化的桑基图"
@@ -200,8 +194,3 @@ C,D,50
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 800 tokens
- */
-

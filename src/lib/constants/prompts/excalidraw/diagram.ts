@@ -1,11 +1,5 @@
 /**
- * L3: Excalidraw Diagram 生成提示词
- *
- * 作用：定义通用手绘风格图表的生成规则、示例和最佳实践
- * Token 预算：800-1200 tokens
- * 图表类型：Excalidraw Diagram（通用图表）
- *
- * 用途：技术架构图、流程图、关系图、示意图
+ * Excalidraw Diagram 生成提示词
  *
  * @example
  * 用户输入："绘制一个微服务架构图"
@@ -1010,15 +1004,3 @@ export const EXCALIDRAW_DIAGRAM_PROMPT = `
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1180 tokens
- *
- * 分配明细:
- * - 专家视角: 100 tokens
- * - 核心语法: 150 tokens
- * - 生成示例: 660 tokens（3个示例）
- * - 常见错误: 210 tokens（6个错误）
- * - 检查清单: 60 tokens
- */
-

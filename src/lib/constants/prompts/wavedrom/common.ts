@@ -1,14 +1,7 @@
 /**
- * L2: WaveDrom 语言通用规范
+ * WaveDrom 语言通用规范
  *
- * 作用：定义 WaveDrom（WaveJSON）的通用语法规则和最佳实践
- * Token 预算：200-500 tokens
- * 适用范围：所有 WaveDrom 图表类型（Timing、Signal、Register）
- *
- * WaveDrom 特点：
- * - 使用 JSON 格式描述数字时序图
- * - 专为硬件设计和数字电路可视化设计
- * - 支持信号波形、寄存器位字段等表示
+ * 定义 WaveDrom (WaveJSON) 的通用语法规则和最佳实践,适用于所有 WaveDrom 图表类型。
  */
 
 export const WAVEDROM_COMMON_PROMPT = `
@@ -168,14 +161,3 @@ WaveDrom 使用单字符表示信号状态：
 
 **Kroki 端点**：\`/wavedrom/svg/\` 或 \`/wavedrom/png/\`
 `;
-
-/**
- * Token 估算: 约 480 tokens
- *
- * 分配明细:
- * - 语法要求: 180 tokens
- * - 命名规范: 60 tokens
- * - 配置系统: 70 tokens
- * - 常见错误: 120 tokens
- * - 最佳实践: 50 tokens
- */

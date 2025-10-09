@@ -1,14 +1,8 @@
 /**
- * L3: Mermaid Gantt Chart 生成提示词
- *
- * 作用：定义 Mermaid 甘特图的生成规则、示例和最佳实践
- * Token 预算：900-1200 tokens
- * 图表类型：Mermaid Gantt Chart（甘特图）
- *
- * 用途：表示项目计划、任务时间线、资源分配
+ * Mermaid Gantt Chart 生成提示词
  *
  * @example
- * 用户输入："绘制软件开发项目的甘特图"
+ * 用户输入:"绘制软件开发项目的甘特图"
  * 输出：完整的 Mermaid Gantt Chart 代码
  */
 
@@ -325,15 +319,3 @@ gantt
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1180 tokens
- *
- * 分配明细:
- * - 专家视角: 120 tokens
- * - 核心语法: 280 tokens
- * - 生成示例: 500 tokens（3个示例）
- * - 常见错误: 220 tokens（6个错误）
- * - 检查清单: 60 tokens
- */
-

@@ -1,11 +1,5 @@
 /**
- * L3: Mermaid Pie Chart 生成提示词
- *
- * 作用：定义 Mermaid 饼图的生成规则、示例和最佳实践
- * Token 预算：700-900 tokens
- * 图表类型：Mermaid Pie Chart（饼图）
- *
- * 用途：表示比例分布、百分比、数据占比
+ * Mermaid Pie Chart 生成提示词
  *
  * @example
  * 用户输入："绘制公司营收来源的饼图"
@@ -151,8 +145,3 @@ pie
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 750 tokens
- */
-

@@ -1,11 +1,5 @@
 /**
- * L3: Graphviz State Diagram 生成提示词
- *
- * 作用:定义状态图的生成规则、示例和最佳实践
- * Token 预算:900-1200 tokens
- * 图表类型:Graphviz State Diagram(状态图/状态机)
- *
- * 用途:表示系统状态转换、业务流程状态、生命周期等状态机模型
+ * Graphviz State Diagram 生成提示词
  *
  * @example
  * 用户输入:"绘制订单状态流转图"
@@ -359,14 +353,3 @@ digraph {
 
 **任何检查项不通过,立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1170 tokens
- *
- * 分配明细:
- * - 专家视角: 100 tokens
- * - 核心语法: 230 tokens
- * - 生成示例: 590 tokens(3个示例,每个约 195 tokens)
- * - 常见错误: 200 tokens(5个错误,每个约 40 tokens)
- * - 检查清单: 50 tokens
- */

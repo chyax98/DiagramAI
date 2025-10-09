@@ -1,11 +1,5 @@
 /**
- * L3: Mermaid Sequence Diagram 生成提示词
- *
- * 作用：定义 Mermaid 时序图的生成规则、示例和最佳实践
- * Token 预算：900-1200 tokens
- * 图表类型：Mermaid Sequence Diagram（时序图）
- *
- * 用途：表示对象间的交互时序、API 调用流程、系统通信等
+ * Mermaid Sequence Diagram 生成提示词
  *
  * @example
  * 用户输入："绘制用户登录的时序图，包括前端、后端和数据库"
@@ -355,14 +349,3 @@ sequenceDiagram
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1100 tokens
- *
- * 分配明细:
- * - 专家视角: 120 tokens
- * - 核心语法: 320 tokens
- * - 生成示例: 420 tokens（3个示例）
- * - 常见错误: 180 tokens（6个错误）
- * - 检查清单: 60 tokens
- */

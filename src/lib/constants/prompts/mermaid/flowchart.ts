@@ -1,11 +1,5 @@
 /**
- * L3: Mermaid Flowchart 生成提示词
- *
- * 作用：定义 Mermaid 流程图的生成规则、示例和最佳实践
- * Token 预算：800-1200 tokens
- * 图表类型：Mermaid Flowchart（流程图）
- *
- * 用途：表示业务流程、算法逻辑、决策路径等
+ * Mermaid Flowchart 生成提示词
  *
  * @example
  * 用户输入："绘制一个用户登录流程，包含验证和错误处理"
@@ -15,7 +9,7 @@
 export const MERMAID_FLOWCHART_PROMPT = `
 # Mermaid Flowchart 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为流程图专家，你需要同时扮演：
 
@@ -302,7 +296,7 @@ graph TD
 
 **原因**：节点标签中包含 \`[]\` 等特殊字符时，整个标签需要用双引号包裹。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 
@@ -317,14 +311,3 @@ graph TD
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1150 tokens
- *
- * 分配明细:
- * - 专家视角: 120 tokens
- * - 核心语法: 280 tokens
- * - 生成示例: 500 tokens（3个示例，每个约 160-170 tokens）
- * - 常见错误: 200 tokens（6个错误，每个约 30-35 tokens）
- * - 检查清单: 50 tokens
- */

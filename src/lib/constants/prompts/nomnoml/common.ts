@@ -1,12 +1,7 @@
 /**
- * L2: Nomnoml 语言规范
+ * Nomnoml 语言规范
  *
- * 作用：定义 Nomnoml 图表语言的通用语法和最佳实践
- * Token 预算：200-500 tokens
- * 适用范围：所有 Nomnoml 图表类型（类图、组件图、架构图）
- *
- * Nomnoml 是一个轻量级的 UML 图表工具，使用简洁的文本语法
- * 来绘制类图、组件图和架构图等，语法直观易学。
+ * 定义 Nomnoml 图表语言的通用语法和最佳实践,适用于所有 Nomnoml 图表类型。
  */
 
 export const NOMNOML_COMMON_PROMPT = `
@@ -158,14 +153,3 @@ export const NOMNOML_COMMON_PROMPT = `
 4. **关联清晰**：优先使用标准 UML 关联类型
 5. **注释辅助**：对复杂关系使用 \`<note>\` 标签说明
 `;
-
-/**
- * Token 估算: 约 450 tokens
- *
- * 分配明细:
- * - 语法基础: 200 tokens
- * - 命名规范: 50 tokens
- * - 常见错误: 150 tokens
- * - 生成原则: 50 tokens
- */
-

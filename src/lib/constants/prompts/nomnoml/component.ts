@@ -1,11 +1,5 @@
 /**
- * L3: Nomnoml 组件图生成提示词
- *
- * 作用：定义 Nomnoml 组件图的生成规则、示例和最佳实践
- * Token 预算：800-1200 tokens
- * 图表类型：Nomnoml Component Diagram（组件图）
- *
- * 用途：表示系统的物理组件、接口及组件之间的依赖关系
+ * Nomnoml 组件图生成提示词
  *
  * @example
  * 用户输入："绘制微服务系统的组件依赖图"
@@ -353,15 +347,3 @@ export const NOMNOML_COMPONENT_PROMPT = `
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1150 tokens
- *
- * 分配明细:
- * - 专家视角: 120 tokens
- * - 核心语法: 200 tokens
- * - 生成示例: 520 tokens（3个示例）
- * - 常见错误: 240 tokens（6个错误）
- * - 检查清单: 70 tokens
- */
-

@@ -1,11 +1,5 @@
 /**
- * L3: C4-PlantUML Component 生成提示词
- *
- * 作用：定义 C4 模型 Level 3 - 组件图的生成规则
- * Token 预算：800-1200 tokens
- * 图表类型：C4 Component Diagram
- *
- * 用途：展示容器内部的组件划分和职责，详细展示代码组织结构
+ * C4-PlantUML Component 生成提示词
  *
  * @example
  * 用户输入："订单服务的组件图，包含控制器、服务层、仓储层和缓存"
@@ -352,14 +346,3 @@ Rel(ctrl, service, "调用业务逻辑", "方法调用")
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1180 tokens
- *
- * 分配明细:
- * - 专家视角: 110 tokens
- * - 核心语法: 180 tokens
- * - 生成示例: 600 tokens（3个示例）
- * - 常见错误: 240 tokens（6个错误）
- * - 检查清单: 50 tokens
- */

@@ -575,7 +575,9 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                   id="api_key"
                   type="password"
                   {...register("api_key")}
-                  className={errors.api_key ? "border-destructive focus-visible:ring-destructive" : ""}
+                  className={
+                    errors.api_key ? "border-destructive focus-visible:ring-destructive" : ""
+                  }
                   placeholder={isEditMode ? "留空表示不修改" : "输入 API 密钥"}
                 />
                 {errors.api_key && (
@@ -591,7 +593,9 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                   id="model_id"
                   type="text"
                   {...register("model_id")}
-                  className={errors.model_id ? "border-destructive focus-visible:ring-destructive" : ""}
+                  className={
+                    errors.model_id ? "border-destructive focus-visible:ring-destructive" : ""
+                  }
                   placeholder="例如: gpt-4, gemini-pro"
                 />
                 {errors.model_id && (

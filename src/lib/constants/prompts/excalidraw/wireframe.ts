@@ -1,11 +1,5 @@
 /**
- * L3: Excalidraw Wireframe 生成提示词
- *
- * 作用：定义 UI 线框图的生成规则、示例和最佳实践
- * Token 预算：800-1200 tokens
- * 图表类型：Excalidraw Wireframe（线框图）
- *
- * 用途：UI/UX 设计、产品原型、界面布局规划
+ * Excalidraw Wireframe 生成提示词
  *
  * @example
  * 用户输入："绘制一个登录页面的线框图"
@@ -1086,15 +1080,3 @@ export const EXCALIDRAW_WIREFRAME_PROMPT = `
 
 **任何检查项不通过，立即修正后重新生成**
 `;
-
-/**
- * Token 估算: 约 1190 tokens
- *
- * 分配明细:
- * - 专家视角: 110 tokens
- * - 核心语法: 160 tokens
- * - 生成示例: 650 tokens（3个示例）
- * - 常见错误: 210 tokens（6个错误）
- * - 检查清单: 60 tokens
- */
-

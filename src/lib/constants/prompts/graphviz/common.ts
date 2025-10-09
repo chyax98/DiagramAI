@@ -1,12 +1,7 @@
 /**
- * L2: Graphviz/DOT 语言规范提示词
+ * Graphviz/DOT 语言规范
  *
- * 作用：定义 Graphviz DOT 语言的通用语法规则和最佳实践
- * Token 预算：400-500 tokens
- * 适用范围：所有 Graphviz 图表类型（digraph、graph）
- *
- * 说明：Graphviz 是一个开源的图可视化软件，使用 DOT 语言描述图形
- * 支持多种布局引擎（dot、neato、circo、fdp、twopi、osage）
+ * 定义 Graphviz DOT 语言的通用语法规则和最佳实践,适用于所有 Graphviz 图表类型。
  */
 
 export const GRAPHVIZ_COMMON_PROMPT = `
@@ -258,14 +253,3 @@ digraph {
 4. **统一样式**：同类节点使用相同形状和颜色
 5. **测试布局引擎**：不同引擎适合不同场景
 `;
-
-/**
- * Token 估算: 约 480 tokens
- *
- * 分配明细:
- * - 语法要求: 200 tokens
- * - 命名规范: 80 tokens
- * - 样式系统: 120 tokens
- * - 常见错误: 80 tokens
- */
-

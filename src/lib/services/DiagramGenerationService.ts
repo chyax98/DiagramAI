@@ -156,7 +156,7 @@ export class DiagramGenerationService {
       maxRetries: AI_MAX_RETRIES, // todo 需要确认是否在这里写入参数，自定义参数什么时候生效
     });
 
-    const code = cleanCode(generatedCode, params.renderLanguage);  //  todo ai 生成结果如果不是 code，是否需要清理
+    const code = cleanCode(generatedCode, params.renderLanguage); //  todo ai 生成结果如果不是 code，是否需要清理
 
     // 存储时使用原始消息（不包含任务标记）
     const sessionData: ChatSessionData = {

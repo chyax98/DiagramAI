@@ -8,11 +8,7 @@ import { getDatabaseInstance } from "@/lib/db/client";
 import { UserRepository } from "@/lib/repositories/UserRepository";
 import { hashPassword, validatePasswordStrength } from "@/lib/auth/password";
 import { generateToken } from "@/lib/auth/jwt";
-import {
-  successResponse,
-  errorResponse,
-  ErrorCodes,
-} from "@/lib/utils/api-response";
+import { successResponse, errorResponse, ErrorCodes } from "@/lib/utils/api-response";
 import { logger } from "@/lib/utils/logger";
 interface RegisterRequest {
   username: string;

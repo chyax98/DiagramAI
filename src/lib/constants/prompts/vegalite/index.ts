@@ -19,10 +19,19 @@ export { VEGALITE_COMMON_SPEC } from "./common";
 // L3: 各子图类型 prompt
 export { VEGALITE_BAR_PROMPT } from "./bar";
 export { VEGALITE_LINE_PROMPT } from "./line";
-export { VEGALITE_SCATTER_PROMPT } from "./scatter";
+export { VEGALITE_POINT_PROMPT } from "./point";
 export { VEGALITE_AREA_PROMPT } from "./area";
 export { VEGALITE_PIE_PROMPT } from "./pie";
 export { VEGALITE_HEATMAP_PROMPT } from "./heatmap";
+
+// 内部函数导入
+import { VEGALITE_COMMON_SPEC } from "./common";
+import { VEGALITE_BAR_PROMPT } from "./bar";
+import { VEGALITE_LINE_PROMPT } from "./line";
+import { VEGALITE_POINT_PROMPT } from "./point";
+import { VEGALITE_AREA_PROMPT } from "./area";
+import { VEGALITE_PIE_PROMPT } from "./pie";
+import { VEGALITE_HEATMAP_PROMPT } from "./heatmap";
 
 /**
  * Vega-Lite 子图映射表
@@ -32,8 +41,8 @@ export { VEGALITE_HEATMAP_PROMPT } from "./heatmap";
 export const VEGALITE_PROMPTS_MAP = {
   bar: "VEGALITE_BAR_PROMPT",
   line: "VEGALITE_LINE_PROMPT",
-  scatter: "VEGALITE_SCATTER_PROMPT",
-  point: "VEGALITE_SCATTER_PROMPT", // point 是 scatter 的别名
+  point: "VEGALITE_POINT_PROMPT",
+  scatter: "VEGALITE_POINT_PROMPT", // scatter 是 point 的别名（符合 diagram-types.ts）
   area: "VEGALITE_AREA_PROMPT",
   pie: "VEGALITE_PIE_PROMPT",
   arc: "VEGALITE_PIE_PROMPT", // arc 是 pie 的底层标记
@@ -62,32 +71,30 @@ export function getVegalitePrompt(diagramType: string): string {
 
   switch (normalizedType) {
     case "bar":
-      l3Prompt = require("./bar").VEGALITE_BAR_PROMPT;
+      l3Prompt = VEGALITE_BAR_PROMPT;
       break;
     case "line":
-      l3Prompt = require("./line").VEGALITE_LINE_PROMPT;
+      l3Prompt = VEGALITE_LINE_PROMPT;
       break;
-    case "scatter":
     case "point":
-      l3Prompt = require("./scatter").VEGALITE_SCATTER_PROMPT;
+    case "scatter":
+      l3Prompt = VEGALITE_POINT_PROMPT;
       break;
     case "area":
-      l3Prompt = require("./area").VEGALITE_AREA_PROMPT;
+      l3Prompt = VEGALITE_AREA_PROMPT;
       break;
     case "pie":
     case "arc":
-      l3Prompt = require("./pie").VEGALITE_PIE_PROMPT;
+      l3Prompt = VEGALITE_PIE_PROMPT;
       break;
     case "heatmap":
     case "rect":
-      l3Prompt = require("./heatmap").VEGALITE_HEATMAP_PROMPT;
+      l3Prompt = VEGALITE_HEATMAP_PROMPT;
       break;
     default:
       // 默认使用柱状图 prompt
-      l3Prompt = require("./bar").VEGALITE_BAR_PROMPT;
+      l3Prompt = VEGALITE_BAR_PROMPT;
   }
-
-  const { VEGALITE_COMMON_SPEC } = require("./common");
 
   // 组合 L2 + L3
   return `${VEGALITE_COMMON_SPEC}\n\n${l3Prompt}`;
@@ -104,3 +111,35 @@ export const VEGALITE_CHART_TYPES = [
   { value: "pie", label: "饼图 (Pie Chart)", priority: "P1" },
   { value: "heatmap", label: "热力图 (Heatmap)", priority: "P2" },
 ] as const;
+
+// ============================================
+// PromptConfig 导出（供主 index.ts 使用）
+// ============================================
+
+import type { PromptConfig } from "../types";
+import { UNIVERSAL_PROMPT } from "../common";
+
+/**
+ * 获取 Vega-Lite 图表的完整提示词（L1 + L2 + L3）
+ */
+function getVegalitePromptComplete(diagramType: string): string {
+  const l1 = UNIVERSAL_PROMPT;
+  const l2 = VEGALITE_COMMON_SPEC;
+  const l3 = getVegalitePrompt(diagramType);
+  
+  return [l1, l2, l3]
+    .filter((p) => p.length > 0)
+    .join("\n\n---\n\n");
+}
+
+/**
+ * Vega-Lite Prompts 配置对象
+ * 
+ * 实现 PromptConfig<"vegalite"> 接口，供 DIAGRAM_PROMPTS 使用
+ */
+export const vegalitePrompts: PromptConfig<"vegalite"> = {
+  generate: (diagramType) => {
+    return getVegalitePromptComplete(diagramType);
+  },
+};
+

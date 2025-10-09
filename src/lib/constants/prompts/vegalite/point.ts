@@ -16,7 +16,7 @@
  * 输出：完整的 Vega-Lite Scatter Plot JSON 代码
  */
 
-export const VEGALITE_SCATTER_PROMPT = `
+export const VEGALITE_POINT_PROMPT = `
 # Vega-Lite Scatter Plot 生成要求
 
 ## 专家视角 (Simplified DEPTH - D)

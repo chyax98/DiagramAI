@@ -3,6 +3,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import { Loader2, AlertCircle } from "lucide-react";
 import type { AIModel } from "@/types/database";
 import { apiClient } from "@/lib/utils/api-client";
 import {
@@ -12,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, AlertCircle } from "lucide-react";
 import { ProviderIcon } from "@/components/icons";
 
 import { logger } from "@/lib/utils/logger";

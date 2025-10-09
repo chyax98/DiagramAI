@@ -25,6 +25,7 @@ export { VEGALITE_PIE_PROMPT } from "./pie";
 export { VEGALITE_HEATMAP_PROMPT } from "./heatmap";
 
 // 内部函数导入
+import { UNIVERSAL_PROMPT } from "../common";
 import { VEGALITE_COMMON_SPEC } from "./common";
 import { VEGALITE_BAR_PROMPT } from "./bar";
 import { VEGALITE_LINE_PROMPT } from "./line";
@@ -117,7 +118,6 @@ export const VEGALITE_CHART_TYPES = [
 // ============================================
 
 import type { PromptConfig } from "../types";
-import { UNIVERSAL_PROMPT } from "../common";
 
 /**
  * 获取 Vega-Lite 图表的完整提示词（任务上下文 + L1 + L2 + L3）

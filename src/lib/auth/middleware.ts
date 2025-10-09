@@ -13,11 +13,11 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import type Database from "better-sqlite3";
 import { getDatabaseInstance } from "@/lib/db/client";
 import { UserRepository } from "@/lib/repositories/UserRepository";
 import { extractToken, verifyToken } from "@/lib/auth/jwt";
 import type { UserPublic } from "@/types/database";
+import type Database from "better-sqlite3";
 
 /**
  * 认证结果类型

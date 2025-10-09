@@ -6,7 +6,6 @@
  * - 支持中间件组合（日志、验证等）
  */
 
-import type { NextRequest, NextResponse } from "next/server";
 
 import {
   errorResponse,
@@ -17,6 +16,7 @@ import {
 import { AppError, ErrorCode, ErrorHandler } from "@/lib/utils/error-handler";
 
 import { logger } from "@/lib/utils/logger";
+import type { NextRequest, NextResponse } from "next/server";
 
 export type ApiHandler<T = unknown> = (
   request: NextRequest,

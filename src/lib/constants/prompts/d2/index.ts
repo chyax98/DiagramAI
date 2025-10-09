@@ -21,13 +21,13 @@ export { D2_NETWORK_PROMPT } from "./network";
 // ============================================
 
 import type { DiagramType } from "@/lib/constants/diagram-types";
-import type { PromptConfig } from "../types";
 import { UNIVERSAL_PROMPT } from "../common";
 import { D2_COMMON_PROMPT } from "./common";
 import { D2_FLOWCHART_PROMPT } from "./flowchart";
 import { D2_SEQUENCE_PROMPT } from "./sequence";
 import { D2_ARCHITECTURE_PROMPT } from "./architecture";
 import { D2_NETWORK_PROMPT } from "./network";
+import type { PromptConfig } from "../types";
 
 /**
  * 获取 D2 图表的完整提示词（任务上下文 + L1 + L2 + L3）

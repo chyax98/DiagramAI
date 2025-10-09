@@ -14,12 +14,12 @@ export { EXCALIDRAW_DIAGRAM_PROMPT } from "./diagram";
 // ============================================
 
 import type { DiagramType } from "@/lib/constants/diagram-types";
-import type { PromptConfig } from "../types";
 import { UNIVERSAL_PROMPT } from "../common";
 import { EXCALIDRAW_COMMON_PROMPT } from "./common";
 import { EXCALIDRAW_SKETCH_PROMPT } from "./sketch";
 import { EXCALIDRAW_WIREFRAME_PROMPT } from "./wireframe";
 import { EXCALIDRAW_DIAGRAM_PROMPT } from "./diagram";
+import type { PromptConfig } from "../types";
 
 /**
  * 获取 Excalidraw 图表的完整提示词（任务上下文 + L1 + L2 + L3）

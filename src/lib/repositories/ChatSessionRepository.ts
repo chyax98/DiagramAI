@@ -8,8 +8,8 @@
  * - 支持与 generation_history 表关联
  */
 
-import type Database from "better-sqlite3";
 import type { ChatSession, CreateChatSessionParams } from "@/types/database";
+import type Database from "better-sqlite3";
 
 export class ChatSessionRepository {
   private db: Database.Database;

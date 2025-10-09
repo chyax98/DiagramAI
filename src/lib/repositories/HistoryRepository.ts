@@ -1,6 +1,5 @@
 /** 生成历史数据访问层 - 支持分页查询和按语言筛选 */
 
-import type Database from "better-sqlite3";
 import type {
   GenerationHistory,
   CreateHistoryParams,
@@ -8,6 +7,7 @@ import type {
   PaginatedResult,
 } from "@/types/database";
 import type { RenderLanguage } from "@/types/diagram";
+import type Database from "better-sqlite3";
 
 export class HistoryRepository {
   private db: Database.Database;

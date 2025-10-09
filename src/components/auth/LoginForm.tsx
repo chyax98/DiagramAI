@@ -6,12 +6,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { User, Lock, AlertCircle } from "lucide-react";
 import { LoginSchema, type LoginFormData } from "@/lib/validations/auth";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Lock, AlertCircle } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();

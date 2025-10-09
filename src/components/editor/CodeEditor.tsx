@@ -5,13 +5,13 @@
 import { useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
+import { Copy, Code } from "lucide-react";
+import Image from "next/image";
 import { indigoLightTheme, indigoDarkTheme } from "@/lib/themes/codemirror-theme";
 import type { RenderLanguage } from "@/types/diagram";
 import { getRenderLanguages } from "@/lib/constants/diagram-types";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Copy, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { copyTextToClipboard } from "@/lib/utils/clipboard";
 interface CodeEditorProps {
   code: string;

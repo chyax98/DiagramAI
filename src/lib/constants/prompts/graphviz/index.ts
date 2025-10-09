@@ -18,7 +18,6 @@ export { GRAPHVIZ_NETWORK_PROMPT } from "./network";
 // ============================================
 
 import type { DiagramType } from "@/lib/constants/diagram-types";
-import type { PromptConfig } from "../types";
 import { UNIVERSAL_PROMPT } from "../common";
 import { GRAPHVIZ_COMMON_PROMPT } from "./common";
 import { GRAPHVIZ_FLOWCHART_PROMPT } from "./flowchart";
@@ -26,6 +25,7 @@ import { GRAPHVIZ_STATE_PROMPT } from "./state";
 import { GRAPHVIZ_TREE_PROMPT } from "./tree";
 import { GRAPHVIZ_ARCHITECTURE_PROMPT } from "./architecture";
 import { GRAPHVIZ_NETWORK_PROMPT } from "./network";
+import type { PromptConfig } from "../types";
 
 /**
  * 根据图表类型选择合适的 L3 提示词

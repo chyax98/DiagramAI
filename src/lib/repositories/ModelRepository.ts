@@ -1,7 +1,7 @@
 /** AI 模型配置数据访问层 - 支持多 Provider 的 Repository 模式 */
 
-import type Database from "better-sqlite3";
 import type { AIModel, CreateAIModelParams, UpdateAIModelParams } from "@/types/database";
+import type Database from "better-sqlite3";
 
 export class ModelRepository {
   private db: Database.Database;

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 import { ModelDialog } from "@/components/models/ModelDialog";
 import { TestConnectionButton } from "@/components/models/TestConnectionButton";
 import { apiClient } from "@/lib/utils/api-client";

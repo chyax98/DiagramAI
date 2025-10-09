@@ -9,12 +9,12 @@
  */
 
 import type { DiagramType } from "@/lib/constants/diagram-types";
-import type { PromptConfig } from "../types";
 import { UNIVERSAL_PROMPT } from "../common";
 import { NOMNOML_COMMON_PROMPT } from "./common";
 import { NOMNOML_CLASS_PROMPT } from "./class";
 import { NOMNOML_COMPONENT_PROMPT } from "./component";
 import { NOMNOML_ARCHITECTURE_PROMPT } from "./architecture";
+import type { PromptConfig } from "../types";
 
 // ============================================
 // L2: Nomnoml 语言通用规范

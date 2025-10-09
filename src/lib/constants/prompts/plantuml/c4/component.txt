@@ -175,37 +175,56 @@ SHOW_LEGEND()
 title 组件图 - 订单服务完整结构
 
 Container_Boundary(orderService, "订单服务") {
+    ' === API层 ===
     Component(restApi, "REST API", "Express Router", "HTTP接口")
     Component(graphqlApi, "GraphQL API", "Apollo Server", "GraphQL接口")
+
+    ' === 业务逻辑层 ===
     Component(orderLogic, "Order Logic", "Business Service", "订单业务逻辑")
     Component(paymentLogic, "Payment Logic", "Business Service", "支付逻辑")
     Component(validator, "Validator", "Joi", "数据验证")
+
+    ' === 数据访问层 ===
     Component(orderRepo, "Order Repository", "TypeORM", "订单数据访问")
+    ComponentDb(cache, "Cache Manager", "Redis Client", "缓存管理")
+
+    ' === 消息处理层 ===
     Component(eventPublisher, "Event Publisher", "Kafka Producer", "事件发布")
     Component(eventHandler, "Event Handler", "Kafka Consumer", "事件处理")
-    ComponentDb(cache, "Cache Manager", "Redis Client", "缓存管理")
+
+    ' === 基础设施层 ===
     Component(logger, "Logger", "Winston", "日志记录")
     Component(metrics, "Metrics", "Prometheus Client", "指标采集")
 }
 
+' === 外部容器 ===
 ContainerDb_Ext(db, "订单数据库", "PostgreSQL", "主数据库")
 ContainerDb_Ext(redis, "Redis", "Redis Cluster", "缓存")
 Container_Ext(kafka, "Kafka", "消息队列", "事件总线")
 Container_Ext(monitoring, "Prometheus", "监控系统", "指标收集")
 
+' === API层调用 ===
 Rel(restApi, validator, "验证请求", "方法调用")
 Rel(graphqlApi, validator, "验证请求", "方法调用")
 Rel(restApi, orderLogic, "调用", "方法调用")
 Rel(graphqlApi, orderLogic, "调用", "方法调用")
+
+' === 业务层依赖 ===
 Rel(orderLogic, paymentLogic, "依赖", "方法调用")
 Rel(orderLogic, orderRepo, "使用", "接口调用")
 Rel(orderLogic, eventPublisher, "发布事件", "异步")
+
+' === 数据层交互 ===
 Rel(orderRepo, db, "读写", "SQL")
 Rel(orderRepo, cache, "读写缓存", "Redis Protocol")
 Rel(cache, redis, "连接", "TCP")
+
+' === 消息处理 ===
 Rel(eventPublisher, kafka, "发送", "Kafka Protocol")
 Rel(eventHandler, kafka, "订阅", "Kafka Protocol")
 Rel(eventHandler, orderLogic, "触发", "方法调用")
+
+' === 基础设施 ===
 Rel(orderLogic, logger, "记录日志", "方法调用")
 Rel(orderLogic, metrics, "上报指标", "方法调用")
 Rel(metrics, monitoring, "推送", "HTTP")

@@ -188,37 +188,53 @@ SHOW_LEGEND()
 
 title 容器图 - 完整微服务生态系统
 
+' === 参与者定义 ===
 Person(user, "用户")
 Person(admin, "管理员")
 
 System_Boundary(platform, "微服务平台") {
+    ' === 前端层 ===
     Container(web, "Web 应用", "React, TypeScript", "用户界面")
     Container(adminWeb, "管理后台", "Vue, Element UI", "管理界面")
+
+    ' === 网关与服务层 ===
     Container(gateway, "API 网关", "Kong", "统一入口")
     Container(authService, "认证服务", "Node.js, JWT", "认证和授权")
     Container(orderService, "订单服务", "Java, Spring Boot", "订单业务")
     Container(productService, "商品服务", "Go, Gin", "商品管理")
+
+    ' === 基础设施层 ===
     ContainerDb(db, "主数据库", "PostgreSQL Cluster", "业务数据")
     ContainerDb(cache, "缓存", "Redis Cluster", "缓存热点数据")
     ContainerQueue(mq, "消息队列", "Kafka", "事件驱动")
 }
 
+' === 外部系统 ===
 System_Ext(monitor, "监控系统", "Prometheus + Grafana")
 System_Ext(log, "日志系统", "ELK Stack")
 
+' === 用户访问路径 ===
 Rel(user, web, "访问", "HTTPS")
 Rel(admin, adminWeb, "管理", "HTTPS")
+
+' === API网关路由 ===
 Rel(web, gateway, "调用 API", "REST/JSON")
 Rel(adminWeb, gateway, "调用 API", "REST/JSON")
 Rel(gateway, authService, "验证令牌", "gRPC")
 Rel(gateway, orderService, "路由", "REST/JSON")
 Rel(gateway, productService, "路由", "REST/JSON")
+
+' === 数据访问层 ===
 Rel(orderService, db, "读写数据", "SQL")
 Rel(productService, db, "读写数据", "SQL")
 Rel(orderService, cache, "读写缓存", "Redis Protocol")
 Rel(productService, cache, "读写缓存", "Redis Protocol")
+
+' === 消息通信 ===
 Rel(orderService, mq, "发布事件", "Kafka Protocol")
 Rel(productService, mq, "订阅事件", "Kafka Protocol")
+
+' === 监控与日志 ===
 Rel(gateway, monitor, "上报指标", "Prometheus")
 Rel(orderService, log, "推送日志", "Logstash")
 

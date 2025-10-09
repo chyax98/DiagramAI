@@ -26,4 +26,3 @@ export function getGeneratePrompt(
 ): string {
   return promptLoader.buildFullPromptWithoutUserInput(renderLanguage, diagramType);
 }
-

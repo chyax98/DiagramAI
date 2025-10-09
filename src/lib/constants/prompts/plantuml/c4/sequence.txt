@@ -234,6 +234,7 @@ note over mq: 异步通知发货系统
 
 title C4 Sequence - 微服务错误处理与重试
 
+' === 参与者定义 ===
 participant "API网关" as api <<Container>>
 participant "订单服务" as order <<Container>>
 participant "支付服务" as payment <<Container>>
@@ -241,15 +242,19 @@ participant "熔断器" as circuit <<Component>>
 participant "重试队列" as retry <<Container>>
 participant "监控服务" as monitor <<Container>>
 
+' === 初始请求 ===
 api -> order: 创建订单
 
+' === 支付处理流程（含重试机制）===
 group 支付处理（含重试）
     loop 最多重试3次
         order -> circuit: 检查熔断状态
-        
+
+        ' === 熔断器状态判断 ===
         alt 熔断器关闭
             circuit -> payment: 调用支付服务
-            
+
+            ' === 支付结果处理 ===
             alt 支付成功
                 payment --> circuit: 成功响应
                 circuit --> order: 支付完成
@@ -257,7 +262,8 @@ group 支付处理（含重试）
                 payment --> circuit: 超时错误
                 circuit -> monitor: 记录失败
                 circuit --> order: 返回错误
-                
+
+                ' === 重试逻辑 ===
                 alt 未达重试上限
                     order -> retry: 加入重试队列
                     note right: 延迟重试
@@ -267,7 +273,8 @@ group 支付处理（含重试）
                     order --> api: 支付失败
                 end
             end
-            
+
+        ' === 熔断器开启情况 ===
         else 熔断器开启
             circuit --> order: 快速失败
             order --> api: 服务不可用

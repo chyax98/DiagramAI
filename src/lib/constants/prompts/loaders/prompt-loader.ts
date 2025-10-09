@@ -72,10 +72,7 @@ class PromptLoader {
    * // 返回: 通用规范 + Mermaid规范 + Flowchart规范
    * ```
    */
-  buildFullPromptWithoutUserInput(
-    language: RenderLanguage,
-    type: DiagramType
-  ): string {
+  buildFullPromptWithoutUserInput(language: RenderLanguage, type: DiagramType): string {
     const parts: string[] = [];
 
     // 1. L1: 通用规范 (所有图表共享)
@@ -138,7 +135,6 @@ class PromptLoader {
   private getCacheKey(language: string, type: string): string {
     return `${language}:${type}`;
   }
-
 
   /**
    * 清除缓存 (用于开发环境热更新)

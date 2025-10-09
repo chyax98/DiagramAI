@@ -205,13 +205,14 @@ ApproveLoan --|> Login
 @startuml
 left to right direction
 
+' === 参与者定义 ===
 actor "学生" as Student
 actor "教师" as Teacher
 actor "管理员" as Admin
 actor "支付系统" as PaymentSys
 
 rectangle "在线学习平台" {
-  ' 学生用例
+  ' === 学生用例 ===
   package "学习功能" {
     usecase "浏览课程" as BrowseCourse
     usecase "购买课程" as BuyCourse
@@ -219,49 +220,49 @@ rectangle "在线学习平台" {
     usecase "完成作业" as DoHomework
     usecase "参加考试" as TakeExam
   }
-  
-  ' 教师用例
+
+  ' === 教师用例 ===
   package "教学功能" {
     usecase "创建课程" as CreateCourse
     usecase "上传视频" as UploadVideo
     usecase "批改作业" as GradeHomework
     usecase "发布成绩" as PublishGrade
   }
-  
-  ' 管理用例
+
+  ' === 管理用例 ===
   package "管理功能" {
     usecase "审核课程" as ReviewCourse
     usecase "管理用户" as ManageUser
     usecase "查看统计" as ViewStats
   }
-  
-  ' 公共用例
+
+  ' === 公共用例 ===
   usecase "登录" as Login
   usecase "支付处理" as Payment
 }
 
-' 学生关联
+' === 学生关联 ===
 Student -- BrowseCourse
 Student -- BuyCourse
 Student -- WatchVideo
 Student -- DoHomework
 Student -- TakeExam
 
-' 教师关联
+' === 教师关联 ===
 Teacher -- CreateCourse
 Teacher -- UploadVideo
 Teacher -- GradeHomework
 Teacher -- PublishGrade
 
-' 管理员关联
+' === 管理员关联 ===
 Admin -- ReviewCourse
 Admin -- ManageUser
 Admin -- ViewStats
 
-' 外部系统
+' === 外部系统 ===
 PaymentSys -- Payment
 
-' 包含关系
+' === 包含关系 (必须的前置条件) ===
 BuyCourse ..> Login : <<include>>
 BuyCourse ..> Payment : <<include>>
 WatchVideo ..> Login : <<include>>
@@ -270,7 +271,7 @@ TakeExam ..> Login : <<include>>
 CreateCourse ..> Login : <<include>>
 UploadVideo ..> Login : <<include>>
 
-' 扩展关系
+' === 扩展关系 (可选的扩展功能) ===
 TakeExam ..> DoHomework : <<extend>>
 
 @enduml

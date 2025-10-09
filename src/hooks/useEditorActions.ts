@@ -143,7 +143,6 @@ export function useEditorActions() {
       }
     },
     [
-      code,
       renderLanguage,
       selectedModelId,
       currentSessionId,

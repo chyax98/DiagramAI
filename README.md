@@ -182,11 +182,17 @@ NEXT_PUBLIC_APP_URL=https://your-domain.com
 
 ## 📚 文档
 
+### 用户文档
 - **[README.md](README.md)** - 快速开始和基本使用
 - **[README.en.md](README.en.md)** - English version
-- **[CLAUDE.md](CLAUDE.md)** - 架构设计和开发指南
 - **[KROKI_DEPLOYMENT.md](KROKI_DEPLOYMENT.md)** - Kroki 服务部署指南
 - **[env.example](env.example)** - 环境变量配置参考
+
+### 开发文档
+- **[CLAUDE.md](CLAUDE.md)** - 架构设计和开发指南
+- **[claudedocs/L3_PROMPT_REVIEW_README.md](claudedocs/L3_PROMPT_REVIEW_README.md)** - L3 提示词审查方案使用指南
+- **[claudedocs/L3_PROMPT_REVIEW_GUIDE.md](claudedocs/L3_PROMPT_REVIEW_GUIDE.md)** - L3 提示词审查完整方案
+- **[claudedocs/L3_PROMPT_REVIEW_CHECKLIST.md](claudedocs/L3_PROMPT_REVIEW_CHECKLIST.md)** - L3 提示词审查快速清单
 
 ---
 

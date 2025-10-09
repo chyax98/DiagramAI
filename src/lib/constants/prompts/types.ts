@@ -7,6 +7,4 @@ export type ExtractDiagramTypes<Lang extends RenderLanguage> =
 
 export interface PromptConfig<Lang extends RenderLanguage = RenderLanguage> {
   generate: (diagramType: ExtractDiagramTypes<Lang>) => string;
-  /** @deprecated v3.0 已废弃 adjust 字段，统一使用 generate */
-  adjust?: string;
 }

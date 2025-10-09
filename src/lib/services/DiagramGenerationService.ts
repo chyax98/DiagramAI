@@ -104,7 +104,7 @@ export class DiagramGenerationService {
     return { model, modelConfig };
   }
 
-  /** 统一对话接口 - 任务类型由前端按钮决定，而非 sessionId 推断 */
+  /** 统一对话接口 - 任务类型由前端按钮决定，或根据 sessionId 自动推断 */
   async chat(params: ChatParams): Promise<ChatResult> {
     if (params.userMessage.length > MAX_INPUT_TEXT_LENGTH) {
       throw new Error(`输入文本超过 ${MAX_INPUT_TEXT_LENGTH.toLocaleString()} 字符限制`);
@@ -114,7 +114,7 @@ export class DiagramGenerationService {
     const db = getDatabaseInstance();
     const sessionRepo = new ChatSessionRepository(db);
 
-    // ⭐ 决策逻辑：优先使用 taskType，否则根据 sessionId 推断（向后兼容）
+    // ⭐ 决策逻辑：优先使用显式 taskType，否则根据 sessionId 自动推断任务类型
     const taskType: TaskType = params.taskType || (!params.sessionId ? "generate" : "adjust");
 
     // 根据任务类型路由

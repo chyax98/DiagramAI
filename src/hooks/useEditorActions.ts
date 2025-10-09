@@ -152,6 +152,20 @@ export function useEditorActions() {
     ]
   );
 
+  /**
+   * 修复渲染错误
+   *
+   * 构建明确的修复指令，要求 AI 仅修复语法错误，不改变原有逻辑
+   *
+   * @param renderError - Kroki 渲染器返回的错误信息
+   *
+   * @example
+   * // Kroki 返回错误: "Syntax error: invalid node ID '开始'"
+   * handleFix("Syntax error: invalid node ID '开始'")
+   * // AI 收到的完整消息包含:
+   * // 1. 错误信息
+   * // 2. 修复要求（保持逻辑不变、仅修复语法、确保可渲染）
+   */
   const handleFix = useCallback(
     async (renderError: string) => {
       if (!renderError) return;
@@ -161,12 +175,26 @@ export function useEditorActions() {
         return;
       }
 
+      // ✅ 优化：构建明确的修复指令
+      const fixMessage = `请修复以下渲染错误，确保代码可以正常渲染：
+
+错误信息：
+${renderError}
+
+修复要求：
+1. 保持原有逻辑和结构不变
+2. 仅修复导致渲染失败的语法错误
+3. 确保修复后的代码可以通过 Kroki 渲染
+4. 不要添加额外的功能或修改图表内容
+
+请直接输出修复后的完整代码。`;
+
       startGeneration();
 
       try {
         const result = await apiClient.post<{ code: string; sessionId: number }>("/api/chat", {
           sessionId: currentSessionId,
-          userMessage: `代码渲染失败，错误信息：${renderError}。请修复此代码，确保语法正确可以正常渲染。`,
+          userMessage: fixMessage, // ✅ 使用优化后的修复消息
           renderLanguage: renderLanguage,
           modelId: selectedModelId,
         });
@@ -183,7 +211,6 @@ export function useEditorActions() {
       }
     },
     [
-      code,
       renderLanguage,
       selectedModelId,
       currentSessionId,

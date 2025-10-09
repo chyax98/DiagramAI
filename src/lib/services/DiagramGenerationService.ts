@@ -14,6 +14,7 @@ import {
   AI_TEMPERATURE,
   AI_MAX_RETRIES,
 } from "@/lib/constants/env";
+import { logger } from "@/lib/utils/logger";
 
 interface PrepareResult {
   model: LanguageModel;
@@ -44,15 +45,22 @@ export interface ChatResult {
 export class DiagramGenerationService {
   /**
    * 构建任务标记提示
+   *
+   * 任务标记用于帮助 AI 识别当前任务类型，统一格式与 L1 UNIVERSAL_PROMPT 保持一致
+   *
    * @param isFirstGeneration - 是否为首次生成
-   * @param diagramType - 图表类型 todo 暂时非必须
    * @returns 任务标记字符串
+   *
+   * @example
+   * // 首次生成
+   * _buildTaskHint(true) // => "[任务：生成]"
+   *
+   * // 多轮调整
+   * _buildTaskHint(false) // => "[任务：调整]"
    */
-  private _buildTaskHint(isFirstGeneration: boolean, diagramType?: string): string {
-    if (isFirstGeneration) {
-      return `[任务：生成${diagramType}图表]`;
-    }
-    return `[任务：调整图表]`;
+  private _buildTaskHint(isFirstGeneration: boolean): string {
+    // ✅ 修复：统一格式，移除图表类型信息（图表类型已在 system prompt 中指定）
+    return isFirstGeneration ? `[任务：生成]` : `[任务：调整]`;
   }
 
   private async validateAndPrepare(userId: number, modelId: number): Promise<PrepareResult> {
@@ -103,7 +111,19 @@ export class DiagramGenerationService {
     sessionRepo: ChatSessionRepository
   ): Promise<ChatResult> {
     // 构建任务标记（传递给 AI）
-    const taskHint = this._buildTaskHint(true, params.diagramType);
+    const taskHint = this._buildTaskHint(true);
+
+    // ✅ 开发环境验证：任务标记注入
+    if (process.env.NODE_ENV === "development") {
+      logger.debug("[DiagramGenerationService] 首次生成 - 任务标记:", taskHint);
+      logger.debug("[DiagramGenerationService] 首次生成 - 用户消息:", params.userMessage);
+      logger.debug(
+        "[DiagramGenerationService] 首次生成 - 注入内容:",
+        `${taskHint}\n${params.userMessage}`
+      );
+      logger.debug("[DiagramGenerationService] 首次生成 - 图表类型:", params.diagramType);
+      logger.debug("[DiagramGenerationService] 首次生成 - 渲染语言:", params.renderLanguage);
+    }
 
     const { text: generatedCode } = await generateText({
       model,
@@ -115,7 +135,7 @@ export class DiagramGenerationService {
         },
       ],
       temperature: AI_TEMPERATURE,
-      maxRetries: AI_MAX_RETRIES,// todo 需要确认是否在这里写入参数，自定义参数什么时候生效
+      maxRetries: AI_MAX_RETRIES, // todo 需要确认是否在这里写入参数，自定义参数什么时候生效
     });
 
     const code = cleanCode(generatedCode, params.renderLanguage);  //  todo ai 生成结果如果不是 code，是否需要清理
@@ -180,6 +200,18 @@ export class DiagramGenerationService {
 
     // 构建任务标记（传递给 AI）
     const taskHint = this._buildTaskHint(false);
+
+    // ✅ 开发环境验证：任务标记注入
+    if (process.env.NODE_ENV === "development") {
+      logger.debug("[DiagramGenerationService] 多轮调整 - 任务标记:", taskHint);
+      logger.debug("[DiagramGenerationService] 多轮调整 - 用户消息:", params.userMessage);
+      logger.debug(
+        "[DiagramGenerationService] 多轮调整 - 注入内容:",
+        `${taskHint}\n${params.userMessage}`
+      );
+      logger.debug("[DiagramGenerationService] 多轮调整 - 会话轮次:", currentRound + 1);
+      logger.debug("[DiagramGenerationService] 多轮调整 - 历史消息数:", messages.length);
+    }
 
     messages.push({
       role: "user",

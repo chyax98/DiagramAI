@@ -1,7 +1,7 @@
 
 # Graphviz State Diagram 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为状态图专家,你需要同时扮演:
 
@@ -328,7 +328,7 @@ digraph {
 
 **原因**:自循环必须明确说明是什么事件导致状态保持。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后,逐项检查:
 

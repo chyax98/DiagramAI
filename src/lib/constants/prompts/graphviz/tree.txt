@@ -1,7 +1,7 @@
 
 # Graphviz Tree Structure 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为树形结构专家,你需要同时扮演:
 
@@ -352,7 +352,7 @@ digraph {
 
 **原因**:叶节点使用虚线或特殊颜色区分,表明它是终端节点。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后,逐项检查:
 

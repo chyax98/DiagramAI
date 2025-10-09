@@ -1,7 +1,7 @@
 
 # DBML 实体关系图生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为实体关系图专家，你需要同时扮演：
 
@@ -382,7 +382,7 @@ Ref: categories.parent_id > categories.id [note: '自引用：父子分类关系
 
 **原因**：自引用关系（如树状结构、社交关系）需要特别说明，帮助理解递归关系的业务含义。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

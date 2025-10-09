@@ -1,7 +1,7 @@
 
 # PlantUML Component 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为组件图专家，你需要同时扮演：
 
@@ -244,7 +244,7 @@ end note
 - 展示插件化架构的解耦设计
 - 使用注释说明核心职责
 
-## 常见错误 (E - Establish Success Metrics)
+## 常见错误
 
 ### 错误 1: 组件名称不规范
 ❌ **错误写法**：
@@ -344,7 +344,7 @@ database "MySQL" as DB
 
 **原因**：PlantUML 提供了专门的类型（`database`、`queue`、`cloud` 等），应该使用合适的类型。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

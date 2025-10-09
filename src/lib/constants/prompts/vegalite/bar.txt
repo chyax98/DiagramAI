@@ -1,7 +1,7 @@
 
 # Vega-Lite Bar Chart 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为柱状图专家，你需要同时扮演：
 
@@ -370,7 +370,7 @@
 
 **原因**：encoding 中的 `field` 必须与 data.values 中的键名完全一致。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

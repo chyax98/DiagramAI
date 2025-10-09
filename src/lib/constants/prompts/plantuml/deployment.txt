@@ -1,7 +1,7 @@
 
 # PlantUML Deployment 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为部署图专家，你需要同时扮演：
 
@@ -282,7 +282,7 @@ end note
 - 展示跨云通信（如专线连接）
 - 注释说明各层的职责和特点
 
-## 常见错误 (E - Establish Success Metrics)
+## 常见错误
 
 ### 错误 1: 混淆节点和工件
 ❌ **错误写法**：
@@ -381,7 +381,7 @@ database "MySQL数据库" as DB
 
 **原因**：PlantUML 提供了专门的类型（database、cloud、node 等），应该使用合适的类型。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

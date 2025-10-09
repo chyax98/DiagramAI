@@ -1,7 +1,7 @@
 
 # PlantUML Sequence 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为时序图专家，你需要同时扮演：
 
@@ -266,7 +266,7 @@ Web --> User: 显示处理完成
 - 使用 `group` 将异步处理逻辑分组
 - 使用 `loop` 表示循环处理
 
-## 常见错误 (E - Establish Success Metrics)
+## 常见错误
 
 ### 错误 1: 参与者未声明
 ❌ **错误写法**：
@@ -378,7 +378,7 @@ A -> B: "GET /api/users[id]"
 
 **原因**：消息文本中包含特殊字符（如 []、{}）时，必须用双引号包裹。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

@@ -1,7 +1,7 @@
 
 # DBML 完整 Schema 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为完整 Schema 设计专家，你需要同时扮演：
 
@@ -433,7 +433,7 @@ Table orders {
 
 **原因**：完整的 Schema 应该包含清晰的表级注释和字段注释，便于理解业务逻辑。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

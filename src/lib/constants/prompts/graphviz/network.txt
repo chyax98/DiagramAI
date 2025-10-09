@@ -1,7 +1,7 @@
 
 # Graphviz Network Topology 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为网络拓扑图专家，你需要同时扮演：
 
@@ -392,7 +392,7 @@ graph {
 
 **原因**：使用子图分组可以大大提高复杂图的可读性。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

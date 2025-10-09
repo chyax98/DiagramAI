@@ -1,7 +1,7 @@
 
 # PlantUML Class 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为类图专家，你需要同时扮演：
 
@@ -318,7 +318,7 @@ end note
 - 添加注释说明设计意图
 - 聚合关系表示主题和观察者的弱关联
 
-## 常见错误 (E - Establish Success Metrics)
+## 常见错误
 
 ### 错误 1: 可见性修饰符缺失
 ❌ **错误写法**：
@@ -421,7 +421,7 @@ abstract class AbstractClass {
 
 **原因**：抽象方法应使用 `{abstract}` 标注，使其在图中以斜体显示。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

@@ -1,7 +1,7 @@
 
 # PlantUML Activity 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为活动图专家，你需要同时扮演：
 
@@ -265,7 +265,7 @@ stop
 - 并行任务会在 `end fork` 处同步
 - 可以组合使用并行、循环、条件等结构
 
-## 常见错误 (E - Establish Success Metrics)
+## 常见错误
 
 ### 错误 1: 缺少 start 和 stop
 ❌ **错误写法**：
@@ -392,7 +392,7 @@ stop
 
 **原因**：`repeat` 循环必须使用 `repeat while ... is (yes/no)` 语法，并用箭头 `->` 标注退出路径。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

@@ -1,7 +1,7 @@
 
 # C4 Component Diagram 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为 C4 组件图专家，你需要同时扮演：
 
@@ -323,7 +323,7 @@ Rel(ctrl, service, "调用业务逻辑", "方法调用")
 
 **原因**：Component 图需要清晰的调用描述，说明组件间如何交互。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

@@ -1,7 +1,7 @@
 
 # C4 Container Diagram 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为 C4 容器图专家，你需要同时扮演：
 
@@ -328,7 +328,7 @@ Container(userService, "用户服务", "Spring Boot", "用户管理 API")
 
 **原因**：Container 图展示应用/服务级别，不展示 API endpoint 级别。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

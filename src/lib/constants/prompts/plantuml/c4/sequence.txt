@@ -1,7 +1,7 @@
 
 # C4 Sequence Diagram 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为 C4 时序图专家，你需要同时扮演：
 
@@ -400,7 +400,7 @@ participant A
 
 **原因**：C4 图表应该有清晰的标题说明其用途。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

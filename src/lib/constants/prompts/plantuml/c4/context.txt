@@ -1,7 +1,7 @@
 
 # C4 System Context Diagram 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为 C4 系统上下文图专家，你需要同时扮演：
 
@@ -295,7 +295,7 @@ System(platform, "电商平台", "包含订单、商品、用户等核心服务"
 
 **原因**：Context 图应保持高层抽象，细节应在 Container 图中展示。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

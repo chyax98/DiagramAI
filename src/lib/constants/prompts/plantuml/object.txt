@@ -1,7 +1,7 @@
 
 # PlantUML Object 生成要求
 
-## 专家视角 (Simplified DEPTH - D)
+## 专家视角
 
 作为对象图专家，你需要同时扮演：
 
@@ -230,7 +230,7 @@ end note
 - 包含时间点信息，体现快照特性
 - 适合展示系统运行时配置
 
-## 常见错误 (E - Establish Success Metrics)
+## 常见错误
 
 ### 错误 1: 对象属性使用类型而非值
 ❌ **错误写法**：
@@ -314,7 +314,7 @@ object "user1" as u1 : User
 
 **原因**：对象应该标注其所属的类，使用 `: ClassName` 语法。
 
-## 生成检查清单 (Simplified DEPTH - H)
+## 生成检查清单
 
 生成代码后，逐项检查：
 

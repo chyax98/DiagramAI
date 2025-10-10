@@ -41,6 +41,8 @@ export const POST = withAuth(async (request: NextRequest, user: UserPublic) => {
       modelId: data.modelId,
       sessionId: data.sessionId || undefined,
       diagramType: data.diagramType,
+      taskType: data.taskType,
+      renderError: data.renderError,
     };
 
     logger.info(`[/api/chat] 请求参数:`, {

@@ -15,6 +15,7 @@ import {
   AI_MAX_RETRIES,
 } from "@/lib/constants/env";
 import { logger } from "@/lib/utils/logger";
+import { FailureLogService } from "./FailureLogService";
 
 interface PrepareResult {
   model: LanguageModel;
@@ -43,6 +44,7 @@ export interface ChatParams {
   sessionId?: number; // 初始没有生成 session Id
   diagramType?: string; // todo 必填 除非是自己选
   taskType?: TaskType; // ⭐ 任务类型（由前端按钮决定）
+  renderError?: string | null; // 渲染错误信息（用于失败日志记录）
 }
 
 export interface ChatResult {
@@ -52,6 +54,57 @@ export interface ChatResult {
 }
 
 export class DiagramGenerationService {
+  /**
+   * 记录渲染失败到日志文件
+   *
+   * 设计理由：
+   * 1. 只在用户点击"修复"按钮时记录（高质量数据）
+   * 2. 拥有完整上下文（session history, user input, model info）
+   * 3. 异步执行，失败不影响主流程
+   *
+   * @param params - 聊天参数（包含 renderError）
+   * @param sessionData - 会话数据（包含 history 和 currentCode）
+   */
+  private async _logRenderFailure(params: ChatParams, sessionData: ChatSessionData): Promise<void> {
+    try {
+      const failureLogService = new FailureLogService();
+      const db = getDatabaseInstance();
+      const modelRepo = new ModelRepository(db);
+
+      // 获取模型信息
+      const model = modelRepo.findById(params.modelId);
+      const modelInfo = model
+        ? { provider: model.provider, modelId: model.model_id }
+        : { provider: "unknown", modelId: "unknown" };
+
+      // 从 session history 提取原始用户输入
+      const firstUserMessage = sessionData.chatHistory.find((msg) => msg.role === "user");
+      const inputText = firstUserMessage?.content || "未知输入";
+
+      await failureLogService.logFailure({
+        timestamp: new Date().toISOString(),
+        userId: params.userId,
+        input: inputText,
+        diagramType: sessionData.diagramType || params.diagramType || "unknown",
+        renderLanguage: params.renderLanguage,
+        generatedCode: sessionData.currentCode,
+        error: params.renderError!,
+        errorType: failureLogService.classifyError(params.renderError!),
+        modelInfo: modelInfo,
+        sessionId: params.sessionId,
+      });
+
+      logger.info("[FailureLog] 已记录渲染失败", {
+        userId: params.userId,
+        sessionId: params.sessionId,
+        errorType: failureLogService.classifyError(params.renderError!),
+      });
+    } catch (error) {
+      // 日志记录失败不应影响主流程
+      logger.error("[FailureLog] 记录失败日志时出错:", error);
+    }
+  }
+
   /**
    * 构建任务标记提示
    *
@@ -210,6 +263,11 @@ export class DiagramGenerationService {
     const currentRound = session.round_count;
     if (currentRound >= MAX_CHAT_ROUNDS) {
       throw new Error(`已达到最大对话轮次 (${MAX_CHAT_ROUNDS})`);
+    }
+
+    // ⭐ 用户点击修复按钮时,自动记录失败日志
+    if (taskType === "fix" && params.renderError && params.renderError.trim()) {
+      await this._logRenderFailure(params, sessionData);
     }
 
     // 重建历史对话（使用原始消息）

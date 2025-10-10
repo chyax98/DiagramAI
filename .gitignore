@@ -46,6 +46,11 @@ data/
 *.sqlite
 *.sqlite3
 
+# Log files
+logs/
+*.log
+*.jsonl
+
 .idea
 .bmad-core
 .claude

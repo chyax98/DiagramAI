@@ -191,6 +191,7 @@ export function useEditorActions() {
           renderLanguage: renderLanguage,
           modelId: selectedModelId,
           taskType: "fix", // ⭐ 显式指定：修复按钮（会注入任务标记）
+          renderError: renderError, // ⭐ 传递渲染错误，用于自动记录失败日志
         });
 
         const { code: fixedCode, sessionId } = result;

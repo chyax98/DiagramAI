@@ -38,6 +38,8 @@ export const ChatRequestSchema = z
         errorMap: () => ({ message: "任务类型必须是 generate、adjust 或 fix" }),
       })
       .optional(),
+
+    renderError: z.string().max(1000, "错误信息最多 1000 个字符").optional().nullable(),
   })
   .refine(
     (data) => {

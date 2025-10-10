@@ -10,8 +10,7 @@ import {
   type EditModelData,
 } from "@/lib/validations/models";
 import { apiClient } from "@/lib/utils/api-client";
-import { dialog } from "@/components/ui/dialog/dialog";
-import { ProviderIcon, IconCopy, IconRefresh } from "@/components/icons";
+import { ProviderIcon } from "@/components/icons";
 import {
   Select,
   SelectContent,
@@ -54,14 +53,12 @@ const DEFAULT_API_ENDPOINTS: Record<string, string> = {
   openai: "https://api.openai.com/v1",
   gemini: "https://generativelanguage.googleapis.com/v1beta",
   claude: "https://api.anthropic.com/v1",
-  "openai-compatible": "", // 用户自定义
+  "openai-compatible": "https://api.openai.com/v1", // 用户自定义
 };
 
 export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isBatchMode, setIsBatchMode] = useState(false);
-  const [batchInput, setBatchInput] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string>("openai");
 
   const isMountedRef = useRef(true);
@@ -134,126 +131,9 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
     }
   };
 
-  const handleBatchSubmit = async () => {
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const lines = batchInput
-        .trim()
-        .split("\n")
-        .filter((line) => line.trim());
-      if (lines.length === 0) {
-        throw new Error("请输入至少一行模型信息");
-      }
-
-      const models: CreateModelData[] = [];
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i]?.trim();
-        if (!line) continue;
-
-        const parts = line.split("|").map((p) => p.trim());
-
-        if (parts.length < 5) {
-          throw new Error(
-            `第 ${i + 1} 行格式错误: 至少需要 5 个字段(模型名称|服务商|API端点|API密钥|模型ID)`
-          );
-        }
-
-        const name = parts[0]!;
-        const provider = parts[1]!;
-        const api_endpoint = parts[2]!;
-        const api_key = parts[3]!;
-        const model_id = parts[4]!;
-        const parameters = parts[5];
-
-        if (!["openai", "gemini", "claude", "openai-compatible"].includes(provider)) {
-          throw new Error(
-            `第 ${i + 1} 行错误: 服务商必须是 openai, gemini, claude 或 openai-compatible`
-          );
-        }
-
-        models.push({
-          name,
-          provider: provider as "openai" | "gemini" | "claude" | "openai-compatible",
-          api_endpoint,
-          api_key,
-          model_id,
-          parameters: parameters || "",
-        });
-      }
-
-      const results = {
-        success: [] as string[],
-        failed: [] as { name: string; error: string }[],
-      };
-
-      for (const modelData of models) {
-        try {
-          await apiClient.post("/api/models", modelData);
-          results.success.push(modelData.name);
-        } catch (err) {
-          results.failed.push({
-            name: modelData.name,
-            error: err instanceof Error ? err.message : "未知错误",
-          });
-        }
-      }
-
-      if (!isMountedRef.current) return;
-
-      if (results.failed.length === 0) {
-        await dialog.alert("批量添加成功", `成功添加 ${results.success.length} 个模型`);
-      } else if (results.success.length === 0) {
-        const message = [
-          `所有 ${results.failed.length} 个模型添加失败`,
-          "",
-          "失败详情:",
-          ...results.failed.map((f) => `• ${f.name}: ${f.error}`),
-        ].join("\n");
-        await dialog.alert("批量添加失败", message);
-      } else {
-        const message = [
-          `成功: ${results.success.length} 个`,
-          `失败: ${results.failed.length} 个`,
-          "",
-          "成功的模型:",
-          ...results.success.map((name) => `✓ ${name}`),
-          "",
-          "失败的模型:",
-          ...results.failed.map((f) => `✗ ${f.name}: ${f.error}`),
-        ].join("\n");
-        await dialog.alert("批量添加部分失败", message);
-      }
-
-      if (!isMountedRef.current) return;
-
-      if (results.success.length > 0) {
-        await onSuccess();
-      }
-
-      if (!isMountedRef.current) return;
-
-      setBatchInput("");
-      onClose();
-    } catch (err) {
-      // Bug 6 修复: 检查组件是否已卸载
-      if (!isMountedRef.current) return;
-
-      setError(err instanceof Error ? err.message : "批量添加失败,请重试");
-    } finally {
-      if (isMountedRef.current) {
-        setIsSubmitting(false);
-      }
-    }
-  };
-
   const handleClose = () => {
     reset();
     setError(null);
-    setBatchInput("");
-    setIsBatchMode(false);
     onClose();
   };
 
@@ -261,8 +141,6 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
     if (!isOpen) {
       reset();
       setError(null);
-      setBatchInput("");
-      setIsBatchMode(false);
       setSelectedProvider("openai");
     } else if (isEditMode && model) {
       setSelectedProvider(model.provider);
@@ -310,33 +188,9 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between p-6 border-b border-slate-200">
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-slate-900">
-                {isEditMode ? "编辑 AI 模型" : "添加 AI 模型"}
-              </h2>
-              {!isEditMode && (
-                <button
-                  onClick={() => setIsBatchMode(!isBatchMode)}
-                  className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center gap-2 ${
-                    isBatchMode
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
-                  }`}
-                >
-                  {isBatchMode ? (
-                    <>
-                      <IconCopy className="w-4 h-4" />
-                      <span>批量模式</span>
-                    </>
-                  ) : (
-                    <>
-                      <IconRefresh className="w-4 h-4" />
-                      <span>切换批量</span>
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
+            <h2 className="text-2xl font-bold text-slate-900">
+              {isEditMode ? "编辑 AI 模型" : "添加 AI 模型"}
+            </h2>
             <button
               onClick={handleClose}
               className="text-slate-400 hover:text-slate-600 transition-colors"
@@ -352,118 +206,7 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
             </button>
           </div>
 
-          {isBatchMode ? (
-            <div className="p-6 space-y-5">
-              {error && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-600 text-sm">{error}</p>
-                </div>
-              )}
-
-              <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-indigo-900 dark:text-indigo-100 mb-2 flex items-center gap-2">
-                  <IconCopy className="w-4 h-4" />
-                  <span>批量添加格式说明</span>
-                </h3>
-                <p className="text-xs text-indigo-800 dark:text-indigo-200 mb-2">
-                  每行一个模型,字段用竖线{" "}
-                  <code className="bg-indigo-200 dark:bg-indigo-900 px-1 rounded">|</code> 分隔:
-                </p>
-                <code className="block text-xs bg-indigo-100 dark:bg-indigo-900 p-2 rounded text-indigo-900 dark:text-indigo-100">
-                  模型名称|服务商|API端点|API密钥|模型ID|参数(可选)
-                </code>
-                <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-2">
-                  <strong>服务商</strong>: openai, gemini, claude, openai-compatible
-                </p>
-                <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-1">
-                  <strong>示例</strong>:
-                </p>
-                <code className="block text-xs bg-indigo-100 dark:bg-indigo-900 p-2 rounded text-indigo-900 dark:text-indigo-100 mt-1">
-                  DeepSeek
-                  V3|openai-compatible|https://ai.hybgzs.com|sk-xxx|deepseek-ai/DeepSeek-V3.1
-                </code>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="batch_input"
-                  className="block text-sm font-medium text-slate-700 mb-2"
-                >
-                  批量输入 <span className="text-red-500">*</span>
-                </label>
-                <Textarea
-                  id="batch_input"
-                  value={batchInput}
-                  onChange={(e) => setBatchInput(e.target.value)}
-                  rows={10}
-                  className="font-mono text-sm"
-                  placeholder="DeepSeek V3|openai-compatible|https://ai.hybgzs.com|sk-xxx|deepseek-ai/DeepSeek-V3.1&#10;GPT-4|openai|https://api.openai.com/v1|sk-xxx|gpt-4"
-                />
-                <p className="mt-1 text-xs text-slate-500">
-                  已输入{" "}
-                  {
-                    batchInput
-                      .trim()
-                      .split("\n")
-                      .filter((line) => line.trim()).length
-                  }{" "}
-                  行
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="flex-1 px-6 py-3 border border-slate-300 rounded-lg
-                           text-slate-700 hover:bg-slate-50 transition-colors duration-200"
-                >
-                  取消
-                </button>
-                <button
-                  type="button"
-                  onClick={handleBatchSubmit}
-                  disabled={isSubmitting || !batchInput.trim()}
-                  className={`flex-1 px-6 py-3 rounded-lg font-medium
-                           transition-all duration-200 flex items-center justify-center gap-2
-                           ${
-                             isSubmitting || !batchInput.trim()
-                               ? "bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
-                               : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg"
-                           }`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <svg
-                        className="animate-spin h-5 w-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
-                      <span>批量添加中...</span>
-                    </>
-                  ) : (
-                    <span>批量添加模型</span>
-                  )}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
               {error && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-red-600 text-sm">{error}</p>
@@ -674,7 +417,6 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 </button>
               </div>
             </form>
-          )}
         </div>
       </div>
     </>

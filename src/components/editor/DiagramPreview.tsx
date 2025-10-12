@@ -3,19 +3,68 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import mermaid from "mermaid";
 
 import type { RenderLanguage } from "@/types/diagram";
+import type { ExportActions } from "@/hooks/useExportActions";
 import { KROKI_MAX_RETRIES, KROKI_RETRY_DELAY, KROKI_TIMEOUT } from "@/lib/constants/env";
 import { generateKrokiURL, type KrokiDiagramType } from "@/lib/utils/kroki";
 import { logger } from "@/lib/utils/logger";
+import { useTheme } from "@/contexts/ThemeContext";
 import { ZoomableContainer } from "./ZoomableContainer";
+
 interface DiagramPreviewProps {
   code: string;
   renderLanguage: RenderLanguage;
   onError: (error: string | null) => void;
   onSvgRendered?: (svg: string) => void; // 新增：SVG 渲染完成回调
+  exportActions?: ExportActions; // 导出操作
 }
 
+/**
+ * Mermaid 本地渲染
+ * @param code - Mermaid 图表代码
+ * @param theme - 主题 (light/dark)
+ * @returns SVG 字符串
+ */
+async function renderWithMermaid(code: string, theme: "light" | "dark"): Promise<string> {
+  try {
+    // 初始化 Mermaid 配置
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: theme === "dark" ? "dark" : "default",
+      securityLevel: "loose",
+      fontFamily: "ui-sans-serif, system-ui, sans-serif",
+    });
+
+    // 生成唯一 ID
+    const id = `mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+    // 渲染图表
+    const { svg } = await mermaid.render(id, code);
+
+    // ⭐ 检测 Mermaid 是否返回了错误 SVG（包含错误信息的 SVG）
+    // Mermaid 有时会返回包含 "Syntax error" 的 SVG 而不是抛出异常
+    if (svg.includes("Syntax error") || svg.includes("Error:")) {
+      // 从 SVG 中提取错误信息
+      const errorMatch = svg.match(/>(Syntax error[^<]*)</i) || svg.match(/>(Error:[^<]*)</i);
+      const errorMessage = errorMatch ? errorMatch[1] : "Mermaid syntax error";
+      logger.error("❌ [Mermaid] 渲染返回错误 SVG:", errorMessage);
+      return Promise.reject(new Error(errorMessage));
+    }
+
+    logger.info("✅ [Mermaid] 本地渲染成功");
+    return svg;
+  } catch (error) {
+    logger.error("❌ [Mermaid] 本地渲染失败:", error);
+    const errorMessage = error instanceof Error ? error.message : "Mermaid rendering failed";
+    return Promise.reject(new Error(`Mermaid 渲染失败: ${errorMessage}`));
+  }
+}
+
+/**
+ * Kroki 远程渲染 (用于除 Mermaid 外的所有图表)
+ */
 async function renderWithKroki(
   code: string,
   diagramType: RenderLanguage,
@@ -82,7 +131,9 @@ export function DiagramPreview({
   renderLanguage,
   onError,
   onSvgRendered,
+  exportActions,
 }: DiagramPreviewProps) {
+  const { effectiveTheme } = useTheme(); // 获取当前主题
   const [svgContent, setSvgContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -95,9 +146,10 @@ export function DiagramPreview({
 
   const renderCache = useRef<Map<string, string>>(new Map());
 
+  // 缓存指纹包含主题信息 (Mermaid 渲染结果依赖主题)
   const codeFingerprint = useMemo(() => {
-    return hashCode(code + "::" + renderLanguage);
-  }, [code, renderLanguage]);
+    return hashCode(code + "::" + renderLanguage + "::" + effectiveTheme);
+  }, [code, renderLanguage, effectiveTheme]);
 
   const isRenderingRef = useRef(false);
 
@@ -125,10 +177,15 @@ export function DiagramPreview({
       onError(null);
 
       try {
-        const svg = await renderWithKroki(code, renderLanguage);
+        // 渲染决策: Mermaid 使用本地渲染，其他使用 Kroki
+        const svg =
+          renderLanguage === "mermaid"
+            ? await renderWithMermaid(code, effectiveTheme)
+            : await renderWithKroki(code, renderLanguage);
 
         setSvgContent(svg);
         svgCallback?.(svg); // 通知父组件 SVG 已渲染
+        onError(null); // ⭐ 清除之前的错误信息
 
         if (renderCache.current.size >= 20) {
           const firstKey = renderCache.current.keys().next().value;
@@ -147,7 +204,7 @@ export function DiagramPreview({
         isRenderingRef.current = false;
       }
     },
-    [code, renderLanguage, onError, codeFingerprint]
+    [code, renderLanguage, effectiveTheme, onError, codeFingerprint]
   );
 
   /**
@@ -201,6 +258,7 @@ export function DiagramPreview({
       <ZoomableContainer
         isFullscreen={isFullscreen}
         onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+        exportActions={exportActions}
       >
         {isLoading ? (
           <div className="text-muted-foreground">渲染中...</div>

@@ -2,7 +2,7 @@
 
 "use client";
 
-import { Wand2, Wrench, Save, Download, Settings, History } from "lucide-react";
+import { Wand2, Wrench, Save, Settings, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDiagramStore } from "@/lib/stores/diagram-store";
 import {
@@ -18,7 +18,6 @@ interface EditorHeaderProps {
   onAdjustClick: () => void;
   onFixClick: () => void;
   onSaveClick: () => void;
-  onExportClick: () => void;
   onModelsClick: () => void;
   onHistoryClick: () => void;
 }
@@ -28,7 +27,6 @@ export function EditorHeader({
   onAdjustClick,
   onFixClick,
   onSaveClick,
-  onExportClick,
   onModelsClick,
   onHistoryClick,
 }: EditorHeaderProps) {
@@ -67,10 +65,6 @@ export function EditorHeader({
       <Button variant="ghost" size="sm" onClick={onSaveClick} disabled={isSaveDisabled}>
         <Save className="mr-1.5 h-4 w-4" />
         保存
-      </Button>
-      <Button variant="ghost" size="sm" onClick={onExportClick}>
-        <Download className="mr-1.5 h-4 w-4" />
-        导出
       </Button>
       <Button variant="ghost" size="sm" onClick={onModelsClick}>
         <Settings className="mr-1.5 h-4 w-4" />

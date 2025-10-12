@@ -14,10 +14,11 @@ export const dynamic = "force-dynamic";
 // Hooks
 import { useDiagramStore } from "@/lib/stores/diagram-store";
 import { useEditorActions } from "@/hooks/useEditorActions";
+import { useExportActions } from "@/hooks/useExportActions";
 
 // Components
 import { CodeEditor, DiagramPreview, InputPanel } from "@/components/editor";
-import { AdjustModal, ExportModal } from "@/components/modals";
+import { AdjustModal } from "@/components/modals";
 import { EditorHeader } from "@/components/layout";
 
 // Types
@@ -50,10 +51,15 @@ export default function HomePage() {
   // 模态框状态
   const [adjustModalOpen, setAdjustModalOpen] = useState(false);
   const [adjustInput, setAdjustInput] = useState("");
-  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   // SVG 内容状态（用于本地导出）
   const [renderedSvg, setRenderedSvg] = useState<string>("");
+
+  // 导出操作
+  const exportActions = useExportActions({
+    code,
+    svgContent: renderedSvg,
+  });
 
   // 调整图表 - 打开模态框
   const handleAdjustClick = useCallback(() => {
@@ -76,11 +82,6 @@ export default function HomePage() {
       handleFix(renderError);
     }
   }, [renderError, handleFix]);
-
-  // 导出图表 - 打开模态框
-  const handleExportClick = useCallback(() => {
-    setExportModalOpen(true);
-  }, []);
 
   useEffect(() => {
     const loadHistoryId = localStorage.getItem("loadHistoryId");
@@ -152,7 +153,6 @@ export default function HomePage() {
         onAdjustClick={handleAdjustClick}
         onFixClick={handleFixClick}
         onSaveClick={handleSave}
-        onExportClick={handleExportClick}
         onModelsClick={handleNavigateModels}
         onHistoryClick={handleNavigateHistory}
       />
@@ -184,6 +184,7 @@ export default function HomePage() {
           renderLanguage={renderLanguage}
           onError={handleDiagramError}
           onSvgRendered={handleSvgRendered}
+          exportActions={exportActions}
         />
       </main>
 
@@ -195,15 +196,6 @@ export default function HomePage() {
         onClose={() => setAdjustModalOpen(false)}
         onApply={handleApplyAdjustment}
         isLoading={isGenerating}
-      />
-
-      {/* 导出模态框 */}
-      <ExportModal
-        isOpen={exportModalOpen}
-        code={code}
-        renderLanguage={renderLanguage}
-        svgContent={renderedSvg}
-        onClose={() => setExportModalOpen(false)}
       />
     </div>
   );

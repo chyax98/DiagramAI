@@ -54,31 +54,31 @@ export const RENDER_LANGUAGES: readonly RenderLanguageInfo[] = [
   {
     value: "d2",
     label: "D2",
-    description: "现代化声明式图表，6 种图表",
+    description: "现代化声明式图表，7 种图表",
     iconPath: "/icons/languages/d2.svg",
   },
   {
     value: "graphviz",
     label: "Graphviz",
-    description: "DOT 语言图形可视化，5 种图表",
+    description: "DOT 语言图形可视化，6 种图表",
     iconPath: "/icons/languages/graphviz.svg",
   },
   {
     value: "wavedrom",
     label: "WaveDrom",
-    description: "数字信号时序图，3 种图表",
+    description: "数字信号时序图，4 种图表",
     iconPath: "/icons/languages/wavedrom.svg",
   },
   {
     value: "nomnoml",
     label: "Nomnoml",
-    description: "简化 UML 图表，3 种图表",
+    description: "简化 UML 图表，4 种图表",
     iconPath: "/icons/languages/nomnoml.svg",
   },
   {
     value: "excalidraw",
     label: "Excalidraw",
-    description: "手绘风格图表，3 种图表",
+    description: "手绘风格图表，5 种图表",
     iconPath: "/icons/languages/excalidraw.svg",
   },
   {
@@ -108,13 +108,13 @@ export const RENDER_LANGUAGES: readonly RenderLanguageInfo[] = [
   {
     value: "ditaa",
     label: "Ditaa",
-    description: "ASCII 艺术图转换，3 种图表",
+    description: "ASCII 艺术图转换，1 种图表",
     iconPath: "/icons/languages/ditaa.svg",
   },
   {
     value: "nwdiag",
     label: "NwDiag",
-    description: "网络拓扑图，数据中心和网络架构设计，3 种图表",
+    description: "网络拓扑图，数据中心和网络架构设计，1 种图表",
     iconPath: "/icons/languages/nwdiag.svg",
   },
   {
@@ -174,7 +174,7 @@ export const RENDER_LANGUAGES: readonly RenderLanguageInfo[] = [
   {
     value: "umlet",
     label: "UMLet",
-    description: "轻量级 UML 工具，3 种图表",
+    description: "轻量级 UML 工具，1 种图表",
     iconPath: "/icons/languages/umlet.svg",
   },
 ] as const;
@@ -194,7 +194,7 @@ export const LANGUAGE_DIAGRAM_TYPES: Record<RenderLanguage, readonly DiagramType
     { value: "timeline", label: "时间线", description: "展示事件时间轴 (timeline)" },
     { value: "quadrant", label: "象限图", description: "展示四象限分析 (quadrantChart)" },
     { value: "sankey", label: "桑基图", description: "展示流量分布 (sankey-beta)" },
-    { value: "xyChart", label: "XY 图表", description: "展示数据趋势 (xyChart)" },
+    { value: "xychart", label: "XY 图表", description: "展示数据趋势 (xyChart)" },
   ] as const,
 
   plantuml: [
@@ -215,6 +215,7 @@ export const LANGUAGE_DIAGRAM_TYPES: Record<RenderLanguage, readonly DiagramType
     { value: "class", label: "类图", description: "使用 shape: class 展示面向对象设计" },
     { value: "architecture", label: "架构图", description: "使用容器和层级结构" },
     { value: "network", label: "网络拓扑图", description: "使用双向箭头 <->" },
+    { value: "grid", label: "网格布局", description: "精确网格定位系统" },
   ] as const,
 
   graphviz: [
@@ -223,24 +224,29 @@ export const LANGUAGE_DIAGRAM_TYPES: Record<RenderLanguage, readonly DiagramType
     { value: "network", label: "网络拓扑图", description: "使用 graph 和 --" },
     { value: "tree", label: "树形结构", description: "使用 rankdir=TB" },
     { value: "architecture", label: "架构图", description: "使用分层布局" },
+    { value: "er", label: "实体关系图", description: "数据库 ER 图" },
   ] as const,
 
   wavedrom: [
     { value: "timing", label: "时序波形图", description: "数字信号时序图" },
     { value: "signal", label: "信号图", description: "展示信号变化" },
     { value: "register", label: "寄存器图", description: "位字段布局" },
+    { value: "bitfield", label: "位字段图", description: "寄存器位定义" },
   ] as const,
 
   nomnoml: [
     { value: "class", label: "类图", description: "简化的 UML 类图" },
     { value: "component", label: "组件图", description: "系统组件关系" },
     { value: "architecture", label: "架构图", description: "系统架构设计" },
+    { value: "flowchart", label: "流程图", description: "简洁流程图" },
   ] as const,
 
   excalidraw: [
     { value: "sketch", label: "手绘草图", description: "自由手绘风格图表" },
     { value: "wireframe", label: "线框图", description: "UI 原型设计" },
     { value: "diagram", label: "通用图表", description: "手绘风格的通用图表" },
+    { value: "flowchart", label: "流程图", description: "手绘风格的流程图" },
+    { value: "architecture", label: "架构图", description: "手绘风格的系统架构" },
   ] as const,
 
   c4plantuml: [
@@ -278,16 +284,10 @@ export const LANGUAGE_DIAGRAM_TYPES: Record<RenderLanguage, readonly DiagramType
     },
   ] as const,
 
-  ditaa: [
-    { value: "diagram", label: "通用图表", description: "ASCII 艺术转换为图形" },
-    { value: "flowchart", label: "流程图", description: "基于 ASCII 字符的流程图" },
-    { value: "architecture", label: "架构图", description: "系统架构简图" },
-  ] as const,
+  ditaa: [{ value: "ascii", label: "ASCII 艺术图", description: "ASCII 字符转图形" }] as const,
 
   nwdiag: [
     { value: "network", label: "网络拓扑图", description: "多网段网络结构和设备连接" },
-    { value: "rack", label: "机架图", description: "数据中心设备物理布局" },
-    { value: "packet", label: "数据包图", description: "网络协议分层结构" },
   ] as const,
 
   blockdiag: [
@@ -330,18 +330,11 @@ export const LANGUAGE_DIAGRAM_TYPES: Record<RenderLanguage, readonly DiagramType
     { value: "er", label: "实体关系图", description: "简洁 ER 图语法，比 DBML 更简单" },
   ] as const,
 
-  pikchr: [
-    { value: "diagram", label: "通用图表", description: "精确坐标和布局控制" },
-    { value: "flowchart", label: "流程图", description: "程序化流程图设计" },
-  ] as const,
+  pikchr: [{ value: "diagram", label: "通用图表", description: "精确坐标和布局控制" }] as const,
 
   svgbob: [{ value: "ascii", label: "ASCII 转 SVG", description: "自动美化文本图表" }] as const,
 
-  umlet: [
-    { value: "class", label: "类图", description: "简化的 UML 类图" },
-    { value: "component", label: "组件图", description: "系统组件关系" },
-    { value: "usecase", label: "用例图", description: "系统用例建模" },
-  ] as const,
+  umlet: [{ value: "diagram", label: "UML 图表", description: "轻量级 UML 工具" }] as const,
 } as const;
 
 export type DiagramType =

@@ -499,6 +499,71 @@ case 'your-provider':
 
 ---
 
+## 🔄 类型定义管理
+
+### Prompt 层级结构
+
+DiagramAI 使用三层 Prompt 系统:
+
+```
+L1: universal.txt (641 行)
+    → 所有图表共享的通用规范
+
+L2: {language}/common.txt
+    → 每种语言的通用规范 (可选)
+    → 21/23 种语言有此文件
+
+L3: {language}/{type}.txt
+    → 特定图表类型的规范 (必需)
+    → 必须与前端类型定义对齐
+```
+
+**Prompt 构建逻辑** (`src/lib/utils/prompt-loader.ts`):
+```typescript
+最终 Prompt = L1 + L2 + L3 (用 --- 分隔)
+```
+
+### 类型定义对齐原则
+
+**SSOT (Single Source of Truth)**: `src/lib/constants/diagram-types.ts`
+
+**三方对齐关系**:
+```
+前端类型定义 (diagram-types.ts)
+     ↓
+必须完全匹配
+     ↓
+L3 Prompt 文件 (prompts/{language}/{type}.txt)
+```
+
+**维护规则**:
+1. **添加新图表类型**:
+   - ✅ 先创建 `prompts/{language}/{type}.txt` 文件
+   - ✅ 然后在 `LANGUAGE_DIAGRAM_TYPES` 添加对应类型定义
+   - ✅ 验证三方对齐: 运行 `npx tsx scripts/verify-types.ts`
+
+2. **删除图表类型**:
+   - ✅ 先从 `LANGUAGE_DIAGRAM_TYPES` 移除类型定义
+   - ✅ 然后删除或重命名 `prompts/{language}/{type}.txt`
+   - ⚠️  保留有价值的 prompt 内容,避免误删
+
+3. **重命名图表类型**:
+   - ✅ 同时修改前端定义和 prompt 文件名
+   - ✅ 更新 `RENDER_LANGUAGES` 的图表数量描述
+
+**常见错误**:
+- ❌ 前端定义了类型但没有对应 prompt 文件
+- ❌ 存在 prompt 文件但前端没有定义 (用户无法选择)
+- ❌ 复制粘贴导致把其他语言的类型混进来
+
+**历史教训 (2025-10-12)**:
+- 发现所有 23 种语言的类型定义都存在严重混乱
+- 原因: 复制粘贴错误,把其他语言的类型混在一起
+- 修复: 完全基于实际 prompt 文件重建类型定义
+- 结果: 类型数量从 600+ 个混乱定义减少到 80+ 个正确定义
+
+---
+
 ## 📚 关键文件参考
 
 | 文件                                           | 用途                 |
@@ -511,6 +576,7 @@ case 'your-provider':
 | `src/lib/db/schema.sql`                        | 数据库 Schema        |
 | `src/lib/constants/prompts/`                   | AI 提示词 (23+ 语言) |
 | `src/lib/constants/diagram-types.ts`           | 图表类型定义 (SSOT)  |
+| `src/lib/utils/prompt-loader.ts`               | Prompt 三层加载器    |
 | `src/app/api/chat/route.ts`                    | 生成 API 端点        |
 | `src/app/api/kroki/[[...path]]/route.ts`       | Kroki 代理 API       |
 

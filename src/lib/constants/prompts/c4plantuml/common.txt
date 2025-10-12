@@ -1,6 +1,82 @@
 
 # C4-PlantUML 语言规范
 
+## 强制规则（Mandatory Rules）
+
+C4-PlantUML 基于 PlantUML，必须遵循以下强制规则：
+
+### ⚠️ 规则 1: 所有图表必须使用 @startuml 和 @enduml 包裹
+这是 PlantUML 最基本的强制规则！缺少会导致渲染失败。
+
+**错误示例**：
+```plantuml
+!include <C4/C4_Container>
+Person(user, "用户")
+```
+
+**编译错误信息**：
+```
+Error: Syntax error at line 1: Unexpected content outside @startuml block
+```
+
+**正确写法**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+Person(user, "用户")
+@enduml
+```
+
+### ⚠️ 规则 2: 特殊字符必须用双引号包裹
+方括号 []、花括号 {}、圆括号 () 在描述文本中使用时必须用双引号包裹。
+
+**错误示例**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+Container(api, API服务[v2], "Node.js")
+@enduml
+```
+
+**编译错误信息**：
+```
+Error: Syntax error at line 3: Unexpected token '['
+```
+
+**正确写法**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+Container(api, "API服务[v2]", "Node.js", "RESTful API")
+@enduml
+```
+
+### ⚠️ 规则 3: 手写风格必须使用 !option 指令（Kroki 兼容性）
+**重要**: 旧语法 `skinparam handwritten true` 在 Kroki 环境下已废弃，必须使用新语法。
+
+**错误示例**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+skinparam handwritten true
+Person(user, "用户")
+@enduml
+```
+
+**Kroki 错误信息**：
+```
+Warning: 'skinparam handwritten' is deprecated, use '!option handwritten' instead
+```
+
+**正确写法**：
+```plantuml
+@startuml
+!option handwritten false
+!include <C4/C4_Container>
+Person(user, "用户")
+@enduml
+```
+
 ## 核心概念
 
 C4 模型（Context, Container, Component, Code）是一种用于可视化软件架构的分层方法。C4-PlantUML 是 PlantUML 的扩展库，专门用于绘制 C4 模型图表。

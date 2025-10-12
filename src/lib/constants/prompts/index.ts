@@ -3,7 +3,7 @@
  */
 
 import type { RenderLanguage, DiagramType } from "@/lib/constants/diagram-types";
-import { promptLoader } from "./loaders/prompt-loader";
+import { promptLoader } from "@/lib/utils/prompt-loader";
 
 export * from "./types";
 export { promptLoader };

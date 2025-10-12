@@ -20,7 +20,14 @@ export const GET = withAuth(async (_request: NextRequest, user) => {
     const modelRepo = new ModelRepository(db);
     const models = modelRepo.findByUserId(user.id);
 
-    return NextResponse.json({ models });
+    return NextResponse.json(
+      { models },
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      }
+    );
   } catch (error) {
     logger.error("获取模型列表失败", error);
     return NextResponse.json({ error: "服务器错误,请稍后重试" }, { status: 500 });

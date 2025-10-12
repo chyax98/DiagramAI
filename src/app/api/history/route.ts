@@ -53,13 +53,20 @@ export const GET = withAuth(async (request: NextRequest, user) => {
       histories = filtered.slice(offset, offset + limit);
     }
 
-    return NextResponse.json({
-      histories,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    });
+    return NextResponse.json(
+      {
+        histories,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      }
+    );
   } catch (error) {
     logger.error("获取历史记录失败", error);
     return NextResponse.json({ error: "服务器错误,请稍后重试" }, { status: 500 });

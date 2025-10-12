@@ -117,8 +117,8 @@ export default function ModelsPage() {
       // 使用统一 API 客户端 (自动添加 Authorization header)
       await apiClient.delete(`/api/models/${modelId}`);
 
-      // 刷新列表
-      setModels(models.filter((m) => m.id !== modelId));
+      // 刷新列表 (从服务器重新获取最新数据)
+      await fetchModels();
     } catch (err) {
       await dialog.alert("删除失败", err instanceof Error ? err.message : "删除失败，请重试");
     }

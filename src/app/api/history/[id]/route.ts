@@ -31,7 +31,11 @@ export const GET = withAuthParams<{ id: string }>(async (_request: NextRequest, 
       return NextResponse.json({ error: "无权访问此历史记录" }, { status: 403 });
     }
 
-    return NextResponse.json(history);
+    return NextResponse.json(history, {
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+      },
+    });
   } catch (error) {
     logger.error("获取历史记录失败:", error);
     return NextResponse.json({ error: "服务器错误,请稍后重试" }, { status: 500 });

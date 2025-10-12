@@ -36,7 +36,14 @@ export const GET = withAuthParams(async (_request: NextRequest, user, params) =>
       return NextResponse.json({ error: "无权访问该模型" }, { status: 403 });
     }
 
-    return NextResponse.json({ model });
+    return NextResponse.json(
+      { model },
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      }
+    );
   } catch (error) {
     logger.error("获取模型失败:", error);
     return NextResponse.json({ error: "服务器错误,请稍后重试" }, { status: 500 });

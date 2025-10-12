@@ -1,11 +1,7 @@
--- DiagramAI 数据库 Schema (最终版本)
+-- DiagramAI 数据库 Schema
 -- SQLite 3.x
--- 版本: v5.0.0
--- 创建日期: 2025-10-10
+-- 创建日期: 2025-10-12
 -- 编码: UTF-8
---
--- 说明: 此 Schema 包含所有迁移的最终状态,可一次性生成完整数据库
--- 变更日志 v5.0.0: 新增 13 种图表渲染语言 (bpmn, ditaa, nwdiag, blockdiag, actdiag, packetdiag, rackdiag, seqdiag, structurizr, erd, pikchr, svgbob, umlet)
 
 -- ============================================================================
 -- 1. users 表 - 用户认证与访问控制
@@ -60,7 +56,7 @@ CREATE TABLE IF NOT EXISTS ai_models (
   -- 示例: "DeepSeek Chat", "GPT-4 Turbo"
   name TEXT NOT NULL,
 
-  -- Provider 类型 (新增字段 - Migration 001)
+  -- Provider 类型
   -- 'openai' | 'anthropic' | 'gemini' | 'openai-compatible'
   -- 注意: 'gemini' 支持 Google AI, 'openai-compatible' 支持 DeepSeek 等
   provider TEXT NOT NULL DEFAULT 'openai',
@@ -104,7 +100,7 @@ CREATE INDEX IF NOT EXISTS idx_models_user ON ai_models(user_id);
 -- 索引: 按创建时间倒序(显示最新配置)
 CREATE INDEX IF NOT EXISTS idx_models_user_time ON ai_models(user_id, created_at DESC);
 
--- 索引: 按 provider 筛选 (新增 - Migration 001)
+-- 索引: 按 provider 筛选
 CREATE INDEX IF NOT EXISTS idx_models_provider ON ai_models(provider);
 
 
@@ -124,9 +120,9 @@ CREATE TABLE IF NOT EXISTS generation_histories (
   -- 最大长度: 20,000 字符
   input_text TEXT NOT NULL,
 
-  -- 渲染语言: 枚举值 (字段名更新 - Migration 004, 扩展 - Migration 005, v5.0.0 扩展)
-  -- 原有 10 种: 'mermaid' | 'plantuml' | 'd2' | 'graphviz' | 'wavedrom' | 'nomnoml' | 'excalidraw' | 'c4plantuml' | 'vegalite' | 'dbml'
-  -- 新增 13 种 (v5.0.0): 'bpmn' | 'ditaa' | 'nwdiag' | 'blockdiag' | 'actdiag' | 'packetdiag' | 'rackdiag' | 'seqdiag' | 'structurizr' | 'erd' | 'pikchr' | 'svgbob' | 'umlet'
+  -- 渲染语言: 枚举值 (支持 23 种图表语言)
+  -- 主流 10 种: 'mermaid' | 'plantuml' | 'd2' | 'graphviz' | 'wavedrom' | 'nomnoml' | 'excalidraw' | 'c4plantuml' | 'vegalite' | 'dbml'
+  -- 专业扩展 13 种: 'bpmn' | 'ditaa' | 'nwdiag' | 'blockdiag' | 'actdiag' | 'packetdiag' | 'rackdiag' | 'seqdiag' | 'structurizr' | 'erd' | 'pikchr' | 'svgbob' | 'umlet'
   render_language TEXT NOT NULL,
 
   -- 图表类型: 可选
@@ -145,10 +141,10 @@ CREATE TABLE IF NOT EXISTS generation_histories (
   -- 允许为空(模型可能被删除)
   model_id INTEGER,
 
-  -- 是否已保存 (新增字段 - Migration 002)
+  -- 是否已保存
   is_saved BOOLEAN DEFAULT 0,
 
-  -- 渲染错误信息 (新增字段 - Migration 002)
+  -- 渲染错误信息
   render_error TEXT,
 
   -- 创建时间（UTC 时间）
@@ -168,21 +164,21 @@ CREATE TABLE IF NOT EXISTS generation_histories (
 CREATE INDEX IF NOT EXISTS idx_histories_user_time
   ON generation_histories(user_id, created_at DESC);
 
--- 索引: 按渲染语言筛选 (字段名更新 - Migration 004)
+-- 索引: 按渲染语言筛选
 CREATE INDEX IF NOT EXISTS idx_histories_language
   ON generation_histories(user_id, render_language, created_at DESC);
 
--- 索引: 按保存状态查询 (新增 - Migration 003)
+-- 索引: 按保存状态查询
 CREATE INDEX IF NOT EXISTS idx_histories_user_saved_time
   ON generation_histories(user_id, is_saved, created_at DESC);
 
--- 索引: 按错误状态查询 (新增 - Migration 003)
+-- 索引: 按错误状态查询
 CREATE INDEX IF NOT EXISTS idx_histories_user_error
   ON generation_histories(user_id, render_error);
 
 
 -- ============================================================================
--- 4. chat_sessions 表 - 多轮对话会话 (新增 - Migration 002)
+-- 4. chat_sessions 表 - 多轮对话会话
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS chat_sessions (
@@ -229,7 +225,7 @@ CREATE INDEX IF NOT EXISTS idx_chat_sessions_generation_history_id
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_created_at
   ON chat_sessions(created_at DESC);
 
--- 索引: 用户会话分页查询 (新增 - Migration 003)
+-- 索引: 用户会话分页查询
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_user_time
   ON chat_sessions(user_id, created_at DESC);
 

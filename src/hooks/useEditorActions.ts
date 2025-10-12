@@ -120,7 +120,7 @@ export function useEditorActions() {
       startGeneration();
 
       try {
-        // 使用统一的 /api/chat 接口（v4.4.0）
+        // 使用统一的 /api/chat 接口
         const result = await apiClient.post<{
           code: string;
           sessionId: number;

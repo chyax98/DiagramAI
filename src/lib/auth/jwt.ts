@@ -28,7 +28,7 @@ const JWT_SECRET = (() => {
       "JWT_SECRET 环境变量未配置或长度不足 32 字符。\n" +
         "请在 .env 文件中设置强密钥:\n" +
         "  openssl rand -base64 48 | tr -d '\\n' > .env.jwt\n" +
-        "  echo \"JWT_SECRET=$(cat .env.jwt)\" >> .env"
+        '  echo "JWT_SECRET=$(cat .env.jwt)" >> .env'
     );
   }
   return secret;

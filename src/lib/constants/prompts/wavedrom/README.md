@@ -290,6 +290,5 @@ if (isWaveDromTypeSupported("timing")) {
 
 ---
 
-**版本**: v1.0
 **状态**: 已完成 ✅
 **维护者**: DiagramAI Team

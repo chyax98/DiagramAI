@@ -6,7 +6,7 @@
 
 ## 📋 项目概览
 
-- **技术栈**: Next.js 15 + React 19 + TypeScript 5.x
+- **技术栈**: Next.js + React + TypeScript
 - **架构模式**: Repository + Service + Factory Pattern
 - **数据库**: SQLite (better-sqlite3)
 - **认证**: JWT + bcrypt
@@ -47,7 +47,7 @@ graph TB
     end
 
     subgraph Database["数据库"]
-        DB[(SQLite v5.0.0)]
+        DB[(SQLite)]
     end
 
     subgraph External["外部服务"]
@@ -205,10 +205,10 @@ const model = getAIProvider({
 
 **支持的提供商**:
 
-- **OpenAI**: GPT-3.5, GPT-4, GPT-4o, GPT-4o-mini
-- **Anthropic**: Claude 3 系列 (Opus, Sonnet, Haiku)
-- **Google**: Gemini Pro, Gemini Pro Vision
-- **OpenAI Compatible**: DeepSeek, SiliconFlow, Together AI, Groq 等
+- **OpenAI**: 支持所有 GPT 系列模型
+- **Anthropic**: 支持所有 Claude 系列模型
+- **Google**: 支持所有 Gemini 系列模型
+- **OpenAI Compatible**: DeepSeek, SiliconFlow, Together AI, Groq 等兼容 OpenAI API 的服务
 
 ### 2. Diagram Generation Service
 
@@ -354,12 +354,11 @@ erDiagram
 - `generation_histories` - 生成的图表
 - `chat_sessions` - 多轮对话会话
 
-**Schema 版本**: v5.0.0 (2025-10-10)
+**Schema 特性**:
 
-**最新变更**:
-
-- 新增 13 种图表渲染语言支持
-- `render_language` 枚举扩展至 23 种语言
+- 支持 23 种图表渲染语言
+- 完整的用户认证和会话管理
+- 多 AI 提供商配置支持
 
 ---
 
@@ -502,18 +501,18 @@ case 'your-provider':
 
 ## 📚 关键文件参考
 
-| 文件                                           | 用途                   |
-| ---------------------------------------------- | ---------------------- |
-| `src/lib/ai/provider-factory.ts`               | AI 提供商抽象          |
-| `src/lib/services/DiagramGenerationService.ts` | 核心生成逻辑           |
-| `src/lib/services/FailureLogService.ts`        | 失败日志记录           |
-| `src/lib/auth/jwt.ts`                          | JWT 认证               |
-| `src/lib/auth/middleware.ts`                   | API 路由保护           |
-| `src/lib/db/schema.sql`                        | 数据库 Schema (v5.0.0) |
-| `src/lib/constants/prompts/`                   | AI 提示词 (23+ 语言)   |
-| `src/lib/constants/diagram-types.ts`           | 图表类型定义 (SSOT)    |
-| `src/app/api/chat/route.ts`                    | 生成 API 端点          |
-| `src/app/api/kroki/[[...path]]/route.ts`       | Kroki 代理 API         |
+| 文件                                           | 用途                 |
+| ---------------------------------------------- | -------------------- |
+| `src/lib/ai/provider-factory.ts`               | AI 提供商抽象        |
+| `src/lib/services/DiagramGenerationService.ts` | 核心生成逻辑         |
+| `src/lib/services/FailureLogService.ts`        | 失败日志记录         |
+| `src/lib/auth/jwt.ts`                          | JWT 认证             |
+| `src/lib/auth/middleware.ts`                   | API 路由保护         |
+| `src/lib/db/schema.sql`                        | 数据库 Schema        |
+| `src/lib/constants/prompts/`                   | AI 提示词 (23+ 语言) |
+| `src/lib/constants/diagram-types.ts`           | 图表类型定义 (SSOT)  |
+| `src/app/api/chat/route.ts`                    | 生成 API 端点        |
+| `src/app/api/kroki/[[...path]]/route.ts`       | Kroki 代理 API       |
 
 ---
 
@@ -690,6 +689,6 @@ DiagramAI 支持 **23 种图表渲染语言**:
 
 ---
 
-**版本**: 1.2.0
-**最后更新**: 2025-10-11
-**数据库 Schema**: v5.0.0
+---
+
+DiagramAI - AI 驱动的专业图表生成工具

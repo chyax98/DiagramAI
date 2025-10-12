@@ -56,11 +56,11 @@ npm run dev
 
 ## 🏗️ 技术栈
 
-- **前端**: Next.js 15 + React 19 + TypeScript 5
-- **UI**: Tailwind CSS 4.0 + Shadcn/ui
-- **状态管理**: Zustand 5.0
-- **代码编辑**: CodeMirror 6
-- **数据库**: SQLite (better-sqlite3) v5.0.0
+- **前端**: Next.js + React + TypeScript
+- **UI**: Tailwind CSS + Shadcn/ui
+- **状态管理**: Zustand
+- **代码编辑**: CodeMirror
+- **数据库**: SQLite (better-sqlite3)
 - **认证**: JWT + bcrypt
 - **AI**: Vercel AI SDK (多提供商)
 - **图表渲染**: Kroki (23 种语言)
@@ -227,7 +227,7 @@ NEXT_PUBLIC_APP_URL=https://your-domain.com
 
 #### 多轮对话优化
 
-支持最多 10 轮对话调整:
+支持最多 10 轮对话调整（可以配置）:
 
 - 保留完整对话历史
 - 上下文感知的智能调整
@@ -325,10 +325,6 @@ npm run ci               # 格式 + Lint + 类型检查
 ### 开发文档
 
 - **[CLAUDE.md](CLAUDE.md)** - 架构设计和开发指南
-- **[claudedocs/](claudedocs/)** - 项目文档目录
-  - L3 提示词审查方案
-  - 代码规范和最佳实践
-  - 开发流程文档
 
 ---
 
@@ -344,12 +340,12 @@ npm run ci               # 格式 + Lint + 类型检查
 
 ### Q: 支持哪些 AI 模型?
 
-A: 支持所有兼容 OpenAI API 的模型:
+A: 支持主流 AI 提供商:
 
-- OpenAI: GPT-4、GPT-4o、GPT-3.5-turbo
-- Anthropic: Claude 3 系列
-- Google: Gemini Pro
-- 其他: DeepSeek、SiliconFlow、Together AI、Groq 等
+- **OpenAI**: 支持所有 GPT 系列模型
+- **Anthropic**: 支持所有 Claude 系列模型
+- **Google**: 支持所有 Gemini 系列模型
+- **OpenAI Compatible**: DeepSeek, SiliconFlow, Together AI, Groq 等兼容 OpenAI API 的服务
 
 ### Q: 如何自托管 Kroki?
 
@@ -378,24 +374,7 @@ A: 部分支持:
 
 - Kroki 可以本地部署 (完全离线)
 - AI 模型需要联网 (调用 API)
-- 建议使用本地大模型 (如 Ollama) 配合 OpenAI Compatible 模式
 
 ---
 
-## 📊 项目统计
-
-- **代码行数**: 15,000+ 行
-- **组件数量**: 50+ 个 React 组件
-- **测试覆盖**: 50+ 测试套件
-- **支持语言**: 23 种图表渲染语言
-- **图表类型**: 100+ 种图表类型
-
----
-
-**注意**: 本项目仅供学习和研究使用,请遵守各 AI Provider 的使用条款。
-
----
-
-**版本**: 1.0.0
-**最后更新**: 2025-10-11
-**数据库 Schema**: v5.0.0
+DiagramAI - AI 驱动的专业图表生成工具

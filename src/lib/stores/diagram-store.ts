@@ -140,11 +140,15 @@ export const useDiagramStore = create<DiagramState>()(
 
         // 开始生成图表 (原子化 test-and-set)
         startGeneration: () =>
-          set((state) => {
-            // 如果已经在生成中,不更新状态
-            if (state.isGenerating) return state;
-            return { isGenerating: true, renderError: null };
-          }, false, "diagram/startGeneration"),
+          set(
+            (state) => {
+              // 如果已经在生成中,不更新状态
+              if (state.isGenerating) return state;
+              return { isGenerating: true, renderError: null };
+            },
+            false,
+            "diagram/startGeneration"
+          ),
 
         // 完成图表生成
         finishGeneration: (code) =>

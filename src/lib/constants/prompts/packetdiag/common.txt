@@ -1,6 +1,109 @@
 
 # PacketDiag 通用规范
 
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 图表声明语法（编译失败）
+所有 PacketDiag 代码必须使用 `packetdiag {}` 关键字包裹。缺少图表声明会导致编译失败。
+
+**错误示例**：
+```
+colwidth = 32;
+0-15: Source Port;
+```
+
+**正确写法**：
+```
+packetdiag {
+  colwidth = 32;
+  0-15: Source Port;
+}
+```
+
+**违反后果**：
+```
+Syntax Error: Missing diagram declaration
+```
+
+---
+
+### ⚠️ 规则 2: 必须定义 colwidth（编译失败）
+PacketDiag 必须在开头定义 `colwidth` 属性，指定每行的位宽（通常是 32 或 64）。缺少 `colwidth` 会导致编译失败。
+
+**错误示例**：
+```
+packetdiag {
+  0-15: Source Port;  // ❌ 缺少 colwidth
+}
+```
+
+**正确写法**：
+```
+packetdiag {
+  colwidth = 32;  // ✅ 必须定义
+  0-15: Source Port;
+}
+```
+
+**违反后果**：
+```
+Error: colwidth not defined
+```
+
+---
+
+### ⚠️ 规则 3: 字段位范围不能重叠（渲染异常）
+字段的位范围（如 `0-15`、`16-31`）不能重叠。重叠会导致渲染异常或编译错误。
+
+**错误示例**：
+```
+packetdiag {
+  colwidth = 32;
+  0-15: Field 1;
+  10-25: Field 2;  // ❌ 与 Field 1 重叠
+}
+```
+
+**正确写法**：
+```
+packetdiag {
+  colwidth = 32;
+  0-15: Field 1;
+  16-31: Field 2;  // ✅ 无重叠
+}
+```
+
+**违反后果**：
+字段显示异常或编译错误。
+
+---
+
+### ⚠️ 规则 4: 中文标签必须使用双引号包裹（编译失败）
+包含中文、空格或特殊字符的字段名称必须使用双引号 `"..."` 包裹。
+
+**错误示例**：
+```
+packetdiag {
+  colwidth = 32;
+  0-15: 源端口;  // ❌ 缺少引号
+}
+```
+
+**正确写法**：
+```
+packetdiag {
+  colwidth = 32;
+  0-15: "源端口";  // ✅ 正确
+}
+```
+
+**违反后果**：
+```
+Syntax Error: Unexpected character
+```
+
+---
+
 ## 专家视角
 
 作为网络协议工程师，你需要同时扮演：

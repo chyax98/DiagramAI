@@ -25,6 +25,152 @@
 - 所有流程路径必须闭合，不能有悬空的节点
 # BPMN 2.0 规范和语法上下文
 
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 必须包含完整的 XML 声明和 BPMN 命名空间
+这是 BPMN 2.0 XML 的基础要求！缺少命名空间会导致 XML 解析器无法识别 BPMN 元素。
+
+**错误示例**：
+```xml
+<bpmn:definitions>
+  <bpmn:process id="Process_1">
+    <bpmn:startEvent id="start" />
+  </bpmn:process>
+</bpmn:definitions>
+```
+
+**正确写法**：
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  id="Definitions_1">
+  <bpmn:process id="Process_1" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_1" />
+  </bpmn:process>
+</bpmn:definitions>
+```
+
+**违反后果**: BPMN 2.0 XML 无法被解析器识别，渲染完全失败
+**Kroki 错误**: `XML parsing error: Namespace 'http://www.omg.org/spec/BPMN/20100524/MODEL' not declared`
+
+### ⚠️ 规则 2: 所有元素 ID 必须在整个文档中全局唯一
+BPMN 使用 ID 来建立元素之间的引用关系，重复的 ID 会导致流程执行错误。
+
+**错误示例**：
+```xml
+<bpmn:startEvent id="Event_1" name="开始" />
+<bpmn:endEvent id="Event_1" name="结束" />
+```
+
+**正确写法**：
+```xml
+<bpmn:startEvent id="StartEvent_1" name="开始" />
+<bpmn:endEvent id="EndEvent_1" name="结束" />
+```
+
+**违反后果**: ID 冲突导致渲染失败或流程执行错误
+**Kroki 错误**: `Duplicate element ID: 'Event_1' found in process`
+
+### ⚠️ 规则 3: 顺序流的 sourceRef 和 targetRef 必须精确匹配已定义元素的 id
+这是 BPMN 连接规则！任何拼写错误或大小写不匹配都会导致流程断链。
+
+**错误示例**：
+```xml
+<bpmn:startEvent id="StartEvent_1" />
+<bpmn:task id="Task_1" name="任务" />
+<bpmn:sequenceFlow id="Flow_1" sourceRef="start" targetRef="task" />
+```
+
+**正确写法**：
+```xml
+<bpmn:startEvent id="StartEvent_1" />
+<bpmn:task id="Task_1" name="任务" />
+<bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1" />
+```
+
+**违反后果**: 连接失败，流程断链，图表无法正确显示
+**Kroki 错误**: `Element with id 'start' not found in process 'Process_1'`
+
+### ⚠️ 规则 4: 排他网关的分支必须包含条件表达式或明确的默认路径
+排他网关（XOR）必须能够判断走哪条路径，否则执行引擎无法做出决策。
+
+**错误示例**：
+```xml
+<bpmn:exclusiveGateway id="Gateway_1" />
+<bpmn:sequenceFlow id="Flow_1" name="条件A" sourceRef="Gateway_1" targetRef="Task_A" />
+<bpmn:sequenceFlow id="Flow_2" name="条件B" sourceRef="Gateway_1" targetRef="Task_B" />
+```
+
+**正确写法（方式一：使用条件表达式）**：
+```xml
+<bpmn:exclusiveGateway id="Gateway_1" />
+<bpmn:sequenceFlow id="Flow_1" name="金额 > 10000" sourceRef="Gateway_1" targetRef="Task_A">
+  <bpmn:conditionExpression>amount &gt; 10000</bpmn:conditionExpression>
+</bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="Flow_2" name="其他" sourceRef="Gateway_1" targetRef="Task_B">
+  <bpmn:conditionExpression>amount &lt;= 10000</bpmn:conditionExpression>
+</bpmn:sequenceFlow>
+```
+
+**正确写法（方式二：使用默认路径）**：
+```xml
+<bpmn:exclusiveGateway id="Gateway_1" default="Flow_2" />
+<bpmn:sequenceFlow id="Flow_1" name="金额 > 10000" sourceRef="Gateway_1" targetRef="Task_A">
+  <bpmn:conditionExpression>amount &gt; 10000</bpmn:conditionExpression>
+</bpmn:sequenceFlow>
+<bpmn:sequenceFlow id="Flow_2" name="默认路径" sourceRef="Gateway_1" targetRef="Task_B" />
+```
+
+**违反后果**: 执行引擎无法判断走哪条路径，流程无法正确执行
+**Kroki 错误**: `Exclusive gateway 'Gateway_1' has multiple outgoing flows but no default flow or conditions`
+
+### ⚠️ 规则 5: XML 特殊字符必须使用实体编码
+XML 规范要求特殊字符必须转义，否则会导致 XML 解析错误。
+
+**错误示例**：
+```xml
+<bpmn:conditionExpression>amount > 10000 && status == "pending"</bpmn:conditionExpression>
+```
+
+**正确写法**：
+```xml
+<bpmn:conditionExpression>amount &gt; 10000 &amp;&amp; status == &quot;pending&quot;</bpmn:conditionExpression>
+```
+
+**常用实体编码**：
+- `<` → `&lt;`
+- `>` → `&gt;`
+- `&` → `&amp;`
+- `"` → `&quot;`
+- `'` → `&apos;`
+
+**违反后果**: XML 解析错误，整个 BPMN 文件无法加载
+**Kroki 错误**: `XML parsing error at line X: unexpected '<' character in attribute value`
+
+### ⚠️ 规则 6: 所有任务和事件必须有明确的输入输出流
+BPMN 要求每个任务、事件和网关都必须有明确的 `<incoming>` 和 `<outgoing>` 标签（开始事件除外只有 outgoing，结束事件除外只有 incoming）。
+
+**错误示例**：
+```xml
+<bpmn:task id="Task_1" name="处理任务" />
+<bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1" />
+```
+
+**正确写法**：
+```xml
+<bpmn:task id="Task_1" name="处理任务">
+  <bpmn:incoming>Flow_1</bpmn:incoming>
+  <bpmn:outgoing>Flow_2</bpmn:outgoing>
+</bpmn:task>
+<bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1" />
+<bpmn:sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="EndEvent_1" />
+```
+
+**违反后果**: BPMN 引擎无法追踪流程路径，渲染可能失败
+**Kroki 错误**: `Task 'Task_1' has no incoming or outgoing flows defined`
+
 ## XML 基础结构
 
 所有 BPMN 图必须包含以下基础结构：
@@ -186,9 +332,40 @@
 
 ## 最佳实践
 
-1. **每个流程必须有且仅有一个开始事件**
-2. **每个流程至少有一个结束事件**
-3. **所有任务和网关必须有输入和输出流**
-4. **网关必须成对使用**: 分支网关 → 汇聚网关
-5. **泳道使用**: 当涉及多个参与者时，使用泳道区分职责
-6. **避免过度复杂**: 单个流程不超过 15 个元素为宜
+1. **完整的 XML 声明和命名空间**（对应强制规则 1）
+   - 始终包含 `<?xml version="1.0" encoding="UTF-8"?>`
+   - 必须声明 BPMN 2.0 命名空间 `xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"`
+   - 建议包含 `xmlns:bpmndi` 用于布局信息
+
+2. **全局唯一的元素 ID**（对应强制规则 2）
+   - 使用有意义的 ID 前缀：`StartEvent_`, `Task_`, `Gateway_`, `Flow_`
+   - 确保每个 ID 在整个文档中全局唯一
+
+3. **精确的流程连接**（对应强制规则 3）
+   - 仔细检查所有 `sourceRef` 和 `targetRef` 与实际 ID 匹配
+   - 避免拼写错误和大小写不一致
+
+4. **排他网关必须有条件或默认路径**（对应强制规则 4）
+   - 为每个分支添加条件表达式
+   - 或者使用 `default` 属性指定默认路径
+
+5. **正确转义 XML 特殊字符**（对应强制规则 5）
+   - 在条件表达式中使用实体编码（`&lt;`, `&gt;`, `&amp;` 等）
+   - 避免直接使用 `<`, `>`, `&`, `"` 等字符
+
+6. **明确的输入输出流**（对应强制规则 6）
+   - 每个任务、网关必须有 `<incoming>` 和 `<outgoing>` 标签
+   - 开始事件只有 `<outgoing>`，结束事件只有 `<incoming>`
+
+7. **流程结构规范**
+   - 每个流程必须有且仅有一个开始事件
+   - 每个流程至少有一个结束事件
+   - 网关必须成对使用：分支网关 → 汇聚网关
+
+8. **泳道使用**
+   - 当涉及多个参与者时，使用泳道（Pool/Lane）区分职责
+   - 跨泳道通信使用消息流（Message Flow）
+
+9. **避免过度复杂**
+   - 单个流程不超过 15 个元素为宜
+   - 复杂流程拆分为多个子流程

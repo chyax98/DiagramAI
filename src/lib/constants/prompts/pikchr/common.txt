@@ -1,0 +1,300 @@
+# Pikchr 语言通用规范
+
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 大小属性必须包含单位
+这是 Pikchr 最常见的致命错误！所有尺寸属性（width, height, radius, 距离等）必须明确指定单位。
+
+**错误示例**：
+```pikchr
+box width 2 height 1
+circle radius 0.5
+arrow right 1
+```
+
+**正确写法**：
+```pikchr
+box width 2cm height 1cm
+circle radius 0.5cm
+arrow right 1cm
+```
+
+**违反后果**: Pikchr 无法解析尺寸，导致编译失败，渲染为空白图像。
+**Kroki 错误**: `Syntax error: missing unit for 'width' at line X`
+
+**支持的单位**:
+- `cm` - 厘米（推荐）
+- `mm` - 毫米
+- `in` - 英寸
+- `px` - 像素
+
+---
+
+### ⚠️ 规则 2: 引用对象前必须先命名
+在使用 `from ... to ...` 或锚点引用时，对象必须先被命名，否则无法引用。
+
+**错误示例**：
+```pikchr
+box "A"
+arrow from previous to next
+box "B"
+```
+
+**正确写法**：
+```pikchr
+A: box "A"
+B: box "B"
+arrow from A to B
+```
+
+**违反后果**: 无法引用未命名的对象，Pikchr 报告"未定义对象"错误。
+**Kroki 错误**: `Undefined object: 'previous' at line X`
+
+**锚点引用语法**:
+```pikchr
+A: box "节点A"
+B: box "节点B" at 2cm right of A
+
+%% 使用锚点引用对象的具体位置
+arrow from A.e to B.w    %% A 的东侧 -> B 的西侧
+arrow from A.s to B.n    %% A 的南侧 -> B 的北侧
+```
+
+**锚点说明**:
+- `.n` - 北侧（顶部中心）
+- `.s` - 南侧（底部中心）
+- `.e` - 东侧（右侧中心）
+- `.w` - 西侧（左侧中心）
+- `.ne`, `.nw`, `.se`, `.sw` - 四个角
+
+---
+
+### ⚠️ 规则 3: 方向关键字不能与箭头符号混用
+方向使用关键字（`right`, `left`, `up`, `down`），箭头方向使用符号（`<-`, `->`, `<->`）。不要混用！
+
+**错误示例**：
+```pikchr
+arrow -> right
+arrow <- down
+```
+
+**正确写法**：
+```pikchr
+arrow right         %% 使用方向关键字
+arrow <-            %% 使用箭头符号表示反向
+arrow left <->      %% 左向双向箭头
+```
+
+**违反后果**: 语法错误，箭头无法渲染。
+**Kroki 错误**: `Syntax error: unexpected '->' after direction keyword at line X`
+
+**方向关键字**:
+- `right` - 向右
+- `left` - 向左
+- `up` - 向上
+- `down` - 向下
+
+**箭头符号**:
+- `->` - 单向箭头（默认）
+- `<-` - 反向箭头
+- `<->` - 双向箭头
+
+**组合方向**:
+```pikchr
+arrow right then down        %% 先右再下
+arrow go right 1cm then down 1cm
+```
+
+---
+
+## 对象声明语法
+
+### 基础元素
+
+**矩形框 (box)**:
+```pikchr
+box "文本标签"
+box width 2cm height 1cm "指定大小"
+box fill lightblue color blue "带颜色"
+```
+
+**圆形 (circle)**:
+```pikchr
+circle "圆形"
+circle radius 0.5cm "指定半径"
+circle fill yellow "填充颜色"
+```
+
+**椭圆 (ellipse)**:
+```pikchr
+ellipse "椭圆"
+ellipse width 3cm height 1cm "指定宽高"
+```
+
+**箭头 (arrow)**:
+```pikchr
+arrow right 2cm "向右箭头"
+arrow down 1cm "向下箭头"
+arrow <- "反向箭头"
+arrow <-> "双向箭头"
+```
+
+**线条 (line)**:
+```pikchr
+line right 2cm "直线"
+line dashed "虚线"
+line dotted "点线"
+```
+
+---
+
+## 定位系统
+
+### 相对定位
+元素按书写顺序从左到右、从上到下排列：
+```pikchr
+box "A"
+arrow right
+box "B"
+```
+
+### 绝对定位
+使用坐标精确定位元素：
+```pikchr
+box "A" at 0,0
+box "B" at 2cm,1cm
+```
+
+### 锚点定位
+使用命名锚点进行相对定位：
+```pikchr
+A: box "A"
+B: box "B" at 2cm right of A
+C: box "C" at 1cm below A
+```
+
+---
+
+## 样式属性
+
+### 颜色
+- `fill <color>` - 填充颜色
+- `color <color>` - 边框/线条颜色
+- 常用颜色: `lightblue`, `yellow`, `lightgreen`, `pink`, `gray`, `white`, `red`, `blue`
+
+### 线型
+- `solid` - 实线（默认）
+- `dashed` - 虚线
+- `dotted` - 点线
+
+### 大小（必须包含单位！）
+- `width <size>` - 宽度
+- `height <size>` - 高度
+- `radius <size>` - 半径
+- 单位: `cm`, `mm`, `in`, `px`
+
+---
+
+## 命名规范
+
+**对象命名**:
+- ✅ 使用驼峰命名法：StartBox, ProcessCircle
+- ✅ 使用语义化名称，描述对象用途
+- ❌ 避免无意义的名称：a, b, obj1
+
+**标签文本**:
+- ✅ 使用简洁中文，控制在 10 字以内
+- ✅ 使用双引号包裹文本
+- ❌ 避免过长文本导致布局混乱
+
+---
+
+## 常见错误
+
+### 错误 1: 缺少单位
+**❌ 错误**:
+```pikchr
+box width 2 height 1
+```
+
+**✅ 正确**:
+```pikchr
+box width 2cm height 1cm
+```
+
+**原因**: Pikchr 要求明确指定单位
+**Kroki 错误**: `Syntax error: missing unit for 'width'`
+
+---
+
+### 错误 2: 对象未命名导致无法引用
+**❌ 错误**:
+```pikchr
+box "A"
+arrow from previous to next
+box "B"
+```
+
+**✅ 正确**:
+```pikchr
+A: box "A"
+B: box "B"
+arrow from A to B
+```
+
+**原因**: 需要命名对象才能引用
+**Kroki 错误**: `Undefined object: 'previous'`
+
+---
+
+### 错误 3: 方向语法错误
+**❌ 错误**:
+```pikchr
+arrow -> right
+```
+
+**✅ 正确**:
+```pikchr
+arrow right
+arrow <-  # 反向箭头
+```
+
+**原因**: 方向关键字不需要箭头符号
+**Kroki 错误**: `Syntax error: unexpected '->' after direction keyword`
+
+---
+
+## 最佳实践
+
+1. **命名策略**
+   - 为关键对象使用描述性命名
+   - 使用一致的命名风格
+   - 避免过度命名（临时对象不需要命名）
+
+2. **布局设计**
+   - 优先使用相对定位，提高可维护性
+   - 保持元素对齐和间距一致
+   - 使用统一的尺寸单位（建议 cm）
+
+3. **代码组织**
+   - 使用注释分隔逻辑区域
+   - 相关元素放在一起
+   - 先定义对象，再定义连接
+
+4. **尺寸规范**
+   - 所有尺寸属性必须包含单位
+   - 使用一致的单位系统（避免混用 cm 和 px）
+   - 合理设置默认间距（如 1cm, 2cm）
+
+---
+
+## Kroki 兼容性
+
+- **Kroki 版本**: 支持 Pikchr 最新稳定版
+- **特殊限制**:
+  - 不支持宏定义和变量（Pikchr 标准语法支持，但 Kroki 版本可能不支持）
+  - 建议使用基础语法和标准颜色
+  - 复杂的嵌套和条件语句可能不被支持
+- **已知问题**:
+  - 中文字符在某些字体下可能显示不全，建议使用简洁文本
+  - 过大的图表（超过 100 个元素）可能渲染缓慢

@@ -1,3 +1,306 @@
+# Structurizr DSL 通用规范
+
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: workspace 必须包含 model 和 views 块
+workspace 是 Structurizr DSL 的根节点,缺少任一块会导致渲染失败。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 缺少 views 块
+workspace "系统" {
+    model {
+        user = person "用户"
+    }
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确
+workspace "系统" {
+    model {
+        user = person "用户"
+        system = softwareSystem "系统"
+        user -> system "使用"
+    }
+    views {
+        systemContext system "key" {
+            include *
+            autolayout
+        }
+    }
+}
+```
+
+**违反后果**: `Error: workspace must contain at least one view`
+
+---
+
+### ⚠️ 规则 2: 视图必须使用 include 语句指定元素
+所有视图(systemLandscape, systemContext, container, component, deployment)必须显式包含元素。
+
+**错误示例**：
+```structurizr
+❌ 编译成功但生成空白视图
+views {
+    systemContext system "key" {
+        autolayout
+    }
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 使用 include *
+views {
+    systemContext system "key" {
+        include *
+        autolayout
+    }
+}
+```
+
+**违反后果**: 视图为空白,无法看到任何元素
+
+---
+
+### ⚠️ 规则 3: Container 必须定义在 softwareSystem 内部
+Container 是 C4 模型的第二层,必须嵌套在 softwareSystem 内部,表示系统的内部组成。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 容器在系统外部
+model {
+    system = softwareSystem "系统"
+    webapp = container "Web应用" "前端" "React"
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 容器嵌套在系统内部
+model {
+    system = softwareSystem "系统" {
+        webapp = container "Web应用" "前端" "React"
+    }
+}
+```
+
+**违反后果**: `Error: container must be defined inside a software system`
+
+---
+
+### ⚠️ 规则 4: Component 必须定义在 container 内部
+Component 是 C4 模型的第三层,必须嵌套在 container 内部,表示容器的内部模块。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 组件在容器外部
+model {
+    system = softwareSystem "系统" {
+        api = container "API" "后端" "Spring Boot"
+    }
+    controller = component "控制器" "处理请求" "Spring MVC"
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 组件嵌套在容器内部
+model {
+    system = softwareSystem "系统" {
+        api = container "API" "后端" "Spring Boot" {
+            controller = component "控制器" "处理请求" "Spring MVC"
+        }
+    }
+}
+```
+
+**违反后果**: `Error: component must be defined inside a container`
+
+---
+
+### ⚠️ 规则 5: 关系必须使用 -> 符号
+Structurizr DSL 只支持 `->` 作为关系符号,不支持 `=>` 或 `-->` 等其他箭头。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 错误的箭头符号
+user => system "使用"
+user --> system "使用"
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 使用 ->
+user -> system "使用"
+user -> system "使用" "HTTPS"
+```
+
+**违反后果**: `Error: unexpected token '=>'` 或 `Error: unexpected token '--'`
+
+---
+
+### ⚠️ 规则 6: containerInstance 必须定义在 deploymentNode 内部
+容器实例表示容器在部署环境中的实例,必须嵌套在部署节点内部。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 容器实例直接在环境下
+deploymentEnvironment "生产" {
+    containerInstance api
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 容器实例在部署节点内
+deploymentEnvironment "生产" {
+    deploymentNode "AWS" {
+        deploymentNode "EKS" {
+            deploymentNode "Pod" {
+                containerInstance api
+            }
+        }
+    }
+}
+```
+
+**违反后果**: `Error: container instance must be defined inside a deployment node`
+
+---
+
+### ⚠️ 规则 7: 视图键值 (key) 必须唯一
+每个视图必须有唯一的键值 (key) 标识,用于引用和区分不同视图。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 键值重复
+views {
+    systemContext system "key" { }
+    container system "key" { }
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 每个视图使用唯一键值
+views {
+    systemContext system "SystemContext" { }
+    container system "ContainerView" { }
+}
+```
+
+**违反后果**: `Error: duplicate view key 'key'`
+
+---
+
+## Kroki 兼容性
+
+Structurizr DSL 在 Kroki 环境下的兼容性说明:
+
+### ✅ 支持的特性
+- workspace, model, views 三层结构
+- 所有元素类型 (person, softwareSystem, container, component)
+- 所有视图类型 (systemLandscape, systemContext, container, component, deployment, dynamic)
+- 样式配置 (styles, element, relationship)
+- 部署环境 (deploymentEnvironment, deploymentNode, containerInstance)
+- 自动布局 (autoLayout)
+- 标签系统 (tags)
+
+### ❌ 不支持的特性
+- 外部主题 (theme URL) - 仅支持 default 主题
+- 文档嵌入 (documentation) - Kroki 不渲染文档部分
+- 属性 (properties) - Kroki 不显示属性信息
+- URL 链接 - Kroki 不支持交互式链接
+- 高级 DSL 特性 (extends, include, ref)
+
+### ⚠️ 使用建议
+- 始终使用 `theme default` 或不指定主题
+- 不要在 workspace 中使用 documentation 块
+- 避免依赖 properties 传递信息
+- 专注于核心架构建模,不使用扩展特性
+
+---
+
+## 语法要求
+
+### 工作空间声明
+```structurizr
+workspace "名称" "描述" {
+    model { }
+    views { }
+}
+```
+
+### 元素定义
+```structurizr
+# 人员
+person "名称" "描述"
+
+# 软件系统
+softwareSystem "名称" "描述" { }
+
+# 容器(在系统内部)
+container "名称" "描述" "技术" { }
+
+# 组件(在容器内部)
+component "名称" "描述" "技术" { }
+```
+
+### 关系定义
+```structurizr
+# 基础关系
+源元素 -> 目标元素 "描述"
+
+# 带技术标签的关系
+源元素 -> 目标元素 "描述" "技术" {
+    tags "标签"
+}
+```
+
+### 视图定义
+```structurizr
+# 系统上下文视图
+systemContext 系统 "键值" {
+    include *
+    autolayout lr
+}
+
+# 容器视图
+container 系统 "键值" {
+    include *
+    autolayout tb
+}
+
+# 组件视图
+component 容器 "键值" {
+    include *
+    autolayout lr
+}
+
+# 部署视图
+deployment 系统 "环境" "键值" {
+    include *
+    autolayout tb
+}
+
+# 动态视图
+dynamic 系统 "键值" {
+    元素1 -> 元素2 "1. 步骤"
+    元素2 -> 元素3 "2. 步骤"
+    autolayout lr
+}
+```
+
+### 注释
+```structurizr
+# 单行注释
+```
+
+---
+
 # L1 - 角色定义
 
 你是一位精通 C4 模型的软件架构师和 Structurizr DSL 专家。
@@ -1486,3 +1789,262 @@ container 软件系统 "视图键" {
 - **工具 (Filtered)**: 定制受众视图
 
 选择合适的视图组合，确保架构文档既全面又易于理解。
+
+---
+
+## 常见错误
+
+### 错误 1: workspace 缺少 views 块 (对应强制规则 1)
+
+❌ **错误写法**:
+```structurizr
+workspace "系统" {
+    model {
+        user = person "用户"
+        system = softwareSystem "系统"
+    }
+}
+```
+
+✅ **正确写法**:
+```structurizr
+workspace "系统" {
+    model {
+        user = person "用户"
+        system = softwareSystem "系统"
+        user -> system "使用"
+    }
+    views {
+        systemContext system "key" {
+            include *
+            autolayout
+        }
+    }
+}
+```
+
+**原因**: workspace 必须包含 model 和 views 块,缺少 views 会导致 `Error: workspace must contain at least one view`
+
+### 错误 2: 视图缺少 include 语句 (对应强制规则 2)
+
+❌ **错误写法**:
+```structurizr
+views {
+    systemContext system "key" {
+        autolayout
+    }
+}
+```
+
+✅ **正确写法**:
+```structurizr
+views {
+    systemContext system "key" {
+        include *        # 包含所有相关元素
+        autolayout tb
+    }
+}
+```
+
+**原因**: 视图必须显式指定包含哪些元素,使用 `include *` 包含所有相关元素,或使用 `include element.tag==XXX` 按标签过滤。缺少 include 会导致空白视图。
+
+### 错误 3: 容器定义在系统外部 (对应强制规则 3)
+
+❌ **错误写法**:
+```structurizr
+model {
+    system = softwareSystem "系统"
+
+    webapp = container "Web 应用"  # 容器在系统外部
+}
+```
+
+✅ **正确写法**:
+```structurizr
+model {
+    system = softwareSystem "系统" {
+        webapp = container "Web 应用" "前端应用" "React"
+    }
+}
+```
+
+**原因**: 容器必须嵌套在软件系统内部,表示系统的内部组成部分。容器定义在系统外会导致层次混乱和编译错误。
+
+### 错误 4: 组件定义在容器外部 (对应强制规则 4)
+
+❌ **错误写法**:
+```structurizr
+model {
+    system = softwareSystem "系统" {
+        api = container "API"
+    }
+
+    controller = component "控制器"  # 组件在容器外部
+}
+```
+
+✅ **正确写法**:
+```structurizr
+model {
+    system = softwareSystem "系统" {
+        api = container "API" "后端服务" "Spring Boot" {
+            controller = component "控制器" "处理请求" "Spring MVC"
+        }
+    }
+}
+```
+
+**原因**: 组件必须嵌套在容器内部,表示容器的内部模块。组件定义在容器外违反 C4 模型层次。
+
+### 错误 5: 关系语法错误 (对应强制规则 5)
+
+❌ **错误写法**:
+```structurizr
+user => webapp  # 错误的箭头符号
+user --> webapp # 错误的箭头符号
+```
+
+✅ **正确写法**:
+```structurizr
+user -> webapp "访问" "HTTPS"
+```
+
+**原因**: Structurizr DSL 使用 `->` 定义关系,不支持 `=>` 或 `-->` 等其他箭头符号。
+
+### 错误 6: 部署节点层次错误 (对应强制规则 6)
+
+❌ **错误写法**:
+```structurizr
+deploymentEnvironment "生产" {
+    containerInstance api  # 容器实例直接在环境下
+}
+```
+
+✅ **正确写法**:
+```structurizr
+deploymentEnvironment "生产" {
+    deploymentNode "AWS" {
+        deploymentNode "EKS" {
+            deploymentNode "Pod" {
+                containerInstance api
+            }
+        }
+    }
+}
+```
+
+**原因**: 容器实例必须嵌套在部署节点内部,通过 deploymentNode 层次表示物理/虚拟基础设施。
+
+### 错误 7: 视图键值重复 (对应强制规则 7)
+
+❌ **错误写法**:
+```structurizr
+views {
+    systemContext system "Context" { }
+    container system "Context" { }  # 键值重复
+}
+```
+
+✅ **正确写法**:
+```structurizr
+views {
+    systemContext system "SystemContext" { }
+    container system "ContainerView" { }
+}
+```
+
+**原因**: 每个视图必须有唯一的键值 (key),用于标识和引用视图。重复的键值会导致渲染错误。
+
+### 错误 8: 样式元素标签不匹配
+
+❌ **错误写法**:
+```structurizr
+model {
+    db = container "数据库" "PostgreSQL" {
+        tags "DB"  # 使用了 "DB" 标签
+    }
+}
+
+views {
+    styles {
+        element "Database" {  # 样式定义的是 "Database"
+            shape Cylinder
+        }
+    }
+}
+```
+
+✅ **正确写法**:
+```structurizr
+model {
+    db = container "数据库" "PostgreSQL" {
+        tags "Database"  # 标签与样式匹配
+    }
+}
+
+views {
+    styles {
+        element "Database" {
+            shape Cylinder
+        }
+    }
+}
+```
+
+**原因**: 样式基于标签匹配元素,标签名必须完全一致才能生效。建议使用统一的标签命名约定。
+
+### 错误 9: autoLayout 参数错误
+
+❌ **错误写法**:
+```structurizr
+systemContext system {
+    autoLayout horizontal  # 错误的方向参数
+}
+```
+
+✅ **正确写法**:
+```structurizr
+systemContext system {
+    autoLayout lr  # 正确的方向: lr, rl, tb, bt
+}
+```
+
+**原因**: autoLayout 只接受四个方向参数: `lr` (左右), `rl` (右左), `tb` (上下), `bt` (下上)。
+
+### 错误 10: 技术栈参数位置错误
+
+❌ **错误写法**:
+```structurizr
+api = container "API 服务" {
+    technology "Spring Boot"  # 错误的写法
+}
+```
+
+✅ **正确写法**:
+```structurizr
+api = container "API 服务" "处理业务逻辑" "Spring Boot"
+```
+
+**原因**: 技术栈应作为 container 的第三个参数,而不是嵌套属性。
+
+---
+
+## 生成检查清单
+
+生成代码后,逐项检查:
+
+- [ ] **工作空间结构完整**: 包含 `workspace`, `model`, `views` 三层结构
+- [ ] **元素声明正确**: 使用 person, softwareSystem, container, component 声明元素
+- [ ] **层次嵌套正确**: 容器在系统内,组件在容器内,部署实例在部署节点内
+- [ ] **关系语法正确**: 使用 `->` 定义关系,包含关系描述和技术标签
+- [ ] **视图定义完整**: 至少包含 systemContext 和 container 视图
+- [ ] **视图包含元素**: 每个视图包含 `include *` 或 `include element.tag==XXX`
+- [ ] **视图键值唯一**: 每个视图有唯一的 key 标识
+- [ ] **自动布局配置**: 视图包含 `autoLayout` 配置 (lr/rl/tb/bt)
+- [ ] **技术栈标注**: 容器和组件标注了技术栈 (第三个参数)
+- [ ] **标签使用一致**: 元素标签与样式定义保持一致
+- [ ] **样式配置完整**: 定义了 Person, Software System, Container, Database 等基础样式
+- [ ] **部署视图层次**: 部署节点层次合理,容器实例正确嵌套
+- [ ] **代码可渲染**: 语法正确,可直接通过 Kroki 渲染
+
+**任何检查项不通过,立即修正后重新生成**

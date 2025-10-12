@@ -1,6 +1,186 @@
 
 # Vega-Lite 通用语法规范
 
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 必须包含 $schema 声明
+这是 Kroki 渲染 Vega-Lite 图表的必需字段！缺少此字段会导致渲染失败。
+
+**错误示例**：
+```json
+{
+  "data": {"values": [{"x": 1}, {"x": 2}]},
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "x", "type": "quantitative"}
+  }
+}
+```
+
+**正确写法**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"values": [{"x": 1}, {"x": 2}]},
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "x", "type": "quantitative"}
+  }
+}
+```
+
+**违反后果**：
+```
+Error: Cannot determine Vega-Lite version
+Kroki 无法识别图表类型，渲染失败
+```
+
+**强制要求**：
+- ✅ **必须使用**: `"$schema": "https://vega.github.io/schema/vega-lite/v5.json"`
+- ✅ **位置**: JSON 根对象的第一个属性
+- ❌ **禁止遗漏**: 缺少此字段会导致 Kroki 无法渲染
+
+---
+
+### ⚠️ 规则 2: data.values 必须是对象数组
+Vega-Lite 要求数据为对象数组格式，每个对象代表一行数据。这是硬性语法约束！
+
+**错误示例**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "values": [1, 2, 3, 4, 5]  %% ❌ 编译失败！
+  },
+  "mark": "bar"
+}
+```
+
+**正确写法**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "values": [
+      {"category": "A", "value": 1},
+      {"category": "B", "value": 2},
+      {"category": "C", "value": 3}
+    ]
+  },
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "category", "type": "nominal"},
+    "y": {"field": "value", "type": "quantitative"}
+  }
+}
+```
+
+**违反后果**：
+```
+Error: Data values must be an array of objects
+Expected format: [{"field": value}, ...]
+Invalid data structure: received primitive array instead of object array
+```
+
+**强制要求**：
+- ✅ **必须使用**: 对象数组 `[{field: value}, ...]`
+- ❌ **禁止使用**: 原始数组 `[1, 2, 3]`
+- ❌ **禁止使用**: 单个对象 `{field: value}`
+
+---
+
+### ⚠️ 规则 3: encoding 通道必须包含 field 和 type
+每个编码通道必须同时指定数据字段名（field）和数据类型（type）。缺少任何一个都会导致编译失败。
+
+**错误示例**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"values": [{"cat": "A", "val": 10}]},
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "cat"},              %% ❌ 缺少 type
+    "y": {"type": "quantitative"}       %% ❌ 缺少 field
+  }
+}
+```
+
+**正确写法**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"values": [{"cat": "A", "val": 10}]},
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "cat", "type": "nominal"},       %% ✅ 正确
+    "y": {"field": "val", "type": "quantitative"}   %% ✅ 正确
+  }
+}
+```
+
+**违反后果**：
+```
+Error: Encoding channel 'x' requires a 'type' property
+Error: Encoding channel 'y' requires a 'field' property
+Vega-Lite cannot infer data type without explicit declaration
+```
+
+**强制要求**：
+- ✅ **必须包含**: `field` (数据字段名) 和 `type` (数据类型)
+- ✅ **有效的 type 值**: `"quantitative"`, `"nominal"`, `"ordinal"`, `"temporal"`
+- ❌ **禁止遗漏**: encoding 通道中缺少 field 或 type 会导致编译失败
+
+---
+
+### ⚠️ 规则 4: mark 字段必须是有效的标记类型
+mark 字段定义图表的几何表示形式，必须使用 Vega-Lite 支持的有效标记类型。
+
+**错误示例**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"values": [{"x": 1, "y": 10}]},
+  "mark": "barchart",  %% ❌ 编译失败！无效的标记类型
+  "encoding": {
+    "x": {"field": "x", "type": "quantitative"},
+    "y": {"field": "y", "type": "quantitative"}
+  }
+}
+```
+
+**正确写法**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"values": [{"x": 1, "y": 10}]},
+  "mark": "bar",  %% ✅ 正确
+  "encoding": {
+    "x": {"field": "x", "type": "quantitative"},
+    "y": {"field": "y", "type": "quantitative"}
+  }
+}
+```
+
+**违反后果**：
+```
+Error: Invalid mark type 'barchart'
+Supported mark types: bar, line, point, area, circle, square, rect, arc, rule, text, tick, geoshape, boxplot, errorbar, errorband
+```
+
+**有效的标记类型**：
+- ✅ `"bar"` - 柱状图
+- ✅ `"line"` - 折线图
+- ✅ `"point"` - 散点图
+- ✅ `"area"` - 面积图
+- ✅ `"circle"` - 圆形标记
+- ✅ `"rect"` - 矩形（热力图）
+- ✅ `"arc"` - 弧形（饼图）
+- ✅ `"rule"` - 规则线
+- ✅ `"text"` - 文本标记
+- ❌ **禁止使用**: 拼写错误或不存在的标记类型
+
+---
+
 ## JSON 基本结构
 
 Vega-Lite 使用声明式 JSON 格式定义图表，基本结构：
@@ -161,17 +341,150 @@ Vega-Lite 使用声明式 JSON 格式定义图表，基本结构：
 
 ## 常见错误
 
-### 错误 1：数据格式不正确
-**❌ 错误**：`"values": [1, 2, 3]`
-**✅ 正确**：`"values": [{"x": 1}, {"x": 2}, {"x": 3}]`
-**原因**：data.values 必须是对象数组
+### 错误 1: 缺少 $schema 声明（最常见的致命错误！对应强制规则 1）
 
-### 错误 2：数据类型选择错误
-**❌ 错误**：日期字段使用 `"type": "nominal"`
-**✅ 正确**：日期字段使用 `"type": "temporal"`
-**原因**：错误的数据类型会导致排序和显示问题
+**❌ 错误代码**：
+```json
+{
+  "data": {"values": [{"x": 1}]},
+  "mark": "bar",
+  "encoding": {"x": {"field": "x", "type": "quantitative"}}
+}
+```
 
-### 错误 3：缺少必需字段
-**❌ 错误**：encoding 中只有 `field`，没有 `type`
-**✅ 正确**：encoding 必须同时包含 `field` 和 `type`
-**原因**：type 是必需字段，Kroki 会渲染失败
+**✅ 正确代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"values": [{"x": 1}]},
+  "mark": "bar",
+  "encoding": {"x": {"field": "x", "type": "quantitative"}}
+}
+```
+
+**错误原因**：Kroki 需要 $schema 字段来识别 Vega-Lite 版本，缺少会导致渲染失败
+**错误信息**：`Error: Cannot determine Vega-Lite version`
+**修复方法**：在 JSON 根对象的第一个属性添加 `"$schema": "https://vega.github.io/schema/vega-lite/v5.json"`
+
+---
+
+### 错误 2: 数据格式不正确（对应强制规则 2）
+
+**❌ 错误代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "values": [1, 2, 3, 4, 5]  // ❌ 原始数组
+  },
+  "mark": "bar"
+}
+```
+
+**✅ 正确代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "values": [
+      {"category": "A", "value": 1},
+      {"category": "B", "value": 2},
+      {"category": "C", "value": 3}
+    ]
+  },
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "category", "type": "nominal"},
+    "y": {"field": "value", "type": "quantitative"}
+  }
+}
+```
+
+**错误原因**：data.values 必须是对象数组，每个对象代表一行数据
+**错误信息**：`Error: Data values must be an array of objects`
+**修复方法**：将原始数组转换为对象数组格式
+
+---
+
+### 错误 3: encoding 缺少必需字段（对应强制规则 3）
+
+**❌ 错误代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"values": [{"cat": "A", "val": 10}]},
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "cat"},              // ❌ 缺少 type
+    "y": {"type": "quantitative"}       // ❌ 缺少 field
+  }
+}
+```
+
+**✅ 正确代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"values": [{"cat": "A", "val": 10}]},
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "cat", "type": "nominal"},
+    "y": {"field": "val", "type": "quantitative"}
+  }
+}
+```
+
+**错误原因**：每个 encoding 通道必须同时包含 field 和 type，Vega-Lite 无法自动推断
+**错误信息**：`Error: Encoding channel 'x' requires a 'type' property`
+**修复方法**：为每个编码通道同时指定 field 和 type
+
+---
+
+### 错误 4: 数据类型选择错误
+
+**❌ 错误代码**：
+```json
+{
+  "encoding": {
+    "x": {"field": "date", "type": "nominal"}  // ❌ 日期使用 nominal
+  }
+}
+```
+
+**✅ 正确代码**：
+```json
+{
+  "encoding": {
+    "x": {"field": "date", "type": "temporal"}  // ✅ 日期使用 temporal
+  }
+}
+```
+
+**错误原因**：错误的数据类型会导致排序和显示问题，时间数据必须使用 temporal 类型
+**修复方法**：根据数据语义选择正确的类型 (quantitative/nominal/ordinal/temporal)
+
+---
+
+### 错误 5: 无效的标记类型（对应强制规则 4）
+
+**❌ 错误代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "mark": "barchart",  // ❌ 拼写错误
+  "encoding": {...}
+}
+```
+
+**✅ 正确代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "mark": "bar",  // ✅ 正确的标记类型
+  "encoding": {...}
+}
+```
+
+**错误原因**：mark 字段必须是 Vega-Lite 支持的有效标记类型
+**错误信息**：`Error: Invalid mark type 'barchart'`
+**修复方法**：使用有效的标记类型 (bar, line, point, area, rect, arc 等)

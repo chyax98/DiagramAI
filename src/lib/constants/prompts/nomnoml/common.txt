@@ -1,6 +1,127 @@
 
 # Nomnoml 语言通用规范
 
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 分隔符使用规则
+Nomnoml 的类属性和方法必须使用分号 `;` 或换行分隔，不能使用逗号。
+
+**错误示例**：
+```nomnoml
+[Person| name: String, age: int]    %% ❌ 编译失败！
+```
+
+**正确写法**：
+```nomnoml
+[Person| name: String; age: int]    %% ✅ 正确
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Unexpected token ',' at line 1
+Expected ';' or newline after attribute declaration
+Possible fix: Replace ',' with ';' or use line break
+```
+
+---
+
+### ⚠️ 规则 2: 继承方向规则
+继承箭头必须从子类指向父类，使用 `-:>` 语法。
+
+**错误示例**：
+```nomnoml
+[Animal] -:> [Dog]    %% ❌ 语义错误（父类指向子类）
+```
+
+**正确写法**：
+```nomnoml
+[Dog] -:> [Animal]    %% ✅ 正确（子类指向父类）
+```
+
+**违反后果**：虽然不会编译错误，但违反 UML 标准，导致语义错误。
+```
+Warning: Inheritance direction may be incorrect
+Expected: [Child] -:> [Parent]
+UML Standard: Arrow should point from subclass to superclass
+```
+
+---
+
+### ⚠️ 规则 3: 类区域分隔符规则
+类定义必须使用 `|` 分隔类名、属性区、方法区，顺序不能颠倒。
+
+**错误示例**：
+```nomnoml
+[Person|
+  getName(): String    %% ❌ 方法在前
+|
+  name: String         %% ❌ 属性在后
+]
+```
+
+**正确写法**：
+```nomnoml
+[Person|
+  name: String         %% ✅ 属性在前
+|
+  getName(): String    %% ✅ 方法在后
+]
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Invalid class structure at line 1
+Expected format: [ClassName| attributes | methods]
+Attributes must come before methods
+```
+
+---
+
+### ⚠️ 规则 4: 分类器类型标签位置
+分类器类型标签（如 `<abstract>`、`<database>` 等）必须在类名前，用尖括号包裹。
+
+**错误示例**：
+```nomnoml
+[Animal <abstract>]    %% ❌ 标签位置错误
+```
+
+**正确写法**：
+```nomnoml
+[<abstract> Animal]    %% ✅ 正确
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Invalid classifier syntax at line 1
+Classifier type must precede class name: [<type> Name]
+Found '<abstract>' after class name
+```
+
+---
+
+### ⚠️ 规则 5: 指令位置规则
+所有 `#` 开头的指令必须在文件开头，在任何节点或连接之前声明。
+
+**错误示例**：
+```nomnoml
+[ClassA] -> [ClassB]
+#direction: down    %% ❌ 指令在内容后
+```
+
+**正确写法**：
+```nomnoml
+#direction: down    %% ✅ 指令在最前
+[ClassA] -> [ClassB]
+```
+
+**违反后果**：指令设置无效，布局方向不符合预期。
+```
+Warning: Directive '#direction' ignored
+Directives must be declared before any nodes or connections
+```
+
+---
+
 ## 语法基础
 
 ### 1. 基本结构
@@ -65,6 +186,8 @@
 
 ### 5. 指令（样式控制）
 
+所有指令必须在文件开头，在任何节点或连接之前声明（参见强制规则 5）。
+
 ```nomnoml
 #direction: down              // 布局方向：down（默认）| right
 #stroke: #333333              // 线条颜色
@@ -73,6 +196,26 @@
 #fontSize: 12                 // 字体大小
 #spacing: 40                  // 节点间距
 #padding: 8                   // 节点内边距
+#lineWidth: 2                 // 线条宽度
+#visual: visualizer           // 视觉风格（visualizer/handDrawn）
+```
+
+### 6. 注释语法
+
+```nomnoml
+// 单行注释，必须在行首
+// 不支持行中注释
+
+/* 多行注释
+   用于详细说明
+   支持跨多行 */
+
+// ❌ 错误：行中注释不支持
+[ClassA] -> [ClassB]  // 这样会报错
+
+// ✅ 正确：注释在行首
+// 这是关联关系
+[ClassA] -> [ClassB]
 ```
 
 ## 命名规范
@@ -89,7 +232,7 @@
 
 ## 常见错误
 
-### 错误 1: 分隔符使用错误
+### 错误 1: 分隔符使用错误（对应强制规则 1）⚠️
 **❌ 错误**：使用逗号分隔属性
 ```nomnoml
 [Person| name: String, age: int]
@@ -100,7 +243,14 @@
 [Person| name: String; age: int]
 ```
 
-### 错误 2: 继承方向错误
+**错误信息示例**：
+```
+Error: Unexpected token ',' at line 1
+Expected ';' or newline after attribute declaration
+Possible fix: Replace ',' with ';' or use line break
+```
+
+### 错误 2: 继承方向错误（对应强制规则 2）⚠️
 **❌ 错误**：箭头方向混乱
 ```nomnoml
 [Parent] <:- [Child]    // 容易混淆
@@ -111,7 +261,78 @@
 [Child] -:> [Parent]    // 清晰：Child 继承 Parent
 ```
 
-### 错误 3: 注释位置错误
+**错误信息示例**：
+```
+Warning: Inheritance direction may be incorrect
+Expected: [Child] -:> [Parent]
+UML Standard: Arrow should point from subclass to superclass
+```
+
+### 错误 3: 类区域顺序错误（对应强制规则 3）⚠️
+**❌ 错误**：方法和属性顺序颠倒
+```nomnoml
+[Person|
+  getName(): String    // ❌ 方法在前
+|
+  name: String         // ❌ 属性在后
+]
+```
+
+**✅ 正确**：属性在前，方法在后
+```nomnoml
+[Person|
+  name: String         // ✅ 属性在前
+|
+  getName(): String    // ✅ 方法在后
+]
+```
+
+**错误信息示例**：
+```
+Error: Invalid class structure at line 1
+Expected format: [ClassName| attributes | methods]
+Attributes must come before methods
+```
+
+### 错误 4: 分类器标签位置错误（对应强制规则 4）⚠️
+**❌ 错误**：标签在类名后
+```nomnoml
+[Animal <abstract>]
+```
+
+**✅ 正确**：标签在类名前
+```nomnoml
+[<abstract> Animal]
+```
+
+**错误信息示例**：
+```
+Error: Invalid classifier syntax at line 1
+Classifier type must precede class name: [<type> Name]
+Found '<abstract>' after class name
+```
+
+### 错误 5: 指令位置错误（对应强制规则 5）⚠️
+**❌ 错误**：指令在内容后
+```nomnoml
+[ClassA] -> [ClassB]
+#direction: down
+```
+
+**✅ 正确**：指令在文件开头
+```nomnoml
+#direction: down
+
+[ClassA] -> [ClassB]
+```
+
+**错误信息示例**：
+```
+Warning: Directive '#direction' ignored
+Directives must be declared before any nodes or connections
+```
+
+### 错误 6: 注释位置错误
 **❌ 错误**：行中注释
 ```nomnoml
 [ClassA] -> [ClassB] // 不支持行中注释
@@ -123,7 +344,9 @@
 [ClassA] -> [ClassB]
 ```
 
-### 错误 4: 嵌套结构缩进混乱
+**原因**: Nomnoml 的注释必须在独立一行，不支持行尾注释。
+
+### 错误 7: 嵌套结构缩进混乱
 **❌ 错误**：嵌套没有缩进
 ```nomnoml
 [Engine|
@@ -139,6 +362,8 @@
 ]
 ```
 
+**原因**: 虽然 Nomnoml 不强制要求缩进，但正确缩进可以显著提升代码可读性。
+
 ## 生成原则
 
 1. **简洁优先**：Nomnoml 的优势是简洁，避免过度复杂
@@ -146,3 +371,79 @@
 3. **类型标签**：合理使用 `<abstract>`、`<package>` 等标签
 4. **关联清晰**：优先使用标准 UML 关联类型
 5. **注释辅助**：对复杂关系使用 `<note>` 标签说明
+
+## 样式系统
+
+### 常用样式属性
+
+```nomnoml
+#direction: down | right      // 布局方向（默认 down）
+#stroke: #333333              // 边框颜色（默认黑色）
+#fill: #ffffff                // 填充颜色（默认白色）
+#background: #f5f5f5          // 背景颜色（默认透明）
+#fontSize: 12                 // 字体大小（默认 12）
+#spacing: 40                  // 节点间距（默认 40）
+#padding: 8                   // 节点内边距（默认 8）
+#lineWidth: 2                 // 线条宽度（默认 1）
+#visual: visualizer | handDrawn  // 视觉风格（默认 visualizer）
+```
+
+### 配色建议
+
+- 🔵 **蓝色系** (#E3F2FD, #1976D2) - 专业、清新，适合流程图和架构图
+- 🟢 **绿色系** (#E8F5E9, #2E7D32) - 自然、稳定，适合状态图和组件图
+- 🟠 **橙色系** (#FFF3E0, #F57F17) - 活力、温暖，适合警告和重要节点
+- 🟣 **紫色系** (#F3E5F5, #7B1FA2) - 优雅、神秘，适合抽象概念和接口
+- 🟡 **黄色系** (#FEFECE, #A80036) - 经典 PlantUML 配色，适合类图
+
+### 样式使用建议
+
+1. **统一风格**: 同一图表使用统一的配色方案
+2. **对比度**: 确保文本和背景有足够对比度
+3. **柔和色调**: 避免使用纯色（如纯红 #FF0000），使用柔和的色调
+4. **视觉风格**:
+   - `visualizer` - 专业、清晰，适合正式文档
+   - `handDrawn` - 手绘、轻松，适合草图和演示
+
+## Kroki 渲染说明
+
+### Kroki 支持的 Nomnoml 版本
+
+- Kroki 使用 Nomnoml 1.6.2 版本
+- 支持所有标准 Nomnoml 语法
+- 不支持自定义字体（使用系统默认字体）
+- 完全支持中文，无需转义
+
+### Kroki 特殊限制
+
+1. **嵌套深度限制**: 建议不超过 3 层嵌套，过深可能导致渲染失败
+2. **节点数量限制**: 单个图表建议不超过 50 个节点
+3. **特殊字符**: 中文完全支持，无需转义
+4. **连接复杂度**: 避免过多的交叉连接，可能导致布局混乱
+
+### 常见 Kroki 渲染错误
+
+**错误 1: 语法错误**
+```
+Error 400: Syntax error at line X
+```
+**解决方法**: 检查分隔符、语法结构，参考强制规则 1-5
+
+**错误 2: 图表过大**
+```
+Error 413: Payload Too Large
+```
+**解决方法**: 简化图表，减少节点数量，拆分为多个子图
+
+**错误 3: 渲染超时**
+```
+Error 504: Gateway Timeout
+```
+**解决方法**: 检查嵌套层级（不超过 3 层），减少连接复杂度
+
+### Kroki 渲染优化建议
+
+1. **控制复杂度**: 单个图表不超过 30 个节点为最佳
+2. **合理分组**: 使用 `<frame>` 和 `<package>` 分组，但避免过深嵌套
+3. **清晰布局**: 优先使用 `#direction` 控制布局方向
+4. **测试渲染**: 先用简单示例测试，再逐步增加复杂度

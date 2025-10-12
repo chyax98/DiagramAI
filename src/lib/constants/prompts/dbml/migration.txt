@@ -20,7 +20,62 @@
    - 提供迁移步骤和回滚策略
    - 添加迁移注意事项
 
-${DBML_LANGUAGE_SPEC}
+## DBML 语法规范
+
+**请参考 common.txt 中的完整语法说明，以下是数据库迁移关键要点**：
+
+### 表定义（强制规则）
+```dbml
+Table table_name {
+  id integer [pk, increment]
+  field_name type [constraints]
+  Note: '表级注释'
+}
+```
+
+⚠️ **关键规则**：
+- 必须使用 `Table`（首字母大写），不能使用小写 `table`
+- varchar 和 decimal 必须指定长度/精度：`varchar(n)`, `decimal(p,s)`
+- 主键使用 `[pk]` 或 `[primary key]`
+- 引用的表和字段必须存在
+
+### 迁移版本标识
+使用版本后缀区分不同版本的表：
+```dbml
+Table users_v1 {
+  // 旧版本字段
+}
+
+Table users_v2 {
+  // 新版本字段（含变更）
+}
+```
+
+⚠️ **Kroki 渲染说明**：
+- Kroki 会将 `users_v1` 和 `users_v2` 渲染为两个独立的表
+- 主要用于文档说明，直观展示版本差异
+- 建议在注释中说明迁移步骤和 SQL 语句
+
+### 字段类型
+- **字符类型**: `varchar(n)`, `text`
+- **数值类型**: `integer`, `decimal(p,s)`
+- **日期时间**: `timestamp`, `date`
+- **其他类型**: `boolean`, `json`
+
+### 迁移注释
+使用 `Note:` 标注变更信息：
+```dbml
+Table users_v2 {
+  Note: '''
+  迁移说明：
+  ✨ 新增字段：phone, level
+  🔄 修改字段：email 长度从 100 增加到 255
+  ⚠️ 风险：需要更新应用层代码
+  '''
+}
+```
+
+**详细语法和常见错误请参考 common.txt**
 
 ## 生成示例
 

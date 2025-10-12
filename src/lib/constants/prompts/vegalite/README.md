@@ -11,20 +11,25 @@
 vegalite/
 ├── README.md              # 本文档
 ├── index.ts               # 导出所有 prompt
-├── common.ts              # L2: Vega-Lite 语言规范 (450 tokens)
+├── common.txt             # L2: Vega-Lite 语言规范 (已更新，包含强制规则)
+├── expert-guide.txt       # 完整参考手册 (4500 tokens，仅供学习参考)
 └── 子图 prompt (L3):
-    ├── bar.ts             # 柱状图 (1180 tokens) - P0
-    ├── line.ts            # 折线图 (1150 tokens) - P0
-    ├── scatter.ts         # 散点图 (1140 tokens) - P1
-    ├── area.ts            # 面积图 (1120 tokens) - P1
-    ├── pie.ts             # 饼图 (1150 tokens) - P1
-    └── heatmap.ts         # 热力图 (1170 tokens) - P2
+    ├── bar.txt            # 柱状图 (1180 tokens) - P0
+    ├── line.txt           # 折线图 (1150 tokens) - P0
+    ├── point.txt          # 散点图 (1140 tokens) - P1
+    ├── area.txt           # 面积图 (1120 tokens) - P1
+    ├── pie.txt            # 饼图 (1150 tokens) - P1
+    └── heatmap.txt        # 热力图 (1170 tokens) - P2
 ```
 
-**总文件数**: 8 个  
-**L2 文件数**: 1 个  
-**L3 文件数**: 6 个  
-**总 Token 数**: 约 7,360 tokens
+**总文件数**: 9 个
+**L2 文件数**: 1 个 (common.txt)
+**L3 文件数**: 6 个
+**参考手册**: 1 个 (expert-guide.txt，不用于 prompt 组合)
+**总 Token 数**: 约 7,360 tokens (不含 expert-guide.txt)
+
+> **重要说明**: `expert-guide.txt` 是完整的技术参考手册，**不应直接用于 AI prompt 组合**。
+> AI 生成图表时应使用 `common.txt` (L2) + 各图表类型文件 (L3)。
 
 ---
 

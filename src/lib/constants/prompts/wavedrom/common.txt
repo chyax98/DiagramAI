@@ -1,6 +1,187 @@
 
 # WaveDrom 语言通用规范
 
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 必须使用严格的 JSON 格式
+WaveDrom 要求有效的 JSON 格式，所有键和字符串值必须使用双引号。单引号、缺少引号或尾随逗号都会导致渲染失败。
+
+**错误示例**：
+```json
+{signal:[{name:'clk',wave:'p....'}]}  // ❌ 编译失败！
+```
+
+**正确写法**：
+```json
+{"signal":[{"name":"clk","wave":"p...."}]}  // ✅ 正确
+```
+
+**Kroki 编译错误信息**：
+```
+SyntaxError: Unexpected token s in JSON at position 1
+Kroki API: HTTP 400 Bad Request - Invalid JSON input
+JSON parse error at line 1 column 2
+```
+
+**原因**：WaveJSON 基于严格的 JSON 标准，不支持 JavaScript 对象字面量语法。
+
+---
+
+### ⚠️ 规则 2: signal 或 reg 数组是必需的
+所有 WaveDrom 图表的根对象必须包含 `signal` 数组（时序图）或 `reg` 数组（位字段图）。
+
+**错误示例**：
+```json
+{"name":"CLK","wave":"p...."}  // ❌ 缺少根数组
+```
+
+**正确写法**：
+```json
+{"signal":[{"name":"CLK","wave":"p...."}]}  // ✅ 时序图
+{"reg":[{"bits":8,"name":"data"}]}          // ✅ 位字段图
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Missing 'signal' or 'reg' array in root object
+Kroki: HTTP 400 Bad Request - Invalid WaveDrom structure
+WaveDrom: Cannot render diagram - no signal or register data found
+```
+
+**原因**：WaveDrom 根据根数组类型判断图表类型，缺少根数组无法渲染。
+
+---
+
+### ⚠️ 规则 3: Wave 字符串长度必须一致
+同一时序图中所有信号的 wave 字符串长度必须相同，代表相同的时间跨度。不一致的长度会导致对齐错误或渲染失败。
+
+**错误示例**：
+```json
+{"signal":[
+  {"name":"CLK","wave":"p...."},     // 5 个字符
+  {"name":"DATA","wave":"x34x"}      // ❌ 4 个字符，长度不匹配！
+]}
+```
+
+**正确写法**：
+```json
+{"signal":[
+  {"name":"CLK","wave":"p....."},    // 5 个字符
+  {"name":"DATA","wave":"x.34.x"}    // ✅ 5 个字符，长度一致
+]}
+```
+
+**Kroki 编译错误信息**：
+```
+Warning: Wave length mismatch - CLK:5, DATA:4
+WaveDrom: Rendering may produce misaligned signals
+可能导致渲染错位或部分信号显示异常
+```
+
+**原因**：WaveDrom 使用字符串长度作为时间轴基准，不一致会破坏时序对齐。
+
+---
+
+### ⚠️ 规则 4: 数据符号必须配合 data 数组
+使用数据符号（2-9）时，必须在同一信号对象中提供 `data` 数组来标注数据内容。缺少 data 数组会导致数据符号显示为空白。
+
+**错误示例**：
+```json
+{"signal":[
+  {"name":"BUS","wave":"x345x"}      // ❌ 使用了 3/4/5 但无 data
+]}
+```
+
+**正确写法**：
+```json
+{"signal":[
+  {"name":"BUS","wave":"x345x","data":["A","B","C"]}  // ✅ 提供 data 数组
+]}
+```
+
+**Kroki 编译错误信息**：
+```
+Warning: Data symbols (3,4,5) found but 'data' array is missing
+WaveDrom: Data symbols will be rendered as empty boxes
+数据符号将显示为空白框，无法表达信息
+```
+
+**原因**：数据符号 2-9 是对 data 数组的索引引用，缺少 data 数组无法显示标签。
+
+---
+
+### ⚠️ 规则 5: Wave 符号必须合法
+wave 字符串只能包含预定义的符号字符，不支持中文、特殊符号或空格。非法字符会导致渲染失败或显示异常。
+
+**错误示例**：
+```json
+{"signal":[
+  {"name":"CLK","wave":"开始结束"}    // ❌ 使用了中文字符
+]}
+```
+
+**正确写法**：
+```json
+{"signal":[
+  {"name":"CLK","wave":"p...."}      // ✅ 使用合法符号
+]}
+```
+
+**合法符号列表**：
+- 时钟: `p` `n` `P` `N`
+- 电平: `0` `1` `x` `z` `=`
+- 数据: `2` `3` `4` `5` `6` `7` `8` `9`
+- 辅助: `.` `|` `u` `d`
+
+**Kroki 编译错误信息**：
+```
+Error: Invalid wave character '开' at position 0
+Kroki: Rendering failed - Unknown symbol in wave string
+WaveDrom: Character '开' is not recognized
+```
+
+**原因**：WaveDrom 仅支持预定义的 ASCII 符号集，超出范围的字符无法解析。
+
+---
+
+### ⚠️ 规则 6: Kroki 兼容性约束
+通过 Kroki 渲染时，需要遵守以下额外约束：
+
+1. **禁止 JSON 注释** - Kroki 使用标准 JSON 解析器，不支持 `//` 或 `/* */` 注释
+2. **URL 编码限制** - 超大图表（>10KB JSON）可能超过 URL 长度限制
+3. **超时限制** - 复杂图表（>100 个信号）可能触发 5 秒渲染超时
+4. **字符转义** - 字符串中的双引号必须转义为 `\"`
+5. **无外部资源** - 不支持嵌入图片或外部 SVG 文件
+
+**错误示例**：
+```json
+{
+  "signal": [
+    {"name": "CLK", "wave": "p...."}  // 这是时钟注释 - ❌ JSON 不支持
+  ]
+}
+```
+
+**正确写法**：
+```json
+{
+  "signal": [
+    {"name": "CLK", "wave": "p...."}
+  ]
+}
+```
+
+**Kroki 编译错误信息**：
+```
+HTTP 400 Bad Request: JSON parse error
+Unexpected token / in JSON at position 45
+SyntaxError: Comments are not allowed in JSON
+```
+
+**原因**：Kroki 使用标准 JSON 解析器，严格遵守 RFC 8259 规范，不支持任何 JSON 扩展语法。
+
+---
+
 ## 语法要求
 
 ### 基础结构
@@ -92,7 +273,7 @@ WaveDrom 使用单字符表示信号状态：
 
 ## 常见错误
 
-### 错误 1: JSON 格式错误
+### 错误 1: JSON 格式错误（对应强制规则 1）
 **❌ 错误写法**：
 ```json
 {signal:[{name:'clk',wave:'p....'}]}  // 缺少引号
@@ -105,7 +286,11 @@ WaveDrom 使用单字符表示信号状态：
 
 **原因**：WaveJSON 必须是严格的 JSON 格式，所有键和字符串值都需要双引号。
 
-### 错误 2: Wave 长度不一致
+**详见**: 强制规则 1 - 包含完整的编译错误信息和修复方法
+
+---
+
+### 错误 2: Wave 长度不一致（对应强制规则 3）
 **❌ 错误写法**：
 ```json
 {"signal":[
@@ -124,7 +309,11 @@ WaveDrom 使用单字符表示信号状态：
 
 **原因**：同一组信号的 wave 字符串长度应保持一致，代表相同的时间跨度。
 
-### 错误 3: 数据标签缺失
+**详见**: 强制规则 3 - 包含完整的编译错误信息和修复方法
+
+---
+
+### 错误 3: 数据标签缺失（对应强制规则 4）
 **❌ 错误写法**：
 ```json
 {"signal":[{"name":"bus","wave":"x345x"}]}  // 使用了 3/4/5 但无 data
@@ -137,6 +326,8 @@ WaveDrom 使用单字符表示信号状态：
 
 **原因**：使用数据符号（2-9）时，必须提供对应的 data 数组来标注数据内容。
 
+**详见**: 强制规则 4 - 包含完整的编译错误信息和修复方法
+
 ## 最佳实践
 
 1. **时钟信号优先**：将时钟信号放在信号列表最前面
@@ -144,13 +335,6 @@ WaveDrom 使用单字符表示信号状态：
 3. **使用分组**：用空对象 `{}` 或 `[]` 创建视觉分隔
 4. **合理缩放**：复杂图表使用 hscale 调整显示密度
 5. **添加标题**：为复杂图表添加 head 和 foot 说明
+6. **遵守强制规则**：生成代码前务必检查所有 6 条强制规则
 
-## Kroki 渲染要求
-
-**重要**：生成的 JSON 必须：
-- 是有效的 JSON 格式（可通过 JSON.parse 解析）
-- 不包含注释（JSON 标准不支持注释）
-- 使用双引号，不使用单引号
-- 所有字符串正确转义
-
-**Kroki 端点**：`/wavedrom/svg/` 或 `/wavedrom/png/`
+**重要提醒**：WaveDrom 的 JSON 格式要求是最严格的，违反强制规则会导致 100% 渲染失败！

@@ -1,7 +1,198 @@
 
-## DBML 语言规范
+# DBML 语言通用规范
 
-### 基础语法
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 表定义必须使用 `Table` 关键字（首字母大写）
+DBML 对大小写敏感！使用小写 `table` 会导致解析失败。
+
+**错误示例**：
+```dbml
+table users {              // ❌ 编译失败！table 必须首字母大写
+  id integer
+}
+
+users {                    // ❌ 编译失败！缺少 Table 关键字
+  id integer
+}
+```
+
+**正确写法**：
+```dbml
+Table users {              // ✅ 正确：使用 Table（首字母大写）
+  id integer [pk]
+}
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Syntax error at line 1: Expected 'Table' keyword, got 'table'
+Error: Unexpected token 'users' at line 1
+Possible fix: Use 'Table' (capital T) to define tables
+```
+
+---
+
+### ⚠️ 规则 2: varchar 和 decimal 类型必须指定长度/精度
+DBML 语法要求，Kroki 渲染时需要明确的类型参数。
+
+**错误示例**：
+```dbml
+Table users {
+  name varchar             // ❌ 编译失败！缺少长度参数
+  email varchar            // ❌ 编译失败！缺少长度参数
+}
+
+Table products {
+  price decimal            // ❌ 编译失败！缺少精度参数
+}
+```
+
+**正确写法**：
+```dbml
+Table users {
+  name varchar(100)        // ✅ 正确：指定长度
+  email varchar(255)       // ✅ 正确：指定长度
+}
+
+Table products {
+  price decimal(10,2)      // ✅ 正确：指定精度 (总位数, 小数位)
+}
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Type 'varchar' requires length parameter at line 2
+Error: Type 'decimal' requires precision and scale parameters at line 6
+Possible fix: Use varchar(n) or decimal(p,s)
+```
+
+---
+
+### ⚠️ 规则 3: 关系定义的箭头方向必须正确
+箭头方向决定关系基数，错误会导致 ER 图关系方向错误，误导开发者。
+
+**核心规则**：箭头 `>` 指向"一"的一方（多对一关系）
+
+**错误示例**：
+```dbml
+// 业务逻辑：一个用户有多个订单（一对多）
+Table orders {
+  user_id integer [ref: < users.id]  // ❌ 箭头方向错误！
+  // 这表示：一个订单有多个用户（业务逻辑错误）
+}
+```
+
+**正确写法**：
+```dbml
+// 业务逻辑：一个用户有多个订单（一对多）
+Table orders {
+  user_id integer [ref: > users.id]  // ✅ 正确：箭头指向"一"的一方（users）
+  // 这表示：多个订单属于一个用户（正确）
+}
+```
+
+**记忆方法**：
+- `ref: >` = 多对一 (Many-to-One) - 箭头指向父表（常用）
+- `ref: <` = 一对多 (One-to-Many) - 箭头指向子表（很少用）
+- `ref: -` = 一对一 (One-to-One)
+
+**违反后果**：虽然能渲染，但 ER 图关系方向错误，业务逻辑混乱
+
+---
+
+### ⚠️ 规则 4: 引用的表和字段必须存在
+Kroki 会验证关系完整性，引用不存在的表或字段会导致渲染失败。
+
+**错误示例**：
+```dbml
+Table orders {
+  user_id integer [ref: > users.id]  // ❌ 渲染失败！users 表不存在
+}
+// 缺少 Table users { ... } 定义
+```
+
+**正确写法**：
+```dbml
+Table users {
+  id integer [pk, increment]
+  username varchar(50)
+}
+
+Table orders {
+  id integer [pk, increment]
+  user_id integer [ref: > users.id]  // ✅ 正确：users 表已定义
+}
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Reference error at line 2: Table 'users' not found
+Error: Field 'users.id' does not exist
+Possible fix: Define the referenced table before using it in relationships
+```
+
+---
+
+### ⚠️ 规则 5: 主键约束使用 `[pk]` 或 `[primary key]`
+DBML 语法要求，主键标识符必须正确，不能使用下划线或全大写形式。
+
+**错误示例**：
+```dbml
+Table users {
+  id integer [primary_key]     // ❌ 编译失败！下划线而非空格
+  id integer [PRIMARY KEY]     // ❌ 编译失败！全大写不支持
+}
+```
+
+**正确写法**：
+```dbml
+Table users {
+  id integer [pk, increment]        // ✅ 正确：简写形式（推荐）
+  id integer [primary key]          // ✅ 正确：完整形式
+}
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Unknown constraint 'primary_key' at line 2
+Error: Invalid constraint syntax 'PRIMARY KEY'
+Possible fix: Use [pk] or [primary key] (lowercase)
+```
+
+---
+
+### ⚠️ 规则 6: 字段类型必须符合 DBML 规范
+使用非标准类型会导致渲染失败或类型识别错误。
+
+**错误示例**：
+```dbml
+Table products {
+  name string              // ❌ 渲染失败！DBML 不支持 'string'
+  price number             // ❌ 渲染失败！DBML 不支持 'number'
+  tags array               // ❌ 渲染失败！DBML 不支持 'array'
+}
+```
+
+**正确写法**：
+```dbml
+Table products {
+  name varchar(100)        // ✅ 正确：使用 varchar
+  price decimal(10,2)      // ✅ 正确：使用 decimal 或 integer
+  tags json                // ✅ 正确：使用 json 或单独的关联表
+}
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Unknown type 'string' at line 2
+Error: Type 'number' is not supported, use 'integer', 'decimal', or 'float'
+Possible fix: Use standard DBML types (varchar, integer, decimal, etc.)
+```
+
+---
+
+## 基础语法
 
 #### 表定义
 ```dbml
@@ -112,41 +303,87 @@ Table users {
 
 ### 常见错误
 
-#### 错误 1: 字段类型不规范
-**❌ 错误**：
+#### 错误 1: varchar 和 decimal 类型缺少长度/精度（对应强制规则 2）
+**❌ 错误写法**：
 ```dbml
 Table users {
-  name string
-  age number
+  name varchar              // ❌ 错误：缺少长度
+  email varchar             // ❌ 错误：缺少长度
+}
+
+Table products {
+  price decimal             // ❌ 错误：缺少精度
 }
 ```
 
-**✅ 正确**：
+**✅ 正确写法**：
 ```dbml
 Table users {
-  name varchar(100)
-  age integer
+  name varchar(100)         // ✅ 正确：指定长度
+  email varchar(255)        // ✅ 正确：指定长度
+}
+
+Table products {
+  price decimal(10,2)       // ✅ 正确：指定精度
 }
 ```
 
-#### 错误 2: 外键关系方向错误
-**❌ 错误**：
+**原因**：DBML 语法要求 varchar 和 decimal 必须明确指定参数。
+
+**错误信息**：`Type 'varchar' requires length parameter`
+
+---
+
+#### 错误 2: 外键关系方向错误（对应强制规则 3）
+**❌ 错误写法**：
 ```dbml
-// orders 表的 user_id 指向 users.id（多对一）
+// 业务逻辑：一个用户有多个订单（一对多）
 Table orders {
-  user_id integer [ref: < users.id]  // 错误：应该用 >
+  user_id integer [ref: < users.id]  // ❌ 错误：箭头方向错误
+  // 这表示：一个订单有多个用户（业务逻辑错误）
 }
 ```
 
-**✅ 正确**：
+**✅ 正确写法**：
 ```dbml
 Table orders {
-  user_id integer [ref: > users.id]  // 正确：多个订单 → 一个用户
+  user_id integer [ref: > users.id]  // ✅ 正确：多个订单 → 一个用户
 }
 ```
 
-#### 错误 3: 缺少主键
-**❌ 错误**：
+**原因**：箭头 `>` 必须指向"一"的一方（父表）。
+
+**错误信息**：虽然能渲染，但 ER 图关系方向错误，业务逻辑混乱
+
+---
+
+#### 错误 3: 字段类型不规范（对应强制规则 6）
+**❌ 错误写法**：
+```dbml
+Table users {
+  name string              // ❌ 错误：DBML 不支持 'string'
+  age number               // ❌ 错误：DBML 不支持 'number'
+  tags array               // ❌ 错误：DBML 不支持 'array'
+}
+```
+
+**✅ 正确写法**：
+```dbml
+Table users {
+  name varchar(100)        // ✅ 正确：使用 varchar
+  age integer              // ✅ 正确：使用 integer
+  tags json                // ✅ 正确：使用 json
+}
+```
+
+**原因**：必须使用 DBML 标准数据类型。
+
+**错误信息**：`Unknown type 'string'`
+
+---
+
+#### 错误 4: 缺少主键
+**❌ 错误写法**：
 ```dbml
 Table users {
   username varchar(50) [unique]
@@ -154,7 +391,7 @@ Table users {
 }
 ```
 
-**✅ 正确**：
+**✅ 正确写法**：
 ```dbml
 Table users {
   id integer [pk, increment]
@@ -162,6 +399,55 @@ Table users {
   email varchar(100)
 }
 ```
+
+**原因**：每个表必须有主键，便于数据管理和关系维护。
+
+---
+
+#### 错误 5: 使用小写 table 关键字（对应强制规则 1）
+**❌ 错误写法**：
+```dbml
+table users {              // ❌ 错误：小写 table
+  id integer [pk]
+}
+```
+
+**✅ 正确写法**：
+```dbml
+Table users {              // ✅ 正确：首字母大写
+  id integer [pk]
+}
+```
+
+**原因**：DBML 对大小写敏感，必须使用 `Table`（首字母大写）。
+
+**错误信息**：`Syntax error: Expected 'Table' keyword, got 'table'`
+
+---
+
+#### 错误 6: 引用不存在的表或字段（对应强制规则 4）
+**❌ 错误写法**：
+```dbml
+Table orders {
+  user_id integer [ref: > users.id]  // ❌ 错误：users 表不存在
+}
+```
+
+**✅ 正确写法**：
+```dbml
+Table users {
+  id integer [pk, increment]
+}
+
+Table orders {
+  id integer [pk, increment]
+  user_id integer [ref: > users.id]  // ✅ 正确：users 表已定义
+}
+```
+
+**原因**：Kroki 会验证关系完整性，引用的表必须存在。
+
+**错误信息**：`Reference error: Table 'users' not found`
 
 ### 最佳实践
 

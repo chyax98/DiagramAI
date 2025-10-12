@@ -23,6 +23,8 @@ export interface ExportActions {
   pngStatus: ExportStatus;
   copyStatus: ExportStatus;
   copyImageStatus: ExportStatus;
+  // SVG 是否可用（用于禁用按钮）
+  hasSvgContent: boolean;
 }
 
 interface UseExportActionsParams {
@@ -47,7 +49,7 @@ export function useExportActions({ code, svgContent }: UseExportActionsParams): 
 
   const exportSVG = useCallback(async () => {
     if (!svgContent) {
-      logger.warn("⚠️ [Export] SVG 内容不可用");
+      logger.warn("⚠️ [Export] SVG 内容不可用 - 当前图表渲染失败或未渲染");
       setSvgStatus("error");
       setTimeout(() => setSvgStatus("idle"), 2000);
       return;
@@ -70,7 +72,7 @@ export function useExportActions({ code, svgContent }: UseExportActionsParams): 
 
   const exportPNG = useCallback(async () => {
     if (!svgContent || !isSvgToImageSupported()) {
-      logger.warn("⚠️ [Export] SVG 内容不可用或浏览器不支持");
+      logger.warn("⚠️ [Export] SVG 内容不可用（当前图表渲染失败或未渲染）或浏览器不支持");
       setPngStatus("error");
       setTimeout(() => setPngStatus("idle"), 2000);
       return;
@@ -107,7 +109,7 @@ export function useExportActions({ code, svgContent }: UseExportActionsParams): 
 
   const copyImage = useCallback(async () => {
     if (!svgContent || !isSvgToImageSupported()) {
-      logger.warn("⚠️ [Export] SVG 内容不可用或浏览器不支持");
+      logger.warn("⚠️ [Export] SVG 内容不可用（当前图表渲染失败或未渲染）或浏览器不支持");
       setCopyImageStatus("error");
       setTimeout(() => setCopyImageStatus("idle"), 2000);
       return;
@@ -137,5 +139,6 @@ export function useExportActions({ code, svgContent }: UseExportActionsParams): 
     pngStatus,
     copyStatus,
     copyImageStatus,
+    hasSvgContent: Boolean(svgContent),
   };
 }

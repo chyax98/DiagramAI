@@ -49,8 +49,9 @@ export function ZoomableContainer({
                     variant="ghost"
                     size="sm"
                     onClick={exportActions.exportSVG}
-                    disabled={exportActions.svgStatus === "loading"}
+                    disabled={!exportActions.hasSvgContent || exportActions.svgStatus === "loading"}
                     className="h-8 gap-1.5"
+                    title={!exportActions.hasSvgContent ? "请先成功渲染图表" : "下载 SVG"}
                   >
                     {exportActions.svgStatus === "loading" ? (
                       <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -66,8 +67,9 @@ export function ZoomableContainer({
                     variant="ghost"
                     size="sm"
                     onClick={exportActions.exportPNG}
-                    disabled={exportActions.pngStatus === "loading"}
+                    disabled={!exportActions.hasSvgContent || exportActions.pngStatus === "loading"}
                     className="h-8 gap-1.5"
+                    title={!exportActions.hasSvgContent ? "请先成功渲染图表" : "下载 PNG"}
                   >
                     {exportActions.pngStatus === "loading" ? (
                       <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -83,8 +85,9 @@ export function ZoomableContainer({
                     variant="ghost"
                     size="sm"
                     onClick={exportActions.copyImage}
-                    disabled={exportActions.copyImageStatus === "loading"}
+                    disabled={!exportActions.hasSvgContent || exportActions.copyImageStatus === "loading"}
                     className="h-8 gap-1.5"
+                    title={!exportActions.hasSvgContent ? "请先成功渲染图表" : "复制图片到剪贴板"}
                   >
                     {exportActions.copyImageStatus === "loading" ? (
                       <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

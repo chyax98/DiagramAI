@@ -233,6 +233,7 @@ export function DiagramPreview({
         const errorMessage = error instanceof Error ? error.message : "Unknown rendering error";
         onError(errorMessage);
         setSvgContent("");
+        svgCallback?.(""); // ⭐ 修复：通知父组件清空 SVG 状态，避免导出历史成功的图表
       } finally {
         setIsLoading(false);
         isRenderingRef.current = false;

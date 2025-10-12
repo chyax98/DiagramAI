@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GenerationHistory, RenderLanguage } from "@/types/database";
+
+// 禁用静态生成 - 此页面需要认证,不能预渲染
+export const dynamic = "force-dynamic";
 import { HistoryCard } from "@/components/history/HistoryCard";
 import { SkeletonCard } from "@/components/shared";
 import { apiClient } from "@/lib/utils/api-client";

@@ -38,9 +38,22 @@ export class ModelRepository {
     return row || null;
   }
 
+  /**
+   * 查询用户的所有模型 (用于列表展示)
+   * 安全考虑: 不返回完整的 api_key,仅返回脱敏后的部分
+   */
   findByUserId(userId: number): AIModel[] {
     const stmt = this.db.prepare(`
-      SELECT * FROM ai_models
+      SELECT
+        id,
+        user_id,
+        name,
+        provider,
+        api_endpoint,
+        model_id,
+        parameters,
+        created_at
+      FROM ai_models
       WHERE user_id = ?
       ORDER BY created_at DESC
     `);

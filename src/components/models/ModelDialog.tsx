@@ -34,7 +34,7 @@ interface AIModel {
 interface ModelDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: () => void | Promise<void>;
   model?: AIModel;
 }
 
@@ -116,8 +116,11 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
 
       if (!isMountedRef.current) return;
 
-      reset();
+      // 先等待刷新完成
       await onSuccess();
+
+      // 然后关闭对话框和重置表单
+      reset();
       onClose();
     } catch (err) {
       // Bug 6 修复: 检查组件是否已卸载

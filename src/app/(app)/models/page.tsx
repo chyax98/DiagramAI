@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+
+// 禁用静态生成 - 此页面需要认证,不能预渲染
+export const dynamic = "force-dynamic";
 import { ModelDialog } from "@/components/models/ModelDialog";
 import { TestConnectionButton } from "@/components/models/TestConnectionButton";
 import { apiClient } from "@/lib/utils/api-client";

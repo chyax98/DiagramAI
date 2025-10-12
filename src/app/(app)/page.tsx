@@ -8,6 +8,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "@/components/ui/toast";
 
+// 禁用静态生成 - 此页面需要认证,不能预渲染
+export const dynamic = "force-dynamic";
+
 // Hooks
 import { useDiagramStore } from "@/lib/stores/diagram-store";
 import { useEditorActions } from "@/hooks/useEditorActions";

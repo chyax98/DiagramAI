@@ -31,28 +31,29 @@ export default function HistoryPage() {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   // 获取历史记录（带分页）
-  useEffect(() => {
-    async function fetchHistories() {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchHistories = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const data = await apiClient.get<{
-          histories: GenerationHistory[];
-          total: number;
-        }>(`/api/history?page=${page}&limit=${limit}&language=${languageFilter}&sort=${sortOrder}`);
+      const data = await apiClient.get<{
+        histories: GenerationHistory[];
+        total: number;
+      }>(`/api/history?page=${page}&limit=${limit}&language=${languageFilter}&sort=${sortOrder}`);
 
-        setHistories(data.histories || []);
-        setTotal(data.total || 0);
-      } catch (err) {
-        logger.error("获取历史记录失败:", err);
-        setError(err instanceof Error ? err.message : "未知错误");
-      } finally {
-        setLoading(false);
-      }
+      setHistories(data.histories || []);
+      setTotal(data.total || 0);
+    } catch (err) {
+      logger.error("获取历史记录失败:", err);
+      setError(err instanceof Error ? err.message : "未知错误");
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchHistories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, languageFilter, sortOrder]);
 
   // 应用前端搜索过滤（实时）
@@ -207,6 +208,31 @@ export default function HistoryPage() {
 
         {/* 控制栏 */}
         <div className="mb-6 flex flex-wrap items-center gap-4">
+          {/* 刷新按钮 */}
+          <button
+            onClick={() => fetchHistories()}
+            disabled={loading}
+            className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg
+                     hover:bg-slate-200 transition-colors duration-200
+                     flex items-center gap-2 shadow-sm disabled:opacity-50"
+            title="刷新列表"
+          >
+            <svg
+              className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            <span className="hidden sm:inline">刷新</span>
+          </button>
+
           {/* 搜索框 */}
           <input
             type="text"

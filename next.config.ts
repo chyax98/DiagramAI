@@ -93,13 +93,13 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // 头部配置（安全和性能）
+  // 头部配置（安全头部）
   async headers() {
     return [
       {
-        source: "/(.*)",
+        // 全局安全头部
+        source: "/:path*",
         headers: [
-          // 安全头部
           {
             key: "X-Frame-Options",
             value: "DENY",
@@ -111,11 +111,6 @@ const nextConfig: NextConfig = {
           {
             key: "Referrer-Policy",
             value: "strict-origin-when-cross-origin",
-          },
-          // 性能头部
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
           },
         ],
       },

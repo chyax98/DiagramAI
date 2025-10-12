@@ -7,12 +7,16 @@
  * - 提升用户体验和输入准确性
  *
  * 设计原则:
- * - 示例具体且实用
- * - 符合图表类型的典型场景
- * - 简洁明了，易于理解
+ * - 自动生成: 基于 diagram-types.ts 的定义自动生成 placeholder
+ * - 零维护: 新增图表类型无需手动更新此文件
+ * - 类型安全: 依赖 SSOT (diagram-types.ts)
+ *
+ * 架构说明:
+ * - 短期方案: 自动从 description 生成基础 placeholder
+ * - 长期规划: 迁移到 Prompt metadata 驱动的系统（见 CLAUDE.md）
  */
 
-import type { DiagramType } from "./diagram-types";
+import { LANGUAGE_DIAGRAM_TYPES, type RenderLanguage, type DiagramType } from "./diagram-types";
 
 /**
  * 默认 Placeholder (当没有选择具体图表类型时使用)
@@ -20,13 +24,19 @@ import type { DiagramType } from "./diagram-types";
 export const DEFAULT_PLACEHOLDER = "✨ 描述你想要生成的图表，例如：用户登录流程的时序图...";
 
 /**
- * 图表类型 Placeholder 映射表
+ * 手动定义的高质量 Placeholder（可选）
  *
- * 为每种图表类型提供具体的输入示例，帮助用户快速上手
+ * 这些手动定义的 placeholder 会覆盖自动生成的版本
+ * 用于提供更生动、更具体的示例
+ *
+ * 迁移路径:
+ * 1. 短期: 保留现有的高质量 placeholder
+ * 2. 中期: 逐步迁移到 Prompt metadata
+ * 3. 长期: 完全由 Prompt 文件驱动，删除此对象
  */
-export const DIAGRAM_PLACEHOLDERS: Record<DiagramType, string> = {
+const MANUAL_PLACEHOLDERS: Partial<Record<DiagramType, string>> = {
   // ============================================
-  // Mermaid (12 种图表类型)
+  // Mermaid - 主流图表的高质量 placeholder
   // ============================================
   flowchart: "✨ 描述一个流程，例如：用户登录流程，包括输入账号密码、验证、登录成功或失败处理",
   sequence:
@@ -41,78 +51,58 @@ export const DIAGRAM_PLACEHOLDERS: Record<DiagramType, string> = {
     "✨ 描述事件时间轴，例如：公司发展历程，包括 2020 年成立、2021 年 A 轮融资、2022 年产品上线",
   quadrant: "✨ 描述四象限分析，例如：任务优先级矩阵，按重要性和紧急程度分类",
   sankey: "✨ 描述流量分布，例如：网站流量来源分析，从不同渠道到页面到转化的流向",
-  xyChart: "✨ 描述数据趋势，例如：过去 12 个月的销售额和利润趋势对比",
 
   // ============================================
-  // PlantUML (8 种图表类型)
+  // PlantUML - UML 图表
   // ============================================
-  // sequence: '✨ 描述系统交互，例如：用户认证流程，包括客户端、认证服务、数据库的交互',
-  // class: '✨ 描述面向对象设计，例如：图书管理系统的类结构，包括图书、读者、借阅记录',
   usecase: "✨ 描述系统用例，例如：在线购物系统，包括浏览商品、加入购物车、下单、支付等用例",
   activity: "✨ 描述业务流程，例如：请假审批流程，包括提交申请、部门审批、HR 审批、结束",
   component: "✨ 描述系统组件，例如：微服务架构，包括网关、用户服务、订单服务、支付服务",
-  // state: '✨ 描述状态机，例如：TCP 连接状态转换，包括 LISTEN、SYN_SENT、ESTABLISHED 等状态',
   object: "✨ 描述对象实例，例如：用户对象和订单对象的关联关系，展示具体的实例数据",
   deployment: "✨ 描述部署架构，例如：三层架构部署，包括负载均衡、应用服务器、数据库服务器",
 
   // ============================================
-  // D2 (4 种图表类型)
+  // D2 - 现代化图表
   // ============================================
-  // flowchart: '✨ 描述流程或关系，例如：数据处理流水线，从数据采集到清洗到存储到分析',
-  // sequence: '✨ 描述时序交互，例如：API 调用流程，包括客户端请求、认证、业务处理、返回响应',
   architecture: "✨ 描述系统架构，例如：云原生架构，包括 CDN、负载均衡、容器集群、数据库集群",
   network: "✨ 描述网络拓扑，例如：企业网络拓扑，包括路由器、交换机、防火墙、服务器的连接",
 
   // ============================================
-  // Graphviz (5 种图表类型)
+  // Graphviz - 图形可视化
   // ============================================
-  // flowchart: '✨ 描述有向图，例如：编译器的词法分析流程，从源代码到 Token 流',
-  // state: '✨ 描述状态转换，例如：自动售货机状态图，包括待机、选择商品、付款、出货状态',
-  // network: '✨ 描述无向图，例如：社交网络关系图，展示用户之间的好友关系',
   tree: "✨ 描述树形结构，例如：公司组织架构树，从 CEO 到部门到团队的层级结构",
-  // architecture: '✨ 描述分层架构，例如：MVC 架构图，展示 Model、View、Controller 的层次关系',
 
   // ============================================
-  // WaveDrom (3 种图表类型)
+  // WaveDrom - 数字信号
   // ============================================
   timing: "✨ 描述数字信号时序，例如：SPI 通信时序图，包括 CLK、MOSI、MISO、CS 信号",
   signal: "✨ 描述信号变化，例如：I2C 总线信号，包括 SDA 和 SCL 的时序关系",
   register: "✨ 描述寄存器布局，例如：32 位控制寄存器，包括各个位字段的功能和位置",
 
   // ============================================
-  // Nomnoml (3 种图表类型)
-  // ============================================
-  // class: '✨ 描述类关系，例如：设计模式中的观察者模式类图',
-  // component: '✨ 描述组件关系，例如：前端组件树，包括 App、Header、Content、Footer',
-  // architecture: '✨ 描述架构设计，例如：MVVM 架构，展示 View、ViewModel、Model 的关系',
-
-  // ============================================
-  // Excalidraw (3 种图表类型)
+  // Excalidraw - 手绘风格
   // ============================================
   sketch: "✨ 描述自由草图，例如：产品功能脑暴草图，包括各种想法和关联",
   wireframe: "✨ 描述界面原型，例如：移动应用登录页面线框图，包括 Logo、输入框、按钮布局",
   diagram: "✨ 描述通用图表，例如：技术选型对比图，用手绘风格展示不同方案的优缺点",
 
   // ============================================
-  // C4-PlantUML (4 种图表类型)
+  // C4-PlantUML - C4 架构图
   // ============================================
   context: "✨ 描述系统上下文，例如：电商系统的外部环境，包括用户、支付平台、物流系统",
   container: "✨ 描述容器视图，例如：电商系统内部结构，包括 Web 应用、API 服务、数据库",
-  // component: '✨ 描述组件视图，例如：订单服务内部组件，包括订单控制器、订单服务、订单仓储',
-  // sequence: '✨ 描述 C4 时序，例如：用户下单的完整交互流程，从 UI 到服务到数据库',
 
   // ============================================
-  // Vega-Lite (6 种图表类型)
+  // Vega-Lite - 数据可视化
   // ============================================
   bar: "✨ 描述柱状图数据，例如：各城市 2024 年 GDP 对比，包括北京、上海、深圳等数据",
   line: "✨ 描述折线图数据，例如：过去一年的股票价格走势，包括开盘价、收盘价",
   point: "✨ 描述散点图数据，例如：身高体重相关性分析，包括 100 个样本数据点",
   area: "✨ 描述面积图数据，例如：网站月活跃用户累积趋势，从 2023 年 1 月到 2024 年 12 月",
-  // pie: '✨ 描述饼图数据，例如：市场份额分布，包括各品牌的占比数据',
   heatmap: "✨ 描述热力图数据，例如：网站访问热力图，按小时和星期几统计访问量",
 
   // ============================================
-  // DBML (4 种图表类型)
+  // DBML - 数据库设计
   // ============================================
   schema: "✨ 描述数据库设计，例如：社交网络数据库，包括用户、帖子、评论、点赞表及关系",
   single_table: "✨ 描述单表结构，例如：用户表设计，包括 id、用户名、邮箱、密码、创建时间等字段",
@@ -121,22 +111,116 @@ export const DIAGRAM_PLACEHOLDERS: Record<DiagramType, string> = {
 };
 
 /**
- * 获取图表类型对应的 Placeholder
+ * 自动从图表类型定义生成 placeholder
  *
- * @param diagramType 图表类型
- * @returns Placeholder 文本
+ * 策略:
+ * 1. 查找图表类型的 label 和 description
+ * 2. 生成格式: "✨ 描述你想要的{label}，例如：{description}"
+ * 3. 如果找不到定义，返回 DEFAULT_PLACEHOLDER
+ *
+ * @param language - 渲染语言
+ * @param type - 图表类型
+ * @returns 自动生成的 placeholder
  *
  * @example
- * getPlaceholder('flowchart')
- * // 返回: '✨ 描述一个流程，例如：用户登录流程...'
- *
- * getPlaceholder(undefined)
- * // 返回: DEFAULT_PLACEHOLDER
+ * generatePlaceholder('mermaid', 'gitgraph')
+ * // 返回: "✨ 描述你想要的 Git 图，例如：展示 Git 提交历史和分支"
  */
-export function getPlaceholder(diagramType?: DiagramType): string {
-  if (!diagramType) {
+function generatePlaceholder(language: RenderLanguage, type: DiagramType): string {
+  const types = LANGUAGE_DIAGRAM_TYPES[language];
+  if (!types) {
     return DEFAULT_PLACEHOLDER;
   }
 
-  return DIAGRAM_PLACEHOLDERS[diagramType] ?? DEFAULT_PLACEHOLDER;
+  const info = types.find((t) => t.value === type);
+  if (!info) {
+    return DEFAULT_PLACEHOLDER;
+  }
+
+  // 生成格式: "✨ 描述你想要的{label}，例如：{description}"
+  return `✨ 描述你想要的${info.label}，例如：${info.description}`;
+}
+
+/**
+ * Placeholder 缓存
+ *
+ * key 格式: "{language}:{type}"
+ * value: placeholder 文本
+ *
+ * 缓存策略:
+ * - 首次访问时计算并缓存
+ * - 后续访问直接返回缓存值
+ * - 应用重启时清空
+ */
+const placeholderCache = new Map<string, string>();
+
+/**
+ * 获取图表类型对应的 Placeholder
+ *
+ * 优先级:
+ * 1. 手动定义的高质量 placeholder (MANUAL_PLACEHOLDERS)
+ * 2. 自动生成的 placeholder (基于 diagram-types.ts)
+ * 3. 默认 placeholder (DEFAULT_PLACEHOLDER)
+ *
+ * @param language - 渲染语言 (可选)
+ * @param type - 图表类型 (可选)
+ * @returns Placeholder 文本
+ *
+ * @example
+ * // 场景 1: 有手动定义
+ * getPlaceholder('mermaid', 'flowchart')
+ * // 返回: "✨ 描述一个流程，例如：用户登录流程..."
+ *
+ * // 场景 2: 无手动定义，自动生成
+ * getPlaceholder('mermaid', 'gitgraph')
+ * // 返回: "✨ 描述你想要的 Git 图，例如：展示 Git 提交历史和分支"
+ *
+ * // 场景 3: 未选择类型
+ * getPlaceholder()
+ * // 返回: DEFAULT_PLACEHOLDER
+ */
+export function getPlaceholder(language?: RenderLanguage, type?: DiagramType): string {
+  // 未选择语言或类型，返回默认
+  if (!language || !type) {
+    return DEFAULT_PLACEHOLDER;
+  }
+
+  // 优先级 1: 检查手动定义
+  if (type in MANUAL_PLACEHOLDERS) {
+    return MANUAL_PLACEHOLDERS[type]!;
+  }
+
+  // 优先级 2: 自动生成（带缓存）
+  const cacheKey = `${language}:${type}`;
+  if (!placeholderCache.has(cacheKey)) {
+    const generated = generatePlaceholder(language, type);
+    placeholderCache.set(cacheKey, generated);
+  }
+
+  return placeholderCache.get(cacheKey)!;
+}
+
+/**
+ * 清除 placeholder 缓存
+ *
+ * 用途:
+ * - 开发环境热更新
+ * - 测试环境重置状态
+ */
+export function clearPlaceholderCache(): void {
+  placeholderCache.clear();
+}
+
+/**
+ * 获取缓存统计信息
+ *
+ * 用途:
+ * - 监控缓存命中率
+ * - 调试和性能分析
+ */
+export function getPlaceholderCacheStats(): { size: number; keys: string[] } {
+  return {
+    size: placeholderCache.size,
+    keys: Array.from(placeholderCache.keys()),
+  };
 }

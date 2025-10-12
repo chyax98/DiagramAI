@@ -77,9 +77,13 @@ class PromptLoader {
 
     // 1. L1: 通用规范 (所有图表共享)
     try {
-      parts.push(this.getPrompt("common", "universal"));
+      // 直接从根目录加载 universal.txt
+      const universalPath = path.join(this.dataDir, "universal.txt");
+      if (fs.existsSync(universalPath)) {
+        parts.push(fs.readFileSync(universalPath, "utf-8"));
+      }
     } catch {
-      // common/universal.txt 可选，不存在则跳过
+      // universal.txt 可选，不存在则跳过
     }
 
     // 2. L2: 语言规范 (如 Mermaid 通用规范)

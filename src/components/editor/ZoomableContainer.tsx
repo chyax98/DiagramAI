@@ -3,19 +3,30 @@
 "use client";
 
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import { ZoomIn, ZoomOut, Maximize, RotateCcw } from "lucide-react";
+import {
+  ZoomIn,
+  ZoomOut,
+  Maximize,
+  RotateCcw,
+  Download,
+  Copy,
+  FileImage,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { ExportActions } from "@/hooks/useExportActions";
 
 interface ZoomableContainerProps {
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   children: React.ReactNode;
+  exportActions?: ExportActions; // 导出操作
 }
 
 export function ZoomableContainer({
   isFullscreen,
   onToggleFullscreen,
   children,
+  exportActions,
 }: ZoomableContainerProps) {
   return (
     <TransformWrapper
@@ -31,6 +42,65 @@ export function ZoomableContainer({
             <div className="text-sm font-medium">图表预览</div>
 
             <div className="flex items-center gap-2">
+              {/* 导出操作按钮组 */}
+              {exportActions && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={exportActions.exportSVG}
+                    disabled={exportActions.svgStatus === "loading"}
+                    className="h-8 gap-1.5"
+                  >
+                    {exportActions.svgStatus === "loading" ? (
+                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : exportActions.svgStatus === "success" ? (
+                      <FileImage className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <FileImage className="h-4 w-4" />
+                    )}
+                    <span className="text-xs">SVG</span>
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={exportActions.exportPNG}
+                    disabled={exportActions.pngStatus === "loading"}
+                    className="h-8 gap-1.5"
+                  >
+                    {exportActions.pngStatus === "loading" ? (
+                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : exportActions.pngStatus === "success" ? (
+                      <Download className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                    <span className="text-xs">PNG</span>
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={exportActions.copyImage}
+                    disabled={exportActions.copyImageStatus === "loading"}
+                    className="h-8 gap-1.5"
+                  >
+                    {exportActions.copyImageStatus === "loading" ? (
+                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : exportActions.copyImageStatus === "success" ? (
+                      <Copy className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                    <span className="text-xs">复制图片</span>
+                  </Button>
+
+                  <div className="h-6 w-px bg-border mx-1" />
+                </>
+              )}
+
+              {/* 缩放和全屏按钮 */}
               <Button
                 variant="ghost"
                 size="sm"

@@ -93,9 +93,39 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // 头部配置（安全头部）
+  // 头部配置（安全头部 + 静态资源缓存）
   async headers() {
     return [
+      {
+        // 静态资源缓存 - SVG 图标
+        source: "/icons/:path*.svg",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable", // 1年缓存
+          },
+        ],
+      },
+      {
+        // 静态资源缓存 - 其他图片
+        source: "/icons/:path*.(png|jpg|jpeg|gif|webp|avif|ico)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable", // 1年缓存
+          },
+        ],
+      },
+      {
+        // 根目录 SVG 文件
+        source: "/:path*.svg",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable", // 1年缓存
+          },
+        ],
+      },
       {
         // 全局安全头部
         source: "/:path*",

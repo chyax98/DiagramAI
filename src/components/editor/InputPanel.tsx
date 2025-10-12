@@ -7,7 +7,7 @@ import { Sparkles, Loader2, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { getPlaceholder } from "@/lib/constants/placeholders";
-import type { DiagramType } from "@/lib/constants/diagram-types";
+import type { DiagramType, RenderLanguage } from "@/lib/constants/diagram-types";
 import { MAX_INPUT_TEXT_LENGTH } from "@/lib/constants/env";
 import { useRecommendation } from "@/hooks/useRecommendation";
 import { RecommendationCard } from "@/components/RecommendationCard";
@@ -17,10 +17,17 @@ interface InputPanelProps {
   onGenerate: (inputText: string) => Promise<void>;
   isGenerating: boolean;
   disabled?: boolean;
+  renderLanguage?: RenderLanguage;
   diagramType?: DiagramType;
 }
 
-export function InputPanel({ onGenerate, isGenerating, disabled, diagramType }: InputPanelProps) {
+export function InputPanel({
+  onGenerate,
+  isGenerating,
+  disabled,
+  renderLanguage,
+  diagramType,
+}: InputPanelProps) {
   const [inputText, setInputText] = useState("");
   const { handleRecommend, applyRecommendation, isRecommending, recommendation } =
     useRecommendation();
@@ -57,7 +64,7 @@ export function InputPanel({ onGenerate, isGenerating, disabled, diagramType }: 
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={getPlaceholder(diagramType)}
+          placeholder={getPlaceholder(renderLanguage, diagramType)}
           disabled={isGenerating || disabled}
           className="relative w-full resize-none rounded-xl
                    backdrop-blur-sm

@@ -11,7 +11,6 @@ import {
   Download,
   Copy,
   FileImage,
-  FileCode,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ExportActions } from "@/hooks/useExportActions";
@@ -51,8 +50,7 @@ export function ZoomableContainer({
                     size="sm"
                     onClick={exportActions.exportSVG}
                     disabled={exportActions.svgStatus === "loading"}
-                    className="h-8 w-8 p-0"
-                    title="导出 SVG"
+                    className="h-8 gap-1.5"
                   >
                     {exportActions.svgStatus === "loading" ? (
                       <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -61,6 +59,7 @@ export function ZoomableContainer({
                     ) : (
                       <FileImage className="h-4 w-4" />
                     )}
+                    <span className="text-xs">SVG</span>
                   </Button>
 
                   <Button
@@ -68,8 +67,7 @@ export function ZoomableContainer({
                     size="sm"
                     onClick={exportActions.exportPNG}
                     disabled={exportActions.pngStatus === "loading"}
-                    className="h-8 w-8 p-0"
-                    title="导出 PNG"
+                    className="h-8 gap-1.5"
                   >
                     {exportActions.pngStatus === "loading" ? (
                       <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -78,23 +76,7 @@ export function ZoomableContainer({
                     ) : (
                       <Download className="h-4 w-4" />
                     )}
-                  </Button>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={exportActions.copyCode}
-                    disabled={exportActions.copyStatus === "loading"}
-                    className="h-8 w-8 p-0"
-                    title="复制源代码"
-                  >
-                    {exportActions.copyStatus === "loading" ? (
-                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    ) : exportActions.copyStatus === "success" ? (
-                      <FileCode className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <FileCode className="h-4 w-4" />
-                    )}
+                    <span className="text-xs">PNG</span>
                   </Button>
 
                   <Button
@@ -102,8 +84,7 @@ export function ZoomableContainer({
                     size="sm"
                     onClick={exportActions.copyImage}
                     disabled={exportActions.copyImageStatus === "loading"}
-                    className="h-8 w-8 p-0"
-                    title="复制图片"
+                    className="h-8 gap-1.5"
                   >
                     {exportActions.copyImageStatus === "loading" ? (
                       <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -112,6 +93,7 @@ export function ZoomableContainer({
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
+                    <span className="text-xs">复制图片</span>
                   </Button>
 
                   <div className="h-6 w-px bg-border mx-1" />

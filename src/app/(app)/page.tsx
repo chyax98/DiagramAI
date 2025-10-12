@@ -166,6 +166,7 @@ export default function HomePage() {
             onGenerate={handleGenerate}
             isGenerating={isGenerating}
             disabled={false}
+            renderLanguage={renderLanguage}
             diagramType={diagramType}
           />
 

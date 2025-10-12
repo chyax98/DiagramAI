@@ -37,6 +37,17 @@ async function renderWithMermaid(code: string, theme: "light" | "dark"): Promise
       fontFamily: "ui-sans-serif, system-ui, sans-serif",
     });
 
+    // ⭐ 步骤1: 先用 parse() 验证语法 (会抛出异常)
+    try {
+      await mermaid.parse(code);
+    } catch (parseError) {
+      const errorMessage =
+        parseError instanceof Error ? parseError.message : "Mermaid syntax error";
+      logger.error("❌ [Mermaid] 语法验证失败:", errorMessage);
+      return Promise.reject(new Error(errorMessage));
+    }
+
+    // ⭐ 步骤2: 语法正确,执行渲染
     // 生成唯一 ID
     const id = `mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
@@ -44,10 +55,26 @@ async function renderWithMermaid(code: string, theme: "light" | "dark"): Promise
     const { svg } = await mermaid.render(id, code);
 
     // ⭐ 检测 Mermaid 是否返回了错误 SVG（包含错误信息的 SVG）
-    // Mermaid 有时会返回包含 "Syntax error" 的 SVG 而不是抛出异常
-    if (svg.includes("Syntax error") || svg.includes("Error:")) {
+    // Mermaid 11.x 在遇到语法错误时会返回包含 "Syntax error in text" 的 SVG 而不是抛出异常
+    const svgLowerCase = svg.toLowerCase();
+    const errorIndicators = [
+      "syntax error", // 不区分大小写
+      "parse error",
+      "error:",
+      "mermaid version", // 错误 SVG 通常包含版本信息
+    ];
+
+    const hasError = errorIndicators.some((indicator) => svgLowerCase.includes(indicator));
+
+    // 额外检查: 错误 SVG 通常包含 <path> 的地雷/警告图标
+    const hasErrorIcon = svg.includes('d="M12 9v2m0 4h.01');
+
+    if (hasError || hasErrorIcon) {
       // 从 SVG 中提取错误信息
-      const errorMatch = svg.match(/>(Syntax error[^<]*)</i) || svg.match(/>(Error:[^<]*)</i);
+      const errorMatch =
+        svg.match(/>(Syntax error[^<]*)</i) ||
+        svg.match(/>(Error:[^<]*)</i) ||
+        svg.match(/>(Parse error[^<]*)</i);
       const errorMessage = errorMatch ? errorMatch[1] : "Mermaid syntax error";
       logger.error("❌ [Mermaid] 渲染返回错误 SVG:", errorMessage);
       return Promise.reject(new Error(errorMessage));
@@ -182,6 +209,13 @@ export function DiagramPreview({
           renderLanguage === "mermaid"
             ? await renderWithMermaid(code, effectiveTheme)
             : await renderWithKroki(code, renderLanguage);
+
+        // ⭐ 双重防御: 在设置 svgContent 之前再次检查是否包含错误信息
+        // 防止万一 renderWithMermaid 没有正确拒绝错误 SVG
+        const errorIndicators = ["Syntax error", "Parse error", "mermaid version"];
+        if (errorIndicators.some((indicator) => svg.includes(indicator))) {
+          throw new Error("Mermaid 返回的 SVG 包含错误信息");
+        }
 
         setSvgContent(svg);
         svgCallback?.(svg); // 通知父组件 SVG 已渲染

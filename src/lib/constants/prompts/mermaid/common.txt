@@ -1,6 +1,111 @@
 
 # Mermaid 语言通用规范
 
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 节点 ID 不能使用中文或保留关键字
+这是 Mermaid 最常见的致命错误！违反此规则会导致编译失败。
+
+**错误示例**：
+```mermaid
+graph TD
+    开始 --> 结束    %% ❌ 编译失败！节点 ID 使用中文
+    start --> end[完成]  %% ❌ 编译失败！end 是保留关键字
+```
+
+**正确写法**：
+```mermaid
+graph TD
+    start[开始] --> finish[结束]  %% ✅ 正确
+    start --> done[完成]          %% ✅ 正确，避免使用 end
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Syntax error in text, line 2: '开始' is not a valid node ID
+Error: 'end' is a reserved keyword and cannot be used as node ID
+Possible fix: Use 'finish', 'done', or 'complete' instead of 'end'
+```
+
+**强制要求**：
+- ✅ **必须使用**: 英文字母（A-Z, a-z）、数字（0-9）、下划线 `_`、连字符 `-`
+- ❌ **禁止使用**: 中文、空格
+- ❌ **保留关键字**（禁止用作节点 ID）:
+  - `end` - 最常见的错误，极易误用
+  - `graph`, `subgraph`, `flowchart` - 图表声明关键字
+  - `class`, `classDef`, `style` - 样式关键字
+  - `click`, `call`, `href` - 交互关键字
+  - `direction` - 布局关键字
+
+---
+
+### ⚠️ 规则 2: 特殊字符必须转义
+标签中包含 Mermaid 语法字符时，必须用双引号包裹，否则会导致解析错误。
+
+**错误示例**：
+```mermaid
+graph TD
+    A[用户[管理员]] --> B    %% ❌ 编译失败！[] 是节点语法
+    C[任务{重要}] --> D      %% ❌ 编译失败！{} 是菱形语法
+    E[HTTP://example.com] --> F  %% ❌ 编译失败！: 是分隔符
+```
+
+**正确写法**：
+```mermaid
+graph TD
+    A["用户[管理员]"] --> B  %% ✅ 正确
+    C["任务{重要}"] --> D    %% ✅ 正确
+    E["HTTP://example.com"] --> F  %% ✅ 正确
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Parse error on line 2: Unexpected token '['
+Error: Expecting 'NODE_LABEL', got '{'
+Error: Syntax error: Unexpected ':' in node label
+```
+
+**必须转义的字符**：
+- `[` `]` - 节点形状语法
+- `{` `}` - 菱形节点语法
+- `(` `)` - 圆角节点语法
+- `#` - 样式语法
+- `:` - 分隔符
+- `|` - 子图语法
+
+**转义方法**: 使用双引号 `"..."` 包裹整个标签
+
+---
+
+### ⚠️ 规则 3: 箭头语法必须匹配图表类型
+不同图表类型有不同的箭头语法，使用错误会导致编译失败。
+
+**错误示例**：
+```mermaid
+graph TD
+    A -> B    %% ❌ 编译失败！flowchart 使用双箭头
+```
+
+**正确写法**：
+```mermaid
+graph TD
+    A --> B   %% ✅ 正确：flowchart 使用双箭头
+```
+
+**Kroki 编译错误信息**：
+```
+Error: Syntax error in graph: '->' is not valid, use '-->' instead
+Error: Invalid arrow syntax for flowchart diagram type
+```
+
+**各图表类型的箭头语法**：
+- **Flowchart**: `-->`、`-.->` (虚线), `==>` (粗箭头)
+- **Sequence**: `->>` (实线箭头)、`-->>` (虚线箭头), `-x` (异步), `-)` (返回)
+- **State**: `-->`
+- **Class**: `--|>` (继承)、`..|>` (实现)、`*--` (组合)、`o--` (聚合)、`-->` (关联)、`..>` (依赖)、`--` (链接)
+
+---
+
 ## 语法要求
 
 ### 基础语法
@@ -51,50 +156,59 @@ class node1,node2 className
 
 ## 常见错误
 
-### 错误 1: 节点 ID 使用中文
+### 错误 1: 节点 ID 使用中文或保留关键字（对应强制规则 1）
 **❌ 错误**:
 ```mermaid
 graph TD
-    开始 --> 结束
+    开始 --> 结束                %% 错误：节点 ID 使用中文
+    start --> end[完成]         %% 错误：end 是保留关键字
 ```
 
 **✅ 正确**:
 ```mermaid
 graph TD
-    start[开始] --> end[结束]
+    start[开始] --> finish[结束]  %% 正确：ID 用英文，中文作为标签
+    start --> done[完成]          %% 正确：避免使用 end
 ```
 
-**原因**: 节点 ID 必须是英文，中文作为标签放在 `[]` 中
+**原因**:
+- 节点 ID 必须是英文，中文作为标签放在 `[]` 中
+- `end` 是保留关键字，建议使用 `finish`、`done`、`complete` 替代
+- 其他保留关键字包括：`graph`, `subgraph`, `class`, `style`, `click` 等
 
-### 错误 2: 特殊字符未转义
+### 错误 2: 特殊字符未转义（对应强制规则 2）
 **❌ 错误**:
 ```mermaid
 graph TD
-    A[用户[管理员]] --> B
+    A[用户[管理员]] --> B       %% 错误：[] 未转义
+    C[任务{重要}] --> D         %% 错误：{} 未转义
 ```
 
 **✅ 正确**:
 ```mermaid
 graph TD
-    A["用户[管理员]"] --> B[下一步]
+    A["用户[管理员]"] --> B     %% 正确：使用引号包裹
+    C["任务{重要}"] --> D       %% 正确：使用引号包裹
 ```
 
-**原因**: 标签中包含 `[]` 等特殊字符时，整个标签需要用引号包裹
+**原因**: 标签中包含 `[]` `{}` `()` `:` `#` `|` 等特殊字符时，整个标签需要用双引号包裹
 
-### 错误 3: 箭头语法错误
+### 错误 3: 箭头语法错误（对应强制规则 3）
 **❌ 错误**:
 ```mermaid
 graph TD
-    A -> B    %% 单箭头语法错误
+    A -> B    %% 错误：单箭头语法错误
 ```
 
 **✅ 正确**:
 ```mermaid
 graph TD
-    A --> B   %% 使用双箭头
+    A --> B   %% 正确：flowchart 使用双箭头
 ```
 
-**原因**: Mermaid flowchart 使用 `-->` 表示箭头，不是 `->`
+**原因**:
+- Mermaid flowchart 使用 `-->` 表示箭头，不是 `->`
+- 不同图表类型有不同的箭头语法，必须按图表类型使用正确的箭头
 
 ### 错误 4: 缺少节点声明
 **❌ 错误**:

@@ -1,6 +1,68 @@
 
 # D2 语言通用规范
 
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 所有样式属性必须使用 `style.` 前缀
+这是 D2 最常见的致命错误！缺少 `style.` 前缀会导致编译失败。
+
+**错误示例**：
+```d2
+节点: {
+  fill: "#bbdefb"           %% ❌ 编译失败！
+  border-radius: 10         %% ❌ 编译失败！
+}
+```
+
+**正确写法**：
+```d2
+节点: {
+  style.fill: "#bbdefb"     %% ✅ 正确
+  style.border-radius: 10   %% ✅ 正确
+}
+```
+
+### ⚠️ 规则 2: 节点 ID 命名规范
+- ✅ **推荐使用**: 中文、英文、数字、下划线、短横线
+- ✅ **可以使用**: 空格（但需用引号包裹）
+- ❌ **避免使用**: 特殊符号 `[]` `{}` `()` `:` `.`（这些是语法保留字符）
+
+**示例**：
+```d2
+%% ✅ 正确的 ID
+用户
+UserService
+API网关
+user_service
+api-gateway
+
+%% ✅ 带空格需要引号
+"Web 界面": {
+  shape: rectangle
+}
+
+%% ❌ 错误的 ID
+user.service      %% . 是路径分隔符
+api[1]            %% [] 是容器语法
+```
+
+### ⚠️ 规则 3: 路径引用语法
+访问嵌套节点必须使用 `.` 连接路径：
+
+```d2
+系统: {
+  前端层: {
+    Web界面
+  }
+}
+
+%% ✅ 正确：路径引用
+用户 -> 系统.前端层.Web界面
+
+%% ❌ 错误：直接引用嵌套节点
+用户 -> Web界面
+```
+
 ## 语法要求
 
 ### 节点定义
@@ -59,18 +121,35 @@ D2 支持丰富的形状类型：
 - `sequence_diagram` - 时序图容器
 
 ### 样式配置
+
 ```d2
 节点: {
-  shape: rectangle
+  shape: rectangle                %% shape 不是样式属性，不加 style. 前缀
   style.fill: "#颜色代码"        %% 填充色
   style.stroke: "#边框颜色"       %% 边框色
   style.stroke-width: 2           %% 边框粗细
   style.stroke-dash: 3            %% 虚线样式
   style.animated: true            %% 动画效果
   style.multiple: true            %% 多实例效果
-  style.border-radius: 10         %% 圆角
+  style.border-radius: 10         %% 圆角半径
+  style.opacity: 0.8              %% 透明度
+  style.shadow: true              %% 阴影
+  style.3d: true                  %% 3D 效果
 }
 ```
+
+**文本样式**：
+```d2
+节点: {
+  style.bold: true                %% 粗体
+  style.italic: true              %% 斜体
+  style.underline: true           %% 下划线
+  style.font-size: 16             %% 字体大小
+  style.font-color: "#333333"     %% 字体颜色
+}
+```
+
+**记住：所有 `style.*` 属性都必须加 `style.` 前缀，否则编译失败！**
 
 ### 布局方向
 ```d2
@@ -110,22 +189,46 @@ direction: up       %% 从下到上
 
 ## 常见错误
 
-### 错误 1: 嵌套层级过深
+### 错误 1: 样式属性缺少 style. 前缀（最常见的致命错误！）
+**❌ 错误写法**：
+```d2
+容器: {
+  fill: "#bbdefb"              %% 错误！会导致编译失败
+  border-radius: 10            %% 错误！会导致编译失败
+  stroke-width: 2              %% 错误！会导致编译失败
+}
+```
+
+**✅ 正确写法**：
+```d2
+容器: {
+  style.fill: "#bbdefb"        %% 正确！必须加 style. 前缀
+  style.border-radius: 10      %% 正确！必须加 style. 前缀
+  style.stroke-width: 2        %% 正确！必须加 style. 前缀
+}
+```
+
+**原因**：D2 严格要求所有样式属性必须使用 `style.` 前缀，否则会导致编译错误：
+```
+Error 400: border-radius must be style.border-radius
+```
+
+### 错误 2: 嵌套层级过深
 **❌ 错误**：超过 3 层嵌套，结构混乱
 **✅ 正确**：控制在 2-3 层嵌套，必要时使用引用
 
-### 错误 2: 连接线交叉混乱
+### 错误 3: 连接线交叉混乱
 **❌ 错误**：连接关系过于复杂导致交叉
 **✅ 正确**：合理规划布局，使用 `direction` 调整方向
 
-### 错误 3: 缺少容器分组
+### 错误 4: 缺少容器分组
 **❌ 错误**：所有节点平铺，缺少层次
 **✅ 正确**：使用容器对相关组件分组
 
-### 错误 4: 样式不一致
+### 错误 5: 样式不一致
 **❌ 错误**：同类组件使用不同颜色和样式
 **✅ 正确**：建立统一的样式规范
 
-### 错误 5: 标签信息不足
+### 错误 6: 标签信息不足
 **❌ 错误**：连接线没有标签，关系不明确
 **✅ 正确**：为关键连接添加清晰的标签说明

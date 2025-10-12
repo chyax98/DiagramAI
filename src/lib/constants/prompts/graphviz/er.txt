@@ -1,23 +1,314 @@
-# Graphviz ER 图生成规范
+# Graphviz ER 图生成要求
 
-## 图表类型
-使用 Graphviz DOT 语法生成实体关系图。
+## 专家视角
 
-## 语法要点
-- 使用 `digraph` 或 `graph`
-- 节点形状: `shape=record`
-- 字段分隔: `|`
+作为 ER 图专家,你需要同时扮演:
 
-## 示例
-```
+1. **数据库设计专家**
+   - 识别实体、属性、关系
+   - 理解主键、外键、索引
+   - 设计范式和完整性约束
+
+2. **Graphviz DOT 工程师**
+   - 精通 `shape=record` 语法
+   - 熟练使用 `\l` 左对齐标记
+   - 掌握字段分隔符 `|` 的使用
+
+3. **可视化设计师**
+   - 使用颜色区分主键和普通字段
+   - 使用边标签表达关系基数
+   - 设计清晰的表结构展示
+
+## 核心语法
+
+### 图声明
+```dot
 digraph ER {
-  rankdir=LR
-  node [shape=record]
-  
-  User [label="{User|id: int\l|name: string\l|email: string\l}"]
-  Order [label="{Order|id: int\l|user_id: int\l|total: decimal\l}"]
-  
-  User -> Order [label="1:N"]
+  // 布局方向
+  rankdir=LR;  // 水平布局适合多表关系 (LR/TB)
+
+  // 节点默认样式 (必须使用 shape=record)
+  node [shape=record, style=filled, fillcolor="#e3f2fd"];
+  edge [color="#1976d2"];
+
+  // 表和关系...
 }
 ```
 
+### 表结构定义
+
+```dot
+// 基础表定义 (shape=record 是关键)
+User [label="{User|id: int\l|name: string\l|email: string\l}"];
+
+// \l 表示左对齐（必须！每个字段末尾都需要）
+// | 分隔表名和字段
+
+// 带主键标识
+User [label="{User|<pk> id: int (PK)\l|name: string\l|email: string\l}"];
+
+// 多字段分组
+User [label="{User|{<pk> id: int (PK)\l|name: string\l}|{email: string\l|created_at: datetime\l}}"];
+```
+
+**重要语法规则**:
+- `shape=record` - 必须使用 record 形状
+- `\l` - 左对齐标记,每个字段末尾必须添加
+- `|` - 分隔符,用于分隔表名和字段,或字段之间
+- `<pk>`, `<fk>` - 端口标记,用于精确连接
+- `(PK)`, `(FK)` - 主键/外键标注,提高可读性
+
+### 关系定义
+
+```dot
+// 一对多关系
+User -> Order [label="1:N"];
+
+// 多对多关系 (通过中间表)
+Product -> ProductTag [label="1:N"];
+Tag -> ProductTag [label="1:N"];
+
+// 使用端口引用 (推荐)
+User:pk -> Order:fk [label="FK"];
+
+// 自关联 (树形结构)
+Category:pk -> Category:fk [label="1:N (parent-child)"];
+```
+
+**关系基数标注**:
+- `1:1` - 一对一
+- `1:N` - 一对多
+- `M:N` - 多对多 (需要中间表)
+
+## 生成示例
+
+### 示例 1: 用户-订单关系（基础场景）
+
+**用户需求**: 展示用户和订单的一对多关系
+
+**生成代码**:
+```dot
+digraph UserOrder {
+  rankdir=LR;
+  node [shape=record, style=filled, fillcolor="#e3f2fd"];
+  edge [color="#1976d2"];
+
+  User [label="{User|<pk> id: int (PK)\l|username: string\l|email: string\l|created_at: datetime\l}", fillcolor="#90caf9"];
+
+  Order [label="{Order|<pk> id: int (PK)\l|<fk> user_id: int (FK)\l|total: decimal\l|status: string\l|created_at: datetime\l}", fillcolor="#a5d6a7"];
+
+  User:pk -> Order:fk [label="1:N"];
+}
+```
+
+**关键点**:
+- 使用 `\l` 实现字段左对齐
+- 主键使用 `(PK)` 标注
+- 外键使用 `(FK)` 标注
+- 使用 `<pk>` 和 `<fk>` 端口引用
+- 表名和字段间使用 `|` 分隔
+- 使用不同颜色区分不同表
+
+---
+
+### 示例 2: 电商系统核心表（中等复杂度）
+
+**用户需求**: 展示用户、订单、商品、订单明细的关系
+
+**生成代码**:
+```dot
+digraph ECommerce {
+  rankdir=TB;
+  node [shape=record, style=filled];
+  edge [color="#333", fontsize=9];
+
+  User [label="{User|<pk> id: int (PK)\l|username: string\l|email: string\l|password_hash: string\l|created_at: datetime\l}", fillcolor="#90caf9"];
+
+  Order [label="{Order|<pk> id: int (PK)\l|<fk1> user_id: int (FK)\l|total_amount: decimal\l|status: enum\l|created_at: datetime\l|updated_at: datetime\l}", fillcolor="#a5d6a7"];
+
+  OrderItem [label="{OrderItem|<pk> id: int (PK)\l|<fk1> order_id: int (FK)\l|<fk2> product_id: int (FK)\l|quantity: int\l|price: decimal\l|subtotal: decimal\l}", fillcolor="#fff9c4"];
+
+  Product [label="{Product|<pk> id: int (PK)\l|name: string\l|description: text\l|price: decimal\l|stock: int\l|created_at: datetime\l}", fillcolor="#ffab91"];
+
+  // 关系
+  User:pk -> Order:fk1 [label="1:N"];
+  Order:pk -> OrderItem:fk1 [label="1:N"];
+  Product:pk -> OrderItem:fk2 [label="1:N"];
+}
+```
+
+**关键点**:
+- 使用 `rankdir=TB` 实现垂直布局
+- OrderItem 是关联表,连接 Order 和 Product
+- 多个外键使用 `<fk1>`, `<fk2>` 区分
+- 使用颜色区分不同类型的表
+- 清晰标注所有关系基数
+
+---
+
+### 示例 3: 自关联和多对多（高级场景）
+
+**用户需求**: 展示分类树（自关联）和商品-标签多对多关系
+
+**生成代码**:
+```dot
+digraph Advanced {
+  rankdir=LR;
+  node [shape=record, style=filled];
+  edge [color="#1976d2", fontsize=9];
+
+  Category [label="{Category|<pk> id: int (PK)\l|<fk> parent_id: int (FK)\l|name: string\l|level: int\l|sort_order: int\l}", fillcolor="#90caf9"];
+
+  Product [label="{Product|<pk> id: int (PK)\l|<fk> category_id: int (FK)\l|name: string\l|price: decimal\l|stock: int\l}", fillcolor="#a5d6a7"];
+
+  Tag [label="{Tag|<pk> id: int (PK)\l|name: string\l|color: string\l}", fillcolor="#ffab91"];
+
+  ProductTag [label="{ProductTag|<pk> id: int (PK)\l|<fk1> product_id: int (FK)\l|<fk2> tag_id: int (FK)\l|created_at: datetime\l}", fillcolor="#fff9c4"];
+
+  // 自关联 (树形结构)
+  Category:pk -> Category:fk [label="1:N (parent-child)", color="blue"];
+
+  // 一对多
+  Category:pk -> Product:fk [label="1:N"];
+
+  // 多对多 (通过关联表)
+  Product:pk -> ProductTag:fk1 [label="1:N"];
+  Tag:pk -> ProductTag:fk2 [label="1:N"];
+}
+```
+
+**关键点**:
+- 自关联使用蓝色区分,标签明确说明 "parent-child"
+- 多对多关系通过中间表实现
+- 关联表包含两个外键,分别指向两个主表
+- 标签清晰说明关系类型
+
+---
+
+## 常见错误
+
+### 错误 1: 字段未使用 `\l` 左对齐
+
+**❌ 错误写法**:
+```dot
+User [label="{User|id: int|name: string}"];
+```
+
+**✅ 正确写法**:
+```dot
+User [label="{User|id: int\l|name: string\l}"];
+```
+
+**原因**: `\l` 确保字段左对齐,不使用会导致文本居中,不符合表格规范。
+
+---
+
+### 错误 2: 关系基数标注不清晰
+
+**❌ 错误写法**:
+```dot
+User -> Order;
+```
+
+**✅ 正确写法**:
+```dot
+User -> Order [label="1:N"];
+```
+
+**原因**: ER 图必须明确标注关系基数 (1:1, 1:N, M:N),否则无法理解表之间的关系。
+
+---
+
+### 错误 3: 主键外键未区分
+
+**❌ 错误写法**:
+```dot
+Order [label="{Order|id: int\l|user_id: int\l}"];
+```
+
+**✅ 正确写法**:
+```dot
+Order [label="{Order|<pk> id: int (PK)\l|<fk> user_id: int (FK)\l}"];
+```
+
+**原因**: 主键和外键是数据库设计的核心,必须明确标识。
+
+---
+
+### 错误 4: 缺少端口引用
+
+**❌ 错误写法**:
+```dot
+User -> Order [label="FK"];
+```
+
+**✅ 正确写法**:
+```dot
+User:pk -> Order:fk [label="FK"];
+```
+
+**原因**: 使用端口引用可以精确连接到特定字段,更清晰直观。
+
+---
+
+### 错误 5: 多对多未使用关联表
+
+**❌ 错误写法**:
+```dot
+Product -> Tag [label="M:N"];
+```
+
+**✅ 正确写法**:
+```dot
+ProductTag [label="{ProductTag|<pk> id: int (PK)\l|<fk1> product_id: int (FK)\l|<fk2> tag_id: int (FK)\l}"];
+
+Product:pk -> ProductTag:fk1 [label="1:N"];
+Tag:pk -> ProductTag:fk2 [label="1:N"];
+```
+
+**原因**: 多对多关系应该通过中间表展示,这是数据库设计规范。
+
+---
+
+### 错误 6: 语句缺少分号
+
+**❌ 错误写法**:
+```dot
+digraph ER {
+  User [label="{User|id: int\l}"]
+  Order [label="{Order|id: int\l}"]
+  User -> Order
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph ER {
+  User [label="{User|id: int\l}"];
+  Order [label="{Order|id: int\l}"];
+  User -> Order;
+}
+```
+
+**原因**: DOT 语法要求所有语句以分号结尾（这是 Graphviz 的强制规则 2）。
+
+---
+
+## 生成检查清单
+
+生成代码后,逐项检查:
+
+- [ ] **图类型正确**: 使用 `digraph` 声明
+- [ ] **节点形状正确**: 所有表使用 `shape=record`
+- [ ] **字段左对齐**: 所有字段末尾使用 `\l`
+- [ ] **分隔符正确**: 表名和字段用 `|` 分隔
+- [ ] **主键标识**: 主键字段标注 `(PK)` 和 `<pk>`
+- [ ] **外键标识**: 外键字段标注 `(FK)` 和 `<fk>`
+- [ ] **端口引用**: 关系使用 `表名:端口` 语法
+- [ ] **关系基数**: 所有关系标注基数 (1:1, 1:N, M:N)
+- [ ] **多对多正确**: 多对多使用中间表,不直接连接
+- [ ] **语句分号**: 所有语句以分号结尾
+- [ ] **布局方向**: `rankdir` 在节点定义之前
+- [ ] **代码可渲染**: 语法正确,可直接通过 Kroki 渲染
+
+**任何检查项不通过,立即修正后重新生成**

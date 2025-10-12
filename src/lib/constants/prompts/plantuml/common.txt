@@ -1,6 +1,74 @@
 
 # PlantUML 语言规范
 
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 所有图表必须使用 @startuml 和 @enduml 包裹
+这是 PlantUML 最基本的强制规则！缺少会导致渲染失败。
+
+**错误示例**：
+```plantuml
+Alice -> Bob: Hello
+```
+
+**编译错误信息**：
+```
+Error: Syntax error at line 1: Unexpected content outside @startuml block
+```
+
+**正确写法**：
+```plantuml
+@startuml
+Alice -> Bob: Hello
+@enduml
+```
+
+### ⚠️ 规则 2: 特殊字符必须用双引号包裹
+方括号 []、花括号 {}、圆括号 () 在 PlantUML 中有特殊含义，在标签中使用时必须用双引号包裹。
+
+**错误示例**：
+```plantuml
+@startuml
+Alice -> Bob: Hello [World]
+@enduml
+```
+
+**编译错误信息**：
+```
+Error: Syntax error at line 2: Unexpected token '['
+```
+
+**正确写法**：
+```plantuml
+@startuml
+Alice -> Bob: "Hello [World]"
+@enduml
+```
+
+### ⚠️ 规则 3: 手写风格必须使用 !option 指令（Kroki 兼容性）
+**重要**: 旧语法 `skinparam handwritten true` 在 Kroki 环境下已废弃，必须使用新语法。
+
+**错误示例**：
+```plantuml
+@startuml
+skinparam handwritten true
+Alice -> Bob: Hello
+@enduml
+```
+
+**Kroki 错误信息**：
+```
+Warning: 'skinparam handwritten' is deprecated, use '!option handwritten' instead
+```
+
+**正确写法**：
+```plantuml
+@startuml
+!option handwritten false
+Alice -> Bob: Hello
+@enduml
+```
+
 ## 核心语法
 
 PlantUML 是一种基于文本描述的 UML 图表语言，支持多种图表类型。
@@ -25,7 +93,7 @@ PlantUML 是一种基于文本描述的 UML 图表语言，支持多种图表类
 @startuml
 ' 这是单行注释
 
-/' 
+/'
 这是多行注释
 可以跨越多行
 '/
@@ -41,10 +109,6 @@ User --> UC1
 ### skinparam 样式定制
 
 PlantUML 使用 `skinparam` 命令定制图表外观：
-
-⚠️ **重要**: 手写风格语法已更新
-- ❌ 旧语法: `skinparam handwritten true` （已废弃）
-- ✅ 新语法: `!option handwritten true`
 
 ```plantuml
 @startuml
@@ -85,7 +149,12 @@ Alice -> Bob #blue;line.bold : 蓝色粗线箭头
 
 ## 常见错误
 
-### 错误 1: 忘记图表声明
+**注意**: 以下是 PlantUML 的通用常见错误。详细的强制规则请参阅 [强制规则](#强制规则mandatory-rules) 部分。
+
+### 错误 1: 忘记图表声明（对应强制规则 1）
+
+参阅 [⚠️ 规则 1: 所有图表必须使用 @startuml 和 @enduml 包裹](#规则-1-所有图表必须使用-startuml-和-enduml-包裹)
+
 ❌ **错误写法**：
 ```plantuml
 Alice -> Bob: Hello
@@ -100,7 +169,10 @@ Alice -> Bob: Hello
 
 **原因**：PlantUML 必须使用 `@startuml` 和 `@enduml` 包裹所有图表内容。
 
-### 错误 2: 特殊字符未转义
+### 错误 2: 特殊字符未转义（对应强制规则 2）
+
+参阅 [⚠️ 规则 2: 特殊字符必须用双引号包裹](#规则-2-特殊字符必须用双引号包裹)
+
 ❌ **错误写法**：
 ```plantuml
 @startuml

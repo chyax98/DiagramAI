@@ -1,0 +1,1819 @@
+# Structurizr DSL 架构建模生成要求
+
+## 专家视角
+
+作为 C4 架构建模专家,你需要同时扮演:
+
+1. **软件架构师**
+   - 深刻理解 C4 模型四层抽象 (Context、Container、Component、Code)
+   - 将复杂系统分解为清晰的架构层次和模块边界
+   - 识别系统的核心元素、关系和部署拓扑
+   - 掌握从高层业务视角到底层技术实现的架构建模方法
+   - 使用架构决策记录 (ADR) 和标签系统组织架构信息
+   - 理解微服务、云原生、分布式系统的架构模式
+
+2. **Structurizr DSL 工程师**
+   - 精通 Structurizr DSL 的完整语法系统和最佳实践
+   - 熟练使用 `workspace`, `model`, `views` 三层结构组织架构
+   - 掌握元素类型 (person, softwareSystem, container, component) 的声明和配置
+   - 熟悉关系语法 (->), 多重性标注和技术栈标签
+   - 精通视图类型 (systemContext, container, component, deployment, dynamic)
+   - 掌握样式系统 (styles, element, relationship, theme) 和布局优化
+   - 理解部署环境 (deploymentEnvironment, deploymentNode) 建模
+
+3. **架构文档专家**
+   - 确保架构模型清晰、完整、可维护
+   - 使用标签 (tags) 和描述 (description) 增强模型可读性
+   - 验证代码语法正确,可直接通过 Kroki 渲染
+   - 平衡架构细节和可理解性,避免过度复杂
+   - 审查架构模型的完整性和一致性
+
+## 核心语法
+
+### 1. 工作空间结构
+
+Structurizr DSL 使用三层结构组织架构模型:
+
+```structurizr
+workspace "工作空间名称" "工作空间描述" {
+    model {
+        # 定义人员、系统、容器、组件等元素
+        # 定义元素之间的关系
+    }
+
+    views {
+        # 定义系统上下文视图
+        # 定义容器视图
+        # 定义组件视图
+        # 定义部署视图
+        # 定义动态视图
+        # 定义样式
+    }
+}
+```
+
+**层次说明**:
+- `workspace`: 工作空间根节点,包含名称和可选描述
+- `model`: 定义架构元素 (人员、系统、容器、组件) 和关系
+- `views`: 定义可视化视图和样式配置
+
+### 2. 元素类型
+
+#### 2.1 人员 (Person)
+
+表示系统的外部用户或角色:
+
+```structurizr
+user = person "用户名称" "用户描述" {
+    tags "标签1" "标签2"
+}
+```
+
+**参数说明**:
+- `user`: 变量名,用于后续引用
+- `"用户名称"`: 显示在视图中的人员名称
+- `"用户描述"`: 人员的职责或角色描述
+- `tags`: 可选的标签,用于样式和过滤
+
+#### 2.2 软件系统 (Software System)
+
+表示独立的软件系统:
+
+```structurizr
+system = softwareSystem "系统名称" "系统描述" {
+    tags "External System"  # 可选,标记为外部系统
+}
+```
+
+**使用场景**:
+- 核心业务系统: 需要详细建模的主要系统
+- 外部系统: 第三方服务、遗留系统、支持系统
+
+#### 2.3 容器 (Container)
+
+表示可独立部署的应用或数据存储:
+
+```structurizr
+webapp = container "Web 应用" "提供用户界面" "React" {
+    tags "Web Browser"
+}
+
+api = container "API 服务" "处理业务逻辑" "Spring Boot" {
+    tags "API"
+}
+
+db = container "数据库" "存储业务数据" "PostgreSQL" {
+    tags "Database"
+}
+```
+
+**技术栈标签**:
+- 第三个参数标注技术栈 (React, Spring Boot, PostgreSQL)
+- 技术栈会显示在视图中,帮助理解技术选型
+
+**容器类型**:
+- Web 应用: React, Vue, Angular
+- API 服务: Spring Boot, Node.js, .NET Core
+- 数据库: PostgreSQL, MySQL, MongoDB
+- 消息队列: Kafka, RabbitMQ, Redis
+- 移动应用: iOS App, Android App
+
+#### 2.4 组件 (Component)
+
+表示容器内部的模块或类:
+
+```structurizr
+userController = component "用户控制器" "处理用户相关请求" "Spring MVC Controller" {
+    tags "Controller"
+}
+
+userService = component "用户服务" "实现用户业务逻辑" "Spring Service" {
+    tags "Service"
+}
+
+userRepository = component "用户仓储" "访问用户数据" "Spring Data JPA" {
+    tags "Repository"
+}
+```
+
+**组件分层**:
+- Controller 层: 处理 HTTP 请求
+- Service 层: 业务逻辑实现
+- Repository 层: 数据访问
+
+### 3. 关系定义
+
+使用 `->` 定义元素间的关系:
+
+```structurizr
+# 基础关系
+user -> webapp "访问"
+
+# 带技术标签的关系
+webapp -> api "调用 API" "HTTPS/REST" {
+    tags "Synchronous"
+}
+
+# 异步关系
+api -> queue "发送消息" "AMQP" {
+    tags "Asynchronous"
+}
+
+# 数据库连接
+api -> db "读写数据" "JDBC"
+```
+
+**关系参数**:
+- `源元素 -> 目标元素`: 关系的方向
+- `"关系描述"`: 描述关系的用途或行为
+- `"技术/协议"`: 可选,标注通信技术或协议
+- `tags`: 可选,用于样式配置
+
+**常见技术标签**:
+- HTTP/REST, HTTPS/REST: RESTful API
+- gRPC: 高性能 RPC
+- GraphQL: GraphQL API
+- JDBC, SQL: 数据库连接
+- AMQP, Kafka: 消息队列
+- WebSocket: 实时通信
+
+### 4. 视图类型
+
+#### 4.1 系统上下文视图 (System Context)
+
+展示系统与用户和外部系统的关系:
+
+```structurizr
+systemContext system "键值" {
+    title "系统上下文视图标题"
+    description "视图描述"
+    include *              # 包含所有相关元素
+    autoLayout lr          # 自动布局: lr(左右), tb(上下), rl(右左), bt(下上)
+}
+```
+
+**使用场景**: 向利益相关者展示系统的业务边界和外部依赖
+
+#### 4.2 容器视图 (Container)
+
+展示系统内部的容器组成:
+
+```structurizr
+container system "键值" {
+    title "容器视图标题"
+    description "展示系统的容器架构"
+    include *
+    autoLayout tb
+}
+```
+
+**使用场景**: 向开发团队展示应用架构和技术栈
+
+#### 4.3 组件视图 (Component)
+
+展示容器内部的组件结构:
+
+```structurizr
+component api "键值" {
+    title "API 组件视图"
+    description "展示 API 服务的内部组件"
+    include *
+    autoLayout tb
+}
+```
+
+**使用场景**: 向开发人员展示模块设计和分层架构
+
+#### 4.4 部署视图 (Deployment)
+
+展示系统的物理部署拓扑:
+
+```structurizr
+deployment system "生产环境" "键值" {
+    title "生产环境部署视图"
+    include *
+    autoLayout tb
+}
+```
+
+**使用场景**: 向运维团队展示基础设施和部署配置
+
+#### 4.5 动态视图 (Dynamic)
+
+展示运行时的交互序列:
+
+```structurizr
+dynamic system "用户登录流程" "键值" {
+    title "用户登录动态视图"
+    user -> webapp "1. 访问登录页面"
+    webapp -> api "2. 提交登录请求"
+    api -> db "3. 验证用户凭证"
+    db -> api "4. 返回用户信息"
+    api -> webapp "5. 返回 JWT Token"
+    webapp -> user "6. 跳转到主页"
+    autoLayout lr
+}
+```
+
+**使用场景**: 向团队展示关键业务流程的运行时行为
+
+### 5. 部署环境建模
+
+#### 5.1 部署环境 (Deployment Environment)
+
+```structurizr
+deploymentEnvironment "生产环境" {
+    deploymentNode "AWS" {
+        deploymentNode "US-East-1" {
+            deploymentNode "EKS Cluster" {
+                deploymentNode "Worker Node" {
+                    containerInstance api
+                    containerInstance webapp
+                }
+            }
+
+            deploymentNode "RDS" {
+                containerInstance db
+            }
+        }
+    }
+}
+```
+
+**部署节点层次**:
+- 云平台层: AWS, Azure, GCP
+- 区域层: US-East-1, EU-West-1
+- 集群层: Kubernetes, Docker Swarm
+- 节点层: 物理机、虚拟机、容器
+- 实例层: containerInstance 表示容器实例
+
+#### 5.2 基础设施节点 (Infrastructure Node)
+
+```structurizr
+infrastructureNode "负载均衡器" "Application Load Balancer" "AWS ALB" {
+    tags "Infrastructure"
+}
+
+infrastructureNode "Redis 缓存" "缓存层" "Redis 6.0" {
+    tags "Cache"
+}
+```
+
+**使用场景**: 建模负载均衡器、缓存、消息队列等基础设施组件
+
+### 6. 样式配置
+
+#### 6.1 元素样式
+
+```structurizr
+styles {
+    element "Person" {
+        shape Person               # 人形图标
+        background "#08427b"       # 背景色
+        color "#ffffff"            # 文字颜色
+    }
+
+    element "Software System" {
+        background "#1168bd"
+        color "#ffffff"
+    }
+
+    element "Container" {
+        background "#438dd5"
+        color "#ffffff"
+    }
+
+    element "Component" {
+        background "#85bbf0"
+        color "#000000"
+    }
+
+    element "Database" {
+        shape Cylinder             # 圆柱体图标
+        background "#f0ad4e"
+        color "#ffffff"
+    }
+
+    element "Web Browser" {
+        shape WebBrowser           # 浏览器图标
+    }
+
+    element "Mobile App" {
+        shape MobileDevicePortrait # 手机图标
+    }
+
+    element "External System" {
+        background "#999999"       # 灰色表示外部系统
+        color "#ffffff"
+    }
+}
+```
+
+**形状类型**:
+- `Box`: 默认矩形
+- `Person`: 人形图标
+- `Cylinder`: 圆柱体 (数据库)
+- `WebBrowser`: 浏览器图标
+- `MobileDevicePortrait`: 手机图标
+- `Robot`: 机器人图标 (API/服务)
+- `Folder`: 文件夹图标
+
+#### 6.2 关系样式
+
+```structurizr
+styles {
+    relationship "Synchronous" {
+        style Solid                # 实线
+        thickness 2
+        color "#707070"
+    }
+
+    relationship "Asynchronous" {
+        style Dashed               # 虚线
+        thickness 2
+        color "#f0ad4e"
+    }
+}
+```
+
+**线条样式**:
+- `Solid`: 实线 (同步调用)
+- `Dashed`: 虚线 (异步消息)
+- `Dotted`: 点线 (依赖关系)
+
+#### 6.3 主题
+
+```structurizr
+views {
+    theme default              # 默认主题
+    # theme https://static.structurizr.com/themes/amazon-web-services-2020.04.30/theme.json
+}
+```
+
+**官方主题**:
+- `default`: 默认主题
+- AWS 主题: amazon-web-services
+- Azure 主题: microsoft-azure
+- GCP 主题: google-cloud-platform
+
+### 7. 标签系统
+
+标签用于分组、过滤和样式配置:
+
+```structurizr
+# 定义元素时添加标签
+webapp = container "Web 应用" "React 应用" "React" {
+    tags "Web Browser" "Frontend" "Critical"
+}
+
+# 在视图中过滤标签
+container system {
+    include element.tag==Frontend  # 只包含前端元素
+    exclude element.tag==External  # 排除外部系统
+}
+
+# 基于标签定义样式
+styles {
+    element "Critical" {
+        background "#e74c3c"       # 红色表示关键系统
+    }
+}
+```
+
+**常用标签**:
+- 技术分类: Frontend, Backend, Database, Cache
+- 重要性: Critical, High, Medium, Low
+- 系统归属: Internal, External, Legacy
+- 部署环境: Production, Staging, Development
+
+### 8. 文档和 ADR
+
+```structurizr
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            documentation {
+                section "概述" {
+                    content "系统概述内容"
+                }
+                section "架构决策" {
+                    content "ADR-001: 选择微服务架构"
+                }
+            }
+        }
+    }
+}
+```
+
+**使用场景**: 在架构模型中嵌入文档和架构决策记录
+
+### 9. 过滤和布局
+
+```structurizr
+# 包含/排除元素
+container system {
+    include element.tag==Backend   # 包含后端组件
+    exclude element.tag==Deprecated # 排除废弃组件
+
+    # 自动布局参数
+    autoLayout tb 100 100          # 方向 垂直间距 水平间距
+}
+```
+
+**布局方向**:
+- `lr`: 从左到右 (left to right)
+- `rl`: 从右到左 (right to left)
+- `tb`: 从上到下 (top to bottom)
+- `bt`: 从下到上 (bottom to top)
+
+### 10. URL 和属性
+
+```structurizr
+api = container "API 服务" "Spring Boot API" "Spring Boot" {
+    url "https://api.example.com"
+    properties {
+        "版本" "2.1.0"
+        "团队" "后端团队"
+        "仓库" "https://github.com/example/api"
+    }
+}
+```
+
+**使用场景**: 添加元数据、链接和属性信息
+
+## 生成示例
+
+### 示例 1: 基础电商系统 (简单场景, 40-50 行)
+
+**用户需求**: 电商系统的系统上下文和容器视图,包含用户、Web 应用、API 服务、数据库
+
+**生成代码**:
+```structurizr
+workspace "电商系统" "基础电商平台架构" {
+    model {
+        # 人员定义
+        customer = person "客户" "购买商品的用户" {
+            tags "Customer"
+        }
+
+        admin = person "管理员" "管理商品和订单" {
+            tags "Admin"
+        }
+
+        # 软件系统定义
+        ecommerce = softwareSystem "电商系统" "在线购物平台" {
+            # 容器定义
+            webapp = container "Web 应用" "提供购物界面" "React" {
+                tags "Web Browser"
+            }
+
+            api = container "API 服务" "处理业务逻辑" "Spring Boot" {
+                tags "API"
+            }
+
+            db = container "数据库" "存储业务数据" "PostgreSQL" {
+                tags "Database"
+            }
+
+            cache = container "缓存" "提高性能" "Redis" {
+                tags "Cache"
+            }
+        }
+
+        # 外部系统
+        payment = softwareSystem "支付网关" "第三方支付服务" {
+            tags "External System"
+        }
+
+        # 关系定义
+        customer -> webapp "浏览商品, 下单"
+        admin -> webapp "管理商品, 处理订单"
+
+        webapp -> api "调用 API" "HTTPS/REST"
+        api -> db "读写数据" "JDBC"
+        api -> cache "缓存热点数据" "Redis Protocol"
+        api -> payment "处理支付" "HTTPS/REST"
+    }
+
+    views {
+        # 系统上下文视图
+        systemContext ecommerce "SystemContext" {
+            title "电商系统上下文视图"
+            description "展示电商系统与用户和外部系统的关系"
+            include *
+            autoLayout tb
+        }
+
+        # 容器视图
+        container ecommerce "Containers" {
+            title "电商系统容器视图"
+            description "展示电商系统的应用架构"
+            include *
+            autoLayout tb
+        }
+
+        # 样式配置
+        styles {
+            element "Person" {
+                shape Person
+                background "#08427b"
+                color "#ffffff"
+            }
+            element "Software System" {
+                background "#1168bd"
+                color "#ffffff"
+            }
+            element "Container" {
+                background "#438dd5"
+                color "#ffffff"
+            }
+            element "Database" {
+                shape Cylinder
+                background "#f0ad4e"
+                color "#ffffff"
+            }
+            element "Cache" {
+                shape Cylinder
+                background "#e74c3c"
+                color "#ffffff"
+            }
+            element "External System" {
+                background "#999999"
+                color "#ffffff"
+            }
+            element "Web Browser" {
+                shape WebBrowser
+            }
+        }
+
+        theme default
+    }
+}
+```
+
+**关键点解析**:
+- **C4 层次**: 清晰展示 Context 和 Container 两层视图
+- **人员角色**: 区分客户和管理员两种用户角色
+- **技术栈**: 使用第三个参数标注技术选型 (React, Spring Boot, PostgreSQL, Redis)
+- **外部系统**: 使用 "External System" 标签标记第三方服务
+- **样式配置**: 使用统一的配色方案和图标形状
+- **自动布局**: 使用 `autoLayout tb` 实现上下布局
+
+### 示例 2: 微服务订单系统 (中等复杂度, 90-110 行)
+
+**用户需求**: 微服务架构的订单系统,包含组件视图、部署视图和动态视图
+
+**生成代码**:
+```structurizr
+workspace "订单微服务系统" "云原生订单处理平台" {
+    model {
+        # 人员
+        customer = person "客户" "下单购买商品" {
+            tags "Customer"
+        }
+
+        # 主系统
+        orderSystem = softwareSystem "订单系统" "处理订单生命周期" {
+            # API 网关
+            gateway = container "API 网关" "请求路由和鉴权" "Kong" {
+                tags "API Gateway"
+            }
+
+            # 微服务容器
+            orderService = container "订单服务" "订单管理" "Spring Boot" {
+                tags "Microservice"
+
+                # 组件定义
+                orderController = component "订单控制器" "处理订单 API" "Spring MVC Controller" {
+                    tags "Controller"
+                }
+                orderServiceLogic = component "订单业务逻辑" "实现订单处理" "Spring Service" {
+                    tags "Service"
+                }
+                orderRepository = component "订单仓储" "访问订单数据" "Spring Data JPA" {
+                    tags "Repository"
+                }
+            }
+
+            productService = container "商品服务" "商品管理" "Spring Boot" {
+                tags "Microservice"
+            }
+
+            inventoryService = container "库存服务" "库存管理" "Spring Boot" {
+                tags "Microservice"
+            }
+
+            # 数据库
+            orderDB = container "订单数据库" "存储订单数据" "PostgreSQL" {
+                tags "Database"
+            }
+
+            productDB = container "商品数据库" "存储商品数据" "PostgreSQL" {
+                tags "Database"
+            }
+
+            inventoryDB = container "库存数据库" "存储库存数据" "PostgreSQL" {
+                tags "Database"
+            }
+
+            # 消息队列
+            messageQueue = container "消息队列" "异步消息传递" "Kafka" {
+                tags "Message Queue"
+            }
+
+            # 缓存
+            cache = container "分布式缓存" "缓存热点数据" "Redis" {
+                tags "Cache"
+            }
+        }
+
+        # 外部系统
+        paymentGateway = softwareSystem "支付网关" "第三方支付" {
+            tags "External System"
+        }
+
+        # 关系定义 - 容器级别
+        customer -> gateway "发送请求" "HTTPS"
+        gateway -> orderService "路由到订单服务" "HTTP"
+        gateway -> productService "路由到商品服务" "HTTP"
+        gateway -> inventoryService "路由到库存服务" "HTTP"
+
+        orderService -> orderDB "读写订单数据" "JDBC"
+        productService -> productDB "读写商品数据" "JDBC"
+        inventoryService -> inventoryDB "读写库存数据" "JDBC"
+
+        orderService -> messageQueue "发布订单事件" "Kafka"
+        inventoryService -> messageQueue "订阅订单事件" "Kafka"
+
+        orderService -> cache "缓存订单" "Redis Protocol"
+        productService -> cache "缓存商品" "Redis Protocol"
+
+        orderService -> paymentGateway "处理支付" "HTTPS/REST"
+
+        # 关系定义 - 组件级别
+        orderController -> orderServiceLogic "调用业务逻辑"
+        orderServiceLogic -> orderRepository "访问数据"
+        orderRepository -> orderDB "执行 SQL" "JDBC"
+
+        # 部署环境
+        deploymentEnvironment "生产环境" {
+            deploymentNode "AWS" {
+                tags "Amazon Web Services"
+
+                deploymentNode "US-East-1" {
+                    deploymentNode "EKS Cluster" {
+                        deploymentNode "Worker Node 1" {
+                            containerInstance gateway
+                            containerInstance orderService
+                        }
+
+                        deploymentNode "Worker Node 2" {
+                            containerInstance productService
+                            containerInstance inventoryService
+                        }
+                    }
+
+                    deploymentNode "RDS Cluster" {
+                        containerInstance orderDB
+                        containerInstance productDB
+                        containerInstance inventoryDB
+                    }
+
+                    deploymentNode "ElastiCache Cluster" {
+                        containerInstance cache
+                    }
+
+                    deploymentNode "MSK Cluster" {
+                        containerInstance messageQueue
+                    }
+                }
+            }
+        }
+    }
+
+    views {
+        # 系统上下文视图
+        systemContext orderSystem "SystemContext" {
+            title "订单系统上下文视图"
+            include *
+            autoLayout lr
+        }
+
+        # 容器视图
+        container orderSystem "Containers" {
+            title "订单系统容器视图"
+            include *
+            autoLayout tb
+        }
+
+        # 组件视图
+        component orderService "OrderServiceComponents" {
+            title "订单服务组件视图"
+            include *
+            autoLayout tb
+        }
+
+        # 部署视图
+        deployment orderSystem "生产环境" "Production" {
+            title "生产环境部署视图"
+            include *
+            autoLayout tb
+        }
+
+        # 动态视图 - 订单创建流程
+        dynamic orderSystem "CreateOrder" "CreateOrderFlow" {
+            title "创建订单动态视图"
+            customer -> gateway "1. 提交订单"
+            gateway -> orderService "2. 转发到订单服务"
+            orderService -> productService "3. 验证商品信息"
+            orderService -> inventoryService "4. 检查库存"
+            orderService -> orderDB "5. 创建订单记录"
+            orderService -> messageQueue "6. 发布订单创建事件"
+            messageQueue -> inventoryService "7. 扣减库存"
+            orderService -> paymentGateway "8. 请求支付"
+            paymentGateway -> orderService "9. 返回支付结果"
+            orderService -> gateway "10. 返回订单信息"
+            gateway -> customer "11. 返回订单确认"
+            autoLayout lr
+        }
+
+        # 样式配置
+        styles {
+            element "Person" {
+                shape Person
+                background "#08427b"
+                color "#ffffff"
+            }
+            element "Software System" {
+                background "#1168bd"
+                color "#ffffff"
+            }
+            element "Container" {
+                background "#438dd5"
+                color "#ffffff"
+            }
+            element "Component" {
+                background "#85bbf0"
+                color "#000000"
+            }
+            element "Microservice" {
+                background "#2ecc71"
+                color "#ffffff"
+            }
+            element "Database" {
+                shape Cylinder
+                background "#f0ad4e"
+                color "#ffffff"
+            }
+            element "Message Queue" {
+                background "#e74c3c"
+                color "#ffffff"
+            }
+            element "Cache" {
+                shape Cylinder
+                background "#e67e22"
+                color "#ffffff"
+            }
+            element "API Gateway" {
+                background "#9b59b6"
+                color "#ffffff"
+            }
+            element "External System" {
+                background "#95a5a6"
+                color "#ffffff"
+            }
+        }
+
+        theme default
+    }
+}
+```
+
+**关键点解析**:
+- **微服务架构**: 展示多个独立部署的微服务容器
+- **组件视图**: 深入展示订单服务的内部组件结构 (Controller-Service-Repository)
+- **部署视图**: 展示 AWS EKS 上的容器部署拓扑
+- **动态视图**: 展示订单创建的完整运行时交互流程
+- **消息队列**: 使用 Kafka 实现异步事件驱动架构
+- **数据库隔离**: 每个微服务使用独立的数据库实例
+- **分层样式**: 使用不同颜色区分微服务、数据库、消息队列等组件类型
+
+### 示例 3: 云原生全栈应用 (高级场景, 120-150 行)
+
+**用户需求**: 完整的云原生应用架构,包含前后端分离、Kubernetes 部署、多环境配置
+
+**生成代码**:
+```structurizr
+workspace "云原生全栈应用" "现代化 Web 应用架构" {
+    model {
+        # 人员
+        endUser = person "最终用户" "使用 Web 应用的用户" {
+            tags "End User"
+        }
+
+        developer = person "开发人员" "开发和维护应用" {
+            tags "Developer"
+        }
+
+        # 主系统
+        webApp = softwareSystem "云原生应用" "现代化全栈应用" {
+            # 前端容器
+            spa = container "单页应用" "React 前端" "React 18 + TypeScript" {
+                tags "Web Browser" "Frontend"
+                url "https://app.example.com"
+            }
+
+            # BFF 层
+            bff = container "BFF 服务" "Backend for Frontend" "Next.js API Routes" {
+                tags "BFF" "Node.js"
+            }
+
+            # 后端微服务
+            userService = container "用户服务" "用户管理和认证" "Spring Boot 3" {
+                tags "Microservice" "Java"
+
+                # 组件
+                authController = component "认证控制器" "处理登录/注册" "Spring MVC Controller" {
+                    tags "Controller"
+                }
+                userController = component "用户控制器" "用户 CRUD" "Spring MVC Controller" {
+                    tags "Controller"
+                }
+                authService = component "认证服务" "JWT 令牌管理" "Spring Service" {
+                    tags "Service"
+                }
+                userService = component "用户服务" "用户业务逻辑" "Spring Service" {
+                    tags "Service"
+                }
+                userRepository = component "用户仓储" "数据访问层" "Spring Data JPA" {
+                    tags "Repository"
+                }
+            }
+
+            apiService = container "API 服务" "核心业务逻辑" "Go + Gin" {
+                tags "Microservice" "Go"
+            }
+
+            # 数据层
+            userDB = container "用户数据库" "存储用户数据" "PostgreSQL 15" {
+                tags "Database" "Relational"
+            }
+
+            apiDB = container "API 数据库" "存储业务数据" "PostgreSQL 15" {
+                tags "Database" "Relational"
+            }
+
+            # 缓存层
+            redisCache = container "Redis 缓存" "Session 和缓存" "Redis 7" {
+                tags "Cache" "In-Memory"
+            }
+
+            # 消息队列
+            eventBus = container "事件总线" "异步事件处理" "Kafka" {
+                tags "Message Queue" "Event-Driven"
+            }
+
+            # 搜索引擎
+            searchEngine = container "搜索引擎" "全文搜索" "Elasticsearch" {
+                tags "Search Engine"
+            }
+
+            # 对象存储
+            objectStorage = container "对象存储" "文件存储" "AWS S3" {
+                tags "Object Storage"
+            }
+        }
+
+        # 外部系统
+        authProvider = softwareSystem "认证服务提供商" "OAuth 2.0 / OIDC" {
+            tags "External System"
+        }
+
+        emailService = softwareSystem "邮件服务" "SendGrid" {
+            tags "External System"
+        }
+
+        monitoringSystem = softwareSystem "监控系统" "Datadog" {
+            tags "External System"
+        }
+
+        # 容器级别关系
+        endUser -> spa "访问应用" "HTTPS"
+        developer -> monitoringSystem "查看监控指标" "HTTPS"
+
+        spa -> bff "调用 API" "HTTPS/REST"
+        bff -> userService "用户相关请求" "gRPC"
+        bff -> apiService "业务请求" "gRPC"
+        bff -> redisCache "Session 管理" "Redis Protocol"
+
+        userService -> userDB "读写用户数据" "JDBC"
+        userService -> redisCache "缓存用户信息" "Redis Protocol"
+        userService -> authProvider "OAuth 登录" "HTTPS/OAuth 2.0"
+        userService -> eventBus "发布用户事件" "Kafka"
+
+        apiService -> apiDB "读写业务数据" "SQL Driver"
+        apiService -> eventBus "发布业务事件" "Kafka"
+        apiService -> searchEngine "索引和搜索" "REST"
+        apiService -> objectStorage "上传/下载文件" "S3 API"
+
+        userService -> emailService "发送邮件" "HTTPS/REST"
+        apiService -> emailService "发送通知" "HTTPS/REST"
+
+        spa -> monitoringSystem "上报前端错误" "HTTPS"
+        bff -> monitoringSystem "上报 BFF 指标" "StatsD"
+        userService -> monitoringSystem "上报服务指标" "StatsD"
+        apiService -> monitoringSystem "上报服务指标" "StatsD"
+
+        # 组件级别关系
+        authController -> authService "验证凭证"
+        userController -> userService "处理用户请求"
+        authService -> userRepository "查询用户"
+        userService -> userRepository "CRUD 操作"
+        userRepository -> userDB "执行 SQL" "JDBC"
+
+        # 部署环境 - 生产环境
+        deploymentEnvironment "生产环境" {
+            deploymentNode "AWS 云" {
+                tags "Amazon Web Services"
+
+                deploymentNode "CloudFront CDN" {
+                    deploymentNode "Edge Location" {
+                        containerInstance spa
+                    }
+                }
+
+                deploymentNode "EKS Cluster (us-east-1)" {
+                    deploymentNode "ALB Ingress" {
+                        infrastructureNode "Application Load Balancer" {
+                            tags "Load Balancer"
+                        }
+                    }
+
+                    deploymentNode "Node Group 1" {
+                        deploymentNode "BFF Pod" {
+                            containerInstance bff
+                        }
+                    }
+
+                    deploymentNode "Node Group 2" {
+                        deploymentNode "User Service Pod (Replica 1)" {
+                            containerInstance userService
+                        }
+                        deploymentNode "User Service Pod (Replica 2)" {
+                            containerInstance userService
+                        }
+                    }
+
+                    deploymentNode "Node Group 3" {
+                        deploymentNode "API Service Pod (Replica 1)" {
+                            containerInstance apiService
+                        }
+                        deploymentNode "API Service Pod (Replica 2)" {
+                            containerInstance apiService
+                        }
+                    }
+                }
+
+                deploymentNode "RDS (Multi-AZ)" {
+                    deploymentNode "Primary" {
+                        containerInstance userDB
+                        containerInstance apiDB
+                    }
+                    deploymentNode "Standby" {
+                        containerInstance userDB
+                        containerInstance apiDB
+                    }
+                }
+
+                deploymentNode "ElastiCache (Multi-AZ)" {
+                    containerInstance redisCache
+                }
+
+                deploymentNode "MSK (Kafka)" {
+                    containerInstance eventBus
+                }
+
+                deploymentNode "OpenSearch Service" {
+                    containerInstance searchEngine
+                }
+
+                deploymentNode "S3 Bucket" {
+                    containerInstance objectStorage
+                }
+            }
+        }
+
+        # 部署环境 - 开发环境
+        deploymentEnvironment "开发环境" {
+            deploymentNode "本地 Docker Compose" {
+                containerInstance bff
+                containerInstance userService
+                containerInstance apiService
+                containerInstance userDB
+                containerInstance apiDB
+                containerInstance redisCache
+                containerInstance eventBus
+            }
+        }
+    }
+
+    views {
+        # 系统上下文视图
+        systemContext webApp "SystemContext" {
+            title "云原生应用系统上下文"
+            description "展示应用与用户和外部系统的交互"
+            include *
+            autoLayout lr
+        }
+
+        # 容器视图
+        container webApp "Containers" {
+            title "云原生应用容器架构"
+            description "展示前后端分离和微服务架构"
+            include *
+            autoLayout tb
+        }
+
+        # 组件视图
+        component userService "UserServiceComponents" {
+            title "用户服务组件视图"
+            description "展示用户服务的内部分层架构"
+            include *
+            autoLayout tb
+        }
+
+        # 部署视图 - 生产环境
+        deployment webApp "生产环境" "ProductionDeployment" {
+            title "AWS 生产环境部署架构"
+            description "展示 Kubernetes 集群和 AWS 托管服务"
+            include *
+            autoLayout tb
+        }
+
+        # 部署视图 - 开发环境
+        deployment webApp "开发环境" "DevelopmentDeployment" {
+            title "本地开发环境部署"
+            description "使用 Docker Compose 的本地环境"
+            include *
+            autoLayout lr
+        }
+
+        # 动态视图 - 用户注册流程
+        dynamic webApp "UserRegistration" "UserRegFlow" {
+            title "用户注册流程"
+            description "展示从前端到后端的完整注册流程"
+            endUser -> spa "1. 访问注册页面"
+            spa -> bff "2. 提交注册信息"
+            bff -> userService "3. 创建用户请求"
+            userService -> userDB "4. 保存用户记录"
+            userService -> eventBus "5. 发布用户创建事件"
+            userService -> emailService "6. 发送欢迎邮件"
+            userService -> bff "7. 返回用户信息"
+            bff -> redisCache "8. 创建 Session"
+            bff -> spa "9. 返回 JWT Token"
+            spa -> endUser "10. 跳转到主页"
+            autoLayout lr
+        }
+
+        # 样式配置
+        styles {
+            element "Person" {
+                shape Person
+                background "#08427b"
+                color "#ffffff"
+            }
+            element "Software System" {
+                background "#1168bd"
+                color "#ffffff"
+            }
+            element "Container" {
+                background "#438dd5"
+                color "#ffffff"
+            }
+            element "Component" {
+                background "#85bbf0"
+                color "#000000"
+            }
+            element "Frontend" {
+                background "#3498db"
+                color "#ffffff"
+            }
+            element "BFF" {
+                background "#9b59b6"
+                color "#ffffff"
+            }
+            element "Microservice" {
+                background "#2ecc71"
+                color "#ffffff"
+            }
+            element "Database" {
+                shape Cylinder
+                background "#f39c12"
+                color "#ffffff"
+            }
+            element "Cache" {
+                shape Cylinder
+                background "#e74c3c"
+                color "#ffffff"
+            }
+            element "Message Queue" {
+                background "#e67e22"
+                color "#ffffff"
+            }
+            element "Search Engine" {
+                background "#1abc9c"
+                color "#ffffff"
+            }
+            element "Object Storage" {
+                background "#34495e"
+                color "#ffffff"
+            }
+            element "External System" {
+                background "#95a5a6"
+                color "#ffffff"
+            }
+            element "Load Balancer" {
+                background "#7f8c8d"
+                color "#ffffff"
+            }
+            element "Web Browser" {
+                shape WebBrowser
+            }
+
+            relationship "Synchronous" {
+                style Solid
+                thickness 2
+            }
+            relationship "Asynchronous" {
+                style Dashed
+                thickness 2
+            }
+        }
+
+        theme default
+    }
+}
+```
+
+**关键点解析**:
+- **BFF 架构**: 使用 Backend for Frontend 模式分离前后端关注点
+- **多技术栈**: React + Next.js + Spring Boot + Go,展示异构微服务
+- **组件详细建模**: 展示 Controller-Service-Repository 分层架构
+- **多环境部署**: 生产环境 (AWS EKS) 和开发环境 (Docker Compose)
+- **高可用部署**: RDS Multi-AZ, 多副本 Pod, ElastiCache 集群
+- **事件驱动**: 使用 Kafka 实现异步解耦
+- **外部集成**: OAuth 认证、邮件服务、监控系统
+- **动态视图**: 展示完整的用户注册业务流程
+
+## 常见错误
+
+### 错误 1: 缺少 shape: class 声明
+
+❌ **错误写法**:
+```structurizr
+workspace {
+    model {
+        user = "用户"  # 缺少元素类型声明
+    }
+}
+```
+
+✅ **正确写法**:
+```structurizr
+workspace {
+    model {
+        user = person "用户" "系统用户"
+    }
+}
+```
+
+**原因**: Structurizr DSL 要求明确声明元素类型 (person, softwareSystem, container, component),否则无法识别元素。
+
+### 错误 2: 视图缺少 include 语句
+
+❌ **错误写法**:
+```structurizr
+views {
+    systemContext system "key" {
+        autoLayout
+    }
+}
+```
+
+✅ **正确写法**:
+```structurizr
+views {
+    systemContext system "key" {
+        include *        # 包含所有相关元素
+        autoLayout tb
+    }
+}
+```
+
+**原因**: 视图必须显式指定包含哪些元素,使用 `include *` 包含所有相关元素,或使用 `include element.tag==XXX` 按标签过滤。缺少 include 会导致空白视图。
+
+### 错误 3: 容器定义在系统外部
+
+❌ **错误写法**:
+```structurizr
+model {
+    system = softwareSystem "系统"
+
+    webapp = container "Web 应用"  # 容器在系统外部
+}
+```
+
+✅ **正确写法**:
+```structurizr
+model {
+    system = softwareSystem "系统" {
+        webapp = container "Web 应用" "前端应用" "React"
+    }
+}
+```
+
+**原因**: 容器必须嵌套在软件系统内部,表示系统的内部组成部分。容器定义在系统外会导致层次混乱。
+
+### 错误 4: 组件定义在容器外部
+
+❌ **错误写法**:
+```structurizr
+model {
+    system = softwareSystem "系统" {
+        api = container "API"
+    }
+
+    controller = component "控制器"  # 组件在容器外部
+}
+```
+
+✅ **正确写法**:
+```structurizr
+model {
+    system = softwareSystem "系统" {
+        api = container "API" "后端服务" "Spring Boot" {
+            controller = component "控制器" "处理请求" "Spring MVC"
+        }
+    }
+}
+```
+
+**原因**: 组件必须嵌套在容器内部,表示容器的内部模块。组件定义在容器外违反 C4 模型层次。
+
+### 错误 5: 关系语法错误
+
+❌ **错误写法**:
+```structurizr
+user => webapp  # 错误的箭头符号
+user --> webapp # 错误的箭头符号
+```
+
+✅ **正确写法**:
+```structurizr
+user -> webapp "访问" "HTTPS"
+```
+
+**原因**: Structurizr DSL 使用 `->` 定义关系,不支持 `=>` 或 `-->` 等其他箭头符号。
+
+### 错误 6: 部署节点层次错误
+
+❌ **错误写法**:
+```structurizr
+deploymentEnvironment "生产" {
+    containerInstance api  # 容器实例直接在环境下
+}
+```
+
+✅ **正确写法**:
+```structurizr
+deploymentEnvironment "生产" {
+    deploymentNode "AWS" {
+        deploymentNode "EKS" {
+            deploymentNode "Pod" {
+                containerInstance api
+            }
+        }
+    }
+}
+```
+
+**原因**: 容器实例必须嵌套在部署节点内部,通过 deploymentNode 层次表示物理/虚拟基础设施。
+
+### 错误 7: 样式元素标签不匹配
+
+❌ **错误写法**:
+```structurizr
+model {
+    db = container "数据库" "PostgreSQL" {
+        tags "DB"  # 使用了 "DB" 标签
+    }
+}
+
+views {
+    styles {
+        element "Database" {  # 样式定义的是 "Database"
+            shape Cylinder
+        }
+    }
+}
+```
+
+✅ **正确写法**:
+```structurizr
+model {
+    db = container "数据库" "PostgreSQL" {
+        tags "Database"  # 标签与样式匹配
+    }
+}
+
+views {
+    styles {
+        element "Database" {
+            shape Cylinder
+        }
+    }
+}
+```
+
+**原因**: 样式基于标签匹配元素,标签名必须完全一致才能生效。建议使用统一的标签命名约定。
+
+### 错误 8: 视图键值重复
+
+❌ **错误写法**:
+```structurizr
+views {
+    systemContext system "Context" { }
+    container system "Context" { }  # 键值重复
+}
+```
+
+✅ **正确写法**:
+```structurizr
+views {
+    systemContext system "SystemContext" { }
+    container system "ContainerView" { }
+}
+```
+
+**原因**: 每个视图必须有唯一的键值 (key),用于标识和引用视图。重复的键值会导致渲染错误。
+
+### 错误 9: autoLayout 参数错误
+
+❌ **错误写法**:
+```structurizr
+systemContext system {
+    autoLayout horizontal  # 错误的方向参数
+}
+```
+
+✅ **正确写法**:
+```structurizr
+systemContext system {
+    autoLayout lr  # 正确的方向: lr, rl, tb, bt
+}
+```
+
+**原因**: autoLayout 只接受四个方向参数: `lr` (左右), `rl` (右左), `tb` (上下), `bt` (下上)。
+
+### 错误 10: 技术栈参数位置错误
+
+❌ **错误写法**:
+```structurizr
+api = container "API 服务" {
+    technology "Spring Boot"  # 错误的写法
+}
+```
+
+✅ **正确写法**:
+```structurizr
+api = container "API 服务" "处理业务逻辑" "Spring Boot"
+```
+
+**原因**: 技术栈应作为 container 的第三个参数,而不是嵌套属性。
+
+## 生成检查清单
+
+生成代码后,逐项检查:
+
+- [ ] **工作空间结构完整**: 包含 `workspace`, `model`, `views` 三层结构
+- [ ] **元素声明正确**: 使用 person, softwareSystem, container, component 声明元素
+- [ ] **层次嵌套正确**: 容器在系统内,组件在容器内,部署实例在部署节点内
+- [ ] **关系语法正确**: 使用 `->` 定义关系,包含关系描述和技术标签
+- [ ] **视图定义完整**: 至少包含 systemContext 和 container 视图
+- [ ] **视图包含元素**: 每个视图包含 `include *` 或 `include element.tag==XXX`
+- [ ] **视图键值唯一**: 每个视图有唯一的 key 标识
+- [ ] **自动布局配置**: 视图包含 `autoLayout` 配置 (lr/rl/tb/bt)
+- [ ] **技术栈标注**: 容器和组件标注了技术栈 (第三个参数)
+- [ ] **标签使用一致**: 元素标签与样式定义保持一致
+- [ ] **样式配置完整**: 定义了 Person, Software System, Container, Database 等基础样式
+- [ ] **部署视图层次**: 部署节点层次合理,容器实例正确嵌套
+- [ ] **代码可渲染**: 语法正确,可直接通过 Kroki 渲染
+
+**任何检查项不通过,立即修正后重新生成**
+
+## 高级特性
+
+### 1. 多视图组合策略
+
+```structurizr
+views {
+    # 战略层视图 - 给高管看
+    systemContext system "Strategic" {
+        title "战略层: 系统边界和外部依赖"
+        include *
+        autoLayout lr
+    }
+
+    # 战术层视图 - 给架构师看
+    container system "Tactical" {
+        title "战术层: 应用架构和技术栈"
+        include *
+        autoLayout tb
+    }
+
+    # 实现层视图 - 给开发人员看
+    component api "Implementation" {
+        title "实现层: API 服务内部设计"
+        include *
+        autoLayout tb
+    }
+
+    # 运维层视图 - 给运维团队看
+    deployment system "生产" "Operations" {
+        title "运维层: 生产环境部署拓扑"
+        include *
+        autoLayout tb
+    }
+}
+```
+
+**使用场景**: 为不同受众创建针对性视图,降低沟通成本
+
+### 2. 标签驱动的架构分析
+
+```structurizr
+# 按重要性分类
+webapp = container "Web 应用" {
+    tags "Critical" "Frontend"
+}
+
+# 按技术栈分类
+api = container "API 服务" "Spring Boot" {
+    tags "Backend" "Java" "Microservice"
+}
+
+# 按团队归属分类
+orderService = container "订单服务" {
+    tags "OrderTeam" "DomainService"
+}
+
+# 基于标签的视图过滤
+views {
+    container system "CriticalOnly" {
+        include element.tag==Critical
+        autoLayout
+    }
+
+    container system "BackendServices" {
+        include element.tag==Backend
+        exclude element.tag==Deprecated
+        autoLayout
+    }
+}
+```
+
+**使用场景**: 使用标签实现多维度架构分析和视图过滤
+
+### 3. 文档嵌入和 ADR
+
+```structurizr
+system = softwareSystem "系统" {
+    documentation {
+        section "架构概述" {
+            content """
+                本系统采用微服务架构,主要包括:
+                - 前端: React SPA
+                - BFF: Next.js
+                - 后端: Spring Boot 微服务
+                - 数据: PostgreSQL + Redis
+            """
+        }
+
+        section "ADR-001: 选择微服务架构" {
+            content """
+                **状态**: 已接受
+                **背景**: 单体应用难以扩展,团队协作效率低
+                **决策**: 采用微服务架构
+                **后果**: 提高独立部署能力,增加运维复杂度
+            """
+        }
+
+        section "ADR-002: 选择 Kubernetes" {
+            content """
+                **状态**: 已接受
+                **背景**: 需要容器编排平台
+                **决策**: 使用 Kubernetes
+                **后果**: 获得自动扩缩容能力,需要 K8s 运维能力
+            """
+        }
+    }
+}
+```
+
+**使用场景**: 在架构模型中直接嵌入文档和架构决策记录
+
+### 4. 关系属性和约束
+
+```structurizr
+# 带属性的关系
+webapp -> api "调用 API" "HTTPS/REST" {
+    tags "Synchronous"
+    properties {
+        "超时时间" "30s"
+        "重试策略" "指数退避"
+        "断路器" "Hystrix"
+    }
+}
+
+# 异步关系
+api -> queue "发布事件" "Kafka" {
+    tags "Asynchronous" "Event-Driven"
+    properties {
+        "Topic" "order-events"
+        "分区数" "12"
+        "保留期" "7 天"
+    }
+}
+```
+
+**使用场景**: 记录关系的技术细节和约束条件
+
+### 5. 多环境部署对比
+
+```structurizr
+# 开发环境 - 单节点
+deploymentEnvironment "开发" {
+    deploymentNode "本地 Docker" {
+        containerInstance webapp
+        containerInstance api
+        containerInstance db
+    }
+}
+
+# 测试环境 - 基础集群
+deploymentEnvironment "测试" {
+    deploymentNode "测试集群" {
+        deploymentNode "Node 1" {
+            containerInstance webapp
+            containerInstance api
+        }
+        deploymentNode "RDS" {
+            containerInstance db
+        }
+    }
+}
+
+# 生产环境 - 高可用集群
+deploymentEnvironment "生产" {
+    deploymentNode "AWS" {
+        deploymentNode "EKS" {
+            deploymentNode "Node Group 1" {
+                containerInstance webapp instances=3
+            }
+            deploymentNode "Node Group 2" {
+                containerInstance api instances=5
+            }
+        }
+        deploymentNode "RDS Multi-AZ" {
+            containerInstance db instances=2
+        }
+    }
+}
+```
+
+**使用场景**: 对比不同环境的部署配置,理解演进路径
+
+## Structurizr 特色优势
+
+### 1. C4 模型原生支持
+
+Structurizr 是 C4 模型的官方实现,原生支持四层抽象:
+
+**优势**:
+- **层次清晰**: Context → Container → Component → Code 自然递进
+- **受众分层**: 不同视图服务不同受众 (高管、架构师、开发者)
+- **渐进式细化**: 从高层业务到底层实现逐步细化
+
+**对比其他工具**:
+- PlantUML/Mermaid: 需要手动实现 C4 层次
+- Excalidraw/D2: 缺少语义化的架构层次
+
+### 2. 代码即架构 (Architecture as Code)
+
+```structurizr
+# 可版本控制的架构定义
+workspace "系统" {
+    model { ... }
+    views { ... }
+}
+```
+
+**优势**:
+- **版本控制**: 架构演进可追溯
+- **代码审查**: 架构变更可 Code Review
+- **CI/CD 集成**: 自动生成架构图
+
+### 3. 多视图一致性
+
+```structurizr
+# 定义一次,多视图复用
+model {
+    system = softwareSystem "系统" { ... }
+}
+
+views {
+    systemContext system { ... }  # 视图 1
+    container system { ... }       # 视图 2
+    deployment system "生产" { ... } # 视图 3
+}
+```
+
+**优势**:
+- **单一数据源**: 模型定义一次,视图自动一致
+- **减少维护**: 修改模型自动更新所有视图
+- **避免不一致**: 消除手动维护多图的同步问题
+
+### 4. 部署拓扑建模
+
+```structurizr
+deploymentEnvironment "生产" {
+    deploymentNode "AWS" {
+        deploymentNode "EKS" {
+            containerInstance api
+        }
+    }
+}
+```
+
+**优势**:
+- **物理拓扑**: 清晰展示基础设施层次
+- **容器映射**: 容器实例映射到部署节点
+- **多环境对比**: 开发/测试/生产环境对比
+
+### 5. 动态视图 (运行时行为)
+
+```structurizr
+dynamic system "登录流程" {
+    user -> webapp "1. 输入凭证"
+    webapp -> api "2. 验证请求"
+    api -> db "3. 查询用户"
+    # ...
+}
+```
+
+**优势**:
+- **序列建模**: 展示运行时交互序列
+- **业务流程**: 可视化关键业务流程
+- **时序理解**: 帮助理解系统动态行为
+
+## 最佳实践
+
+### 1. 命名规范
+
+- **变量名**: 使用小驼峰 (camelCase),如 `orderService`, `userDB`
+- **显示名称**: 使用中文,如 `"订单服务"`, `"用户数据库"`
+- **描述**: 简洁清晰,如 `"处理订单生命周期"`, `"存储用户数据"`
+- **视图键值**: 使用大驼峰 (PascalCase),如 `"SystemContext"`, `"ContainerView"`
+
+### 2. 标签策略
+
+**技术分类标签**:
+- Frontend, Backend, Database, Cache, Message Queue
+
+**重要性标签**:
+- Critical, High, Medium, Low
+
+**系统归属标签**:
+- Internal, External, Legacy, Deprecated
+
+**团队归属标签**:
+- OrderTeam, UserTeam, PaymentTeam
+
+### 3. 视图设计原则
+
+**少即是多**:
+- 每个视图聚焦一个主题
+- 避免信息过载
+- 使用过滤器隐藏无关元素
+
+**渐进式细化**:
+- Context 视图: 高层业务边界
+- Container 视图: 应用架构
+- Component 视图: 模块设计
+- Code 视图: 类图 (可选)
+
+**受众导向**:
+- 高管: System Context
+- 架构师: Container + Deployment
+- 开发者: Component + Dynamic
+- 运维: Deployment
+
+### 4. 样式一致性
+
+```structurizr
+styles {
+    # 基础元素
+    element "Person" { ... }
+    element "Software System" { ... }
+    element "Container" { ... }
+
+    # 技术分类
+    element "Database" { shape Cylinder; ... }
+    element "Message Queue" { ... }
+
+    # 重要性分类
+    element "Critical" { background "#e74c3c"; ... }
+
+    # 关系样式
+    relationship "Synchronous" { style Solid; ... }
+    relationship "Asynchronous" { style Dashed; ... }
+}
+```
+
+### 5. 完整性检查
+
+**模型完整性**:
+- [ ] 所有人员角色已定义
+- [ ] 核心系统已建模
+- [ ] 关键容器已识别
+- [ ] 重要组件已细化
+- [ ] 外部依赖已标记
+
+**视图完整性**:
+- [ ] System Context 视图存在
+- [ ] Container 视图存在
+- [ ] 关键容器有 Component 视图
+- [ ] 生产环境有 Deployment 视图
+- [ ] 关键流程有 Dynamic 视图
+
+**样式完整性**:
+- [ ] Person 样式已定义
+- [ ] Software System 样式已定义
+- [ ] Container 样式已定义
+- [ ] Database 样式已定义
+- [ ] 关系样式已定义
+
+## 总结
+
+Structurizr DSL 架构建模要求你:
+
+1. **深入理解 C4 模型**: 掌握四层抽象和渐进式细化方法
+2. **精通 Structurizr 语法**: 熟练使用 workspace-model-views 结构和所有元素类型
+3. **架构思维**: 从业务上下文到技术实现的系统化思考
+4. **代码质量**: 确保生成的 DSL 代码语法正确、结构清晰、可直接渲染
+5. **多视图设计**: 为不同受众创建合适的架构视图
+6. **文档化**: 使用标签、描述、ADR 增强架构可理解性
+
+**核心价值**: Structurizr 不仅是画图工具,更是"架构即代码"的实践,通过 DSL 将架构知识版本化、可审查、可演进,是现代软件架构建模的最佳实践。
+
+**记住**: 好的架构模型应该清晰、完整、一致,能够帮助团队理解系统、做出决策、指导实现。使用 C4 模型的层次抽象,为不同受众提供恰当的视角,是架构建模的关键。

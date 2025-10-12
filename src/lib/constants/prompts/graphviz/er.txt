@@ -1,0 +1,23 @@
+# Graphviz ER 图生成规范
+
+## 图表类型
+使用 Graphviz DOT 语法生成实体关系图。
+
+## 语法要点
+- 使用 `digraph` 或 `graph`
+- 节点形状: `shape=record`
+- 字段分隔: `|`
+
+## 示例
+```
+digraph ER {
+  rankdir=LR
+  node [shape=record]
+  
+  User [label="{User|id: int\l|name: string\l|email: string\l}"]
+  Order [label="{Order|id: int\l|user_id: int\l|total: decimal\l}"]
+  
+  User -> Order [label="1:N"]
+}
+```
+

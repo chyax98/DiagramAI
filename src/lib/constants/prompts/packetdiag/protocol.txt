@@ -1,0 +1,43 @@
+
+# PacketDiag Protocol 生成要求
+
+## 图表类型：协议栈图（Protocol Stack Diagram）
+
+协议栈图用于展示OSI七层模型或TCP/IP协议栈的分层结构。
+
+## 核心语法
+
+同 packet.txt，使用 PacketDiag 语法展示协议分层。
+
+## 生成示例
+
+### 示例：HTTP请求协议栈
+```
+packetdiag {
+  colwidth = 64
+  node_height = 100
+
+  // 应用层 - HTTP
+  0-511: "HTTP Request: GET /index.html" [color = "#FFE0E0"];
+
+  // 传输层 - TCP
+  512-527: Source Port [color = "#E0FFE0"];
+  528-543: Dest Port [color = "#E0FFE0"];
+  544-575: Sequence Number [color = "#E0FFE0"];
+
+  // 网络层 - IP
+  576-579: Version [color = "#E0E0FF"];
+  580-583: IHL [color = "#E0E0FF"];
+  584-599: Total Length [color = "#E0E0FF"];
+
+  // 链路层 - Ethernet
+  600-647: Destination MAC [color = "#FFFFE0"];
+  648-695: Source MAC [color = "#FFFFE0"];
+}
+```
+
+## 生成检查清单
+
+- [ ] **分层清晰**：不同协议层使用不同颜色
+- [ ] **字段完整**：包含关键协议字段
+- [ ] **代码可渲染**：语法正确

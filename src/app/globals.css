@@ -1,0 +1,287 @@
+/**
+ * Global Styles - Tailwind CSS v4 + shadcn/ui 标准配置
+ *
+ * 技术栈:
+ * - Tailwind CSS v4.0 (使用 @tailwindcss/postcss)
+ * - shadcn/ui 组件系统 (基于 Radix UI)
+ * - OKLCH 颜色空间 (更现代、更准确)
+ *
+ * 颜色系统: Indigo-Violet 主题
+ * 暗色模式: class="dark" 策略
+ */
+
+@import "tailwindcss";
+
+/**
+ * Tailwind CSS v4 主题配置
+ * 使用 @theme 指令定义设计令牌
+ */
+@theme inline {
+  /* ===== 圆角系统 ===== */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* ===== 颜色映射 (Tailwind v4 格式) ===== */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+/**
+ * ============================================
+ * 亮色模式 (Light Mode) - Indigo-Violet 主题
+ * ============================================
+ */
+:root {
+  --radius: 0.625rem;
+
+  /* 背景色 - 纯白 */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+
+  /* 卡片 - 纯白 */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+
+  /* 弹出层 - 纯白 */
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  /* 主色 - Indigo */
+  --primary: oklch(0.576 0.183 272.314);        /* indigo-600 #4f46e5 */
+  --primary-foreground: oklch(0.985 0 0);
+
+  /* 辅助色 - Violet */
+  --secondary: oklch(0.538 0.207 293.761);      /* violet-600 #7c3aed */
+  --secondary-foreground: oklch(0.985 0 0);
+
+  /* 弱化色 - Slate */
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+
+  /* 强调色 - Indigo 亮色 */
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
+  /* 危险色 - Red */
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  /* 边框和输入 */
+  --border: oklch(0.922 0 0);                   /* slate-200 */
+  --input: oklch(0.922 0 0);
+
+  /* 聚焦环 - Indigo */
+  --ring: oklch(0.576 0.183 272.314);           /* indigo-600 */
+
+  /* 图表颜色 */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+}
+
+/**
+ * ============================================
+ * 暗色模式 (Dark Mode) - 编辑器优化配色
+ * ============================================
+ * 设计理念：
+ * - 编辑器区：深色背景（减少眼疲劳，适合长时间编码）
+ * - 预览区：浅灰背景（图表展示更清晰）
+ * - 工具栏：中性色（不抢视觉焦点）
+ * - 高对比度：确保文字可读性
+ */
+.dark {
+  /* 背景色 - 深邃黑 (适合编辑器) */
+  --background: oklch(0.12 0 0);                /* #1a1a1a 更深的背景 */
+  --foreground: oklch(0.95 0 0);                /* #f0f0f0 高对比度文字 */
+
+  /* 卡片 - 编辑器面板 */
+  --card: oklch(0.18 0 0);                      /* #2a2a2a 编辑器背景 */
+  --card-foreground: oklch(0.95 0 0);
+
+  /* 弹出层 - 深灰 */
+  --popover: oklch(0.15 0 0);                   /* #242424 */
+  --popover-foreground: oklch(0.95 0 0);
+
+  /* 主色 - Indigo 亮色 (更醒目) */
+  --primary: oklch(0.75 0.18 272.693);          /* indigo-400 增强亮度 */
+  --primary-foreground: oklch(0.12 0 0);        /* 深色文字 */
+
+  /* 辅助色 - Violet 亮色 */
+  --secondary: oklch(0.72 0.20 294.598);        /* violet-400 增强 */
+  --secondary-foreground: oklch(0.12 0 0);
+
+  /* 弱化色 - 深灰 */
+  --muted: oklch(0.25 0 0);                     /* #3a3a3a 弱化背景 */
+  --muted-foreground: oklch(0.65 0 0);          /* #a0a0a0 弱化文字 */
+
+  /* 强调色 - 中灰 */
+  --accent: oklch(0.28 0 0);                    /* #444 悬停背景 */
+  --accent-foreground: oklch(0.95 0 0);
+
+  /* 危险色 - Red 暗色 */
+  --destructive: oklch(0.70 0.20 22.216);
+  --destructive-foreground: oklch(0.95 0 0);
+
+  /* 边框和输入 - 更明显的边框 */
+  --border: oklch(0.30 0 0);                    /* #4a4a4a 可见边框 */
+  --input: oklch(0.22 0 0);                     /* #353535 输入框背景 */
+
+  /* 聚焦环 - Indigo 亮色 */
+  --ring: oklch(0.75 0.18 272.693);
+
+  /* 图表颜色 - 暗色优化 */
+  --chart-1: oklch(0.55 0.25 264.376);
+  --chart-2: oklch(0.70 0.18 162.48);
+  --chart-3: oklch(0.78 0.19 70.08);
+  --chart-4: oklch(0.65 0.27 303.9);
+  --chart-5: oklch(0.68 0.25 16.439);
+
+  /* 编辑器专用变量 */
+  --editor-bg: oklch(0.14 0 0);                 /* #222 CodeMirror 背景 */
+  --editor-gutter: oklch(0.16 0 0);             /* #282828 行号背景 */
+  --editor-selection: oklch(0.30 0.12 272);     /* 选中区域 */
+}
+
+/**
+ * ============================================
+ * 暗色模式切换变体
+ * 使用 @custom-variant 定义 dark: 前缀
+ * ============================================
+ */
+@custom-variant dark (&:is(.dark *));
+
+/**
+ * ============================================
+ * 基础样式
+ * ============================================
+ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+    line-height: 1.5;
+  }
+
+  /* 平滑过渡 */
+  html {
+    transition: background-color 300ms ease-out, color 300ms ease-out;
+  }
+}
+
+/**
+ * ============================================
+ * 滚动条样式优化
+ * ============================================
+ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/**
+ * ============================================
+ * 选中文本样式
+ * ============================================
+ */
+::selection {
+  @apply bg-primary/30 text-foreground;
+}
+
+/**
+ * ============================================
+ * 图表预览容器样式
+ * ============================================
+ */
+.diagram-preview-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.diagram-preview-container svg {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+/**
+ * ============================================
+ * TransformWrapper 样式修复
+ * react-zoom-pan-pinch 库的样式覆盖
+ * ============================================
+ */
+.react-transform-wrapper,
+.react-transform-component {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/**
+ * ============================================
+ * ThemeToggle 组件样式
+ * ============================================
+ */
+.theme-toggle {
+  @apply relative flex h-9 w-9 items-center justify-center rounded-md transition-all;
+  @apply text-muted-foreground hover:bg-accent hover:text-accent-foreground;
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+}
+
+.theme-toggle-icon {
+  @apply h-5 w-5 transition-all duration-300;
+}
+
+/* 浅色模式下的太阳图标 */
+.theme-toggle-icon-sun {
+  @apply rotate-0 scale-100 dark:rotate-90 dark:scale-0;
+}
+
+/* 深色模式下的月亮图标 */
+.theme-toggle-icon-moon {
+  @apply absolute rotate-90 scale-0 dark:rotate-0 dark:scale-100;
+}

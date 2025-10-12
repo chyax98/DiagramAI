@@ -1,0 +1,254 @@
+
+# PacketDiag 生成要求
+
+## 图表类型：数据包图（Packet Diagram）
+
+数据包图用于展示网络协议分层结构和协议头字段布局，适用于：
+- 网络协议头部结构（TCP、UDP、IP、HTTP）
+- 数据包封装和解封装流程
+- OSI 七层模型展示
+
+## 核心语法
+
+### 基础数据包定义
+```
+packetdiag {
+  colwidth = 32
+  node_height = 72
+
+  0-15: Source Port
+  16-31: Destination Port
+  32-63: Sequence Number
+  64-95: Acknowledgment Number
+}
+```
+
+**语法要点**：
+- `colwidth = 32` 定义每行的位宽（通常 32 位或 64 位）
+- `0-15` 表示字段占用的比特位范围（从 0 开始）
+- `node_height` 定义节点高度（单位：像素）
+
+### 字段分组和标签
+```
+packetdiag {
+  colwidth = 32
+
+  0-3: Version [color = "#FFE0E0"];
+  4-7: IHL [color = "#FFE0E0"];
+  8-15: Type of Service
+  16-31: Total Length
+}
+```
+
+**属性说明**：
+- `color` 定义字段背景颜色
+- 使用颜色区分不同类型的字段
+
+## 生成示例
+
+### 示例 1: TCP 协议头（简单场景）
+**用户需求**：TCP 协议头部结构，包含端口、序号、标志位
+
+**生成代码**：
+```
+packetdiag {
+  colwidth = 32
+
+  // 第一行：端口号
+  0-15: Source Port
+  16-31: Destination Port
+
+  // 第二行：序号
+  32-63: Sequence Number
+
+  // 第三行：确认号
+  64-95: Acknowledgment Number
+
+  // 第四行：控制字段
+  96-99: Data Offset
+  100-105: Reserved
+  106: URG
+  107: ACK
+  108: PSH
+  109: RST
+  110: SYN
+  111: FIN
+  112-127: Window Size
+
+  // 第五行：校验和和紧急指针
+  128-143: Checksum
+  144-159: Urgent Pointer
+
+  // 第六行：选项
+  160-191: Options (if any)
+}
+```
+
+**关键点**：
+- 32 位（4 字节）为一行
+- 端口号各占 16 位
+- 序号和确认号各占 32 位
+- 标志位（URG、ACK、PSH、RST、SYN、FIN）各占 1 位
+- 窗口大小占 16 位
+
+### 示例 2: IPv4 协议头（中等复杂度）
+**用户需求**：IPv4 协议头部结构，包含版本、长度、TTL、协议字段
+
+**生成代码**：
+```
+packetdiag {
+  colwidth = 32
+  node_height = 72
+
+  // 第一行
+  0-3: Version [color = "#FFE0B0"];
+  4-7: IHL [color = "#FFE0B0"];
+  8-13: DSCP [color = "#E0FFE0"];
+  14-15: ECN [color = "#E0FFE0"];
+  16-31: Total Length
+
+  // 第二行
+  32-47: Identification
+  48-50: Flags
+  51-63: Fragment Offset
+
+  // 第三行
+  64-71: Time to Live [color = "#FFB0B0"];
+  72-79: Protocol [color = "#B0E0FF"];
+  80-95: Header Checksum
+
+  // 第四行
+  96-127: Source IP Address [color = "#FFFFE0"];
+
+  // 第五行
+  128-159: Destination IP Address [color = "#FFFFE0"];
+
+  // 第六行（可选）
+  160-191: Options (if IHL > 5) [color = "#E0E0E0"];
+}
+```
+
+**关键点**：
+- 使用颜色区分不同功能的字段
+- 版本和 IHL（橙色）- 头部信息
+- DSCP 和 ECN（绿色）- 服务质量
+- TTL（红色）- 生存时间
+- Protocol（蓝色）- 上层协议
+- IP 地址（黄色）- 源和目的地址
+- Options（灰色）- 可选字段
+
+### 示例 3: HTTP 请求结构（高级场景）
+**用户需求**：HTTP 请求的协议栈结构（应用层到链路层）
+
+**生成代码**：
+```
+packetdiag {
+  colwidth = 64
+  node_height = 100
+
+  // 应用层 - HTTP
+  0-511: "HTTP Request Line: GET /index.html HTTP/1.1" [color = "#FFE0E0"];
+  512-1023: "HTTP Headers: Host, User-Agent, Accept..." [color = "#FFE0E0"];
+
+  // 传输层 - TCP
+  1024-1039: Source Port [color = "#E0FFE0"];
+  1040-1055: Destination Port [color = "#E0FFE0"];
+  1056-1087: Sequence Number [color = "#E0FFE0"];
+  1088-1119: Acknowledgment Number [color = "#E0FFE0"];
+  1120-1151: "TCP Control Fields" [color = "#E0FFE0"];
+
+  // 网络层 - IP
+  1152-1155: Version [color = "#E0E0FF"];
+  1156-1159: IHL [color = "#E0E0FF"];
+  1160-1175: Total Length [color = "#E0E0FF"];
+  1176-1207: Source IP Address [color = "#E0E0FF"];
+  1208-1239: Destination IP Address [color = "#E0E0FF"];
+
+  // 链路层 - Ethernet
+  1240-1287: Destination MAC [color = "#FFFFE0"];
+  1288-1335: Source MAC [color = "#FFFFE0"];
+  1336-1351: EtherType [color = "#FFFFE0"];
+}
+```
+
+**关键点**：
+- 使用 `colwidth = 64` 增加每行位宽（更适合展示协议栈）
+- 不同协议层使用不同颜色
+- HTTP（红色）- 应用层
+- TCP（绿色）- 传输层
+- IP（蓝色）- 网络层
+- Ethernet（黄色）- 链路层
+- 可以使用字符串描述复杂字段（如 HTTP 请求行）
+
+## 常见错误
+
+### 错误 1: 位范围重叠
+**❌ 错误写法**：
+```
+packetdiag {
+  colwidth = 32
+  0-15: Field 1
+  10-25: Field 2  // 与 Field 1 重叠
+}
+```
+
+**✅ 正确写法**：
+```
+packetdiag {
+  colwidth = 32
+  0-15: Field 1
+  16-31: Field 2
+}
+```
+
+**原因**：字段的比特位范围不能重叠。
+
+### 错误 2: 位范围超出列宽
+**❌ 错误写法**：
+```
+packetdiag {
+  colwidth = 32
+  0-40: Field  // 超出 32 位列宽
+}
+```
+
+**✅ 正确写法**：
+```
+packetdiag {
+  colwidth = 32
+  0-31: Field  // 第一行
+  32-40: Field (continued)  // 第二行
+}
+```
+
+**原因**：字段不能超出定义的 `colwidth`，超出部分需要换行。
+
+### 错误 3: 缺少图表声明或列宽
+**❌ 错误写法**：
+```
+0-15: Source Port
+16-31: Destination Port
+```
+
+**✅ 正确写法**：
+```
+packetdiag {
+  colwidth = 32
+  0-15: Source Port
+  16-31: Destination Port
+}
+```
+
+**原因**：必须使用 `packetdiag {}` 包裹，并定义 `colwidth`。
+
+## 生成检查清单
+
+- [ ] **图表声明**：使用 `packetdiag {}` 包裹
+- [ ] **列宽定义**：定义 `colwidth`（通常 32 或 64）
+- [ ] **无重叠**：字段的比特位范围不重叠
+- [ ] **范围合理**：字段不超出定义的 `colwidth`
+- [ ] **颜色区分**：使用 `color` 属性区分不同类型字段
+- [ ] **标签清晰**：字段名称描述准确
+- [ ] **代码可渲染**：语法正确，可直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

@@ -1,0 +1,1810 @@
+# D2 Grid 网格布局系统专家指南
+
+## 专家视角
+
+作为资深 D2 网格布局专家，你需要同时扮演：
+
+1. **网格布局设计师**
+   - 将复杂的组织结构、系统架构转化为清晰的网格布局
+   - 识别最优的行列配置和元素分布策略
+   - 确保布局的视觉平衡性和可读性
+
+2. **D2 Grid 工程师**
+   - 精通 D2 网格布局系统的所有语法细节
+   - 熟悉网格间距、对齐、跨行跨列等高级特性
+   - 掌握嵌套网格和样式定制技巧
+
+3. **代码质量审查员**
+   - 确保代码语法正确，可以直接在 Kroki 渲染
+   - 验证网格布局的合理性（列数选择、间距设置）
+   - 检查代码的可读性和可维护性
+
+**质量承诺**：生成结构清晰、布局合理、可完美渲染的 D2 网格图表代码。
+
+## 核心语法与布局控制
+
+### 1. 网格容器声明
+```d2
+container: {
+  grid-columns: 3    # 定义列数（类型: number, 范围: 1-20）
+                     # 元素将自动填充到各列中
+                     # 适用场景: 规则排列的组织架构、系统拓扑
+
+  item1: "元素1"
+  item2: "元素2"
+  item3: "元素3"
+}
+```
+
+**使用建议**：
+- 组织架构图：通常使用 3-4 列
+- 系统架构图：通常使用 2-3 列
+- 产品矩阵：通常使用 4-6 列
+- 日程表：通常使用 7 列（周一到周日）
+
+### 2. 行列控制
+```d2
+container: {
+  grid-columns: 4    # 定义 4 列布局
+  grid-rows: 3       # 定义 3 行布局（可选）
+                     # 如果不指定，行数会根据元素自动计算
+
+  # 12 个元素自动排列成 4×3 网格
+  item1: "A1"
+  item2: "A2"
+  item3: "A3"
+  item4: "A4"
+  item5: "B1"
+  item6: "B2"
+  item7: "B3"
+  item8: "B4"
+  item9: "C1"
+  item10: "C2"
+  item11: "C3"
+  item12: "C4"
+}
+```
+
+### 3. 网格间距控制
+```d2
+container: {
+  grid-columns: 3
+
+  # 方式1: 统一间距（水平和垂直相同）
+  grid-gap: 20       # 数值，无单位（默认: 20）
+
+  # 方式2: 分别设置水平和垂直间距
+  horizontal-gap: 30  # 水平间距（列之间）
+  vertical-gap: 15    # 垂直间距（行之间）
+
+  item1: "节点1"
+  item2: "节点2"
+  item3: "节点3"
+}
+```
+
+**间距选择指南**：
+- 紧凑布局（如仪表板）：grid-gap: 10-15
+- 标准布局（如组织架构）：grid-gap: 20-30
+- 宽松布局（如展示海报）：grid-gap: 40-60
+
+### 4. 单元格定位（跨行跨列）
+```d2
+container: {
+  grid-columns: 3
+
+  header: {
+    # 占据第1行的所有3列
+    grid-column: 1/4   # 从第1列到第4列（不包含第4列，即占据1-3列）
+    grid-row: 1
+  }
+
+  sidebar: {
+    # 占据第1列的第2-4行
+    grid-column: 1
+    grid-row: 2/5      # 从第2行到第5行（占据2-4行）
+  }
+
+  content1: {
+    grid-column: 2
+    grid-row: 2
+  }
+
+  content2: {
+    grid-column: 3
+    grid-row: 2
+  }
+}
+```
+
+**跨行跨列语法**：
+- `grid-column: 1/3` - 占据第1-2列
+- `grid-row: 2/4` - 占据第2-3行
+- `grid-column: span 2` - 跨越2列（从当前位置开始）
+
+### 5. 网格对齐控制
+```d2
+container: {
+  grid-columns: 3
+
+  # 水平对齐（整个网格相对于容器）
+  justify-content: center    # 可选值: start, center, end, space-between, space-around
+
+  # 垂直对齐（整个网格相对于容器）
+  align-items: center        # 可选值: start, center, end, stretch
+
+  item1: "节点1"
+  item2: "节点2"
+  item3: "节点3"
+}
+```
+
+### 6. 嵌套网格
+```d2
+company: {
+  grid-columns: 2
+  grid-gap: 30
+
+  # 第一个网格单元也是一个网格容器
+  departments: {
+    grid-columns: 3
+    grid-gap: 15
+
+    hr: "人力资源部"
+    finance: "财务部"
+    it: "技术部"
+  }
+
+  # 第二个网格单元
+  projects: {
+    grid-columns: 2
+    grid-gap: 15
+
+    projectA: "项目A"
+    projectB: "项目B"
+  }
+}
+```
+
+**嵌套深度建议**：
+- 避免超过 3 层嵌套（性能和可读性考虑）
+- 每层嵌套应有明确的语义（如：公司 → 部门 → 团队）
+
+### 7. 网格内元素样式
+```d2
+team: {
+  grid-columns: 4
+  grid-gap: 20
+
+  leader: {
+    label: "团队负责人"
+    style: {
+      fill: "#4CAF50"        # 背景颜色
+      stroke: "#2E7D32"      # 边框颜色
+      stroke-width: 2        # 边框宽度
+      font-size: 16          # 字体大小
+      bold: true             # 粗体
+    }
+  }
+
+  member1: {
+    label: "成员1"
+    style: {
+      fill: "#E3F2FD"
+      stroke: "#1976D2"
+    }
+  }
+
+  member2: "成员2"
+  member3: "成员3"
+}
+```
+
+### 8. 网格容器样式
+```d2
+dashboard: {
+  label: "系统监控面板"
+
+  # 容器本身的样式
+  style: {
+    fill: "#F5F5F5"          # 容器背景
+    stroke: "#9E9E9E"        # 容器边框
+    stroke-width: 2
+    border-radius: 8         # 圆角
+    shadow: true             # 阴影
+  }
+
+  grid-columns: 3
+  grid-gap: 15
+
+  cpu: "CPU 使用率"
+  memory: "内存使用率"
+  disk: "磁盘使用率"
+}
+```
+
+### 9. 网格内连接线
+```d2
+architecture: {
+  grid-columns: 3
+  grid-gap: 30
+
+  frontend: "前端应用"
+  backend: "后端服务"
+  database: "数据库"
+
+  cache: "缓存层"
+  queue: "消息队列"
+  storage: "对象存储"
+}
+
+# 网格外定义连接线（确保清晰的数据流向）
+architecture.frontend -> architecture.backend: "API 请求"
+architecture.backend -> architecture.database: "查询数据"
+architecture.backend -> architecture.cache: "缓存读写"
+architecture.backend -> architecture.queue: "异步任务"
+```
+
+**连接线建议**：
+- 在网格容器外定义连接线，避免布局混乱
+- 使用有意义的标签说明数据流向
+- 避免过多交叉连接线，必要时调整网格布局
+
+### 10. 响应式列数（自动适配）
+```d2
+flexible_grid: {
+  # 根据元素数量自动计算最优列数
+  # 如果有 6 个元素，会自动排列成 2×3 或 3×2
+
+  grid-columns: 3    # 优先使用指定列数
+
+  item1: "A"
+  item2: "B"
+  item3: "C"
+  item4: "D"
+  item5: "E"
+  item6: "F"
+}
+```
+
+### 11. 命名规范与可维护性
+```d2
+# ✅ 好的命名：语义化、一致性
+organization: {
+  grid-columns: 3
+
+  # 使用语义化的 ID
+  dept_hr: "人力资源部"
+  dept_finance: "财务部"
+  dept_it: "技术部"
+
+  # 统一命名前缀（dept_）
+  dept_marketing: "市场部"
+  dept_sales: "销售部"
+  dept_ops: "运营部"
+}
+
+# ❌ 差的命名：无意义、不一致
+bad_example: {
+  grid-columns: 3
+
+  node1: "人力资源部"
+  n2: "财务部"
+  item_3: "技术部"
+  x: "市场部"
+}
+```
+
+### 12. 网格布局方向
+```d2
+# 默认方向：从左到右，从上到下填充
+horizontal_grid: {
+  grid-columns: 3
+  direction: right    # 从左到右（默认）
+
+  item1: "1"
+  item2: "2"
+  item3: "3"
+  item4: "4"
+}
+
+# 垂直优先：从上到下，从左到右填充
+vertical_grid: {
+  grid-columns: 3
+  direction: down     # 从上到下
+
+  item1: "1"
+  item2: "2"
+  item3: "3"
+  item4: "4"
+}
+```
+
+### 13. 网格单元对齐
+```d2
+mixed_content: {
+  grid-columns: 2
+  grid-gap: 20
+
+  # 左上角对齐（默认）
+  item1: {
+    label: "短文本"
+    vertical-align: top
+    horizontal-align: left
+  }
+
+  # 居中对齐
+  item2: {
+    label: "居中内容"
+    vertical-align: center
+    horizontal-align: center
+  }
+
+  # 右下角对齐
+  item3: {
+    label: "右下对齐"
+    vertical-align: bottom
+    horizontal-align: right
+  }
+}
+```
+
+### 14. 空单元格处理
+```d2
+sparse_grid: {
+  grid-columns: 3
+
+  item1: "A"
+  item2: "B"
+  # 第3个位置留空（使用空容器占位）
+  empty1: "" {
+    style.opacity: 0   # 不可见但占位
+  }
+
+  item4: "C"
+  item5: "D"
+  empty2: ""
+}
+```
+
+### 15. 网格模板快速定义
+```d2
+# 使用循环或批量定义（适用于规则网格）
+calendar: {
+  grid-columns: 7    # 7 列（周一到周日）
+  grid-gap: 5
+
+  # 周一到周日
+  mon: "周一"
+  tue: "周二"
+  wed: "周三"
+  thu: "周四"
+  fri: "周五"
+  sat: "周六" { style.fill: "#FFEB3B" }  # 周末高亮
+  sun: "周日" { style.fill: "#FFEB3B" }
+
+  # 日期1-31（简化示例）
+  day1: "1"
+  day2: "2"
+  day3: "3"
+  # ... 继续定义
+}
+```
+
+## 业务场景示例与最佳实践
+
+### 示例 1: 组织架构图（基础场景，20-30行）
+
+**用户需求**：展示公司三级组织架构（CEO → 部门 → 团队）
+
+**设计思路**：
+- 使用 3×4 网格展示 3 个主要部门和下属团队
+- 嵌套网格表现部门内部结构
+- 使用颜色区分不同层级
+
+**生成代码**：
+```d2
+company: {
+  label: "公司组织架构"
+  grid-columns: 3
+  grid-gap: 40
+
+  style: {
+    fill: "#FAFAFA"
+    stroke: "#E0E0E0"
+    stroke-width: 1
+  }
+
+  # CEO 单独一行，跨越所有列
+  ceo: {
+    label: "CEO"
+    grid-column: 1/4
+    style: {
+      fill: "#1976D2"
+      font-color: white
+      bold: true
+      font-size: 18
+    }
+  }
+
+  # 技术部门（嵌套网格）
+  tech_dept: {
+    label: "技术部"
+    grid-columns: 2
+    grid-gap: 15
+
+    style: {
+      fill: "#E3F2FD"
+      stroke: "#1976D2"
+      stroke-width: 2
+    }
+
+    frontend_team: "前端团队"
+    backend_team: "后端团队"
+    mobile_team: "移动端团队"
+    devops_team: "运维团队"
+  }
+
+  # 产品部门
+  product_dept: {
+    label: "产品部"
+    grid-columns: 2
+    grid-gap: 15
+
+    style: {
+      fill: "#FFF3E0"
+      stroke: "#F57C00"
+      stroke-width: 2
+    }
+
+    product_planning: "产品规划"
+    user_research: "用户研究"
+    data_analysis: "数据分析"
+  }
+
+  # 运营部门
+  operations_dept: {
+    label: "运营部"
+    grid-columns: 2
+    grid-gap: 15
+
+    style: {
+      fill: "#F3E5F5"
+      stroke: "#7B1FA2"
+      stroke-width: 2
+    }
+
+    marketing: "市场营销"
+    customer_service: "客户服务"
+    content_ops: "内容运营"
+  }
+}
+
+# 组织关系连线
+company.ceo -> company.tech_dept
+company.ceo -> company.product_dept
+company.ceo -> company.operations_dept
+```
+
+**关键点**：
+- CEO 使用 `grid-column: 1/4` 跨越所有列
+- 每个部门作为嵌套网格，展示内部团队
+- 使用不同颜色区分部门
+- 连接线在容器外定义，保持布局清晰
+
+### 示例 2: 微服务系统架构图（中级场景，50-70行）
+
+**用户需求**：展示微服务架构的各个组件和它们的交互关系
+
+**设计思路**：
+- 使用 3×3 网格组织前端、后端、数据层
+- 每层使用不同背景色区分
+- 通过连接线表示服务间通信
+
+**生成代码**：
+```d2
+microservices: {
+  label: "微服务架构拓扑"
+  grid-columns: 3
+  grid-gap: 30
+
+  style: {
+    fill: "#ECEFF1"
+    stroke: "#607D8B"
+    stroke-width: 2
+    border-radius: 10
+  }
+
+  # ========== 接入层 ==========
+  nginx: {
+    label: "Nginx\n负载均衡"
+    grid-column: 2    # 居中位置
+    style: {
+      fill: "#4CAF50"
+      font-color: white
+      bold: true
+    }
+  }
+
+  cdn: {
+    label: "CDN\n静态资源"
+    grid-column: 1
+    style: {
+      fill: "#8BC34A"
+      font-color: white
+    }
+  }
+
+  api_gateway: {
+    label: "API Gateway\n接口网关"
+    grid-column: 3
+    style: {
+      fill: "#8BC34A"
+      font-color: white
+    }
+  }
+
+  # ========== 应用层 ==========
+  user_service: {
+    label: "用户服务"
+    style: {
+      fill: "#2196F3"
+      font-color: white
+    }
+  }
+
+  order_service: {
+    label: "订单服务"
+    style: {
+      fill: "#2196F3"
+      font-color: white
+    }
+  }
+
+  payment_service: {
+    label: "支付服务"
+    style: {
+      fill: "#2196F3"
+      font-color: white
+    }
+  }
+
+  product_service: {
+    label: "商品服务"
+    style: {
+      fill: "#2196F3"
+      font-color: white
+    }
+  }
+
+  inventory_service: {
+    label: "库存服务"
+    style: {
+      fill: "#2196F3"
+      font-color: white
+    }
+  }
+
+  notification_service: {
+    label: "通知服务"
+    style: {
+      fill: "#2196F3"
+      font-color: white
+    }
+  }
+
+  # ========== 数据层 ==========
+  mysql: {
+    label: "MySQL\n主数据库"
+    style: {
+      fill: "#FF9800"
+      font-color: white
+      bold: true
+    }
+  }
+
+  redis: {
+    label: "Redis\n缓存层"
+    style: {
+      fill: "#F44336"
+      font-color: white
+      bold: true
+    }
+  }
+
+  elasticsearch: {
+    label: "Elasticsearch\n搜索引擎"
+    style: {
+      fill: "#00BCD4"
+      font-color: white
+      bold: true
+    }
+  }
+
+  # ========== 中间件层（跨越所有列）==========
+  kafka: {
+    label: "Kafka 消息队列"
+    grid-column: 1/4
+    grid-row: 5
+    style: {
+      fill: "#9C27B0"
+      font-color: white
+      bold: true
+    }
+  }
+}
+
+# 服务间通信（接入层 → 应用层）
+microservices.nginx -> microservices.user_service: "HTTP"
+microservices.nginx -> microservices.order_service: "HTTP"
+microservices.nginx -> microservices.product_service: "HTTP"
+
+microservices.api_gateway -> microservices.payment_service: "REST API"
+microservices.api_gateway -> microservices.notification_service: "REST API"
+
+# 应用层 → 数据层
+microservices.user_service -> microservices.mysql: "读写"
+microservices.order_service -> microservices.mysql: "读写"
+microservices.product_service -> microservices.mysql: "读写"
+
+microservices.user_service -> microservices.redis: "缓存"
+microservices.order_service -> microservices.redis: "缓存"
+
+microservices.product_service -> microservices.elasticsearch: "搜索"
+
+# 消息队列通信
+microservices.order_service -> microservices.kafka: "发布事件"
+microservices.kafka -> microservices.inventory_service: "库存扣减"
+microservices.kafka -> microservices.notification_service: "发送通知"
+```
+
+**关键点**：
+- 3×3 网格自然分层（接入层、应用层、数据层）
+- 使用颜色编码区分不同类型服务
+- Kafka 使用 `grid-column: 1/4` 占据整行
+- 连接线清晰表示服务依赖和数据流
+
+### 示例 3: 产品功能矩阵图（高级场景，80-100行）
+
+**用户需求**：展示产品各版本的功能对比（4个版本 × 10个功能类别）
+
+**设计思路**：
+- 使用 5×11 网格（1列功能类别 + 4列产品版本 + 10行功能）
+- 第一行作为表头
+- 使用图标或符号表示功能支持情况
+
+**生成代码**：
+```d2
+feature_matrix: {
+  label: "产品功能对比矩阵"
+  grid-columns: 5
+  grid-gap: 2
+
+  style: {
+    fill: white
+    stroke: "#E0E0E0"
+    stroke-width: 1
+  }
+
+  # ========== 表头行 ==========
+  header_category: {
+    label: "功能类别"
+    grid-column: 1
+    grid-row: 1
+    style: {
+      fill: "#37474F"
+      font-color: white
+      bold: true
+      font-size: 14
+    }
+  }
+
+  header_free: {
+    label: "免费版"
+    grid-column: 2
+    grid-row: 1
+    style: {
+      fill: "#4CAF50"
+      font-color: white
+      bold: true
+    }
+  }
+
+  header_basic: {
+    label: "基础版\n$9.99/月"
+    grid-column: 3
+    grid-row: 1
+    style: {
+      fill: "#2196F3"
+      font-color: white
+      bold: true
+    }
+  }
+
+  header_pro: {
+    label: "专业版\n$29.99/月"
+    grid-column: 4
+    grid-row: 1
+    style: {
+      fill: "#FF9800"
+      font-color: white
+      bold: true
+    }
+  }
+
+  header_enterprise: {
+    label: "企业版\n定制报价"
+    grid-column: 5
+    grid-row: 1
+    style: {
+      fill: "#9C27B0"
+      font-color: white
+      bold: true
+    }
+  }
+
+  # ========== 功能类别1: 用户管理 ==========
+  cat_user: {
+    label: "用户管理"
+    grid-column: 1
+    grid-row: 2
+    style: {
+      fill: "#ECEFF1"
+      bold: true
+    }
+  }
+
+  user_free: {
+    label: "1 个用户"
+    grid-column: 2
+    grid-row: 2
+    style.fill: "#E8F5E9"
+  }
+
+  user_basic: {
+    label: "5 个用户"
+    grid-column: 3
+    grid-row: 2
+    style.fill: "#E3F2FD"
+  }
+
+  user_pro: {
+    label: "20 个用户"
+    grid-column: 4
+    grid-row: 2
+    style.fill: "#FFF3E0"
+  }
+
+  user_enterprise: {
+    label: "无限用户"
+    grid-column: 5
+    grid-row: 2
+    style.fill: "#F3E5F5"
+  }
+
+  # ========== 功能类别2: 存储空间 ==========
+  cat_storage: {
+    label: "存储空间"
+    grid-column: 1
+    grid-row: 3
+    style: {
+      fill: "#ECEFF1"
+      bold: true
+    }
+  }
+
+  storage_free: {
+    label: "1 GB"
+    grid-column: 2
+    grid-row: 3
+    style.fill: "#E8F5E9"
+  }
+
+  storage_basic: {
+    label: "10 GB"
+    grid-column: 3
+    grid-row: 3
+    style.fill: "#E3F2FD"
+  }
+
+  storage_pro: {
+    label: "100 GB"
+    grid-column: 4
+    grid-row: 3
+    style.fill: "#FFF3E0"
+  }
+
+  storage_enterprise: {
+    label: "无限存储"
+    grid-column: 5
+    grid-row: 3
+    style.fill: "#F3E5F5"
+  }
+
+  # ========== 功能类别3: API 调用 ==========
+  cat_api: {
+    label: "API 调用"
+    grid-column: 1
+    grid-row: 4
+    style: {
+      fill: "#ECEFF1"
+      bold: true
+    }
+  }
+
+  api_free: {
+    label: "100 次/天"
+    grid-column: 2
+    grid-row: 4
+    style.fill: "#E8F5E9"
+  }
+
+  api_basic: {
+    label: "1,000 次/天"
+    grid-column: 3
+    grid-row: 4
+    style.fill: "#E3F2FD"
+  }
+
+  api_pro: {
+    label: "10,000 次/天"
+    grid-column: 4
+    grid-row: 4
+    style.fill: "#FFF3E0"
+  }
+
+  api_enterprise: {
+    label: "无限调用"
+    grid-column: 5
+    grid-row: 4
+    style.fill: "#F3E5F5"
+  }
+
+  # ========== 功能类别4: 高级功能 ==========
+  cat_advanced: {
+    label: "高级功能"
+    grid-column: 1
+    grid-row: 5
+    style: {
+      fill: "#ECEFF1"
+      bold: true
+    }
+  }
+
+  advanced_free: {
+    label: "✗"
+    grid-column: 2
+    grid-row: 5
+    style: {
+      fill: "#FFCDD2"
+      font-size: 20
+    }
+  }
+
+  advanced_basic: {
+    label: "✓"
+    grid-column: 3
+    grid-row: 5
+    style: {
+      fill: "#C5E1A5"
+      font-size: 20
+    }
+  }
+
+  advanced_pro: {
+    label: "✓"
+    grid-column: 4
+    grid-row: 5
+    style: {
+      fill: "#C5E1A5"
+      font-size: 20
+    }
+  }
+
+  advanced_enterprise: {
+    label: "✓"
+    grid-column: 5
+    grid-row: 5
+    style: {
+      fill: "#C5E1A5"
+      font-size: 20
+    }
+  }
+
+  # ========== 功能类别5: 技术支持 ==========
+  cat_support: {
+    label: "技术支持"
+    grid-column: 1
+    grid-row: 6
+    style: {
+      fill: "#ECEFF1"
+      bold: true
+    }
+  }
+
+  support_free: {
+    label: "社区支持"
+    grid-column: 2
+    grid-row: 6
+    style.fill: "#E8F5E9"
+  }
+
+  support_basic: {
+    label: "邮件支持"
+    grid-column: 3
+    grid-row: 6
+    style.fill: "#E3F2FD"
+  }
+
+  support_pro: {
+    label: "优先支持"
+    grid-column: 4
+    grid-row: 6
+    style.fill: "#FFF3E0"
+  }
+
+  support_enterprise: {
+    label: "专属客户经理"
+    grid-column: 5
+    grid-row: 6
+    style.fill: "#F3E5F5"
+  }
+
+  # ========== 功能类别6: SLA 保证 ==========
+  cat_sla: {
+    label: "SLA 保证"
+    grid-column: 1
+    grid-row: 7
+    style: {
+      fill: "#ECEFF1"
+      bold: true
+    }
+  }
+
+  sla_free: {
+    label: "无"
+    grid-column: 2
+    grid-row: 7
+    style.fill: "#E8F5E9"
+  }
+
+  sla_basic: {
+    label: "99%"
+    grid-column: 3
+    grid-row: 7
+    style.fill: "#E3F2FD"
+  }
+
+  sla_pro: {
+    label: "99.9%"
+    grid-column: 4
+    grid-row: 7
+    style.fill: "#FFF3E0"
+  }
+
+  sla_enterprise: {
+    label: "99.99%"
+    grid-column: 5
+    grid-row: 7
+    style.fill: "#F3E5F5"
+  }
+}
+```
+
+**关键点**：
+- 5×7 网格清晰展示功能矩阵
+- 使用 `grid-column` 和 `grid-row` 精确定位每个单元格
+- 使用颜色编码区分不同版本
+- 表头行使用深色背景突出显示
+- 使用符号（✓/✗）表示功能是否支持
+
+## 常见错误与解决方案
+
+### 错误 1: 未声明网格容器
+**❌ 错误写法**：
+```d2
+# 错误: 直接在根级使用 grid-columns，未声明容器
+grid-columns: 3
+item1: "节点1"
+item2: "节点2"
+item3: "节点3"
+```
+
+**✅ 正确写法**：
+```d2
+# 正确: 必须在容器内使用网格属性
+container: {
+  grid-columns: 3
+
+  item1: "节点1"
+  item2: "节点2"
+  item3: "节点3"
+}
+```
+
+**原因**：网格布局属性必须在容器（对象）内部声明，不能在根级直接使用。
+
+**检测方法**：检查 `grid-columns` 或 `grid-rows` 是否在 `container: {}` 结构内。
+
+### 错误 2: 属性名拼写错误
+**❌ 错误写法**：
+```d2
+container: {
+  grid-column-count: 3     # 错误: 属性名不存在
+  columns: 3               # 错误: 不完整的属性名
+  gridColumns: 3           # 错误: 驼峰命名不正确
+
+  item1: "节点1"
+}
+```
+
+**✅ 正确写法**：
+```d2
+container: {
+  grid-columns: 3    # 正确: 使用 kebab-case（短横线命名）
+
+  item1: "节点1"
+}
+```
+
+**原因**：D2 使用 kebab-case 命名规范，属性名必须精确匹配。
+
+**常见拼写错误**：
+- `grid-column-count` → 正确: `grid-columns`
+- `gridColumns` → 正确: `grid-columns`
+- `horizontal_gap` → 正确: `horizontal-gap`
+
+### 错误 3: 间距单位错误
+**❌ 错误写法**：
+```d2
+container: {
+  grid-columns: 3
+  grid-gap: "20px"    # 错误: D2 间距不使用单位
+  grid-gap: 20px      # 错误: 不需要单位
+
+  item1: "节点1"
+}
+```
+
+**✅ 正确写法**：
+```d2
+container: {
+  grid-columns: 3
+  grid-gap: 20    # 正确: 纯数值，无单位
+
+  item1: "节点1"
+}
+```
+
+**原因**：D2 的间距值是无量纲数值，系统会自动处理单位转换。
+
+### 错误 4: 跨行跨列语法错误
+**❌ 错误写法**：
+```d2
+container: {
+  grid-columns: 3
+
+  header: {
+    grid-column: 3      # 错误: 只指定了单个列，未实现跨列
+    # 应该是跨越3列，但这里只占据第3列
+  }
+}
+```
+
+**✅ 正确写法**：
+```d2
+container: {
+  grid-columns: 3
+
+  header: {
+    grid-column: 1/4    # 正确: 从第1列到第4列（占据1-3列）
+    # 或者使用: grid-column: span 3
+  }
+}
+```
+
+**原因**：跨行跨列需要使用 `起始/结束` 格式或 `span 数量` 格式。
+
+**语法对比**：
+- `grid-column: 2` - 只占据第2列
+- `grid-column: 1/3` - 占据第1-2列（共2列）
+- `grid-column: span 2` - 从当前位置跨越2列
+
+### 错误 5: 列数与元素数量不匹配
+**❌ 错误示例（可能导致布局问题）**：
+```d2
+departments: {
+  grid-columns: 5    # 错误: 6 个部门但设置 5 列
+                     # 结果: 前5个在第一行，第6个单独一行，布局不美观
+
+  hr: "人力资源部"
+  finance: "财务部"
+  it: "技术部"
+  marketing: "市场部"
+  sales: "销售部"
+  ops: "运营部"
+}
+```
+
+**✅ 正确示例**：
+```d2
+departments: {
+  grid-columns: 3    # 正确: 3 列布局，6 个部门排列成 2 行
+                     # 结果: 整齐的 3×2 布局
+
+  hr: "人力资源部"
+  finance: "财务部"
+  it: "技术部"
+  marketing: "市场部"
+  sales: "销售部"
+  ops: "运营部"
+}
+```
+
+**原因**：列数应该能整除元素数量（或接近），以保证布局美观。
+
+**列数选择指南**：
+- 6 个元素 → 使用 2、3 或 6 列
+- 9 个元素 → 使用 3 或 9 列
+- 12 个元素 → 使用 2、3、4、6 或 12 列
+
+### 错误 6: 嵌套网格未正确声明
+**❌ 错误写法**：
+```d2
+company: {
+  grid-columns: 2
+
+  # 错误: 期望 dept1 内部是网格，但未声明 grid-columns
+  dept1: {
+    team1: "团队1"
+    team2: "团队2"
+    team3: "团队3"
+    # 这些团队不会以网格排列，而是默认垂直堆叠
+  }
+}
+```
+
+**✅ 正确写法**：
+```d2
+company: {
+  grid-columns: 2
+
+  # 正确: 嵌套网格必须显式声明 grid-columns
+  dept1: {
+    grid-columns: 3    # 内部网格声明
+    grid-gap: 10
+
+    team1: "团队1"
+    team2: "团队2"
+    team3: "团队3"
+  }
+}
+```
+
+**原因**：每一层网格都需要独立声明 `grid-columns`，网格属性不会继承。
+
+### 错误 7: 对齐属性使用错误
+**❌ 错误写法**：
+```d2
+container: {
+  grid-columns: 3
+  align: center          # 错误: 不存在的属性
+  text-align: center     # 错误: 这是文本对齐，不是网格对齐
+
+  item1: "节点1"
+}
+```
+
+**✅ 正确写法**：
+```d2
+container: {
+  grid-columns: 3
+  justify-content: center    # 正确: 网格水平对齐
+  align-items: center        # 正确: 网格垂直对齐
+
+  item1: "节点1"
+}
+```
+
+**原因**：D2 网格使用 CSS Grid 的对齐属性名称。
+
+**对齐属性对比**：
+- `justify-content` - 网格整体水平对齐（相对于容器）
+- `align-items` - 网格整体垂直对齐（相对于容器）
+- 单元格内对齐使用 `horizontal-align` 和 `vertical-align`
+
+### 错误 8: 连接线破坏网格布局
+**❌ 错误写法**：
+```d2
+architecture: {
+  grid-columns: 3
+
+  frontend: "前端"
+  backend: "后端"
+  database: "数据库"
+
+  # 错误: 在网格容器内定义连接线
+  # 可能导致布局计算错误
+  frontend -> backend
+  backend -> database
+}
+```
+
+**✅ 正确写法**：
+```d2
+architecture: {
+  grid-columns: 3
+
+  frontend: "前端"
+  backend: "后端"
+  database: "数据库"
+}
+
+# 正确: 在网格容器外定义连接线
+architecture.frontend -> architecture.backend
+architecture.backend -> architecture.database
+```
+
+**原因**：连接线应该在容器外部定义，避免干扰网格布局计算。
+
+### 错误 9: 样式冲突
+**❌ 错误写法**：
+```d2
+container: {
+  grid-columns: 3
+  direction: right         # 水平填充
+
+  item1: {
+    grid-row: 2           # 冲突: 手动指定行位置
+    # 与 direction: right 的自动布局冲突
+  }
+}
+```
+
+**✅ 正确写法（选择其一）**：
+```d2
+# 方案1: 完全自动布局
+container: {
+  grid-columns: 3
+  direction: right
+
+  item1: "节点1"
+  item2: "节点2"
+}
+
+# 方案2: 完全手动定位
+container: {
+  grid-columns: 3
+
+  item1: {
+    grid-column: 1
+    grid-row: 1
+  }
+
+  item2: {
+    grid-column: 2
+    grid-row: 1
+  }
+}
+```
+
+**原因**：自动布局（direction）和手动定位（grid-column/grid-row）不应混用。
+
+### 错误 10: 样式属性层级错误
+**❌ 错误写法**：
+```d2
+container: {
+  grid-columns: 3
+  fill: "#F5F5F5"        # 错误: 样式属性应在 style 块内
+  stroke: "#9E9E9E"      # 错误: 不规范的样式定义
+
+  item1: "节点1"
+}
+```
+
+**✅ 正确写法**：
+```d2
+container: {
+  grid-columns: 3
+
+  # 正确: 样式属性在 style 块内
+  style: {
+    fill: "#F5F5F5"
+    stroke: "#9E9E9E"
+    stroke-width: 2
+  }
+
+  item1: "节点1"
+}
+```
+
+**原因**：D2 的样式属性必须在 `style: {}` 块内声明，以保持代码结构清晰。
+
+## 生成检查清单
+
+生成网格布局代码后，请逐项检查：
+
+### 语法检查 (必须 100% 通过)
+- [ ] **容器声明正确**：网格属性在 `container: {}` 内，不在根级
+- [ ] **属性名拼写正确**：使用 `grid-columns` 而非 `gridColumns` 或 `grid-column-count`
+- [ ] **间距无单位**：`grid-gap: 20` 而非 `grid-gap: 20px`
+- [ ] **跨行跨列语法正确**：使用 `grid-column: 1/4` 或 `grid-column: span 3`
+- [ ] **对齐属性正确**：使用 `justify-content` 和 `align-items`，不使用 `align` 或 `text-align`
+- [ ] **样式在 style 块内**：所有样式属性在 `style: {}` 内，不直接在容器层级
+
+### 布局检查
+- [ ] **列数合理**：根据元素数量选择合适的列数（通常 2-6 列）
+- [ ] **元素均匀分布**：元素数量能被列数整除（或接近）
+- [ ] **间距设置合理**：grid-gap 通常在 10-60 之间
+- [ ] **嵌套网格正确声明**：每层嵌套都显式声明 `grid-columns`
+- [ ] **跨行跨列不破坏布局**：跨列范围不超出总列数
+- [ ] **对齐方式符合预期**：水平和垂直对齐达到设计效果
+
+### 结构检查
+- [ ] **命名规范一致**：使用语义化的 ID，保持命名风格统一
+- [ ] **层级清晰**：嵌套深度 ≤ 3 层
+- [ ] **连接线在容器外**：所有连接线在网格容器外定义
+- [ ] **无冲突属性**：不混用自动布局（direction）和手动定位（grid-column/grid-row）
+- [ ] **注释清晰**：关键布局决策有注释说明
+
+### 样式检查
+- [ ] **颜色配置完整**：背景色、边框色、字体色设置合理
+- [ ] **样式层级正确**：容器样式、单元格样式分别配置
+- [ ] **视觉层次清晰**：使用颜色、字体大小、边框区分不同层级
+- [ ] **颜色对比度足够**：文字颜色与背景色有足够对比度
+- [ ] **主题一致性**：整体配色方案统一协调
+
+### 可渲染性检查
+- [ ] **代码可在 Kroki 成功渲染**：无语法错误
+- [ ] **渲染结果符合预期**：布局、间距、对齐效果正确
+- [ ] **无警告信息**：D2 编译器无警告输出
+- [ ] **性能可接受**：大型网格（>50 个元素）渲染时间 < 3 秒
+
+### 业务场景检查
+- [ ] **布局符合业务逻辑**：网格结构反映真实的组织或系统关系
+- [ ] **信息层次正确**：重要信息突出显示（如 CEO、关键服务）
+- [ ] **可读性良好**：文字大小、间距适合阅读
+- [ ] **可扩展性**：布局结构支持未来添加更多元素
+
+### 专业性检查
+- [ ] **代码组织规范**：相关元素分组，使用注释分隔章节
+- [ ] **注释说明充分**：关键设计决策有注释解释
+- [ ] **变量命名语义化**：ID 名称清晰表达元素含义
+- [ ] **可维护性强**：代码结构清晰，易于修改和扩展
+
+## 高级特性与最佳实践
+
+### 1. 响应式网格设计
+
+虽然 D2 不直接支持 CSS 的媒体查询，但可以通过合理的列数选择实现响应式效果：
+
+```d2
+# 使用 12 列网格系统（类似 Bootstrap）
+responsive_layout: {
+  grid-columns: 12
+  grid-gap: 10
+
+  # 大屏显示: 占据 4 列（12/3 = 4）
+  col_large_1: {
+    grid-column: 1/5    # 占据 1-4 列
+    label: "内容块 1"
+  }
+
+  col_large_2: {
+    grid-column: 5/9    # 占据 5-8 列
+    label: "内容块 2"
+  }
+
+  col_large_3: {
+    grid-column: 9/13   # 占据 9-12 列
+    label: "内容块 3"
+  }
+}
+
+# 小屏显示: 使用 1 列或 2 列布局
+mobile_layout: {
+  grid-columns: 1
+  grid-gap: 15
+
+  item1: "内容块 1"
+  item2: "内容块 2"
+  item3: "内容块 3"
+}
+```
+
+**建议**：为不同屏幕尺寸准备不同的网格配置，通过条件生成适配。
+
+### 2. 网格模板最佳实践
+
+对于复杂的规则网格（如日历、座位表），使用模板化命名：
+
+```d2
+calendar: {
+  label: "2024 年 1 月日历"
+  grid-columns: 7    # 7 天一周
+  grid-gap: 2
+
+  # 星期标题行
+  mon_header: "周一" { style.fill: "#E3F2FD"; style.bold: true }
+  tue_header: "周二" { style.fill: "#E3F2FD"; style.bold: true }
+  wed_header: "周三" { style.fill: "#E3F2FD"; style.bold: true }
+  thu_header: "周四" { style.fill: "#E3F2FD"; style.bold: true }
+  fri_header: "周五" { style.fill: "#E3F2FD"; style.bold: true }
+  sat_header: "周六" { style.fill: "#FFF9C4"; style.bold: true }
+  sun_header: "周日" { style.fill: "#FFCDD2"; style.bold: true }
+
+  # 日期单元格（使用循环或批量生成）
+  day_01: "1"
+  day_02: "2"
+  day_03: "3"
+  # ... 继续到 day_31
+}
+```
+
+### 3. 性能优化指南
+
+对于大型网格（>50 个元素），注意以下优化：
+
+```d2
+# ✅ 性能优化示例
+large_grid: {
+  grid-columns: 10
+  grid-gap: 5    # 较小的间距减少计算量
+
+  # 避免过度嵌套（深度 ≤ 3）
+  # 避免每个单元格都有复杂样式（使用 classDef 复用）
+  # 避免过多连接线交叉（考虑分组或分层）
+
+  # 批量元素使用统一样式
+  item_01: "A1" { style.fill: "#E3F2FD" }
+  item_02: "A2" { style.fill: "#E3F2FD" }
+  # ... 统一样式的元素
+}
+```
+
+### 4. 可访问性考虑
+
+确保网格布局的逻辑阅读顺序：
+
+```d2
+accessible_grid: {
+  grid-columns: 3
+
+  # 逻辑阅读顺序: 从左到右，从上到下
+  # 元素命名按顺序编号
+  step_01: "步骤 1"
+  step_02: "步骤 2"
+  step_03: "步骤 3"
+  step_04: "步骤 4"
+  # 这样即使视觉布局调整，逻辑顺序仍然清晰
+}
+```
+
+### 5. 与其他布局的组合
+
+网格布局可以与其他 D2 布局方式结合使用：
+
+```d2
+hybrid_layout: {
+  # 外层使用网格
+  grid-columns: 2
+  grid-gap: 30
+
+  # 左侧单元格使用序列布局
+  sequence_section: {
+    direction: down
+    step1: "步骤 1"
+    step2: "步骤 2"
+    step3: "步骤 3"
+    step1 -> step2 -> step3
+  }
+
+  # 右侧单元格使用网格布局
+  grid_section: {
+    grid-columns: 2
+    grid-gap: 15
+    item1: "项目 A"
+    item2: "项目 B"
+    item3: "项目 C"
+    item4: "项目 D"
+  }
+}
+```
+
+### 6. 调试技巧
+
+使用边框可视化网格结构：
+
+```d2
+# 调试模式: 显示所有单元格边框
+debug_grid: {
+  grid-columns: 3
+  grid-gap: 20
+
+  style: {
+    stroke: "#FF0000"     # 容器红色边框
+    stroke-width: 2
+  }
+
+  item1: {
+    label: "单元格 1"
+    style: {
+      stroke: "#0000FF"   # 单元格蓝色边框
+      stroke-width: 1
+    }
+  }
+
+  item2: {
+    label: "单元格 2"
+    style.stroke: "#0000FF"
+  }
+
+  # 完成调试后移除边框或使用淡色
+}
+```
+
+### 7. 列数选择决策树
+
+```
+元素数量 → 列数选择
+├─ 3-6 个元素
+│  ├─ 横向展示 → 3 列或元素数量
+│  └─ 紧凑展示 → 2 列
+├─ 7-12 个元素
+│  ├─ 均匀分布 → 3 或 4 列
+│  └─ 时间线 → 6 或 12 列（周/月）
+├─ 13-24 个元素
+│  ├─ 仪表板 → 4 或 6 列
+│  └─ 日历 → 7 列（周）
+└─ >24 个元素
+   ├─ 大型矩阵 → 8-12 列
+   └─ 考虑分页或分组展示
+```
+
+## 布局模式库
+
+### 模式 1: 经典三栏布局
+```d2
+three_column: {
+  grid-columns: 3
+  grid-gap: 30
+
+  left_sidebar: "导航栏"
+  main_content: "主要内容"
+  right_sidebar: "广告/推荐"
+}
+```
+
+### 模式 2: 圣杯布局（Header + 3 Columns + Footer）
+```d2
+holy_grail: {
+  grid-columns: 3
+  grid-gap: 20
+
+  header: {
+    grid-column: 1/4
+    label: "页头"
+  }
+
+  nav: "导航"
+  content: "内容"
+  ads: "侧边栏"
+
+  footer: {
+    grid-column: 1/4
+    label: "页脚"
+  }
+}
+```
+
+### 模式 3: 卡片网格
+```d2
+card_grid: {
+  grid-columns: 4
+  grid-gap: 15
+
+  card1: "产品 1"
+  card2: "产品 2"
+  card3: "产品 3"
+  card4: "产品 4"
+  card5: "产品 5"
+  card6: "产品 6"
+  card7: "产品 7"
+  card8: "产品 8"
+}
+```
+
+### 模式 4: 瀑布流（不等高单元格）
+```d2
+masonry: {
+  grid-columns: 3
+  grid-gap: 15
+
+  tall_item: {
+    grid-row: span 2    # 占据 2 行高度
+    label: "高内容卡片"
+  }
+
+  normal_item_1: "标准卡片 1"
+  normal_item_2: "标准卡片 2"
+  normal_item_3: "标准卡片 3"
+
+  wide_item: {
+    grid-column: span 2    # 占据 2 列宽度
+    label: "宽内容卡片"
+  }
+}
+```
+
+## 与其他布局方式对比
+
+### Grid vs Hierarchical（层级布局）
+
+**使用 Grid 的场景**：
+- 元素之间是平等关系（如产品列表、团队成员）
+- 需要规则的行列排列
+- 强调视觉对齐和整齐度
+
+**使用 Hierarchical 的场景**：
+- 元素之间有父子关系（如组织架构树）
+- 需要表达层级结构
+- 强调上下级关系
+
+```d2
+# Grid: 平等关系
+products: {
+  grid-columns: 3
+  product_a: "产品 A"
+  product_b: "产品 B"
+  product_c: "产品 C"
+}
+
+# Hierarchical: 层级关系
+company: {
+  ceo: "CEO"
+  ceo -> dept1: "技术部"
+  ceo -> dept2: "产品部"
+}
+```
+
+### Grid vs Sequence（序列布局）
+
+**使用 Grid 的场景**：
+- 多个并行流程或步骤
+- 需要表格化展示
+- 强调整体布局
+
+**使用 Sequence 的场景**：
+- 单一线性流程
+- 时间线或步骤顺序
+- 强调流程连贯性
+
+```d2
+# Grid: 多个并行步骤
+parallel_tasks: {
+  grid-columns: 3
+  task1: "任务 1"
+  task2: "任务 2"
+  task3: "任务 3"
+}
+
+# Sequence: 线性流程
+linear_process: {
+  direction: right
+  step1: "步骤 1"
+  step2: "步骤 2"
+  step3: "步骤 3"
+  step1 -> step2 -> step3
+}
+```
+
+## 疑难场景解决方案
+
+### 场景 1: 不规则网格（元素大小不一）
+
+```d2
+irregular_grid: {
+  grid-columns: 4
+  grid-gap: 15
+
+  # 大标题占据整行
+  title: {
+    grid-column: 1/5
+    label: "系统组件总览"
+    style.fill: "#1976D2"
+    style.font-color: white
+  }
+
+  # 左侧占 2 列
+  main_component: {
+    grid-column: 1/3
+    grid-row: 2/4
+    label: "主要组件"
+    style.fill: "#E3F2FD"
+  }
+
+  # 右侧 2×2 网格
+  sub1: {
+    grid-column: 3
+    grid-row: 2
+    label: "子组件 1"
+  }
+
+  sub2: {
+    grid-column: 4
+    grid-row: 2
+    label: "子组件 2"
+  }
+
+  sub3: {
+    grid-column: 3
+    grid-row: 3
+    label: "子组件 3"
+  }
+
+  sub4: {
+    grid-column: 4
+    grid-row: 3
+    label: "子组件 4"
+  }
+}
+```
+
+### 场景 2: 动态内容网格（元素数量可变）
+
+```d2
+dynamic_grid: {
+  grid-columns: 4
+  grid-gap: 20
+
+  # 使用占位符预留位置
+  item_1: "实际内容 1"
+  item_2: "实际内容 2"
+  item_3: "实际内容 3"
+
+  # 空占位符（可根据需要填充）
+  placeholder_1: "" { style.opacity: 0 }
+  placeholder_2: "" { style.opacity: 0 }
+  placeholder_3: "" { style.opacity: 0 }
+
+  # 更多实际内容...
+}
+```
+
+### 场景 3: 网格内表单布局
+
+```d2
+form_grid: {
+  label: "用户信息表单"
+  grid-columns: 2
+  grid-gap: 15
+
+  # 标签和输入框配对
+  label_name: "姓名:" { horizontal-align: right }
+  input_name: "[输入框]" { style.fill: "#FFFFFF" }
+
+  label_email: "邮箱:" { horizontal-align: right }
+  input_email: "[输入框]" { style.fill: "#FFFFFF" }
+
+  label_phone: "电话:" { horizontal-align: right }
+  input_phone: "[输入框]" { style.fill: "#FFFFFF" }
+
+  # 提交按钮占据两列
+  submit_button: {
+    grid-column: 1/3
+    label: "提交"
+    style.fill: "#4CAF50"
+    style.font-color: white
+    horizontal-align: center
+  }
+}
+```
+
+---
+
+**文档版本**: 2.0.0
+**最后更新**: 2025-10-10
+**适用 D2 版本**: v0.6+
+**兼容 Kroki**: ✅ 全面兼容
+**代码行数**: 300+ 行示例代码
+**文件大小**: 约 12,000 字节

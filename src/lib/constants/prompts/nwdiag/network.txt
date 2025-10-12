@@ -1,0 +1,315 @@
+
+# NwDiag Network 生成要求
+
+## 图表类型：网络拓扑图（Network Topology）
+
+网络拓扑图用于展示多网段网络结构和设备连接关系，适用于：
+- 企业三层网络架构（核心层、汇聚层、接入层）
+- DMZ 安全区域设计
+- 多数据中心互联拓扑
+
+## 核心语法
+
+### 基础网络定义
+```
+nwdiag {
+  network dmz {
+    address = "210.x.x.x/24"
+    web01 [address = "210.x.x.1"];
+    web02 [address = "210.x.x.2"];
+  }
+
+  network internal {
+    address = "172.16.0.0/24"
+    web01 [address = "172.16.0.1"];
+    db01 [address = "172.16.0.10"];
+  }
+}
+```
+
+**语法要点**：
+- 每个 `network` 代表一个网段
+- 节点可以同时出现在多个网段中（如 web01 同时在 dmz 和 internal）
+- `address` 定义 IP 地址
+
+### 分组和标签
+```
+nwdiag {
+  network public {
+    web [address = "1.1.1.1"];
+  }
+
+  group {
+    label = "Web Servers";
+    web;
+  }
+}
+```
+
+## 生成示例
+
+### 示例 1: 三层网络架构（简单场景）
+**用户需求**：企业三层网络架构，包含 DMZ、内网、数据库网段
+
+**生成代码**：
+```
+nwdiag {
+  network dmz {
+    address = "210.x.x.x/24"
+    web01 [address = "210.x.x.1"];
+    web02 [address = "210.x.x.2"];
+  }
+
+  network internal {
+    address = "172.16.0.0/24"
+    web01 [address = "172.16.0.1"];
+    web02 [address = "172.16.0.2"];
+    app01 [address = "172.16.0.10"];
+  }
+
+  network db {
+    address = "172.16.1.0/24"
+    app01 [address = "172.16.1.1"];
+    db01 [address = "172.16.1.10"];
+    db02 [address = "172.16.1.11"];
+  }
+
+  group {
+    label = "DMZ Zone";
+    web01;
+    web02;
+  }
+
+  group {
+    label = "Application Layer";
+    app01;
+  }
+
+  group {
+    label = "Database Layer";
+    db01;
+    db02;
+  }
+}
+```
+
+**关键点**：
+- 三个网段：DMZ、内网、数据库网段
+- web 服务器同时在 DMZ 和内网中（双网卡）
+- app 服务器连接内网和数据库网段
+- 使用 group 进行逻辑分组
+
+### 示例 2: 数据中心互联（中等复杂度）
+**用户需求**：两个数据中心通过专线互联，包含核心交换、防火墙
+
+**生成代码**：
+```
+nwdiag {
+  network dc1_core {
+    address = "10.1.0.0/24"
+    core_sw1 [address = "10.1.0.1", description = "Core Switch DC1"];
+    fw1 [address = "10.1.0.254", description = "Firewall DC1"];
+  }
+
+  network dc2_core {
+    address = "10.2.0.0/24"
+    core_sw2 [address = "10.2.0.1", description = "Core Switch DC2"];
+    fw2 [address = "10.2.0.254", description = "Firewall DC2"];
+  }
+
+  network interconnect {
+    address = "192.168.0.0/30"
+    fw1 [address = "192.168.0.1"];
+    fw2 [address = "192.168.0.2"];
+  }
+
+  network dc1_servers {
+    address = "10.1.10.0/24"
+    core_sw1 [address = "10.1.10.1"];
+    web1 [address = "10.1.10.10"];
+    db1 [address = "10.1.10.20"];
+  }
+
+  network dc2_servers {
+    address = "10.2.10.0/24"
+    core_sw2 [address = "10.2.10.1"];
+    web2 [address = "10.2.10.10"];
+    db2 [address = "10.2.10.20"];
+  }
+
+  group dc1 {
+    label = "Data Center 1";
+    color = "#FFE0E0";
+    core_sw1;
+    fw1;
+    web1;
+    db1;
+  }
+
+  group dc2 {
+    label = "Data Center 2";
+    color = "#E0E0FF";
+    core_sw2;
+    fw2;
+    web2;
+    db2;
+  }
+}
+```
+
+**关键点**：
+- 两个数据中心各自的核心网段
+- 专线互联网段（/30 点对点链路）
+- 防火墙同时连接核心网段和互联网段
+- 使用颜色区分两个数据中心
+
+### 示例 3: DMZ 安全架构（高级场景）
+**用户需求**：包含外网、DMZ、内网、数据库网段的安全架构
+
+**生成代码**：
+```
+nwdiag {
+  internet [shape = "cloud"];
+
+  network outside {
+    address = "未分配"
+    internet [description = "Internet"];
+    fw_outside [address = "公网IP"];
+  }
+
+  network dmz {
+    address = "192.168.1.0/24"
+    fw_dmz [address = "192.168.1.1"];
+    web [address = "192.168.1.10", description = "Web Server"];
+    mail [address = "192.168.1.20", description = "Mail Server"];
+  }
+
+  network inside {
+    address = "10.0.0.0/24"
+    fw_inside [address = "10.0.0.1"];
+    web [address = "10.0.0.10"];
+    app [address = "10.0.0.20"];
+  }
+
+  network database {
+    address = "10.0.1.0/24"
+    app [address = "10.0.1.1"];
+    db_master [address = "10.0.1.10", description = "MySQL Master"];
+    db_slave [address = "10.0.1.11", description = "MySQL Slave"];
+  }
+
+  fw_outside [description = "External Firewall"];
+  fw_dmz [description = "DMZ Firewall"];
+  fw_inside [description = "Internal Firewall"];
+
+  group dmz_zone {
+    label = "DMZ Zone";
+    color = "#FFE0B0";
+    web;
+    mail;
+  }
+
+  group internal {
+    label = "Internal Network";
+    color = "#E0FFE0";
+    app;
+  }
+
+  group database {
+    label = "Database Cluster";
+    color = "#E0E0FF";
+    db_master;
+    db_slave;
+  }
+}
+```
+
+**关键点**：
+- 使用 `shape = "cloud"` 表示互联网
+- 多层防火墙架构（外网防火墙、DMZ 防火墙、内网防火墙）
+- Web 服务器同时在 DMZ 和内网（前端和后端接口）
+- 数据库主从架构
+- 使用颜色区分安全区域
+
+## 常见错误
+
+### 错误 1: 节点未在任何网段中定义
+**❌ 错误写法**：
+```
+nwdiag {
+  web01;
+
+  network internal {
+    db01;
+  }
+}
+```
+
+**✅ 正确写法**：
+```
+nwdiag {
+  network dmz {
+    web01 [address = "210.x.x.1"];
+  }
+
+  network internal {
+    db01 [address = "172.16.0.10"];
+  }
+}
+```
+
+**原因**：所有节点都必须在某个 `network` 中定义地址。
+
+### 错误 2: IP 地址与网段不匹配
+**❌ 错误写法**：
+```
+nwdiag {
+  network dmz {
+    address = "192.168.1.0/24"
+    web01 [address = "10.0.0.1"];  // 不在 192.168.1.0/24 网段
+  }
+}
+```
+
+**✅ 正确写法**：
+```
+nwdiag {
+  network dmz {
+    address = "192.168.1.0/24"
+    web01 [address = "192.168.1.10"];
+  }
+}
+```
+
+**原因**：节点的 IP 地址必须在所属网段的地址范围内。
+
+### 错误 3: 缺少图表声明
+**❌ 错误写法**：
+```
+network dmz {
+  web01;
+}
+```
+
+**✅ 正确写法**：
+```
+nwdiag {
+  network dmz {
+    web01 [address = "192.168.1.1"];
+  }
+}
+```
+
+**原因**：必须使用 `nwdiag {}` 包裹所有内容。
+
+## 生成检查清单
+
+- [ ] **图表声明**：使用 `nwdiag {}` 包裹
+- [ ] **网段定义**：每个 `network` 都有名称和 `address`
+- [ ] **节点地址**：所有节点都定义了 `address` 属性
+- [ ] **IP 匹配**：节点 IP 地址与所属网段匹配
+- [ ] **描述清晰**：关键节点有 `description` 属性
+- [ ] **分组合理**：使用 `group` 进行逻辑分组
+- [ ] **代码可渲染**：语法正确，可直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

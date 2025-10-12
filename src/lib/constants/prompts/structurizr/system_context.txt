@@ -1,0 +1,52 @@
+# System Context (系统上下文图) - C4 Level 1
+
+生成单个系统的边界和外部依赖图。
+
+## 关键特点
+
+- **聚焦单系统**: 明确一个 Software System 作为主体
+- **边界定义**: 展示什么在系统内，什么在系统外
+- **用户交互**: 展示系统的直接用户（Person）
+- **外部集成**: 展示与其他系统的集成关系
+
+## 输出结构
+
+```
+workspace {
+    model {
+        # 用户
+        user = person "用户"
+        admin = person "管理员"
+
+        # 主系统
+        targetSystem = softwareSystem "目标系统" "系统描述"
+
+        # 外部系统
+        externalA = softwareSystem "外部系统A" {
+            tags "External"
+        }
+        externalB = softwareSystem "外部系统B" {
+            tags "External"
+        }
+
+        # 关系
+        user -> targetSystem "使用"
+        admin -> targetSystem "管理"
+        targetSystem -> externalA "调用 API"
+        targetSystem -> externalB "发送数据"
+    }
+
+    views {
+        systemContext targetSystem "context" "系统上下文" {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+## 注意事项
+
+- 不要深入到容器内部（那是 Container 视图的工作）
+- 关系描述要清晰：用户做什么，系统与外部如何交互
+- 适合非技术干系人理解系统定位

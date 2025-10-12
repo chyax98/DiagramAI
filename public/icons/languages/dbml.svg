@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <!-- 背景 -->
+  <rect width="256" height="256" rx="24" fill="#8B5CF6"/>
+
+  <!-- 数据库表 1 -->
+  <rect x="40" y="50" width="90" height="80" rx="4" fill="white" stroke="#8B5CF6" stroke-width="2"/>
+  <line x1="40" y1="75" x2="130" y2="75" stroke="#8B5CF6" stroke-width="2"/>
+  <text x="85" y="68" font-family="monospace" font-size="12" font-weight="bold" fill="#8B5CF6" text-anchor="middle">Users</text>
+  <text x="48" y="95" font-family="monospace" font-size="10" fill="#7C3AED">🔑 id</text>
+  <text x="48" y="110" font-family="monospace" font-size="10" fill="#7C3AED">name</text>
+
+  <!-- 数据库表 2 -->
+  <rect x="160" y="50" width="90" height="80" rx="4" fill="white" stroke="#8B5CF6" stroke-width="2"/>
+  <line x1="160" y1="75" x2="250" y2="75" stroke="#8B5CF6" stroke-width="2"/>
+  <text x="205" y="68" font-family="monospace" font-size="12" font-weight="bold" fill="#8B5CF6" text-anchor="middle">Posts</text>
+  <text x="168" y="95" font-family="monospace" font-size="10" fill="#7C3AED">🔑 id</text>
+  <text x="168" y="110" font-family="monospace" font-size="10" fill="#7C3AED">user_id</text>
+
+  <!-- 关系线 (one-to-many) -->
+  <path d="M 130 90 L 160 90" stroke="white" stroke-width="3" marker-end="url(#dbml-arrow)"/>
+  <circle cx="134" cy="90" r="4" fill="white" stroke="white" stroke-width="2"/>
+
+  <defs>
+    <marker id="dbml-arrow" markerWidth="12" markerHeight="12" refX="10" refY="3" orient="auto">
+      <path d="M 0 0 L 0 6 L 9 3 Z" fill="white"/>
+      <path d="M 9 0 L 9 6" stroke="white" stroke-width="2"/>
+    </marker>
+  </defs>
+
+  <!-- ER 图标识 -->
+  <text x="128" y="180" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">ER</text>
+  <path d="M 100 190 L 156 190" stroke="white" stroke-width="2"/>
+</svg>

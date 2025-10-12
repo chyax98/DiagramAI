@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+  <!-- ASCII 风格的方框 -->
+  <rect x="3" y="4" width="8" height="6" fill="none" stroke="#607D8B" stroke-dasharray="1,1"/>
+  <text x="7" y="8.5" font-family="monospace" font-size="3" fill="#607D8B" text-anchor="middle">+--+</text>
+
+  <!-- ASCII 箭头 -->
+  <path d="M 11 7 L 13 7" stroke="#607D8B" stroke-width="1"/>
+  <path d="M 12.5 6.5 L 13 7 L 12.5 7.5" stroke="#607D8B" stroke-width="1" fill="none"/>
+
+  <!-- 第二个方框 -->
+  <rect x="13" y="4" width="8" height="6" fill="none" stroke="#607D8B" stroke-dasharray="1,1"/>
+  <text x="17" y="8.5" font-family="monospace" font-size="3" fill="#607D8B" text-anchor="middle">|  |</text>
+
+  <!-- ASCII 字符装饰 -->
+  <text x="3" y="16" font-family="monospace" font-size="6" fill="#607D8B">+-|</text>
+  <text x="12" y="16" font-family="monospace" font-size="6" fill="#607D8B">+-+</text>
+  <text x="18" y="16" font-family="monospace" font-size="6" fill="#607D8B">|</text>
+
+  <!-- 边框 -->
+  <rect x="1" y="1" width="22" height="22" fill="none" stroke="#E0E0E0" stroke-width="0.5" rx="2"/>
+</svg>

@@ -1,0 +1,59 @@
+# Deployment (部署图)
+
+生成软件的部署环境和基础设施架构。
+
+## 关键特点
+
+- **环境视图**: 展示部署环境（开发、测试、生产）
+- **Deployment Node**: 物理/虚拟节点（服务器、容器、云实例）
+- **Container Instance**: 容器的部署实例
+- **嵌套结构**: 节点可以嵌套（数据中心 > 服务器 > Docker）
+
+## 输出结构
+
+```
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            webApp = container "Web 应用" "前端" "React"
+            apiApp = container "API 应用" "后端" "Spring Boot"
+            database = container "数据库" "数据存储" "PostgreSQL"
+        }
+
+        # 生产环境部署
+        deploymentEnvironment "生产环境" {
+            deploymentNode "阿里云" {
+                deploymentNode "负载均衡器" "Nginx" {
+                    webAppInstance = containerInstance webApp
+                }
+
+                deploymentNode "Kubernetes 集群" "K8s" {
+                    deploymentNode "API Pod" "Docker" {
+                        apiAppInstance1 = containerInstance apiApp "实例1"
+                        apiAppInstance2 = containerInstance apiApp "实例2"
+                    }
+                }
+
+                deploymentNode "RDS" "托管数据库" {
+                    databaseInstance = containerInstance database
+                }
+            }
+        }
+    }
+
+    views {
+        deployment system "生产环境" "prod" "生产环境部署" {
+            include *
+            autolayout tb
+        }
+    }
+}
+```
+
+## 注意事项
+
+- 使用 `deploymentEnvironment` 区分环境（开发、测试、生产）
+- `deploymentNode` 可以嵌套，体现基础设施层次
+- `containerInstance` 映射容器到部署节点
+- 第二个参数可以指定技术（Docker、K8s、Nginx）
+- 适合运维团队和 SRE 理解部署架构

@@ -1,0 +1,62 @@
+# Container (容器图) - C4 Level 2
+
+生成系统内部的技术架构和运行时容器。
+
+## 关键特点
+
+- **技术视图**: 展示技术栈和容器间通信
+- **Container 定义**: 独立运行/部署的单元（Web应用、API、数据库、消息队列等）
+- **技术栈**: 明确每个容器的技术实现（第三个参数）
+- **通信协议**: 关系中说明技术细节（HTTPS、gRPC、JDBC等）
+
+## 输出结构
+
+```
+workspace {
+    model {
+        user = person "用户"
+
+        system = softwareSystem "系统" {
+            # 前端容器
+            webApp = container "Web 应用" "前端界面" "React" {
+                tags "WebApp"
+            }
+
+            # 后端容器
+            apiApp = container "API 应用" "后端服务" "Spring Boot" {
+                tags "Backend"
+            }
+
+            # 数据容器
+            database = container "数据库" "数据存储" "PostgreSQL" {
+                tags "Database"
+            }
+
+            # 缓存容器
+            cache = container "缓存" "性能优化" "Redis" {
+                tags "Cache"
+            }
+        }
+
+        # 关系（包含技术细节）
+        user -> webApp "访问"
+        webApp -> apiApp "调用 API" "HTTPS/REST"
+        apiApp -> database "读写数据" "JDBC"
+        apiApp -> cache "缓存数据" "Redis Protocol"
+    }
+
+    views {
+        container system "containers" "容器架构" {
+            include *
+            autolayout tb
+        }
+    }
+}
+```
+
+## 注意事项
+
+- Container 的第三个参数是技术栈（必填）
+- 使用标签分类容器（WebApp, Backend, Database）
+- 关系要说明通信协议和技术
+- 适合开发团队和架构师理解技术方案

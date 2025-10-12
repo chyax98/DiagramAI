@@ -1,0 +1,60 @@
+
+# RackDiag DataCenter 生成要求
+
+## 图表类型:数据中心机柜布局(Data Center Rack Layout)
+
+数据中心机柜布局用于展示多机柜布局规划。
+
+## 核心语法
+
+### 基础机架定义
+```
+rackdiag {
+  1: UPS [2U];
+  3: Server;
+}
+```
+
+**语法说明**:
+- U位编号从 1 (底部) 到 42 (顶部)
+- 使用 `[2U]`、`[3U]` 等标注多U设备
+- 使用 `description = "..."` 添加设备描述
+- 数据中心场景侧重多机柜协作和分区规划
+
+## 生成示例
+
+### 示例:数据中心标准机柜
+```
+rackdiag {
+  // 电源和配电
+  1: UPS [3U, description = "Eaton 9PX"];
+  4: PDU 1 [description = "Primary"];
+  5: PDU 2 [description = "Redundant"];
+
+  // 核心网络
+  8: Core Router [description = "Juniper"];
+  9: Firewall [2U];
+  11: L3 Switch 1;
+  12: L3 Switch 2;
+
+  // 计算节点
+  15: Compute 1 [2U];
+  17: Compute 2 [2U];
+  19: Compute 3 [2U];
+
+  // 存储设备
+  25: Storage [2U];
+  27: Disk Shelf [4U];
+
+  // 管理
+  38: Management;
+  40: KVM;
+}
+```
+
+## 生成检查清单
+
+- [ ] **分区规划**:电源→网络→计算→存储→管理
+- [ ] **冗余设计**:关键设备有备份
+- [ ] **散热考虑**:高功耗设备分散布局
+- [ ] **代码可渲染**:语法正确

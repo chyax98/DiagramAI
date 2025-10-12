@@ -1,0 +1,423 @@
+
+# Vega-Lite Scatter Plot 生成要求
+
+## 专家视角
+
+作为散点图专家，你需要同时扮演：
+
+1. **数据关系分析专家**
+   - 识别两个变量之间的相关性（正相关、负相关、无关）
+   - 判断数据分布特征（聚集、分散、离群）
+   - 选择合适的坐标轴范围（是否从0开始）
+
+2. **Vega-Lite JSON 工程师**
+   - 精通 point mark 的配置（size、shape、filled、opacity）
+   - 掌握多维散点图的实现（color、size 通道）
+   - 熟悉回归线和趋势线的添加
+
+3. **代码质量审查员**
+   - 确保 x/y 轴数据类型正确（通常为 quantitative）
+   - 验证 scale.zero 设置合理（根据数据特点）
+   - 检查数据点样式清晰可辨
+
+## 核心语法
+
+### 基础散点图
+
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "基础散点图",
+  "data": {
+    "values": [
+      {"x": 10, "y": 20},
+      {"x": 15, "y": 30}
+    ]
+  },
+  "mark": {
+    "type": "point",
+    "filled": true,     // 填充数据点
+    "size": 100,        // 数据点大小
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "x",
+      "type": "quantitative",
+      "axis": {"title": "X 轴标题"}
+    },
+    "y": {
+      "field": "y",
+      "type": "quantitative",
+      "axis": {"title": "Y 轴标题"}
+    }
+  }
+}
+```
+
+### 分类散点图（使用颜色区分）
+
+```json
+{
+  "mark": {
+    "type": "point",
+    "filled": true,
+    "size": 100
+  },
+  "encoding": {
+    "x": {"field": "x", "type": "quantitative"},
+    "y": {"field": "y", "type": "quantitative"},
+    "color": {
+      "field": "category",
+      "type": "nominal",
+      "legend": {"title": "类别"}
+    }
+  }
+}
+```
+
+### 气泡图（使用大小表示第三维度）
+
+```json
+{
+  "mark": {
+    "type": "point",
+    "filled": true,
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {"field": "x", "type": "quantitative"},
+    "y": {"field": "y", "type": "quantitative"},
+    "size": {
+      "field": "value",
+      "type": "quantitative",
+      "legend": {"title": "大小"}
+    }
+  }
+}
+```
+
+### 坐标轴范围控制
+
+```json
+{
+  "encoding": {
+    "x": {
+      "field": "x",
+      "type": "quantitative",
+      "scale": {"zero": false}  // 不从0开始，显示数据范围
+    }
+  }
+}
+```
+
+## 生成示例
+
+### 示例 1: 基础散点图（简单场景）
+**用户需求**：展示身高和体重的关系，数据：(170,65), (175,70), (165,60), (180,75), (168,62)
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "身高体重散点图",
+  "data": {
+    "values": [
+      {"height": 170, "weight": 65},
+      {"height": 175, "weight": 70},
+      {"height": 165, "weight": 60},
+      {"height": 180, "weight": 75},
+      {"height": 168, "weight": 62}
+    ]
+  },
+  "mark": {
+    "type": "point",
+    "filled": true,
+    "size": 100,
+    "tooltip": true,
+    "color": "#4285f4"
+  },
+  "encoding": {
+    "x": {
+      "field": "height",
+      "type": "quantitative",
+      "axis": {"title": "身高 (cm)"},
+      "scale": {"zero": false}
+    },
+    "y": {
+      "field": "weight",
+      "type": "quantitative",
+      "axis": {"title": "体重 (kg)"},
+      "scale": {"zero": false}
+    }
+  },
+  "width": 400,
+  "height": 300
+}
+```
+
+**关键点**：
+- 使用 `filled: true` 填充数据点
+- `scale.zero: false` 不从0开始，显示数据真实范围
+- 两个轴都使用 `quantitative` 类型（数值数据）
+- 添加 `tooltip: true` 提升交互性
+
+### 示例 2: 分类散点图（中等复杂度）
+**用户需求**：展示不同班级学生的数学和英语成绩，A班：(85,90), (78,85), (92,88)，B班：(75,80), (88,92), (82,78)
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "学生成绩分布（按班级分类）",
+  "data": {
+    "values": [
+      {"class": "A班", "math": 85, "english": 90},
+      {"class": "A班", "math": 78, "english": 85},
+      {"class": "A班", "math": 92, "english": 88},
+      {"class": "B班", "math": 75, "english": 80},
+      {"class": "B班", "math": 88, "english": 92},
+      {"class": "B班", "math": 82, "english": 78}
+    ]
+  },
+  "mark": {
+    "type": "point",
+    "filled": true,
+    "size": 120,
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "math",
+      "type": "quantitative",
+      "axis": {"title": "数学成绩"},
+      "scale": {"domain": [0, 100]}
+    },
+    "y": {
+      "field": "english",
+      "type": "quantitative",
+      "axis": {"title": "英语成绩"},
+      "scale": {"domain": [0, 100]}
+    },
+    "color": {
+      "field": "class",
+      "type": "nominal",
+      "legend": {"title": "班级"},
+      "scale": {"range": ["#4285f4", "#ea4335"]}
+    }
+  },
+  "width": 400,
+  "height": 400
+}
+```
+
+**关键点**：
+- 使用 `color` 通道区分不同类别
+- 使用 `scale.domain` 固定坐标轴范围（0-100分）
+- 数据结构需要包含分类字段（class）
+- 使用 `scale.range` 自定义颜色
+
+### 示例 3: 气泡图（高级场景）
+**用户需求**：展示城市的人口、GDP和面积关系，北京(2200万,4万亿,1.6万km²)、上海(2500万,4.3万亿,0.6万km²)、广州(1500万,2.8万亿,0.7万km²)、深圳(1300万,3.2万亿,0.2万km²)
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "城市人口、GDP和面积关系（气泡图）",
+  "data": {
+    "values": [
+      {"city": "北京", "population": 2200, "gdp": 4.0, "area": 16000},
+      {"city": "上海", "population": 2500, "gdp": 4.3, "area": 6000},
+      {"city": "广州", "population": 1500, "gdp": 2.8, "area": 7000},
+      {"city": "深圳", "population": 1300, "gdp": 3.2, "area": 2000}
+    ]
+  },
+  "mark": {
+    "type": "point",
+    "filled": true,
+    "tooltip": true,
+    "opacity": 0.7
+  },
+  "encoding": {
+    "x": {
+      "field": "population",
+      "type": "quantitative",
+      "axis": {"title": "人口（万人）"}
+    },
+    "y": {
+      "field": "gdp",
+      "type": "quantitative",
+      "axis": {"title": "GDP（万亿元）"}
+    },
+    "size": {
+      "field": "area",
+      "type": "quantitative",
+      "legend": {"title": "面积（km²）"},
+      "scale": {"range": [100, 1000]}
+    },
+    "color": {
+      "field": "city",
+      "type": "nominal",
+      "legend": {"title": "城市"}
+    },
+    "text": {
+      "field": "city",
+      "type": "nominal"
+    }
+  },
+  "width": 500,
+  "height": 400
+}
+```
+
+**关键点**：
+- 使用 `size` 通道表示第三个维度（面积）
+- 使用 `color` 通道区分不同城市
+- 使用 `opacity` 控制透明度（避免重叠）
+- 使用 `scale.range` 控制气泡大小范围
+- 可选：使用 `text` 通道添加标签
+
+## 常见错误
+
+### 错误 1: x/y 轴数据类型错误
+**❌ 错误写法**：
+```json
+{
+  "encoding": {
+    "x": {"field": "height", "type": "nominal"},
+    "y": {"field": "weight", "type": "ordinal"}
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "encoding": {
+    "x": {"field": "height", "type": "quantitative"},
+    "y": {"field": "weight", "type": "quantitative"}
+  }
+}
+```
+
+**原因**：散点图的 x/y 轴通常使用 `quantitative` 类型（连续数值数据）。
+
+### 错误 2: 数据点不可见（未填充）
+**❌ 错误写法**：
+```json
+{
+  "mark": "point"
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "mark": {
+    "type": "point",
+    "filled": true,
+    "size": 100
+  }
+}
+```
+
+**原因**：默认的 point 可能不够明显，使用 `filled: true` 和适当的 `size` 提升可见性。
+
+### 错误 3: 坐标轴范围不合理
+**❌ 错误写法**：
+```json
+{
+  "encoding": {
+    "x": {
+      "field": "height",
+      "type": "quantitative"
+      // 默认从 0 开始，身高数据不合理
+    }
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "encoding": {
+    "x": {
+      "field": "height",
+      "type": "quantitative",
+      "scale": {"zero": false}
+    }
+  }
+}
+```
+
+**原因**：身高、体重等数据不需要从0开始，使用 `scale.zero: false` 显示真实范围。
+
+### 错误 4: 气泡图缺少 size 通道
+**❌ 错误写法**：
+```json
+{
+  "mark": "point",
+  "encoding": {
+    "x": {"field": "x", "type": "quantitative"},
+    "y": {"field": "y", "type": "quantitative"},
+    "color": {"field": "value", "type": "quantitative"}
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "mark": "point",
+  "encoding": {
+    "x": {"field": "x", "type": "quantitative"},
+    "y": {"field": "y", "type": "quantitative"},
+    "size": {"field": "value", "type": "quantitative"}
+  }
+}
+```
+
+**原因**：气泡图应使用 `size` 通道表示第三维度，而非 `color`。
+
+### 错误 5: 缺少图例标题
+**❌ 错误写法**：
+```json
+{
+  "encoding": {
+    "color": {"field": "category", "type": "nominal"}
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "encoding": {
+    "color": {
+      "field": "category",
+      "type": "nominal",
+      "legend": {"title": "类别"}
+    }
+  }
+}
+```
+
+**原因**：添加图例标题提升图表可读性。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **$schema 声明**：必须包含 `"$schema": "https://vega.github.io/schema/vega-lite/v5.json"`
+- [ ] **JSON 格式合法**：使用 JSON 验证器检查语法
+- [ ] **data.values 是对象数组**：每个元素是 `{"field": value}` 格式
+- [ ] **mark 类型正确**：使用 `"point"`
+- [ ] **x/y 轴类型正确**：通常使用 `quantitative`
+- [ ] **数据点可见**：使用 `filled: true` 和适当的 `size`
+- [ ] **坐标轴范围合理**：根据数据特点设置 `scale.zero`
+- [ ] **分类散点图有颜色**：使用 `color` 通道区分类别
+- [ ] **气泡图有大小**：使用 `size` 通道表示第三维度
+- [ ] **代码可渲染**：确保能通过 Kroki 正确渲染
+
+**任何检查项不通过，立即修正后重新生成**

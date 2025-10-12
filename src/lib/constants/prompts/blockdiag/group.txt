@@ -1,0 +1,364 @@
+
+# BlockDiag Group 生成要求
+
+## 图表类型：分组图（Group Diagram）
+
+分组图强调逻辑分组和层次结构，用于展示模块化系统和组织结构，适用于：
+- 系统模块化设计
+- 组织架构图
+- 逻辑分层展示
+
+## 核心语法
+
+### 基础分组
+```
+blockdiag {
+  group {
+    label = "前端模块";
+    UI; View;
+  }
+
+  group {
+    label = "后端模块";
+    API; Service; DB;
+  }
+
+  UI -> API;
+  View -> API;
+  API -> Service -> DB;
+}
+```
+
+**语法要点**：
+- `group {}` 定义分组
+- `label` 定义分组标签
+- 分组内列出包含的节点
+- 分组外定义连接关系
+
+### 嵌套分组
+```
+blockdiag {
+  group {
+    label = "应用层";
+    color = "#FFE0E0";
+
+    group {
+      label = "前端";
+      UI;
+    }
+
+    group {
+      label = "后端";
+      API; Service;
+    }
+  }
+
+  UI -> API -> Service;
+}
+```
+
+## 生成示例
+
+### 示例 1: 三层架构（简单场景）
+**用户需求**：展示经典三层架构（表现层、业务层、数据层）
+
+**生成代码**：
+```
+blockdiag {
+  // 表现层
+  group presentation {
+    label = "表现层 (Presentation)";
+    color = "#FFE0E0";
+
+    Web [label = "Web UI"];
+    Mobile [label = "Mobile App"];
+  }
+
+  // 业务层
+  group business {
+    label = "业务层 (Business Logic)";
+    color = "#E0FFE0";
+
+    Auth [label = "认证服务"];
+    Order [label = "订单服务"];
+    Payment [label = "支付服务"];
+  }
+
+  // 数据层
+  group data {
+    label = "数据层 (Data Access)";
+    color = "#E0E0FF";
+
+    MySQL [label = "MySQL"];
+    Redis [label = "Redis"];
+  }
+
+  // 连接关系
+  Web -> Auth;
+  Web -> Order;
+  Mobile -> Auth;
+  Mobile -> Payment;
+
+  Auth -> MySQL;
+  Auth -> Redis;
+  Order -> MySQL;
+  Payment -> MySQL;
+}
+```
+
+**关键点**：
+- 使用不同颜色区分三层
+- 每层使用 `group` 包裹
+- 跨层连接清晰展示数据流
+
+### 示例 2: 微服务架构（中等复杂度）
+**用户需求**：展示微服务系统的模块化结构和服务依赖
+
+**生成代码**：
+```
+blockdiag {
+  // 客户端分组
+  group clients {
+    label = "客户端";
+    color = "#FFD0D0";
+
+    Web [label = "Web 应用"];
+    iOS [label = "iOS App"];
+    Android [label = "Android App"];
+  }
+
+  // API 网关
+  Gateway [label = "API Gateway", color = "#D0FFD0"];
+
+  // 核心服务
+  group core_services {
+    label = "核心服务";
+    color = "#D0D0FF";
+
+    group auth {
+      label = "认证域";
+      Auth [label = "认证服务"];
+      User [label = "用户服务"];
+    }
+
+    group business {
+      label = "业务域";
+      Order [label = "订单服务"];
+      Product [label = "商品服务"];
+      Payment [label = "支付服务"];
+    }
+  }
+
+  // 基础设施
+  group infrastructure {
+    label = "基础设施";
+    color = "#FFFFD0";
+
+    Config [label = "配置中心"];
+    Registry [label = "服务注册"];
+    Monitor [label = "监控告警"];
+  }
+
+  // 数据存储
+  group storage {
+    label = "数据存储";
+    color = "#FFE0B0";
+
+    MySQL [label = "MySQL"];
+    Redis [label = "Redis"];
+    ElasticSearch [label = "ES"];
+  }
+
+  // 连接关系
+  Web -> Gateway;
+  iOS -> Gateway;
+  Android -> Gateway;
+
+  Gateway -> Auth;
+  Gateway -> Order;
+  Gateway -> Product;
+  Gateway -> Payment;
+
+  Auth -> User;
+  Order -> Product;
+  Order -> Payment;
+
+  Auth -> Redis;
+  User -> MySQL;
+  Order -> MySQL;
+  Product -> MySQL;
+  Payment -> MySQL;
+
+  Order -> ElasticSearch;
+  Product -> ElasticSearch;
+}
+```
+
+**关键点**：
+- 使用嵌套 `group` 表示子模块
+- 不同域使用不同颜色
+- 清晰展示服务间依赖关系
+
+### 示例 3: 企业组织架构（高级场景）
+**用户需求**：展示企业部门结构和汇报关系
+
+**生成代码**：
+```
+blockdiag {
+  // 高层管理
+  group executive {
+    label = "高层管理";
+    color = "#FFE0E0";
+    shape = "line";
+
+    CEO [label = "CEO", shape = "roundedbox"];
+  }
+
+  // 部门层级
+  group departments {
+    label = "部门";
+    orientation = portrait;
+
+    group tech {
+      label = "技术部";
+      color = "#E0E0FF";
+
+      CTO [label = "CTO"];
+
+      group dev {
+        label = "研发";
+        Frontend [label = "前端团队"];
+        Backend [label = "后端团队"];
+        QA [label = "测试团队"];
+      }
+
+      group ops {
+        label = "运维";
+        DevOps [label = "DevOps"];
+        SRE [label = "SRE"];
+      }
+    }
+
+    group product {
+      label = "产品部";
+      color = "#E0FFE0";
+
+      CPO [label = "CPO"];
+      PM1 [label = "产品经理 1"];
+      PM2 [label = "产品经理 2"];
+      UX [label = "UX 设计"];
+    }
+
+    group sales {
+      label = "销售部";
+      color = "#FFFFE0";
+
+      CSO [label = "CSO"];
+      Sales1 [label = "销售团队 1"];
+      Sales2 [label = "销售团队 2"];
+      Support [label = "客户支持"];
+    }
+  }
+
+  // 汇报关系
+  CEO -> CTO;
+  CEO -> CPO;
+  CEO -> CSO;
+
+  CTO -> Frontend;
+  CTO -> Backend;
+  CTO -> QA;
+  CTO -> DevOps;
+  CTO -> SRE;
+
+  CPO -> PM1;
+  CPO -> PM2;
+  CPO -> UX;
+
+  CSO -> Sales1;
+  CSO -> Sales2;
+  CSO -> Support;
+
+  // 协作关系（虚线）
+  PM1 -> Frontend [style = "dashed"];
+  PM1 -> Backend [style = "dashed"];
+  PM2 -> Frontend [style = "dashed"];
+  UX -> Frontend [style = "dashed"];
+}
+```
+
+**关键点**：
+- 使用嵌套 `group` 表示部门层级
+- 不同部门使用不同颜色
+- 实线表示汇报关系，虚线表示协作关系
+- `orientation = portrait` 控制分组布局方向
+
+## 常见错误
+
+### 错误 1: 分组内节点未定义
+**❌ 错误写法**：
+```
+blockdiag {
+  group {
+    label = "模块 A";
+    NodeX;  // NodeX 未定义
+  }
+}
+```
+
+**✅ 正确写法**：
+```
+blockdiag {
+  group {
+    label = "模块 A";
+    A [label = "节点 A"];
+    B [label = "节点 B"];
+  }
+
+  A -> B;
+}
+```
+
+**原因**：分组内的节点必须先定义标签。
+
+### 错误 2: 嵌套分组语法错误
+**❌ 错误写法**：
+```
+blockdiag {
+  group outer {
+    group inner {
+      A;
+    }
+  }
+}
+```
+
+**✅ 正确写法**：
+```
+blockdiag {
+  group outer {
+    label = "外层分组";
+
+    group inner {
+      label = "内层分组";
+      A [label = "节点 A"];
+    }
+  }
+
+  A -> B;
+}
+```
+
+**原因**：嵌套分组都需要定义 `label`，节点需要定义标签。
+
+## 生成检查清单
+
+- [ ] **图表声明**：使用 `blockdiag {}` 包裹
+- [ ] **分组定义**：每个 `group` 都有 `label`
+- [ ] **节点定义**：分组内的节点都定义了标签
+- [ ] **分组颜色**：使用 `color` 区分不同分组
+- [ ] **嵌套合理**：嵌套分组层级清晰，不过深
+- [ ] **连接关系**：跨分组连接正确定义
+- [ ] **代码可渲染**：语法正确，可直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

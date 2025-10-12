@@ -1,0 +1,68 @@
+# Component (组件图) - C4 Level 3
+
+生成容器内部的组件结构和职责划分。
+
+## 关键特点
+
+- **代码视图**: 展示单个容器内部的代码组织
+- **Component 定义**: 代码层面的逻辑分组（Controller、Service、Repository等）
+- **分层架构**: 体现典型的分层设计（MVC、DDD等）
+- **职责清晰**: 每个组件有明确的职责描述
+
+## 输出结构
+
+```
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            apiApp = container "API 应用" "后端服务" "Spring Boot" {
+                # 控制器层
+                userController = component "用户控制器" "处理用户相关请求" "Spring MVC Controller" {
+                    tags "Controller"
+                }
+                orderController = component "订单控制器" "处理订单相关请求" "Spring MVC Controller" {
+                    tags "Controller"
+                }
+
+                # 服务层
+                userService = component "用户服务" "用户业务逻辑" "Spring Service" {
+                    tags "Service"
+                }
+                orderService = component "订单服务" "订单业务逻辑" "Spring Service" {
+                    tags "Service"
+                }
+
+                # 仓储层
+                userRepository = component "用户仓储" "用户数据访问" "Spring Data JPA" {
+                    tags "Repository"
+                }
+                orderRepository = component "订单仓储" "订单数据访问" "Spring Data JPA" {
+                    tags "Repository"
+                }
+
+                # 组件间关系
+                userController -> userService "调用"
+                orderController -> orderService "调用"
+                userService -> userRepository "访问数据"
+                orderService -> orderRepository "访问数据"
+                orderService -> userService "查询用户"
+            }
+        }
+    }
+
+    views {
+        component apiApp "components" "API 应用组件" {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+## 注意事项
+
+- Component 必须定义在 Container 内部
+- 第三个参数是技术实现（Controller、Service、Repository）
+- 使用标签对组件分类
+- 体现分层架构的依赖关系（Controller → Service → Repository）
+- 适合开发团队内部设计和代码审查

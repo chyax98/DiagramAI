@@ -1,0 +1,262 @@
+
+# BlockDiag Block 生成要求
+
+## 图表类型：块状流程图（Block Diagram）
+
+块状流程图用于展示简化的流程和关系，比传统流程图更简洁，适用于：
+- 简化的业务流程展示
+- 系统模块关系图
+- 快速原型设计
+
+## 核心语法
+
+### 基础块状流程图
+```
+blockdiag {
+  A [label = "开始"];
+  B [label = "处理"];
+  C [label = "结束"];
+
+  A -> B -> C;
+}
+```
+
+**语法要点**：
+- 节点使用字母或数字标识
+- `label` 定义节点显示文本
+- `->` 定义连接关系
+
+### 节点形状
+```
+blockdiag {
+  A [label = "开始", shape = "roundedbox"];
+  B [label = "处理", shape = "box"];
+  C [label = "决策", shape = "diamond"];
+  D [label = "结束", shape = "ellipse"];
+}
+```
+
+**常用形状**：
+- `box` - 矩形（默认）
+- `roundedbox` - 圆角矩形
+- `diamond` - 菱形（决策）
+- `ellipse` - 椭圆
+- `circle` - 圆形
+- `note` - 便签
+
+## 生成示例
+
+### 示例 1: 简单登录流程（简单场景）
+**用户需求**：用户登录流程，包含验证和跳转
+
+**生成代码**：
+```
+blockdiag {
+  A [label = "用户访问"];
+  B [label = "登录页面"];
+  C [label = "输入凭证"];
+  D [label = "验证", shape = "diamond"];
+  E [label = "主页"];
+  F [label = "错误提示"];
+
+  A -> B -> C -> D;
+  D -> E [label = "成功"];
+  D -> F [label = "失败"];
+  F -> C;
+}
+```
+
+**关键点**：
+- 使用菱形表示决策点
+- 带标签的连接线表示条件分支
+- 失败路径可以返回到输入步骤
+
+### 示例 2: 订单处理流程（中等复杂度）
+**用户需求**：电商订单处理流程，包含多个处理阶段
+
+**生成代码**：
+```
+blockdiag {
+  // 节点定义
+  A [label = "接收订单", shape = "roundedbox"];
+  B [label = "库存检查", shape = "diamond"];
+  C [label = "支付验证", shape = "diamond"];
+  D [label = "发货", shape = "box"];
+  E [label = "完成", shape = "roundedbox"];
+  F [label = "缺货通知", shape = "note"];
+  G [label = "支付失败", shape = "note"];
+
+  // 连接关系
+  A -> B;
+  B -> C [label = "有库存"];
+  B -> F [label = "无库存"];
+  C -> D [label = "支付成功"];
+  C -> G [label = "支付失败"];
+  D -> E;
+
+  // 分组
+  group {
+    label = "订单验证阶段";
+    color = "#FFE0E0";
+    A; B; C;
+  }
+
+  group {
+    label = "履约阶段";
+    color = "#E0FFE0";
+    D; E;
+  }
+}
+```
+
+**关键点**：
+- 使用 `shape = "diamond"` 表示决策点
+- 使用 `shape = "note"` 表示通知类节点
+- 使用 `group` 和 `color` 区分不同阶段
+- 带标签的连接线清晰表示条件
+
+### 示例 3: 系统架构模块关系（高级场景）
+**用户需求**：展示微服务系统各模块间的依赖关系
+
+**生成代码**：
+```
+blockdiag {
+  // 前端层
+  UI [label = "Web UI", color = "#FFE0E0"];
+  Mobile [label = "Mobile App", color = "#FFE0E0"];
+
+  // API 网关
+  Gateway [label = "API Gateway", shape = "roundedbox", color = "#E0FFE0"];
+
+  // 服务层
+  Auth [label = "认证服务", color = "#E0E0FF"];
+  Order [label = "订单服务", color = "#E0E0FF"];
+  Payment [label = "支付服务", color = "#E0E0FF"];
+  Inventory [label = "库存服务", color = "#E0E0FF"];
+
+  // 数据层
+  Redis [label = "Redis Cache", shape = "ellipse", color = "#FFFFE0"];
+  MySQL [label = "MySQL", shape = "ellipse", color = "#FFFFE0"];
+  Queue [label = "Message Queue", shape = "ellipse", color = "#FFFFE0"];
+
+  // 连接关系
+  UI -> Gateway;
+  Mobile -> Gateway;
+
+  Gateway -> Auth;
+  Gateway -> Order;
+  Gateway -> Payment;
+
+  Order -> Inventory;
+  Payment -> Order;
+
+  Auth -> Redis;
+  Order -> MySQL;
+  Payment -> MySQL;
+  Inventory -> MySQL;
+
+  Order -> Queue;
+  Inventory -> Queue;
+
+  // 分组
+  group {
+    label = "客户端";
+    color = "#FFE0E0";
+    UI; Mobile;
+  }
+
+  group {
+    label = "业务服务";
+    color = "#E0E0FF";
+    Auth; Order; Payment; Inventory;
+  }
+
+  group {
+    label = "基础设施";
+    color = "#FFFFE0";
+    Redis; MySQL; Queue;
+  }
+}
+```
+
+**关键点**：
+- 使用颜色区分不同层级（前端、服务、数据）
+- 使用 `shape = "ellipse"` 表示数据存储
+- 使用 `group` 进行层级划分
+- 连接线清晰展示依赖关系
+
+## 常见错误
+
+### 错误 1: 节点未定义标签
+**❌ 错误写法**：
+```
+blockdiag {
+  A -> B -> C;
+}
+```
+
+**✅ 正确写法**：
+```
+blockdiag {
+  A [label = "步骤 A"];
+  B [label = "步骤 B"];
+  C [label = "步骤 C"];
+
+  A -> B -> C;
+}
+```
+
+**原因**：所有节点都应该定义清晰的标签，提高可读性。
+
+### 错误 2: 缺少图表声明
+**❌ 错误写法**：
+```
+A -> B -> C;
+```
+
+**✅ 正确写法**：
+```
+blockdiag {
+  A [label = "步骤 A"];
+  B [label = "步骤 B"];
+  C [label = "步骤 C"];
+
+  A -> B -> C;
+}
+```
+
+**原因**：必须使用 `blockdiag {}` 包裹所有内容。
+
+### 错误 3: 决策节点未使用菱形
+**❌ 错误写法**：
+```
+blockdiag {
+  A [label = "判断条件"];
+  A -> B;
+  A -> C;
+}
+```
+
+**✅ 正确写法**：
+```
+blockdiag {
+  A [label = "判断条件", shape = "diamond"];
+  A -> B [label = "是"];
+  A -> C [label = "否"];
+}
+```
+
+**原因**：判断节点应该使用 `shape = "diamond"` 并标注分支条件。
+
+## 生成检查清单
+
+- [ ] **图表声明**：使用 `blockdiag {}` 包裹
+- [ ] **节点标签**：所有节点都定义了清晰的 `label`
+- [ ] **节点形状**：决策节点使用 `diamond`，起止节点使用 `roundedbox` 或 `ellipse`
+- [ ] **连接关系**：使用 `->` 正确定义节点间的连接
+- [ ] **条件分支**：分支连接线有 `label` 标注条件
+- [ ] **分组合理**：使用 `group` 进行逻辑分组
+- [ ] **颜色区分**：使用 `color` 属性区分不同类型的节点或分组
+- [ ] **代码可渲染**：语法正确，可直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

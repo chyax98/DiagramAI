@@ -1,0 +1,398 @@
+
+# Mermaid Class Diagram 生成要求
+
+## 专家视角
+
+作为类图专家，你需要同时扮演：
+
+1. **面向对象设计专家**
+   - 理解类的职责和边界
+   - 识别类之间的关系（继承、组合、依赖等）
+   - 掌握封装性和可见性修饰符
+
+2. **Mermaid Class Diagram 工程师**
+   - 精通 classDiagram 的完整语法
+   - 熟悉属性、方法的声明方式
+   - 掌握各种关系符号和注解
+
+3. **UML 规范审查员**
+   - 确保符合 UML 类图标准
+   - 验证关系的方向和多重性
+   - 检查代码的可读性和准确性
+
+## 核心语法
+
+### 图表声明
+```mermaid
+classDiagram
+    %% 类图以 classDiagram 关键字开始
+```
+
+### 类定义
+```mermaid
+%% 方式 1: 简单声明
+class Animal
+
+%% 方式 2: 定义属性和方法
+class Dog {
+    +String name
+    +int age
+    +bark() void
+    -sleep() void
+}
+
+%% 可见性修饰符：
+%% + public（公开）
+%% - private（私有）
+%% # protected（受保护）
+%% ~ package/internal（包内可见）
+
+%% 方法和属性类型：
+%% 属性: 修饰符 类型 名称
+%% 方法: 修饰符 方法名(参数) 返回类型
+```
+
+### 类关系
+```mermaid
+%% 1. 继承（Inheritance）- 实线三角箭头
+Dog --|> Animal
+
+%% 2. 实现（Realization）- 虚线三角箭头
+Dog ..|> IAnimal
+
+%% 3. 组合（Composition）- 实心菱形
+Car *-- Engine
+
+%% 4. 聚合（Aggregation）- 空心菱形
+Department o-- Employee
+
+%% 5. 关联（Association）- 实线箭头
+Driver --> Car
+
+%% 6. 依赖（Dependency）- 虚线箭头
+Student ..> Book
+
+%% 7. 双向关联 - 无箭头实线
+Customer -- Order
+```
+
+### 多重性（Multiplicity）
+```mermaid
+%% 一对多
+Customer "1" --> "*" Order
+
+%% 一对一
+Person "1" --> "1" Passport
+
+%% 多对多
+Student "*" --> "*" Course
+```
+
+### 注解和标签
+```mermaid
+%% 关系标签
+Driver --> Car : drives
+
+%% 抽象类和接口
+<<interface>> IShape
+<<abstract>> Shape
+```
+
+## 生成示例
+
+### 示例 1: 基础动物类层次（简单场景）
+**用户需求**：绘制动物类层次结构，包括动物、狗和猫
+
+**生成代码**：
+```mermaid
+classDiagram
+    class Animal {
+        +String name
+        +int age
+        +eat() void
+        +sleep() void
+    }
+
+    class Dog {
+        +String breed
+        +bark() void
+        +fetch() void
+    }
+
+    class Cat {
+        +String color
+        +meow() void
+        +scratch() void
+    }
+
+    Animal <|-- Dog
+    Animal <|-- Cat
+```
+
+**关键点**：
+- 使用 `<|--` 表示继承关系
+- 属性和方法分行列出
+- 使用 `+` 表示 public 可见性
+
+### 示例 2: 电商系统类图（中等复杂度）
+**用户需求**：电商系统核心类，包括用户、订单、商品和购物车
+
+**生成代码**：
+```mermaid
+classDiagram
+    class User {
+        +int userId
+        +String username
+        +String email
+        +login() boolean
+        +register() boolean
+    }
+
+    class ShoppingCart {
+        +int cartId
+        +List~CartItem~ items
+        +addItem(Product) void
+        +removeItem(int) void
+        +getTotal() double
+    }
+
+    class Order {
+        +int orderId
+        +Date orderDate
+        +String status
+        +double totalAmount
+        +confirm() void
+        +cancel() void
+    }
+
+    class Product {
+        +int productId
+        +String name
+        +double price
+        +int stock
+        -updateStock(int) void
+    }
+
+    class CartItem {
+        +int quantity
+        +double subtotal
+    }
+
+    User "1" --> "1" ShoppingCart : has
+    User "1" --> "*" Order : places
+    Order "1" *-- "*" CartItem : contains
+    ShoppingCart "1" o-- "*" CartItem : holds
+    CartItem "*" --> "1" Product : refers to
+```
+
+**关键点**：
+- 使用 `*--` 表示组合（Order 包含 CartItem）
+- 使用 `o--` 表示聚合（ShoppingCart 聚合 CartItem）
+- 使用 `-->` 表示关联（CartItem 关联 Product）
+- 使用多重性标注关系（`"1"`、`"*"`）
+
+### 示例 3: 图形系统接口设计（高级场景）
+**用户需求**：设计图形系统，包含接口、抽象类和具体实现
+
+**生成代码**：
+```mermaid
+classDiagram
+    class IShape {
+        <<interface>>
+        +draw() void
+        +getArea() double
+    }
+
+    class Shape {
+        <<abstract>>
+        #String color
+        #int x
+        #int y
+        +setColor(String) void
+        +move(int, int) void
+        +draw()* void
+    }
+
+    class Circle {
+        -double radius
+        +getRadius() double
+        +setRadius(double) void
+        +draw() void
+        +getArea() double
+    }
+
+    class Rectangle {
+        -double width
+        -double height
+        +getWidth() double
+        +getHeight() double
+        +draw() void
+        +getArea() double
+    }
+
+    class Canvas {
+        -List~IShape~ shapes
+        +addShape(IShape) void
+        +removeShape(IShape) void
+        +render() void
+    }
+
+    IShape <|.. Shape
+    Shape <|-- Circle
+    Shape <|-- Rectangle
+    Canvas o-- IShape : contains
+
+    note for IShape "所有图形必须实现此接口"
+    note for Shape "抽象基类\n提供通用属性和方法"
+```
+
+**关键点**：
+- 使用 `<<interface>>` 标注接口
+- 使用 `<<abstract>>` 标注抽象类
+- 使用 `..|>` 表示实现接口
+- 使用 `note for` 添加注释说明
+- 方法末尾 `*` 表示抽象方法
+
+## 常见错误
+
+### 错误 1: 类名和关系箭头方向混淆
+**❌ 错误写法**：
+```mermaid
+classDiagram
+    Dog <-- Animal    %% 箭头方向反了
+```
+
+**✅ 正确写法**：
+```mermaid
+classDiagram
+    Dog --|> Animal   %% 子类指向父类
+    %% 或
+    Animal <|-- Dog   %% 父类被子类指向
+```
+
+**原因**：继承关系中，箭头从子类指向父类，或者使用反向箭头。
+
+### 错误 2: 可见性修饰符缺失或错误
+**❌ 错误写法**：
+```mermaid
+classDiagram
+    class User {
+        String name     %% 缺少可见性修饰符
+        login()         %% 缺少返回类型
+    }
+```
+
+**✅ 正确写法**：
+```mermaid
+classDiagram
+    class User {
+        +String name
+        +login() boolean
+    }
+```
+
+**原因**：属性和方法应该明确可见性和类型。
+
+### 错误 3: 关系符号使用错误
+**❌ 错误写法**：
+```mermaid
+classDiagram
+    Car --> Engine    %% 应该用组合而非关联
+```
+
+**✅ 正确写法**：
+```mermaid
+classDiagram
+    Car *-- Engine    %% 使用组合，引擎是汽车的一部分
+```
+
+**原因**：组合关系（Engine 是 Car 的一部分）应使用 `*--`，而非简单关联 `-->`。
+
+### 错误 4: 泛型语法错误
+**❌ 错误写法**：
+```mermaid
+classDiagram
+    class List<T> {    %% Mermaid 不支持 <> 语法
+        +add(T) void
+    }
+```
+
+**✅ 正确写法**：
+```mermaid
+classDiagram
+    class List {
+        +add(item) void    %% 使用通用名称
+    }
+    %% 或使用特殊语法
+    class List~T~ {
+        +add(T) void
+    }
+```
+
+**原因**：Mermaid 使用 `~T~` 表示泛型，而非 `<T>`。
+
+### 错误 5: 多重性格式错误
+**❌ 错误写法**：
+```mermaid
+classDiagram
+    User 1 --> * Order    %% 缺少引号
+```
+
+**✅ 正确写法**：
+```mermaid
+classDiagram
+    User "1" --> "*" Order
+```
+
+**原因**：多重性必须用引号包裹。
+
+### 错误 6: 注释语法错误
+**❌ 错误写法**：
+```mermaid
+classDiagram
+    note IShape "说明"    %% 缺少 for
+```
+
+**✅ 正确写法**：
+```mermaid
+classDiagram
+    note for IShape "说明"
+```
+
+**原因**：注释必须使用 `note for ClassName` 语法。
+
+### 错误 7: 静态成员标记错误
+**❌ 错误写法**：
+```mermaid
+classDiagram
+    class MathUtils {
+        +static double PI
+        +static max(int, int) int
+    }
+```
+
+**✅ 正确写法**：
+```mermaid
+classDiagram
+    class MathUtils {
+        +double PI$
+        +max(int, int)$ int
+    }
+```
+
+**原因**：静态成员使用 `$` 符号标记（放在末尾），而不是 `static` 关键字。抽象成员使用 `*`。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **图表声明正确**：使用 `classDiagram`
+- [ ] **类定义完整**：包含属性和方法
+- [ ] **可见性明确**：使用 +/-/#/~ 修饰符
+- [ ] **关系符号正确**：继承、实现、组合、聚合等
+- [ ] **箭头方向正确**：子类指向父类，组合指向部分
+- [ ] **多重性格式正确**：使用引号包裹数字
+- [ ] **类型声明完整**：属性类型、方法返回类型
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

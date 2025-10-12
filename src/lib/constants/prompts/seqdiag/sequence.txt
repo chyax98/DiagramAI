@@ -1,0 +1,192 @@
+
+# SeqDiag Sequence 生成要求
+
+## 图表类型：时序图（Sequence Diagram - BlockDiag风格）
+
+SeqDiag时序图用于展示对象间消息传递序列，采用BlockDiag简化语法。
+
+## 核心语法
+
+### 基础时序图
+```
+seqdiag {
+  Client -> Server [label = "request"];
+  Server -> Database [label = "query"];
+  Database --> Server [label = "data"];
+  Server --> Client [label = "response"];
+}
+```
+
+**语法要点**：
+- `->` 表示请求消息（实线箭头）
+- `-->` 表示返回消息（虚线箭头）
+- `[label = "..."]` 定义消息标签
+
+## 生成示例
+
+### 示例 1: 用户登录流程（简单场景）
+**用户需求**：展示用户登录的消息交互
+
+**生成代码**：
+```
+seqdiag {
+  // 定义对象
+  User; WebApp; AuthService; Database;
+
+  // 消息序列
+  User -> WebApp [label = "输入用户名密码"];
+  WebApp -> AuthService [label = "验证请求"];
+  AuthService -> Database [label = "查询用户"];
+  Database --> AuthService [label = "用户数据"];
+  AuthService --> WebApp [label = "JWT Token"];
+  WebApp --> User [label = "登录成功"];
+}
+```
+
+**关键点**：
+- 四个参与对象
+- 请求消息使用 `->`
+- 返回消息使用 `-->`
+- 消息标签清晰描述交互内容
+
+### 示例 2: 电商下单流程（中等复杂度）
+**用户需求**：展示电商下单的完整交互流程
+
+**生成代码**：
+```
+seqdiag {
+  // 对象定义
+  Customer; WebUI; OrderService; InventoryService; PaymentService; Database;
+
+  // 下单流程
+  Customer -> WebUI [label = "提交订单"];
+  WebUI -> OrderService [label = "创建订单"];
+
+  // 检查库存
+  OrderService -> InventoryService [label = "检查库存"];
+  InventoryService -> Database [label = "查询库存"];
+  Database --> InventoryService [label = "库存数据"];
+  InventoryService --> OrderService [label = "库存充足"];
+
+  // 支付流程
+  OrderService -> PaymentService [label = "请求支付"];
+  PaymentService --> OrderService [label = "支付成功"];
+
+  // 扣减库存
+  OrderService -> InventoryService [label = "扣减库存"];
+  InventoryService -> Database [label = "更新库存"];
+  Database --> InventoryService [label = "更新成功"];
+  InventoryService --> OrderService [label = "库存已扣减"];
+
+  // 返回结果
+  OrderService --> WebUI [label = "订单确认"];
+  WebUI --> Customer [label = "下单成功"];
+}
+```
+
+**关键点**：
+- 六个参与对象
+- 清晰展示检查库存→支付→扣减库存的顺序
+- 使用 `->` 和 `-->` 区分请求和返回
+
+### 示例 3: 微服务调用链（高级场景）
+**用户需求**：展示微服务架构中的服务调用链
+
+**生成代码**：
+```
+seqdiag {
+  // 对象定义
+  Client; APIGateway; AuthService; UserService; OrderService; NotificationService;
+
+  // 认证流程
+  Client -> APIGateway [label = "API请求 + Token"];
+  APIGateway -> AuthService [label = "验证Token"];
+  AuthService --> APIGateway [label = "验证通过"];
+
+  // 业务流程
+  APIGateway -> UserService [label = "获取用户信息"];
+  UserService --> APIGateway [label = "用户数据"];
+
+  APIGateway -> OrderService [label = "创建订单"];
+  OrderService -> NotificationService [label = "发送通知"];
+  NotificationService --> OrderService [label = "通知已发送"];
+  OrderService --> APIGateway [label = "订单数据"];
+
+  // 返回结果
+  APIGateway --> Client [label = "响应数据"];
+}
+```
+
+**关键点**：
+- API网关作为入口统一认证
+- 展示跨服务调用关系
+- 包含异步通知流程
+
+## 常见错误
+
+### 错误 1: 消息缺少标签
+**❌ 错误写法**：
+```
+seqdiag {
+  A -> B;
+  B --> A;
+}
+```
+
+**✅ 正确写法**：
+```
+seqdiag {
+  A -> B [label = "请求"];
+  B --> A [label = "响应"];
+}
+```
+
+**原因**：所有消息都应该定义清晰的标签。
+
+### 错误 2: 对象未定义
+**❌ 错误写法**：
+```
+seqdiag {
+  A -> B [label = "message"];
+}
+```
+
+**✅ 正确写法**：
+```
+seqdiag {
+  A; B;
+  A -> B [label = "message"];
+}
+```
+
+**原因**：最好显式定义所有参与对象。
+
+### 错误 3: 返回消息使用实线
+**❌ 错误写法**：
+```
+seqdiag {
+  A -> B [label = "request"];
+  B -> A [label = "return"];  // 应该用虚线
+}
+```
+
+**✅ 正确写法**：
+```
+seqdiag {
+  A -> B [label = "request"];
+  B --> A [label = "return"];  // 虚线表示返回
+}
+```
+
+**原因**：返回消息应该使用 `-->` 虚线箭头。
+
+## 生成检查清单
+
+- [ ] **图表声明**：使用 `seqdiag {}` 包裹
+- [ ] **对象定义**：所有参与对象都显式定义
+- [ ] **消息标签**：所有消息都有清晰的 `label`
+- [ ] **返回消息**：使用 `-->` 表示返回消息
+- [ ] **顺序合理**：消息的时间顺序符合业务逻辑
+- [ ] **代码可渲染**：语法正确，可直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

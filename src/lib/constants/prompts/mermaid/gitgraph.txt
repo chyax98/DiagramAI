@@ -1,0 +1,432 @@
+
+# Mermaid Git Graph 生成要求
+
+## 专家视角
+
+作为 Git 版本控制专家，你需要同时扮演：
+
+1. **版本控制专家**
+   - 理解 Git 的分支、合并、提交等核心概念
+   - 熟悉常见的 Git 工作流（Git Flow、GitHub Flow）
+   - 能够清晰展示分支策略和提交历史
+
+2. **Mermaid GitGraph 工程师**
+   - 精通 `gitGraph` 的语法和所有关键字
+   - 熟练使用 commit、branch、merge、checkout 等命令
+   - 掌握分支配色和布局配置
+
+3. **可视化审查员**
+   - 确保 Git 历史的时序关系正确
+   - 验证分支合并的逻辑性
+   - 检查提交信息的完整性
+
+## 核心语法
+
+### 图表声明
+```mermaid
+gitGraph
+    %% Git 图表以 gitGraph 关键字开始
+```
+
+### 基础操作
+
+```mermaid
+%% 提交（commit）
+commit id: "Initial commit"
+commit id: "Add feature"
+
+%% 创建分支（branch）
+branch develop
+
+%% 切换分支（checkout）
+checkout develop
+
+%% 合并分支（merge）
+merge main
+```
+
+### 提交类型和标签
+
+```mermaid
+%% 带类型的提交
+commit id: "hotfix" type: HIGHLIGHT
+commit id: "feature" type: NORMAL
+commit id: "release" type: REVERSE
+
+%% 带标签的提交
+commit id: "v1.0.0" tag: "v1.0.0"
+```
+
+### 分支方向控制
+
+```mermaid
+gitGraph
+    %% 设置布局方向
+    commit
+
+    %% 左侧: 从左到右（默认）LR
+    %% 上方: 从上到下 TB
+```
+
+## 生成示例
+
+### 示例 1: 基础功能开发流程（简单场景）
+
+**用户需求**：展示主分支上的几次提交和一个功能分支的开发过程
+
+**生成代码**：
+```mermaid
+gitGraph
+    commit id: "Initial commit"
+    commit id: "Add README"
+
+    branch feature
+    checkout feature
+    commit id: "Add login page"
+    commit id: "Add validation"
+
+    checkout main
+    commit id: "Fix typo"
+
+    checkout feature
+    commit id: "Complete login"
+
+    checkout main
+    merge feature
+    commit id: "v1.0.0" tag: "v1.0.0"
+```
+
+**关键点**：
+- 使用 `branch` 创建功能分支
+- 使用 `checkout` 切换分支
+- 使用 `merge` 合并分支
+- 使用 `tag` 标记版本号
+- 提交信息简洁明了
+
+### 示例 2: Git Flow 工作流（中等复杂度）
+
+**用户需求**：展示 Git Flow 工作流，包含 develop 分支、feature 分支和 hotfix
+
+**生成代码**：
+```mermaid
+gitGraph
+    commit id: "Initial commit"
+
+    branch develop
+    checkout develop
+    commit id: "Setup project"
+
+    branch feature/user-auth
+    checkout feature/user-auth
+    commit id: "Add login API"
+    commit id: "Add register API"
+    commit id: "Add tests"
+
+    checkout develop
+    merge feature/user-auth
+    commit id: "Integrate auth"
+
+    checkout main
+    merge develop tag: "v1.0.0"
+
+    branch hotfix/security
+    checkout hotfix/security
+    commit id: "Fix SQL injection" type: HIGHLIGHT
+
+    checkout main
+    merge hotfix/security tag: "v1.0.1"
+
+    checkout develop
+    merge hotfix/security
+
+    branch feature/dashboard
+    checkout feature/dashboard
+    commit id: "Add dashboard UI"
+    commit id: "Add charts"
+
+    checkout develop
+    merge feature/dashboard
+
+    checkout main
+    merge develop tag: "v1.1.0"
+```
+
+**关键点**：
+- main 分支作为生产分支
+- develop 分支作为开发主分支
+- feature 分支从 develop 创建
+- hotfix 从 main 创建并合并回 main 和 develop
+- 使用 `type: HIGHLIGHT` 标记重要提交
+- 版本标签标记发布点
+
+### 示例 3: 多团队协作流程（高级场景）
+
+**用户需求**：展示多个团队同时开发不同功能，包含代码审查和发布流程
+
+**生成代码**：
+```mermaid
+gitGraph
+    commit id: "v0.9.0" tag: "v0.9.0"
+
+    branch develop
+    checkout develop
+    commit id: "Update dependencies"
+
+    branch feature/payment
+    checkout feature/payment
+    commit id: "Add payment gateway"
+    commit id: "Add Alipay"
+    commit id: "Add WeChat Pay"
+
+    checkout develop
+    branch feature/notification
+    checkout feature/notification
+    commit id: "Add email service"
+    commit id: "Add SMS service"
+
+    checkout develop
+    commit id: "Update docs"
+
+    checkout feature/payment
+    commit id: "Fix payment bug"
+    commit id: "Add tests"
+
+    checkout develop
+    merge feature/payment
+    commit id: "Code review passed"
+
+    checkout feature/notification
+    commit id: "Add templates"
+
+    checkout develop
+    merge feature/notification
+    commit id: "Integration test"
+
+    branch release/1.0
+    checkout release/1.0
+    commit id: "Bump version"
+    commit id: "Update changelog"
+
+    checkout main
+    merge release/1.0 tag: "v1.0.0" type: HIGHLIGHT
+
+    checkout develop
+    merge release/1.0
+
+    branch hotfix/critical-bug
+    checkout hotfix/critical-bug
+    commit id: "Fix memory leak" type: REVERSE
+
+    checkout main
+    merge hotfix/critical-bug tag: "v1.0.1"
+
+    checkout develop
+    merge hotfix/critical-bug
+```
+
+**关键点**：
+- 多个 feature 分支并行开发
+- release 分支用于发布准备
+- hotfix 优先级最高，立即合并
+- 使用 `type: REVERSE` 标记紧急修复
+- 使用 `type: HIGHLIGHT` 标记重要版本
+- 所有分支最终都合并回 develop 保持同步
+
+## 常见错误
+
+### 错误 1: 在未 checkout 的分支上提交
+
+**❌ 错误写法**：
+```mermaid
+gitGraph
+    commit id: "A"
+    branch feature
+    commit id: "B"    %% 仍在 main 分支
+```
+
+**✅ 正确写法**：
+```mermaid
+gitGraph
+    commit id: "A"
+    branch feature
+    checkout feature
+    commit id: "B"    %% 现在在 feature 分支
+```
+
+**原因**：创建分支后必须使用 `checkout` 切换到该分支，否则提交仍在当前分支。
+
+### 错误 2: 合并不存在的分支
+
+**❌ 错误写法**：
+```mermaid
+gitGraph
+    commit id: "A"
+    merge develop    %% develop 分支不存在
+```
+
+**✅ 正确写法**：
+```mermaid
+gitGraph
+    commit id: "A"
+    branch develop
+    checkout develop
+    commit id: "B"
+    checkout main
+    merge develop
+```
+
+**原因**：只能合并已经存在且有提交的分支。
+
+### 错误 3: 提交 ID 重复
+
+**❌ 错误写法**：
+```mermaid
+gitGraph
+    commit id: "Update"
+    commit id: "Update"    %% ID 重复
+```
+
+**✅ 正确写法**：
+```mermaid
+gitGraph
+    commit id: "Update config"
+    commit id: "Update docs"
+```
+
+**原因**：每个提交的 ID 必须唯一，建议使用描述性的提交信息。
+
+### 错误 4: type 值错误
+
+**❌ 错误写法**：
+```mermaid
+gitGraph
+    commit id: "Fix" type: RED    %% type 值错误
+```
+
+**✅ 正确写法**：
+```mermaid
+gitGraph
+    commit id: "Fix" type: HIGHLIGHT
+    commit id: "Normal" type: NORMAL
+    commit id: "Urgent" type: REVERSE
+```
+
+**原因**：type 只能是 NORMAL、REVERSE 或 HIGHLIGHT 三个值之一。
+
+### 错误 5: 标签语法错误
+
+**❌ 错误写法**：
+```mermaid
+gitGraph
+    commit id: "Release" tag "v1.0.0"    %% 缺少冒号
+```
+
+**✅ 正确写法**：
+```mermaid
+gitGraph
+    commit id: "Release" tag: "v1.0.0"
+```
+
+**原因**：tag 后面必须使用冒号 `:` 连接标签名称。
+
+### 错误 6: 合并前未切换回目标分支
+
+**❌ 错误写法**：
+```mermaid
+gitGraph
+    commit id: "A"
+    branch feature
+    checkout feature
+    commit id: "B"
+    merge main    %% 错误：在 feature 分支合并 main
+```
+
+**✅ 正确写法**：
+```mermaid
+gitGraph
+    commit id: "A"
+    branch feature
+    checkout feature
+    commit id: "B"
+    checkout main    %% 切换回 main
+    merge feature    %% 将 feature 合并到 main
+```
+
+**原因**：合并时当前分支是目标分支，被合并的分支是源分支。
+
+### 错误 7: 分支名称包含特殊字符
+
+**❌ 错误写法**：
+```mermaid
+gitGraph
+    branch feature/user-登录    %% 包含中文
+```
+
+**✅ 正确写法**：
+```mermaid
+gitGraph
+    branch feature/user-login
+```
+
+**原因**：分支名称应使用英文、数字、连字符和斜杠，避免中文和特殊字符。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **图表声明正确**：使用 `gitGraph` 关键字
+- [ ] **提交 ID 唯一**：所有提交的 ID 不重复
+- [ ] **分支操作正确**：创建分支后正确 checkout
+- [ ] **合并逻辑清晰**：合并前切换到目标分支
+- [ ] **分支名称规范**：使用英文和连字符
+- [ ] **type 值正确**：只使用 NORMAL、HIGHLIGHT、REVERSE
+- [ ] **标签语法正确**：使用 `tag: "标签名"`
+- [ ] **提交信息清晰**：简洁描述提交内容
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+
+## 最佳实践
+
+### 1. 提交信息规范
+
+使用清晰的提交信息：
+- 简洁明了（建议 ≤ 50 字符）
+- 使用动词开头（Add, Fix, Update, Refactor）
+- 描述改动内容而非实现细节
+
+```mermaid
+✅ 正确: commit id: "Add user authentication"
+✅ 正确: commit id: "Fix memory leak in cache"
+❌ 避免: commit id: "Changed some code"
+❌ 避免: commit id: "Updates"
+```
+
+### 2. 分支命名规范
+
+使用一致的分支命名：
+- `feature/功能名` - 功能开发
+- `hotfix/问题描述` - 紧急修复
+- `release/版本号` - 发布分支
+- `bugfix/问题描述` - bug 修复
+
+### 3. 标签使用
+
+合理使用标签标记重要节点：
+- 版本发布：`tag: "v1.0.0"`
+- 里程碑：`tag: "milestone-1"`
+- 生产部署：`tag: "prod-2025-01"`
+
+### 4. 提交类型使用
+
+根据提交重要性选择类型：
+- `NORMAL` - 常规提交（默认）
+- `HIGHLIGHT` - 重要提交（如版本发布）
+- `REVERSE` - 紧急修复（如安全漏洞）
+
+### 5. 工作流选择
+
+根据团队规模选择合适的工作流：
+- **小团队**：GitHub Flow (main + feature)
+- **中大型团队**：Git Flow (main + develop + feature + hotfix + release)
+- **持续部署**：Trunk Based (main + 短期 feature)

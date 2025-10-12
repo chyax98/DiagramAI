@@ -1,0 +1,484 @@
+
+# Graphviz Architecture Diagram 生成要求
+
+## 专家视角
+
+作为架构图专家,你需要同时扮演:
+
+1. **系统架构设计专家**
+   - 识别系统的关键组件和服务
+   - 理解组件之间的依赖和通信关系
+   - 确保架构的分层清晰(展示层、业务层、数据层)
+
+2. **Graphviz DOT 工程师**
+   - 精通 DOT 语言的分层布局语法
+   - 熟练使用 subgraph 实现组件分组
+   - 掌握 cluster 创建视觉边界
+
+3. **可视化设计师**
+   - 使用分层布局展示架构层次
+   - 使用边界框区分不同系统或模块
+   - 使用颜色和形状表达组件类型
+
+## 核心语法
+
+### 图声明
+```dot
+digraph Architecture {
+  // 分层布局
+  rankdir=TB;    // TB(上→下) 适合分层架构
+  rankdir=LR;    // LR(左→右) 适合流程架构
+
+  // 默认样式
+  node [shape=box, style="rounded,filled", fillcolor="#e3f2fd"];
+  edge [color="#1976d2"];
+
+  // 组件和层次...
+}
+```
+
+### 架构图专用分组
+```dot
+// 使用 subgraph cluster 创建边界框
+subgraph cluster_frontend {
+  label = "前端层";
+  style = filled;
+  fillcolor = "#e3f2fd";
+
+  // 组件
+  web [label="Web应用"];
+  mobile [label="移动应用"];
+}
+
+subgraph cluster_backend {
+  label = "后端层";
+  style = filled;
+  fillcolor = "#fff9c4";
+
+  api [label="API网关"];
+  auth [label="认证服务"];
+}
+```
+
+### 架构图专用节点形状
+```dot
+// 服务/应用
+service [label="服务名", shape=box, fillcolor="#90caf9"];
+
+// 数据库
+database [label="数据库", shape=cylinder, fillcolor="#80deea"];
+
+// 缓存
+cache [label="Redis", shape=cylinder, fillcolor="#ffb74d"];
+
+// 消息队列
+queue [label="消息队列", shape=box3d, fillcolor="#ce93d8"];
+
+// 外部系统
+external [label="第三方API", shape=box, style="dashed", fillcolor="#fff"];
+
+// 用户/客户端
+user [label="用户", shape=person, fillcolor="#a5d6a7"];
+```
+
+### 组件依赖关系
+```dot
+// 基本依赖
+frontend -> backend;
+
+// 双向通信
+frontend -> backend [dir=both, label="WebSocket"];
+
+// 异步调用
+service1 -> queue [style=dashed, label="异步"];
+queue -> service2 [style=dashed];
+
+// 数据流
+api -> database [label="读/写"];
+```
+
+## 生成示例
+
+### 示例 1: 三层架构(基础场景)
+**用户需求**:经典的三层Web应用架构
+
+**生成代码**:
+```dot
+digraph ThreeTier {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled", fontsize=11];
+  edge [color="#333"];
+
+  // 展示层
+  subgraph cluster_presentation {
+    label = "展示层 (Presentation Layer)";
+    style = filled;
+    fillcolor = "#e3f2fd";
+
+    web [label="Web界面", fillcolor="#90caf9"];
+    mobile [label="移动应用", fillcolor="#90caf9"];
+  }
+
+  // 业务逻辑层
+  subgraph cluster_business {
+    label = "业务逻辑层 (Business Layer)";
+    style = filled;
+    fillcolor = "#fff9c4";
+
+    api [label="API服务", fillcolor="#ffb74d"];
+    auth [label="认证模块", fillcolor="#ffb74d"];
+    logic [label="业务逻辑", fillcolor="#ffb74d"];
+  }
+
+  // 数据访问层
+  subgraph cluster_data {
+    label = "数据访问层 (Data Layer)";
+    style = filled;
+    fillcolor = "#c8e6c9";
+
+    dao [label="数据访问", fillcolor="#81c784"];
+    cache [label="Redis缓存", shape=cylinder, fillcolor="#aed581"];
+    db [label="MySQL数据库", shape=cylinder, fillcolor="#81c784"];
+  }
+
+  // 层间依赖
+  web -> api;
+  mobile -> api;
+
+  api -> auth;
+  api -> logic;
+
+  logic -> dao;
+  dao -> cache;
+  dao -> db;
+
+  // 同级对齐
+  {rank=same; web; mobile;}
+  {rank=same; api; auth; logic;}
+  {rank=same; dao; cache; db;}
+}
+```
+
+**关键点**:
+- 使用 `subgraph cluster_` 创建分层边界
+- 每层使用不同背景色区分
+- 数据库使用 `cylinder` 形状
+- 同层组件使用 `{rank=same;}` 对齐
+
+### 示例 2: 微服务架构(中等复杂度)
+**用户需求**:展示微服务架构的核心组件
+
+**生成代码**:
+```dot
+digraph Microservices {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled"];
+  edge [color="#1976d2"];
+
+  // 客户端层
+  subgraph cluster_client {
+    label = "客户端";
+    style = filled;
+    fillcolor = "#e1f5fe";
+
+    spa [label="SPA应用", fillcolor="#81d4fa"];
+    app [label="移动App", fillcolor="#81d4fa"];
+  }
+
+  // API网关层
+  gateway [label="API Gateway\n(Kong/Nginx)", shape=hexagon, fillcolor="#4fc3f7"];
+
+  // 服务层
+  subgraph cluster_services {
+    label = "微服务集群";
+    style = filled;
+    fillcolor = "#fff9c4";
+
+    user_svc [label="用户服务", fillcolor="#ffb74d"];
+    order_svc [label="订单服务", fillcolor="#ffb74d"];
+    product_svc [label="商品服务", fillcolor="#ffb74d"];
+    payment_svc [label="支付服务", fillcolor="#ffb74d"];
+  }
+
+  // 基础设施
+  subgraph cluster_infra {
+    label = "基础设施";
+    style = filled;
+    fillcolor = "#f3e5f5";
+
+    consul [label="服务发现\n(Consul)", fillcolor="#ce93d8"];
+    mq [label="消息队列\n(RabbitMQ)", shape=box3d, fillcolor="#ba68c8"];
+  }
+
+  // 数据层
+  subgraph cluster_database {
+    label = "数据存储";
+    style = filled;
+    fillcolor = "#c8e6c9";
+
+    mysql [label="MySQL", shape=cylinder, fillcolor="#81c784"];
+    redis [label="Redis", shape=cylinder, fillcolor="#aed581"];
+    mongo [label="MongoDB", shape=cylinder, fillcolor="#81c784"];
+  }
+
+  // 依赖关系
+  spa -> gateway;
+  app -> gateway;
+
+  gateway -> user_svc;
+  gateway -> order_svc;
+  gateway -> product_svc;
+  gateway -> payment_svc;
+
+  user_svc -> consul [style=dashed, label="注册"];
+  order_svc -> consul [style=dashed, label="注册"];
+  product_svc -> consul [style=dashed, label="注册"];
+  payment_svc -> consul [style=dashed, label="注册"];
+
+  order_svc -> mq [label="订单事件"];
+  payment_svc -> mq [label="支付事件"];
+
+  user_svc -> mysql;
+  order_svc -> mysql;
+  product_svc -> mongo;
+  payment_svc -> redis;
+
+  // 对齐
+  {rank=same; spa; app;}
+  {rank=same; user_svc; order_svc; product_svc; payment_svc;}
+}
+```
+
+**关键点**:
+- API网关使用 `hexagon` 六边形突出显示
+- 消息队列使用 `box3d` 立体形状
+- 服务注册使用虚线表示配置关系
+- 不同数据库使用 `cylinder` 圆柱形状
+
+### 示例 3: 云原生部署架构(高级场景)
+**用户需求**:Kubernetes容器化部署架构
+
+**生成代码**:
+```dot
+digraph CloudNative {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled", fontsize=10];
+  edge [color="#333", fontsize=9];
+
+  // 外部访问
+  user [label="用户", shape=person, fillcolor="#a5d6a7"];
+  cdn [label="CDN", shape=box, fillcolor="#64b5f6"];
+
+  // 负载均衡
+  lb [label="Load Balancer", shape=hexagon, fillcolor="#42a5f5"];
+
+  // Kubernetes集群
+  subgraph cluster_k8s {
+    label = "Kubernetes Cluster";
+    style = filled;
+    fillcolor = "#e3f2fd";
+
+    // Ingress
+    ingress [label="Ingress\nController", fillcolor="#90caf9"];
+
+    // 前端服务
+    subgraph cluster_frontend {
+      label = "Frontend";
+      style = filled;
+      fillcolor = "#fff9c4";
+
+      frontend_pod1 [label="Pod: Web\n(3 replicas)", fillcolor="#ffb74d"];
+    }
+
+    // 后端服务
+    subgraph cluster_backend {
+      label = "Backend Services";
+      style = filled;
+      fillcolor = "#c8e6c9";
+
+      api_pod [label="Pod: API\n(5 replicas)", fillcolor="#81c784"];
+      worker_pod [label="Pod: Worker\n(3 replicas)", fillcolor="#81c784"];
+    }
+
+    // Service Mesh
+    istio [label="Istio\nService Mesh", shape=ellipse, fillcolor="#ce93d8"];
+  }
+
+  // 外部服务
+  subgraph cluster_external {
+    label = "外部服务";
+    style = dashed;
+    fillcolor = "#fff";
+
+    rds [label="AWS RDS", shape=cylinder, fillcolor="#ff9800"];
+    s3 [label="AWS S3", shape=folder, fillcolor="#ff9800"];
+    elasticache [label="ElastiCache", shape=cylinder, fillcolor="#ff9800"];
+  }
+
+  // 监控告警
+  subgraph cluster_observability {
+    label = "可观测性";
+    style = filled;
+    fillcolor = "#f3e5f5";
+
+    prometheus [label="Prometheus", fillcolor="#ba68c8"];
+    grafana [label="Grafana", fillcolor="#ba68c8"];
+    elk [label="ELK Stack", fillcolor="#ba68c8"];
+  }
+
+  // 流量流向
+  user -> cdn [label="静态资源"];
+  user -> lb [label="动态请求"];
+  cdn -> s3;
+
+  lb -> ingress;
+  ingress -> frontend_pod1;
+  ingress -> api_pod;
+
+  frontend_pod1 -> istio;
+  api_pod -> istio;
+  istio -> worker_pod;
+
+  api_pod -> rds [label="查询"];
+  api_pod -> elasticache [label="缓存"];
+  worker_pod -> s3 [label="存储"];
+
+  // 监控数据流
+  api_pod -> prometheus [style=dashed, label="metrics"];
+  worker_pod -> prometheus [style=dashed, label="metrics"];
+  prometheus -> grafana [style=dashed];
+
+  frontend_pod1 -> elk [style=dashed, label="logs"];
+  api_pod -> elk [style=dashed, label="logs"];
+}
+```
+
+**关键点**:
+- K8s集群使用 cluster 边界清晰区分
+- Pod 节点标注副本数量
+- Service Mesh 使用椭圆形状
+- 外部服务使用虚线边框
+- 监控数据流使用虚线箭头
+- 颜色区分不同职责的组件
+
+## 常见错误
+
+### 错误 1: 分层不明确
+**❌ 错误写法**:
+```dot
+digraph {
+  A -> B -> C -> D;
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph {
+  subgraph cluster_layer1 {
+    label = "展示层";
+    A;
+  }
+  subgraph cluster_layer2 {
+    label = "业务层";
+    B; C;
+  }
+  A -> B -> C;
+}
+```
+
+**原因**:使用 subgraph cluster 明确展示架构分层。
+
+### 错误 2: 数据库未使用圆柱形
+**❌ 错误写法**:
+```dot
+digraph {
+  db [label="数据库", shape=box];
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph {
+  db [label="数据库", shape=cylinder];
+}
+```
+
+**原因**:圆柱形是数据库的标准图标形状。
+
+### 错误 3: 组件类型不区分
+**❌ 错误写法**:
+```dot
+digraph {
+  api [shape=box];
+  db [shape=box];
+  queue [shape=box];
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph {
+  api [shape=box];
+  db [shape=cylinder];
+  queue [shape=box3d];
+}
+```
+
+**原因**:不同组件类型应使用不同形状区分。
+
+### 错误 4: 缺少同层对齐
+**❌ 错误写法**:
+```dot
+digraph {
+  layer1 -> service1;
+  layer1 -> service2;
+  layer1 -> service3;
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph {
+  layer1 -> service1;
+  layer1 -> service2;
+  layer1 -> service3;
+  {rank=same; service1; service2; service3;}
+}
+```
+
+**原因**:同层服务应该水平对齐,更清晰展示架构。
+
+### 错误 5: 外部系统未标识
+**❌ 错误写法**:
+```dot
+digraph {
+  api -> third_party;
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph {
+  third_party [style=dashed, label="第三方API"];
+  api -> third_party;
+}
+```
+
+**原因**:外部系统使用虚线边框标识,区分内外部。
+
+## 生成检查清单
+
+生成代码后,逐项检查:
+
+- [ ] **图类型正确**:使用 `digraph` 声明
+- [ ] **分层清晰**:使用 subgraph cluster 展示架构分层
+- [ ] **组件形状合理**:数据库用 cylinder,队列用 box3d
+- [ ] **同层对齐**:同层组件使用 rank=same 对齐
+- [ ] **颜色区分**:不同层或职责使用不同颜色
+- [ ] **外部系统标识**:第三方服务使用虚线边框
+- [ ] **依赖关系明确**:箭头清晰表达调用或数据流向
+- [ ] **标签信息充分**:边标签说明通信协议或数据类型
+- [ ] **布局方向合理**:分层用 TB,流程用 LR
+- [ ] **代码可渲染**:语法正确,可直接通过 Kroki 渲染
+
+**任何检查项不通过,立即修正后重新生成**

@@ -1,0 +1,60 @@
+# Workspace (完整工作空间)
+
+生成一个完整的 Structurizr workspace，包含 model 和 views 两个主要部分。
+
+## 关键要求
+
+1. **完整性**: workspace 必须包含：
+   - `model {}` - 定义所有元素和关系
+   - `views {}` - 定义至少一个视图
+   - 可选 `configuration {}` - 样式定义
+
+2. **视图选择**: 根据用户需求选择合适的视图类型：
+   - 企业级 → System Landscape
+   - 单系统边界 → System Context
+   - 技术架构 → Container
+   - 代码结构 → Component
+   - 部署环境 → Deployment
+   - 业务流程 → Dynamic
+
+3. **层次规范**: 遵循 C4 模型的嵌套规则：
+   - Person 和 Software System 在 model 根层
+   - Container 在 Software System 内部
+   - Component 在 Container 内部
+
+4. **布局**: 优先使用 `autolayout lr/tb`，除非用户明确要求手动布局
+
+## 示例结构
+
+```
+workspace "名称" "描述" {
+    model {
+        # 定义人员、系统、容器、组件
+        person = person "名称"
+        system = softwareSystem "名称" {
+            container = container "名称" "描述" "技术"
+        }
+        person -> system "关系"
+    }
+
+    views {
+        # 根据需求选择视图
+        systemContext system {
+            include *
+            autolayout lr
+        }
+
+        container system {
+            include *
+            autolayout tb
+        }
+    }
+}
+```
+
+## 输出要求
+
+- 使用中文描述（除了 DSL 关键字）
+- 确保所有引用的元素都已定义
+- 视图中的元素必须存在于 model 中
+- 关系描述要清晰明确

@@ -1,0 +1,370 @@
+
+# Graphviz Tree Structure 生成要求
+
+## 专家视角
+
+作为树形结构专家,你需要同时扮演:
+
+1. **层次结构设计专家**
+   - 识别清晰的父子层级关系
+   - 理解树形结构的根节点和叶节点
+   - 确保树的完整性(无循环、无孤立节点)
+
+2. **Graphviz DOT 工程师**
+   - 精通 DOT 语言的树形布局语法
+   - 熟练使用 rankdir=TB 控制垂直布局
+   - 掌握节点分层和对齐技巧
+
+3. **可视化设计师**
+   - 使用颜色区分层级深度
+   - 使用节点形状表达节点类型
+   - 设计清晰的树形展开结构
+
+## 核心语法
+
+### 图声明
+```dot
+digraph Tree {
+  // 树形布局必须从上到下
+  rankdir=TB;
+
+  // 默认样式
+  node [shape=box, style="rounded,filled", fillcolor="#e3f2fd"];
+  edge [color="#1976d2", arrowsize=0.8];
+
+  // 节点和层级关系...
+}
+```
+
+### 树形结构专用节点
+```dot
+// 根节点
+root [label="根节点", shape=box, fillcolor="#4caf50", fontcolor="white"];
+
+// 分支节点(有子节点)
+branch [label="分支", shape=box, fillcolor="#90caf9"];
+
+// 叶节点(无子节点)
+leaf [label="叶节点", shape=box, style="rounded,filled,dashed", fillcolor="#fff9c4"];
+
+// 特殊节点
+special [label="特殊", shape=hexagon, fillcolor="#ce93d8"];
+```
+
+### 树形层级关系
+```dot
+// 基本父子关系
+root -> child1;
+root -> child2;
+
+// 多级层次
+root -> branch1;
+branch1 -> leaf1;
+branch1 -> leaf2;
+
+// 同级节点对齐
+{rank=same; child1; child2;}  // 水平对齐
+
+// 控制兄弟节点顺序
+root -> {child1 child2 child3};  // 从左到右
+```
+
+## 生成示例
+
+### 示例 1: 公司组织架构(基础场景)
+**用户需求**:展示公司部门层级结构
+
+**生成代码**:
+```dot
+digraph OrgChart {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled", fontsize=11];
+  edge [color="#555"];
+
+  // 节点定义
+  CEO [label="CEO\n首席执行官", fillcolor="#1976d2", fontcolor="white"];
+
+  CTO [label="CTO\n技术总监", fillcolor="#1976d2", fontcolor="white"];
+  CFO [label="CFO\n财务总监", fillcolor="#1976d2", fontcolor="white"];
+  COO [label="COO\n运营总监", fillcolor="#1976d2", fontcolor="white"];
+
+  FrontEnd [label="前端团队", fillcolor="#42a5f5"];
+  BackEnd [label="后端团队", fillcolor="#42a5f5"];
+  QA [label="测试团队", fillcolor="#42a5f5"];
+
+  Finance [label="财务部", fillcolor="#42a5f5"];
+  HR [label="人力资源", fillcolor="#42a5f5"];
+  Operations [label="运营部", fillcolor="#42a5f5"];
+
+  // 层级关系
+  CEO -> CTO;
+  CEO -> CFO;
+  CEO -> COO;
+
+  CTO -> FrontEnd;
+  CTO -> BackEnd;
+  CTO -> QA;
+
+  CFO -> Finance;
+  COO -> HR;
+  COO -> Operations;
+
+  // 同级对齐
+  {rank=same; CTO; CFO; COO;}
+  {rank=same; FrontEnd; BackEnd; QA; Finance; HR; Operations;}
+}
+```
+
+**关键点**:
+- 使用 `rankdir=TB` 实现从上到下布局
+- 根节点使用深色突出显示
+- 同级节点使用 `{rank=same;}` 对齐
+- 颜色区分管理层和执行层
+
+### 示例 2: 文件系统目录树(中等复杂度)
+**用户需求**:展示项目文件目录结构
+
+**生成代码**:
+```dot
+digraph FileTree {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled"];
+  edge [color="#333", arrowsize=0.7];
+
+  // 根目录
+  root [label="/", shape=folder, fillcolor="#ffa726", fontcolor="white"];
+
+  // 一级目录
+  src [label="src/", shape=folder, fillcolor="#66bb6a"];
+  public [label="public/", shape=folder, fillcolor="#66bb6a"];
+  config [label="config/", shape=folder, fillcolor="#66bb6a"];
+
+  // 二级目录
+  components [label="components/", shape=folder, fillcolor="#81c784"];
+  pages [label="pages/", shape=folder, fillcolor="#81c784"];
+  utils [label="utils/", shape=folder, fillcolor="#81c784"];
+
+  // 文件节点
+  app [label="App.tsx", shape=note, fillcolor="#e3f2fd"];
+  index [label="index.html", shape=note, fillcolor="#e3f2fd"];
+  vite [label="vite.config.ts", shape=note, fillcolor="#e3f2fd"];
+
+  header [label="Header.tsx", shape=note, fillcolor="#fff9c4"];
+  footer [label="Footer.tsx", shape=note, fillcolor="#fff9c4"];
+  home [label="Home.tsx", shape=note, fillcolor="#fff9c4"];
+  api [label="api.ts", shape=note, fillcolor="#fff9c4"];
+
+  // 树形结构
+  root -> src;
+  root -> public;
+  root -> config;
+
+  src -> components;
+  src -> pages;
+  src -> utils;
+  src -> app;
+
+  public -> index;
+  config -> vite;
+
+  components -> header;
+  components -> footer;
+  pages -> home;
+  utils -> api;
+
+  // 同级对齐
+  {rank=same; src; public; config;}
+  {rank=same; components; pages; utils; app;}
+}
+```
+
+**关键点**:
+- 使用 `folder` 形状表示目录
+- 使用 `note` 形状表示文件
+- 颜色深浅表达目录层级
+- 文件和目录分别使用不同颜色
+
+### 示例 3: 决策树分类(高级场景)
+**用户需求**:机器学习决策树模型可视化
+
+**生成代码**:
+```dot
+digraph DecisionTree {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled", fontsize=10];
+  edge [color="#333", fontsize=9];
+
+  // 根节点(决策)
+  root [label="年龄 > 25?", shape=diamond, fillcolor="#ff9800"];
+
+  // 内部节点(决策)
+  n1 [label="收入 > 5万?", shape=diamond, fillcolor="#ffb74d"];
+  n2 [label="学历 = 本科?", shape=diamond, fillcolor="#ffb74d"];
+
+  n3 [label="工作年限 > 3?", shape=diamond, fillcolor="#ffcc80"];
+  n4 [label="负债率 < 30%?", shape=diamond, fillcolor="#ffcc80"];
+  n5 [label="信用分 > 700?", shape=diamond, fillcolor="#ffcc80"];
+
+  // 叶节点(结果)
+  l1 [label="批准\n(置信度: 0.92)", shape=box, fillcolor="#a5d6a7"];
+  l2 [label="拒绝\n(置信度: 0.85)", shape=box, fillcolor="#ef9a9a"];
+  l3 [label="人工审核\n(置信度: 0.67)", shape=box, fillcolor="#fff9c4"];
+  l4 [label="批准\n(置信度: 0.78)", shape=box, fillcolor="#a5d6a7"];
+  l5 [label="拒绝\n(置信度: 0.91)", shape=box, fillcolor="#ef9a9a"];
+  l6 [label="批准\n(置信度: 0.88)", shape=box, fillcolor="#a5d6a7"];
+  l7 [label="拒绝\n(置信度: 0.79)", shape=box, fillcolor="#ef9a9a"];
+
+  // 决策路径
+  root -> n1 [label="是"];
+  root -> n2 [label="否"];
+
+  n1 -> n3 [label="是"];
+  n1 -> l2 [label="否"];
+
+  n2 -> n4 [label="是"];
+  n2 -> l5 [label="否"];
+
+  n3 -> l1 [label="是"];
+  n3 -> l3 [label="否"];
+
+  n4 -> n5 [label="是"];
+  n4 -> l7 [label="否"];
+
+  n5 -> l4 [label="是"];
+  n5 -> l6 [label="否"];
+
+  // 同级对齐
+  {rank=same; n1; n2;}
+  {rank=same; n3; n4; n5;}
+}
+```
+
+**关键点**:
+- 决策节点使用菱形 `diamond`
+- 叶节点使用方框,颜色表示结果类型
+- 边标签标注决策条件(是/否)
+- 颜色深浅表达决策树深度
+- 叶节点显示置信度信息
+
+## 常见错误
+
+### 错误 1: 使用 LR 而非 TB 布局
+**❌ 错误写法**:
+```dot
+digraph {
+  rankdir=LR;  // 水平布局不适合树形
+  A -> B;
+  A -> C;
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph {
+  rankdir=TB;  // 从上到下的树形布局
+  A -> B;
+  A -> C;
+}
+```
+
+**原因**:树形结构从上到下展开更符合认知习惯。
+
+### 错误 2: 存在循环引用
+**❌ 错误写法**:
+```dot
+digraph {
+  A -> B;
+  B -> C;
+  C -> A;  // 循环!
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph {
+  A -> B;
+  B -> C;
+  // 树形结构不应有循环
+}
+```
+
+**原因**:树形结构不允许循环,每个节点只有一个父节点。
+
+### 错误 3: 同级节点未对齐
+**❌ 错误写法**:
+```dot
+digraph {
+  A -> B;
+  A -> C;
+  A -> D;
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph {
+  A -> B;
+  A -> C;
+  A -> D;
+  {rank=same; B; C; D;}  // 兄弟节点对齐
+}
+```
+
+**原因**:使用 rank=same 让同级节点水平对齐,更清晰。
+
+### 错误 4: 根节点不明显
+**❌ 错误写法**:
+```dot
+digraph {
+  A -> B;
+  A -> C;
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph {
+  A [fillcolor="#4caf50", fontcolor="white"];  // 突出根节点
+  A -> B;
+  A -> C;
+}
+```
+
+**原因**:根节点应该用颜色或样式突出显示。
+
+### 错误 5: 叶节点未区分
+**❌ 错误写法**:
+```dot
+digraph {
+  A -> B;
+  A -> C;  // C 是叶节点但未标识
+}
+```
+
+**✅ 正确写法**:
+```dot
+digraph {
+  A -> B;
+  A -> C;
+  C [style="rounded,filled,dashed"];  // 叶节点特殊样式
+}
+```
+
+**原因**:叶节点使用虚线或特殊颜色区分,表明它是终端节点。
+
+## 生成检查清单
+
+生成代码后,逐项检查:
+
+- [ ] **图类型正确**:使用 `digraph` 声明
+- [ ] **使用 TB 布局**:必须使用 `rankdir=TB` 从上到下
+- [ ] **根节点明确**:根节点样式突出,易于识别
+- [ ] **无循环引用**:树形结构不允许循环路径
+- [ ] **层级清晰**:父子关系明确,层级分明
+- [ ] **同级对齐**:兄弟节点使用 rank=same 对齐
+- [ ] **叶节点区分**:叶节点使用特殊样式标识
+- [ ] **颜色语义化**:颜色表达层级深度或节点类型
+- [ ] **节点形状合理**:决策用菱形,目录用folder,文件用note
+- [ ] **代码可渲染**:语法正确,可直接通过 Kroki 渲染
+
+**任何检查项不通过,立即修正后重新生成**

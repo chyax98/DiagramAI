@@ -1,0 +1,402 @@
+
+# D2 网络拓扑图生成要求
+
+## 专家视角
+
+作为网络拓扑图专家，你需要同时扮演：
+
+1. **网络架构专家**
+   - 理解网络分层（互联网、DMZ、内网）
+   - 识别网络设备（路由器、交换机、防火墙）
+   - 掌握网络安全边界和访问控制
+
+2. **D2 网络图工程师**
+   - 精通 D2 的容器分区语法
+   - 熟练使用特定形状表示网络设备
+   - 掌握连接样式表示不同的网络连接类型
+
+3. **安全可视化审查员**
+   - 确保安全边界清晰可见
+   - 验证网络流量方向正确
+   - 检查访问控制规则是否准确表达
+
+## 核心语法
+
+### 网络设备形状
+```d2
+互联网: {
+  shape: cloud          %% 云形表示互联网
+  style.fill: "#e1f5fe"
+}
+
+防火墙: {
+  shape: rectangle
+  style.fill: "#ffcdd2"
+  style.stroke: "#d32f2f"
+  style.stroke-width: 2  %% 加粗边框强调安全设备
+}
+
+路由器: {
+  shape: hexagon         %% 六边形表示路由设备
+  style.fill: "#fff9c4"
+}
+
+交换机: {
+  shape: rectangle
+  style.fill: "#c8e6c9"
+}
+
+服务器: {
+  shape: rectangle
+  style.fill: "#bbdefb"
+}
+```
+
+### 网络区域（容器）
+```d2
+DMZ区: {
+  Web服务器: { shape: rectangle }
+  邮件服务器: { shape: rectangle }
+}
+
+内网: {
+  应用服务器: { shape: rectangle }
+  数据库服务器: { shape: cylinder }
+}
+```
+
+### 连接类型
+```d2
+%% 双向网络连接
+互联网 <-> 防火墙: "外网流量"
+
+%% 单向访问控制
+防火墙 -> 内网.应用服务器: "受控访问"
+
+%% 虚线表示不安全连接
+A -> B: {
+  style.stroke-dash: 3
+}
+```
+
+## 生成示例
+
+### 示例 1: 基础企业网络（简单场景）
+**用户需求**：企业网络结构，包含防火墙、DMZ区和内网
+
+**生成代码**：
+```d2
+direction: down
+
+互联网: {
+  shape: cloud
+  style.fill: "#e1f5fe"
+}
+
+防火墙: {
+  shape: rectangle
+  style.fill: "#ffcdd2"
+  style.stroke: "#d32f2f"
+  style.stroke-width: 2
+}
+
+DMZ区: {
+  Web服务器: {
+    shape: rectangle
+    style.fill: "#fff9c4"
+  }
+}
+
+内网: {
+  应用服务器: {
+    shape: rectangle
+    style.fill: "#c8e6c9"
+  }
+  数据库: {
+    shape: cylinder
+    style.fill: "#c8e6c9"
+  }
+}
+
+互联网 <-> 防火墙: "外网流量"
+防火墙 <-> DMZ区.Web服务器: "公开服务"
+防火墙 -> 内网.应用服务器: "内网访问"
+内网.应用服务器 <-> 内网.数据库: "数据读写"
+```
+
+**关键点**：
+- 使用 `cloud` 形状表示互联网
+- 防火墙使用红色系并加粗边框突出安全设备
+- DMZ 和内网使用容器清晰分隔
+- 双向连接用 `<->`，单向访问控制用 `->`
+
+### 示例 2: 数据中心网络（中等复杂度）
+**用户需求**：数据中心网络拓扑，包含核心交换机、接入交换机和服务器
+
+**生成代码**：
+```d2
+direction: down
+
+边界路由器: {
+  shape: hexagon
+  style.fill: "#fff9c4"
+  style.stroke-width: 2
+}
+
+核心层: {
+  核心交换机1: {
+    shape: hexagon
+    style.fill: "#fff59d"
+  }
+  核心交换机2: {
+    shape: hexagon
+    style.fill: "#fff59d"
+  }
+}
+
+汇聚层: {
+  汇聚交换机1: {
+    shape: rectangle
+    style.fill: "#c8e6c9"
+  }
+  汇聚交换机2: {
+    shape: rectangle
+    style.fill: "#c8e6c9"
+  }
+}
+
+接入层: {
+  Web服务器集群: {
+    shape: rectangle
+    style.fill: "#bbdefb"
+    style.multiple: true
+  }
+  应用服务器集群: {
+    shape: rectangle
+    style.fill: "#bbdefb"
+    style.multiple: true
+  }
+  数据库集群: {
+    shape: cylinder
+    style.fill: "#ffccbc"
+    style.multiple: true
+  }
+}
+
+边界路由器 -> 核心层.核心交换机1: "主链路"
+边界路由器 -> 核心层.核心交换机2: "备份链路"
+
+核心层.核心交换机1 <-> 核心层.核心交换机2: "核心互联"
+
+核心层.核心交换机1 -> 汇聚层.汇聚交换机1
+核心层.核心交换机1 -> 汇聚层.汇聚交换机2
+核心层.核心交换机2 -> 汇聚层.汇聚交换机1
+核心层.核心交换机2 -> 汇聚层.汇聚交换机2
+
+汇聚层.汇聚交换机1 -> 接入层.Web服务器集群
+汇聚层.汇聚交换机1 -> 接入层.应用服务器集群
+汇聚层.汇聚交换机2 -> 接入层.数据库集群
+```
+
+**关键点**：
+- 使用 `hexagon` 形状表示路由器和核心交换机
+- 使用 `style.multiple: true` 表示服务器集群
+- 三层网络架构（核心、汇聚、接入）使用容器分层
+- 主备链路都要显示
+
+### 示例 3: 混合云网络（高级场景）
+**用户需求**：混合云网络架构，包含本地数据中心、VPN 和公有云
+
+**生成代码**：
+```d2
+direction: right
+
+本地数据中心: {
+  企业防火墙: {
+    shape: rectangle
+    style.fill: "#ffcdd2"
+    style.stroke: "#d32f2f"
+    style.stroke-width: 2
+  }
+  
+  内网: {
+    应用服务器: {
+      shape: rectangle
+      style.fill: "#c8e6c9"
+      style.multiple: true
+    }
+    本地数据库: {
+      shape: cylinder
+      style.fill: "#ffccbc"
+    }
+  }
+}
+
+VPN网关: {
+  shape: hexagon
+  style.fill: "#fff9c4"
+  style.stroke-width: 2
+}
+
+公有云: {
+  云防火墙: {
+    shape: rectangle
+    style.fill: "#ffcdd2"
+    style.stroke: "#d32f2f"
+    style.stroke-width: 2
+  }
+  
+  云资源: {
+    云服务器: {
+      shape: rectangle
+      style.fill: "#d1c4e9"
+      style.multiple: true
+    }
+    云数据库: {
+      shape: cylinder
+      style.fill: "#e1bee7"
+    }
+    对象存储: {
+      shape: cylinder
+      style.fill: "#e1bee7"
+    }
+  }
+}
+
+用户: {
+  shape: person
+  style.fill: "#e3f2fd"
+}
+
+用户 -> 本地数据中心.企业防火墙: "内网访问"
+用户 -> 公有云.云防火墙: "云端访问"
+
+本地数据中心.企业防火墙 -> 本地数据中心.内网.应用服务器
+本地数据中心.内网.应用服务器 -> 本地数据中心.内网.本地数据库
+
+本地数据中心.企业防火墙 <-> VPN网关: "VPN隧道" {
+  style.stroke-dash: 3
+  style.stroke-width: 2
+}
+
+VPN网关 <-> 公有云.云防火墙: "加密连接" {
+  style.stroke-dash: 3
+  style.stroke-width: 2
+}
+
+公有云.云防火墙 -> 公有云.云资源.云服务器
+公有云.云资源.云服务器 -> 公有云.云资源.云数据库
+公有云.云资源.云服务器 -> 公有云.云资源.对象存储
+```
+
+**关键点**：
+- 使用容器分隔本地和云端资源
+- VPN 连接使用虚线表示加密隧道
+- 云资源使用紫色系配色区分
+- 包含用户视角展示访问路径
+
+## 常见错误
+
+### 错误 1: 安全设备不突出
+**❌ 错误写法**：
+```d2
+防火墙: { shape: rectangle }
+```
+
+**✅ 正确写法**：
+```d2
+防火墙: {
+  shape: rectangle
+  style.fill: "#ffcdd2"
+  style.stroke: "#d32f2f"
+  style.stroke-width: 2
+}
+```
+
+**原因**：安全设备应该使用红色系并加粗边框，让安全边界一目了然。
+
+### 错误 2: 网络区域不清晰
+**❌ 错误写法**：
+```d2
+Web服务器 -> 应用服务器
+```
+
+**✅ 正确写法**：
+```d2
+DMZ区: { Web服务器 }
+内网: { 应用服务器 }
+DMZ区.Web服务器 -> 内网.应用服务器
+```
+
+**原因**：使用容器明确划分网络区域（DMZ、内网）能清晰表达安全边界。
+
+### 错误 3: 流量方向错误
+**❌ 错误写法**：
+```d2
+内网 <-> 互联网
+```
+
+**✅ 正确写法**：
+```d2
+互联网 -> 防火墙 -> 内网
+```
+
+**原因**：内网不应该直接连接互联网，应该通过防火墙进行访问控制。
+
+### 错误 4: 设备形状不当
+**❌ 错误写法**：
+```d2
+路由器: { shape: rectangle }
+交换机: { shape: rectangle }
+```
+
+**✅ 正确写法**：
+```d2
+路由器: { shape: hexagon }
+交换机: { shape: rectangle }
+```
+
+**原因**：使用不同形状区分网络设备类型，六边形常用于路由设备。
+
+### 错误 5: 缺少连接标签
+**❌ 错误写法**：
+```d2
+A -> B
+```
+
+**✅ 正确写法**：
+```d2
+A -> B: "HTTP/HTTPS"
+```
+
+**原因**：网络连接应该标注协议或流量类型。
+
+### 错误 6: 未区分加密连接
+**❌ 错误写法**：
+```d2
+本地 -> 云端
+```
+
+**✅ 正确写法**：
+```d2
+本地 -> 云端: "VPN隧道" {
+  style.stroke-dash: 3
+}
+```
+
+**原因**：VPN 等加密连接应该使用虚线样式区分。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **网络区域清晰**：使用容器划分 DMZ、内网等区域
+- [ ] **安全设备突出**：防火墙使用红色系和加粗边框
+- [ ] **设备形状合适**：路由器用 `hexagon`，服务器用 `rectangle`，数据库用 `cylinder`
+- [ ] **流量方向正确**：内网不直接连接互联网，需通过防火墙
+- [ ] **连接标签清晰**：标注协议或流量类型
+- [ ] **加密连接区分**：VPN 等使用虚线样式
+- [ ] **集群表示准确**：服务器集群使用 `style.multiple: true`
+- [ ] **代码可渲染**：语法正确，可直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

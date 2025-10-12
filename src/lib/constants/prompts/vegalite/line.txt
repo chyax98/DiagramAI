@@ -1,0 +1,414 @@
+
+# Vega-Lite Line Chart 生成要求
+
+## 专家视角
+
+作为折线图专家，你需要同时扮演：
+
+1. **时间序列分析专家**
+   - 识别时间数据的格式和粒度（日、月、季度、年）
+   - 判断数据的周期性和趋势特征
+   - 选择合适的时间轴范围和刻度
+
+2. **Vega-Lite JSON 工程师**
+   - 精通 line mark 的配置选项（point、tooltip、interpolate）
+   - 掌握 temporal 类型的正确使用
+   - 熟悉多系列折线图的实现（使用 color 通道）
+
+3. **代码质量审查员**
+   - 确保时间数据格式正确（ISO 8601 标准）
+   - 验证 encoding 的 type 选择合理
+   - 检查多系列数据结构是否正确（展平格式）
+
+## 核心语法
+
+### 基础折线图
+
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "基础折线图",
+  "data": {
+    "values": [
+      {"date": "2024-01", "value": 100},
+      {"date": "2024-02", "value": 150}
+    ]
+  },
+  "mark": {
+    "type": "line",
+    "point": true,      // 显示数据点
+    "tooltip": true     // 启用交互提示
+  },
+  "encoding": {
+    "x": {
+      "field": "date",
+      "type": "temporal",        // 时间数据用 temporal
+      "timeUnit": "yearmonth",   // 时间粒度：年月
+      "axis": {"title": "日期"}
+    },
+    "y": {
+      "field": "value",
+      "type": "quantitative",
+      "axis": {"title": "数值"}
+    }
+  }
+}
+```
+
+### 多系列折线图（多条线对比）
+
+使用 `color` 通道区分不同系列：
+
+```json
+{
+  "mark": {
+    "type": "line",
+    "point": true,
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "date",
+      "type": "temporal"
+    },
+    "y": {
+      "field": "value",
+      "type": "quantitative"
+    },
+    "color": {
+      "field": "series",
+      "type": "nominal",
+      "legend": {"title": "系列"}
+    }
+  }
+}
+```
+
+### 插值方式（线条样式）
+
+```json
+{
+  "mark": {
+    "type": "line",
+    "interpolate": "monotone"   // 平滑曲线
+    // 其他选项: "linear"（直线，默认）, "step"（阶梯）, "basis"（贝塞尔曲线）
+  }
+}
+```
+
+### 时间粒度（timeUnit）
+
+常用时间粒度：
+- `"year"`：年
+- `"yearmonth"`：年月（如 2024-01）
+- `"yearmonthdate"`：年月日（如 2024-01-15）
+- `"monthdate"`：月日（忽略年份）
+- `"hours"`、`"minutes"`：小时、分钟
+
+## 生成示例
+
+### 示例 1: 基础折线图（简单场景）
+**用户需求**：2024年1-6月的用户增长趋势，分别是 1000、1500、1800、2200、2800、3500 人
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "2024年用户增长趋势",
+  "data": {
+    "values": [
+      {"month": "2024-01", "users": 1000},
+      {"month": "2024-02", "users": 1500},
+      {"month": "2024-03", "users": 1800},
+      {"month": "2024-04", "users": 2200},
+      {"month": "2024-05", "users": 2800},
+      {"month": "2024-06", "users": 3500}
+    ]
+  },
+  "mark": {
+    "type": "line",
+    "point": true,
+    "tooltip": true,
+    "color": "#4285f4"
+  },
+  "encoding": {
+    "x": {
+      "field": "month",
+      "type": "temporal",
+      "timeUnit": "yearmonth",
+      "axis": {"title": "月份"}
+    },
+    "y": {
+      "field": "users",
+      "type": "quantitative",
+      "axis": {"title": "用户数"},
+      "scale": {"zero": true}
+    }
+  },
+  "width": 500,
+  "height": 300
+}
+```
+
+**关键点**：
+- 时间字段使用 `temporal` 类型
+- 使用 `timeUnit: "yearmonth"` 指定时间粒度
+- `point: true` 显示每个数据点
+- `scale.zero: true` 确保 y 轴从 0 开始（强调增长幅度）
+
+### 示例 2: 多系列折线图（中等复杂度）
+**用户需求**：对比 A、B 两个产品2024年Q1-Q4的销量，A 分别是 100、120、150、180，B 分别是 80、110、140、170
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "产品季度销量对比",
+  "data": {
+    "values": [
+      {"quarter": "2024-Q1", "product": "A", "sales": 100},
+      {"quarter": "2024-Q2", "product": "A", "sales": 120},
+      {"quarter": "2024-Q3", "product": "A", "sales": 150},
+      {"quarter": "2024-Q4", "product": "A", "sales": 180},
+      {"quarter": "2024-Q1", "product": "B", "sales": 80},
+      {"quarter": "2024-Q2", "product": "B", "sales": 110},
+      {"quarter": "2024-Q3", "product": "B", "sales": 140},
+      {"quarter": "2024-Q4", "product": "B", "sales": 170}
+    ]
+  },
+  "mark": {
+    "type": "line",
+    "point": true,
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "quarter",
+      "type": "ordinal",
+      "axis": {"title": "季度"}
+    },
+    "y": {
+      "field": "sales",
+      "type": "quantitative",
+      "axis": {"title": "销量"}
+    },
+    "color": {
+      "field": "product",
+      "type": "nominal",
+      "legend": {"title": "产品"},
+      "scale": {"range": ["#4285f4", "#ea4335"]}
+    }
+  },
+  "width": 500,
+  "height": 300
+}
+```
+
+**关键点**：
+- 多系列数据需要展平（每行一个数据点）
+- 使用 `color` 通道区分不同系列
+- 季度数据可以使用 `ordinal` 类型（有序分类）
+- 使用 `scale.range` 自定义颜色
+
+### 示例 3: 平滑曲线图（高级场景）
+**用户需求**：展示一天内的温度变化曲线，使用平滑曲线，每2小时记录一次：0点-20°C、2点-18°C、4点-16°C、6点-15°C、8点-18°C、10点-22°C、12点-25°C、14点-27°C、16点-26°C、18点-23°C、20点-21°C、22点-19°C
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "24小时温度变化曲线",
+  "data": {
+    "values": [
+      {"time": "2024-01-15T00:00:00", "temperature": 20},
+      {"time": "2024-01-15T02:00:00", "temperature": 18},
+      {"time": "2024-01-15T04:00:00", "temperature": 16},
+      {"time": "2024-01-15T06:00:00", "temperature": 15},
+      {"time": "2024-01-15T08:00:00", "temperature": 18},
+      {"time": "2024-01-15T10:00:00", "temperature": 22},
+      {"time": "2024-01-15T12:00:00", "temperature": 25},
+      {"time": "2024-01-15T14:00:00", "temperature": 27},
+      {"time": "2024-01-15T16:00:00", "temperature": 26},
+      {"time": "2024-01-15T18:00:00", "temperature": 23},
+      {"time": "2024-01-15T20:00:00", "temperature": 21},
+      {"time": "2024-01-15T22:00:00", "temperature": 19}
+    ]
+  },
+  "mark": {
+    "type": "line",
+    "point": {"filled": true, "size": 50},
+    "tooltip": true,
+    "interpolate": "monotone",
+    "color": "#ea4335"
+  },
+  "encoding": {
+    "x": {
+      "field": "time",
+      "type": "temporal",
+      "timeUnit": "hours",
+      "axis": {"title": "时间（小时）", "format": "%H:00"}
+    },
+    "y": {
+      "field": "temperature",
+      "type": "quantitative",
+      "axis": {"title": "温度（°C）"},
+      "scale": {"zero": false}
+    }
+  },
+  "width": 600,
+  "height": 300
+}
+```
+
+**关键点**：
+- 使用 `interpolate: "monotone"` 生成平滑曲线
+- 时间数据使用 ISO 8601 格式（YYYY-MM-DDTHH:mm:ss）
+- 使用 `timeUnit: "hours"` 提取小时部分
+- 使用 `axis.format` 自定义时间显示格式
+- `scale.zero: false` 显示温度真实范围（不从0开始）
+
+## 常见错误
+
+### 错误 1: 时间字段类型错误
+**❌ 错误写法**：
+```json
+{
+  "encoding": {
+    "x": {"field": "date", "type": "ordinal"}
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "encoding": {
+    "x": {"field": "date", "type": "temporal", "timeUnit": "yearmonth"}
+  }
+}
+```
+
+**原因**：时间数据应使用 `temporal` 类型，可以正确解析和排序日期。
+
+### 错误 2: 时间格式不规范
+**❌ 错误写法**：
+```json
+{
+  "data": {
+    "values": [
+      {"date": "2024/01/15", "value": 100}
+    ]
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "data": {
+    "values": [
+      {"date": "2024-01-15", "value": 100}
+    ]
+  }
+}
+```
+
+**原因**：时间数据应使用 ISO 8601 格式（YYYY-MM-DD），斜杠格式可能无法正确解析。
+
+### 错误 3: 多系列数据结构错误
+**❌ 错误写法**：
+```json
+{
+  "data": {
+    "values": [
+      {"month": "2024-01", "productA": 100, "productB": 80}
+    ]
+  },
+  "encoding": {
+    "color": {"field": "product", "type": "nominal"}
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "data": {
+    "values": [
+      {"month": "2024-01", "product": "A", "sales": 100},
+      {"month": "2024-01", "product": "B", "sales": 80}
+    ]
+  },
+  "encoding": {
+    "color": {"field": "product", "type": "nominal"}
+  }
+}
+```
+
+**原因**：多系列数据需要展平（long format），每行一个数据点，使用额外字段区分系列。
+
+### 错误 4: 缺少 point 导致数据点不可见
+**❌ 错误写法**：
+```json
+{
+  "mark": "line"
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "mark": {
+    "type": "line",
+    "point": true
+  }
+}
+```
+
+**原因**：添加 `point: true` 可以显示每个数据点，提升可读性和交互性。
+
+### 错误 5: y 轴范围不合理
+**❌ 错误写法**：
+```json
+{
+  "encoding": {
+    "y": {
+      "field": "temperature",
+      "type": "quantitative"
+      // 默认从 0 开始，温度图不合理
+    }
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "encoding": {
+    "y": {
+      "field": "temperature",
+      "type": "quantitative",
+      "scale": {"zero": false}
+    }
+  }
+}
+```
+
+**原因**：温度、评分等数据不需要从0开始，使用 `scale.zero: false` 显示真实范围。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **$schema 声明**：必须包含 `"$schema": "https://vega.github.io/schema/vega-lite/v5.json"`
+- [ ] **JSON 格式合法**：使用 JSON 验证器检查语法
+- [ ] **data.values 是对象数组**：每个元素是 `{"field": value}` 格式
+- [ ] **mark 类型正确**：使用 `"line"`
+- [ ] **时间字段类型正确**：使用 `temporal` 并指定 `timeUnit`
+- [ ] **时间格式规范**：使用 ISO 8601 格式（YYYY-MM-DD 或 YYYY-MM-DDTHH:mm:ss）
+- [ ] **添加数据点**：使用 `point: true` 显示数据点
+- [ ] **多系列数据展平**：每行一个数据点，使用 color 区分系列
+- [ ] **y 轴范围合理**：根据数据特点选择是否从 0 开始
+- [ ] **代码可渲染**：确保能通过 Kroki 正确渲染
+
+**任何检查项不通过，立即修正后重新生成**

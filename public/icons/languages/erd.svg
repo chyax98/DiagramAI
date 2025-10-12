@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- 实体矩形 -->
+  <rect x="3" y="4" width="7" height="6" rx="0.5" fill="none" stroke="#E91E63"/>
+  <line x1="3" y1="6.5" x2="10" y2="6.5" stroke="#E91E63"/>
+  <text x="6.5" y="5.5" font-size="3" fill="#E91E63" text-anchor="middle" font-weight="bold">E</text>
+
+  <rect x="14" y="4" width="7" height="6" rx="0.5" fill="none" stroke="#E91E63"/>
+  <line x1="14" y1="6.5" x2="21" y2="6.5" stroke="#E91E63"/>
+  <text x="17.5" y="5.5" font-size="3" fill="#E91E63" text-anchor="middle" font-weight="bold">E</text>
+
+  <!-- 关系菱形 -->
+  <path d="M 12 14 L 14.5 16.5 L 12 19 L 9.5 16.5 Z" fill="none" stroke="#9C27B0" stroke-width="1.5"/>
+  <text x="12" y="17.5" font-size="2.5" fill="#9C27B0" text-anchor="middle" font-weight="bold">R</text>
+
+  <!-- 连接线 -->
+  <line x1="6.5" y1="10" x2="10.5" y2="15" stroke="#666" stroke-width="1"/>
+  <line x1="17.5" y1="10" x2="13.5" y2="15" stroke="#666" stroke-width="1"/>
+
+  <!-- 基数标记 -->
+  <text x="8" y="13" font-size="3" fill="#666">1</text>
+  <text x="15" y="13" font-size="3" fill="#666">N</text>
+</svg>

@@ -1,0 +1,63 @@
+
+# RackDiag Rack 生成要求
+
+## 图表类型：机柜图（Rack Diagram）
+
+机柜图用于展示单机柜设备布局（U位规划）。
+
+## 核心语法
+
+### 基础机架定义
+```
+rackdiag {
+  1: UPS [2U];
+  3: Server;
+}
+```
+
+## 生成示例
+
+### 示例：标准42U机柜
+```
+rackdiag {
+  1: UPS [2U, description = "APC UPS"];
+  3: PDU [description = "Power Distribution"];
+  5: Core Switch;
+  6: Access Switch 1;
+  7: Access Switch 2;
+  10: Server 1 [2U];
+  12: Server 2 [2U];
+  40: KVM Switch;
+}
+```
+
+**关键点**：
+- U位从1（底部）到42（顶部）
+- 使用 `[2U]` 标注多U设备
+- 电源在底部，网络居中，管理在顶部
+
+## 常见错误
+
+### 错误 1: U位重叠
+**❌ 错误**：
+```
+rackdiag {
+  1: Server 1 [2U];
+  2: Server 2;  // 重叠
+}
+```
+
+**✅ 正确**：
+```
+rackdiag {
+  1: Server 1 [2U];
+  3: Server 2;
+}
+```
+
+## 生成检查清单
+
+- [ ] **U位编号**：1-42范围内
+- [ ] **无重叠**：多U设备预留空间
+- [ ] **布局合理**：电源底部，管理顶部
+- [ ] **代码可渲染**：语法正确

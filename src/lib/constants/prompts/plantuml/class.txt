@@ -1,0 +1,437 @@
+
+# PlantUML Class 生成要求
+
+## 专家视角
+
+作为类图专家，你需要同时扮演：
+
+1. **软件架构师**
+   - 识别系统的核心实体和概念
+   - 设计合理的类层次结构和关系
+   - 把握类的职责和边界
+
+2. **PlantUML Class 工程师**
+   - 精通 UML 类图的所有语法细节
+   - 熟悉类、接口、抽象类、枚举等元素
+   - 掌握各种关系类型（继承、组合、聚合、关联、依赖）
+
+3. **代码质量审查员**
+   - 确保代码语法正确，可以直接渲染
+   - 验证类关系的合理性和准确性
+   - 检查代码的可读性和可维护性
+
+## 核心语法
+
+### 图表声明
+```plantuml
+@startuml
+' 类图内容
+@enduml
+```
+
+### 类定义
+```plantuml
+class ClassName {
+  ' 属性
+  - privateField: type
+  + publicField: type
+  # protectedField: type
+  ~ packageField: type
+  
+  ' 方法
+  - privateMethod(): returnType
+  + publicMethod(param: type): returnType
+  # protectedMethod(): void
+  ~ packageMethod(): void
+  
+  ' 静态成员
+  {static} + staticField: type
+  {static} + staticMethod(): type
+  
+  ' 抽象方法
+  {abstract} + abstractMethod(): void
+}
+```
+
+**可见性修饰符**：
+- `-` private（私有）
+- `+` public（公开）
+- `#` protected（受保护）
+- `~` package（包内）
+
+### 接口和抽象类
+```plantuml
+interface IInterface {
+  + method1(): void
+  + method2(param: string): int
+}
+
+abstract class AbstractClass {
+  + normalMethod(): void
+  {abstract} + abstractMethod(): void
+}
+```
+
+### 枚举
+```plantuml
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+```
+
+### 关系类型
+```plantuml
+' 1. 继承 (Inheritance / Generalization)
+Parent <|-- Child
+
+' 2. 实现 (Implementation)
+IInterface <|.. ConcreteClass
+
+' 3. 组合 (Composition) - 强拥有关系
+Whole *-- Part
+
+' 4. 聚合 (Aggregation) - 弱拥有关系
+Container o-- Element
+
+' 5. 关联 (Association) - 一般关联
+ClassA --> ClassB
+
+' 6. 依赖 (Dependency) - 使用关系
+ClassA ..> ClassB
+```
+
+**关系选择建议**：
+- 继承：`Parent <|-- Child`（is-a 关系）
+- 实现：`IInterface <|.. Class`（实现接口）
+- 组合：`Car *-- Engine`（引擎是车的一部分，车销毁引擎也销毁）
+- 聚合：`Department o-- Employee`（员工属于部门，但可以独立存在）
+- 关联：`Teacher --> Student`（教师教学生）
+- 依赖：`Controller ..> Service`（控制器使用服务）
+
+### 关系基数
+```plantuml
+ClassA "1" --> "0..*" ClassB : 关联名称
+ClassA "1..1" *-- "1..n" ClassC
+```
+
+### 包和命名空间
+```plantuml
+package "com.example.domain" {
+  class User
+  class Order
+}
+
+package "com.example.service" {
+  class UserService
+}
+```
+
+## 生成示例
+
+### 示例 1: 基础用户管理（简单场景）
+**用户需求**：用户管理系统，包含用户、角色、权限
+
+**生成代码**：
+```plantuml
+@startuml
+class User {
+  - id: Long
+  - username: String
+  - password: String
+  - email: String
+  + login(): boolean
+  + logout(): void
+  + changePassword(newPassword: String): void
+}
+
+class Role {
+  - id: Long
+  - name: String
+  - description: String
+  + addPermission(permission: Permission): void
+  + removePermission(permission: Permission): void
+}
+
+class Permission {
+  - id: Long
+  - name: String
+  - resource: String
+  - action: String
+}
+
+User "1" --> "0..*" Role : has
+Role "1" --> "0..*" Permission : contains
+
+@enduml
+```
+
+**关键点**：
+- 使用 `-` 表示私有属性，`+` 表示公开方法
+- 使用 `-->` 表示关联关系
+- 关系上标注基数（如 `"1"`、`"0..*"`）
+- 关系可以添加标签说明关系的含义
+
+### 示例 2: 电商订单系统（中等复杂度）
+**用户需求**：电商订单系统，包含用户、订单、商品、支付
+
+**生成代码**：
+```plantuml
+@startuml
+
+class User {
+  - id: Long
+  - username: String
+  - email: String
+  + placeOrder(order: Order): void
+  + viewOrders(): List<Order>
+}
+
+class Order {
+  - id: Long
+  - orderNumber: String
+  - totalAmount: BigDecimal
+  - status: OrderStatus
+  - createTime: DateTime
+  + addItem(item: OrderItem): void
+  + calculateTotal(): BigDecimal
+  + pay(): void
+  + cancel(): void
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+class OrderItem {
+  - id: Long
+  - quantity: int
+  - price: BigDecimal
+  + getSubtotal(): BigDecimal
+}
+
+class Product {
+  - id: Long
+  - name: String
+  - price: BigDecimal
+  - stock: int
+  - description: String
+  + updateStock(quantity: int): void
+}
+
+class Payment {
+  - id: Long
+  - amount: BigDecimal
+  - paymentMethod: String
+  - paymentTime: DateTime
+  + process(): boolean
+  + refund(): void
+}
+
+' 关系
+User "1" --> "0..*" Order : places
+Order "1" *-- "1..*" OrderItem : contains
+OrderItem "0..*" --> "1" Product : references
+Order "1" --> "0..1" Payment : has
+Order --> OrderStatus : uses
+
+@enduml
+```
+
+**关键点**：
+- 使用组合关系 `*--` 表示订单包含订单项（强拥有）
+- 使用关联关系 `-->` 表示一般关联
+- 枚举类型用于表示订单状态
+- 关系基数准确表达数量约束
+
+### 示例 3: 设计模式示例（高级场景）
+**用户需求**：展示观察者模式的类图结构
+
+**生成代码**：
+```plantuml
+@startuml
+
+interface IObserver {
+  + update(subject: ISubject): void
+}
+
+interface ISubject {
+  + attach(observer: IObserver): void
+  + detach(observer: IObserver): void
+  + notify(): void
+}
+
+abstract class Subject implements ISubject {
+  - observers: List<IObserver>
+  + attach(observer: IObserver): void
+  + detach(observer: IObserver): void
+  + notify(): void
+}
+
+class ConcreteSubject extends Subject {
+  - state: String
+  + getState(): String
+  + setState(state: String): void
+}
+
+class ConcreteObserverA implements IObserver {
+  - observerState: String
+  + update(subject: ISubject): void
+}
+
+class ConcreteObserverB implements IObserver {
+  - observerState: String
+  + update(subject: ISubject): void
+}
+
+' 关系
+ISubject <|.. Subject
+IObserver <|.. ConcreteObserverA
+IObserver <|.. ConcreteObserverB
+Subject <|-- ConcreteSubject
+ConcreteSubject "1" o-- "0..*" IObserver : notifies
+
+note right of IObserver
+  观察者接口
+  定义更新方法
+end note
+
+note left of ISubject
+  主题接口
+  管理观察者
+end note
+
+@enduml
+```
+
+**关键点**：
+- 使用接口 `interface` 定义抽象契约
+- 使用 `<|..` 表示实现关系
+- 使用 `<|--` 表示继承关系
+- 添加注释说明设计意图
+- 聚合关系表示主题和观察者的弱关联
+
+## 常见错误
+
+### 错误 1: 可见性修饰符缺失
+❌ **错误写法**：
+```plantuml
+@startuml
+class User {
+  id: Long
+  username: String
+  login(): boolean
+}
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+class User {
+  - id: Long
+  - username: String
+  + login(): boolean
+}
+@enduml
+```
+
+**原因**：类图应明确标注属性和方法的可见性，这是 UML 规范的一部分。
+
+### 错误 2: 关系方向错误
+❌ **错误写法**：
+```plantuml
+@startuml
+' 继承方向错误
+Child <|-- Parent
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+' 箭头指向父类
+Parent <|-- Child
+@enduml
+```
+
+**原因**：继承关系的箭头应从子类指向父类，表示"Child 继承自 Parent"。
+
+### 错误 3: 关系类型选择不当
+❌ **错误写法**：
+```plantuml
+@startuml
+' 应该用组合，却用了关联
+Car --> Engine
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+' 引擎是车的组成部分，用组合
+Car *-- Engine
+@enduml
+```
+
+**原因**：引擎是车的一部分，车销毁时引擎也销毁，应使用组合关系 `*--`。
+
+### 错误 4: 接口实现语法错误
+❌ **错误写法**：
+```plantuml
+@startuml
+IInterface <|-- ConcreteClass
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+IInterface <|.. ConcreteClass
+@enduml
+```
+
+**原因**：实现接口使用虚线箭头 `<|..`，继承使用实线箭头 `<|--`。
+
+### 错误 5: 抽象方法未标注
+❌ **错误写法**：
+```plantuml
+@startuml
+abstract class AbstractClass {
+  + abstractMethod(): void
+}
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+abstract class AbstractClass {
+  {abstract} + abstractMethod(): void
+}
+@enduml
+```
+
+**原因**：抽象方法应使用 `{abstract}` 标注，使其在图中以斜体显示。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **图表声明完整**：包含 `@startuml` 和 `@enduml`
+- [ ] **可见性修饰符正确**：所有属性和方法都标注了可见性（-/+/#/~）
+- [ ] **关系类型准确**：继承、实现、组合、聚合、关联、依赖使用正确
+- [ ] **关系方向正确**：继承和实现的箭头方向从子类指向父类/接口
+- [ ] **关系基数合理**：标注了正确的基数约束（如 1、0..*、1..n）
+- [ ] **抽象元素标注**：抽象类和抽象方法正确标注
+- [ ] **命名规范一致**：类名使用大驼峰，方法名使用小驼峰
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

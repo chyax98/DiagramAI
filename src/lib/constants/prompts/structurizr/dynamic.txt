@@ -1,0 +1,59 @@
+# Dynamic (动态图)
+
+生成运行时的交互序列和业务流程。
+
+## 关键特点
+
+- **时序交互**: 展示元素之间的时序调用
+- **步骤编号**: 使用 "1. ", "2. " 明确步骤顺序
+- **业务流程**: 适合描述用户操作流程和技术调用链
+- **基于层次**: 可以基于 Container 或 Component 级别
+
+## 输出结构
+
+```
+workspace {
+    model {
+        user = person "用户"
+
+        system = softwareSystem "系统" {
+            webApp = container "Web 应用" "前端" "React"
+            apiGateway = container "API 网关" "路由" "Kong"
+            authService = container "认证服务" "JWT" "Go"
+            orderService = container "订单服务" "订单处理" "Java"
+            database = container "数据库" "数据存储" "MySQL"
+        }
+
+        # 静态关系（可选）
+        user -> webApp "使用"
+        webApp -> apiGateway "调用"
+        apiGateway -> authService "认证"
+        apiGateway -> orderService "订单"
+        orderService -> database "读写"
+    }
+
+    views {
+        # 动态视图：用户下单流程
+        dynamic system "order-flow" "用户下单流程" {
+            user -> webApp "1. 选择商品，点击下单"
+            webApp -> apiGateway "2. POST /api/orders (带 Token)"
+            apiGateway -> authService "3. 验证 Token"
+            authService -> apiGateway "4. Token 有效"
+            apiGateway -> orderService "5. 创建订单"
+            orderService -> database "6. 保存订单"
+            orderService -> apiGateway "7. 返回订单号"
+            apiGateway -> webApp "8. 返回结果"
+            webApp -> user "9. 显示订单详情"
+            autolayout lr
+        }
+    }
+}
+```
+
+## 注意事项
+
+- Dynamic 视图中的关系要包含步骤编号（"1. ", "2. "）
+- 描述要清晰：用户做什么、系统调用什么
+- 可以基于 Software System 或 Container 创建动态视图
+- 布局方向：lr（左右）适合时间线，tb（上下）适合层次调用
+- 适合业务分析师、开发团队、测试团队理解业务流程

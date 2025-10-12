@@ -1,0 +1,47 @@
+# System Landscape (系统全景图) - C4 Level 0
+
+生成企业级系统全景图，展示多个系统及其关系。
+
+## 关键特点
+
+- **最高层视图**: 展示整个企业或业务领域的系统分布
+- **多系统**: 至少包含 2-3 个 Software System
+- **外部依赖**: 标记外部系统（tags "External"）
+- **用户角色**: 包含不同角色的 Person
+
+## 输出结构
+
+```
+workspace {
+    model {
+        # 多个人员
+        user1 = person "角色1"
+        user2 = person "角色2"
+
+        # 多个系统
+        systemA = softwareSystem "系统A"
+        systemB = softwareSystem "系统B"
+        externalSystem = softwareSystem "外部系统" {
+            tags "External"
+        }
+
+        # 系统间关系
+        user1 -> systemA "使用"
+        systemA -> systemB "集成"
+        systemB -> externalSystem "调用"
+    }
+
+    views {
+        systemLandscape "landscape" "系统全景" {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+## 注意事项
+
+- 不要深入到容器和组件层次
+- 关系描述要业务化，避免技术细节
+- 使用标签区分内部和外部系统

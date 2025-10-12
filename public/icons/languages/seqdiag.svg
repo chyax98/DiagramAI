@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+  <!-- 序列图标 - 表示时序交互 -->
+
+  <!-- 对象A -->
+  <rect x="3" y="3" width="5" height="3" rx="0.5" fill="none" stroke="#3F51B5"/>
+  <text x="5.5" y="5.5" font-size="2" fill="#3F51B5" text-anchor="middle" font-weight="bold">A</text>
+
+  <!-- 对象B -->
+  <rect x="16" y="3" width="5" height="3" rx="0.5" fill="none" stroke="#3F51B5"/>
+  <text x="18.5" y="5.5" font-size="2" fill="#3F51B5" text-anchor="middle" font-weight="bold">B</text>
+
+  <!-- 生命线A -->
+  <line x1="5.5" y1="6" x2="5.5" y2="20" stroke="#3F51B5" stroke-dasharray="2,2" opacity="0.5"/>
+
+  <!-- 生命线B -->
+  <line x1="18.5" y1="6" x2="18.5" y2="20" stroke="#3F51B5" stroke-dasharray="2,2" opacity="0.5"/>
+
+  <!-- 消息1: A → B (同步调用) -->
+  <line x1="5.5" y1="9" x2="18.5" y2="9" stroke="#3F51B5" marker-end="url(#arrow)"/>
+  <text x="12" y="8.5" font-size="1.8" fill="#3F51B5" text-anchor="middle">msg1</text>
+
+  <!-- 激活框B -->
+  <rect x="17.5" y="9" width="2" height="5" fill="#3F51B5" opacity="0.3"/>
+
+  <!-- 消息2: B → A (返回) -->
+  <line x1="18.5" y1="13" x2="5.5" y2="13" stroke="#3F51B5" stroke-dasharray="3,2" marker-end="url(#arrow)"/>
+  <text x="12" y="12.5" font-size="1.8" fill="#3F51B5" text-anchor="middle">return</text>
+
+  <!-- 消息3: A → B (异步) -->
+  <line x1="5.5" y1="16" x2="18.5" y2="16" stroke="#3F51B5" marker-end="url(#openArrow)"/>
+  <text x="12" y="15.5" font-size="1.8" fill="#3F51B5" text-anchor="middle">msg2</text>
+
+  <!-- 箭头定义 -->
+  <defs>
+    <!-- 实心箭头 (同步) -->
+    <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <polygon points="0 0, 6 3, 0 6" fill="#3F51B5"/>
+    </marker>
+    <!-- 空心箭头 (异步) -->
+    <marker id="openArrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <polygon points="0 0, 6 3, 0 6" fill="none" stroke="#3F51B5" stroke-width="1"/>
+    </marker>
+  </defs>
+</svg>

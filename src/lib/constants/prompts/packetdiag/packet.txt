@@ -1,0 +1,134 @@
+
+# PacketDiag Packet 生成要求
+
+## 图表类型：网络数据包图（Packet Diagram）
+
+网络数据包图用于展示协议头字段布局，适用于TCP、UDP、IP等协议头部结构展示。
+
+## 核心语法
+
+### 基础数据包定义
+```
+packetdiag {
+  colwidth = 32
+  node_height = 72
+
+  0-15: Source Port
+  16-31: Destination Port
+  32-63: Sequence Number
+}
+```
+
+## 生成示例
+
+### 示例 1: TCP协议头（简单场景）
+**用户需求**：展示TCP协议头部结构
+
+**生成代码**：
+```
+packetdiag {
+  colwidth = 32
+
+  0-15: Source Port
+  16-31: Destination Port
+  32-63: Sequence Number
+  64-95: Acknowledgment Number
+  96-99: Data Offset
+  100-105: Reserved
+  106: URG
+  107: ACK
+  108: PSH
+  109: RST
+  110: SYN
+  111: FIN
+  112-127: Window Size
+  128-143: Checksum
+  144-159: Urgent Pointer
+}
+```
+
+**关键点**：
+- 32位列宽（4字节）
+- 端口号各占16位
+- 标志位各占1位
+
+### 示例 2: IPv4协议头（中等复杂度）
+**用户需求**：展示IPv4协议头部结构并使用颜色区分字段类型
+
+**生成代码**：
+```
+packetdiag {
+  colwidth = 32
+  node_height = 72
+
+  0-3: Version [color = "#FFE0B0"];
+  4-7: IHL [color = "#FFE0B0"];
+  8-13: DSCP [color = "#E0FFE0"];
+  14-15: ECN [color = "#E0FFE0"];
+  16-31: Total Length
+
+  32-47: Identification
+  48-50: Flags
+  51-63: Fragment Offset
+
+  64-71: Time to Live [color = "#FFB0B0"];
+  72-79: Protocol [color = "#B0E0FF"];
+  80-95: Header Checksum
+
+  96-127: Source IP Address [color = "#FFFFE0"];
+  128-159: Destination IP Address [color = "#FFFFE0"];
+}
+```
+
+**关键点**：
+- 使用颜色区分字段类型
+- 版本和IHL（橙色）- 头部信息
+- DSCP和ECN（绿色）- 服务质量
+- TTL（红色）- 生存时间
+- Protocol（蓝色）- 上层协议
+- IP地址（黄色）- 源和目的地址
+
+## 常见错误
+
+### 错误 1: 位范围重叠
+**❌ 错误写法**：
+```
+packetdiag {
+  colwidth = 32
+  0-15: Field 1
+  10-25: Field 2  // 重叠
+}
+```
+
+**✅ 正确写法**：
+```
+packetdiag {
+  colwidth = 32
+  0-15: Field 1
+  16-31: Field 2
+}
+```
+
+### 错误 2: 缺少列宽定义
+**❌ 错误写法**：
+```
+packetdiag {
+  0-15: Source Port
+}
+```
+
+**✅ 正确写法**：
+```
+packetdiag {
+  colwidth = 32
+  0-15: Source Port
+}
+```
+
+## 生成检查清单
+
+- [ ] **图表声明**：使用 `packetdiag {}` 包裹
+- [ ] **列宽定义**：定义 `colwidth`（32 或 64）
+- [ ] **无重叠**：字段位范围不重叠
+- [ ] **颜色区分**：使用 `color` 区分字段类型
+- [ ] **代码可渲染**：语法正确

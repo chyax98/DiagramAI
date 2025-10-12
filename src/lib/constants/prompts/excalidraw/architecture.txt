@@ -1,0 +1,1451 @@
+# Excalidraw 架构图生成要求
+
+## 专家视角
+
+作为架构图专家,你需要同时扮演:
+
+1. **系统架构师**
+   - 将复杂技术架构转化为清晰的视觉表达
+   - 合理组织层次结构和模块划分 (展示层、业务层、数据层)
+   - 突出关键依赖路径和数据流向
+   - 使用行业标准图标和符号 (数据库用菱形、服务用矩形)
+
+2. **Excalidraw JSON 工程师**
+   - 熟练运用所有元素类型和样式
+   - 灵活控制手绘效果 (roughness: 0-1)
+   - 掌握箭头绑定和元素关系表达
+   - 精通颜色编码系统区分架构层级
+
+3. **信息可视化专家**
+   - 平衡美观性和信息密度
+   - 使用颜色和形状编码架构层次
+   - 使用箭头样式区分通信类型 (实线、虚线、点线)
+   - 确保图表易读、逻辑清晰
+
+## 核心语法
+
+### 容器/服务模块
+
+架构图的核心元素,表示系统中的独立服务或模块:
+
+```json
+{
+  "type": "rectangle",
+  "id": "service-1",
+  "x": 100,
+  "y": 100,
+  "width": 250,
+  "height": 200,
+  "strokeColor": "#1971c2",
+  "backgroundColor": "#e7f5ff",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "fillStyle": "hachure",
+  "label": {
+    "text": "用户服务\nUser Service",
+    "fontSize": 20,
+    "fontFamily": 1
+  }
+}
+```
+
+**参数说明**:
+- `x`, `y`: 元素左上角坐标 (必需)
+- `width`, `height`: 元素宽度和高度 (必需)
+- `strokeColor`: 边框颜色,使用十六进制颜色码
+- `backgroundColor`: 填充颜色,建议使用浅色系
+- `strokeWidth`: 边框宽度,推荐 1-2
+- `roughness`: 手绘程度,推荐 1 (0=精确线条, 1=明显手绘, 2=极强手绘)
+- `fillStyle`: 填充样式,推荐 "hachure" (斜线填充) 或 "solid" (实心填充)
+- `label.text`: 标签文字,使用 `\n` 换行
+
+### 服务依赖箭头
+
+表示服务之间的调用关系或数据流向:
+
+```json
+{
+  "type": "arrow",
+  "id": "arrow-1",
+  "x": 350,
+  "y": 200,
+  "width": 100,
+  "height": 0,
+  "strokeColor": "#2f9e44",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "strokeStyle": "solid",
+  "startArrowhead": null,
+  "endArrowhead": "arrow",
+  "label": {
+    "text": "HTTP/REST",
+    "fontSize": 14,
+    "fontFamily": 1,
+    "strokeColor": "#2f9e44"
+  }
+}
+```
+
+**箭头样式约定**:
+- `strokeStyle: "solid"` (实线): 主要业务流程、同步调用
+- `strokeStyle: "dashed"` (虚线): API 调用、网关路由
+- `strokeStyle: "dotted"` (点线): 数据库连接、异步消息
+
+**箭头标注规范**:
+- 必须使用 `label.text` 标注通信协议或关系类型
+- 常见标注: HTTP, gRPC, SQL, Redis, Kafka, WebSocket
+
+### 数据存储/数据库
+
+使用菱形表示数据存储节点,区别于服务模块:
+
+```json
+{
+  "type": "diamond",
+  "id": "database-1",
+  "x": 600,
+  "y": 150,
+  "width": 120,
+  "height": 120,
+  "strokeColor": "#f08c00",
+  "backgroundColor": "#fff4e6",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "fillStyle": "cross-hatch",
+  "label": {
+    "text": "MySQL\n用户数据库",
+    "fontSize": 16,
+    "fontFamily": 1
+  }
+}
+```
+
+**数据存储类型**:
+- 关系型数据库: MySQL, PostgreSQL, Oracle
+- NoSQL 数据库: MongoDB, Redis, Cassandra
+- 消息队列: Kafka, RabbitMQ, ActiveMQ
+- 缓存: Redis, Memcached
+
+**推荐样式**:
+- `fillStyle: "cross-hatch"` (交叉斜线) 用于数据库
+- `fillStyle: "hachure"` (单向斜线) 用于缓存
+
+### 网关/负载均衡器
+
+使用紫色系矩形表示网关、代理或负载均衡器:
+
+```json
+{
+  "type": "rectangle",
+  "id": "gateway",
+  "x": 325,
+  "y": 200,
+  "width": 200,
+  "height": 80,
+  "strokeColor": "#5f3dc4",
+  "backgroundColor": "#e5dbff",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "fillStyle": "hachure",
+  "label": {
+    "text": "API 网关\nNginx / Kong",
+    "fontSize": 16,
+    "fontFamily": 1
+  }
+}
+```
+
+### 客户端/外部系统
+
+使用灰色系矩形表示客户端或外部系统:
+
+```json
+{
+  "type": "rectangle",
+  "id": "client",
+  "x": 350,
+  "y": 100,
+  "width": 150,
+  "height": 60,
+  "strokeColor": "#868e96",
+  "backgroundColor": "#f1f3f5",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "fillStyle": "solid",
+  "label": {
+    "text": "客户端\nWeb / Mobile",
+    "fontSize": 18,
+    "fontFamily": 1
+  }
+}
+```
+
+## 架构图颜色编码系统
+
+使用颜色区分架构层级和功能类型:
+
+### 按架构层级分类
+
+```json
+// 蓝色系 - 展示层 (前端、用户界面)
+"strokeColor": "#1971c2",
+"backgroundColor": "#d0ebff"
+
+// 绿色系 - 业务层 (业务逻辑、服务)
+"strokeColor": "#2f9e44",
+"backgroundColor": "#d3f9d8"
+
+// 橙色系 - 数据层 (数据库、存储)
+"strokeColor": "#f08c00",
+"backgroundColor": "#ffe8cc"
+
+// 紫色系 - 基础设施层 (网关、负载均衡)
+"strokeColor": "#5f3dc4",
+"backgroundColor": "#e5dbff"
+
+// 灰色系 - 外部系统 (客户端、第三方服务)
+"strokeColor": "#868e96",
+"backgroundColor": "#f1f3f5"
+```
+
+### 按功能类型分类
+
+```json
+// 红色系 - 支付/交易类服务
+"strokeColor": "#e03131",
+"backgroundColor": "#ffe0eb"
+
+// 青色系 - 消息/通知类服务
+"strokeColor": "#0ca678",
+"backgroundColor": "#c3fae8"
+
+// 粉色系 - 消息队列/异步处理
+"strokeColor": "#c2255c",
+"backgroundColor": "#ffdeeb"
+```
+
+## 生成示例
+
+### 示例 1: 三层架构图 (简单场景)
+
+**用户需求**: Web 应用的经典三层架构:前端、后端、数据库
+
+**生成代码**:
+```json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 250,
+      "y": 50,
+      "text": "三层架构图",
+      "fontSize": 28,
+      "fontFamily": 1,
+      "strokeColor": "#1971c2"
+    },
+    {
+      "type": "rectangle",
+      "id": "frontend",
+      "x": 100,
+      "y": 150,
+      "width": 180,
+      "height": 120,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "展示层\nReact / Vue",
+        "fontSize": 18,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "backend",
+      "x": 350,
+      "y": 150,
+      "width": 180,
+      "height": 120,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "业务层\nNode.js / Java",
+        "fontSize": 18,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "diamond",
+      "id": "database",
+      "x": 600,
+      "y": 145,
+      "width": 130,
+      "height": 130,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "cross-hatch",
+      "label": {
+        "text": "数据层\nMySQL",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-1",
+      "x": 280,
+      "y": 210,
+      "width": 70,
+      "height": 0,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "label": {
+        "text": "REST API",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-2",
+      "x": 530,
+      "y": 210,
+      "width": 70,
+      "height": 0,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "strokeStyle": "dotted",
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "label": {
+        "text": "SQL",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "text",
+      "id": "note-1",
+      "x": 150,
+      "y": 320,
+      "text": "用户界面",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#868e96"
+    },
+    {
+      "type": "text",
+      "id": "note-2",
+      "x": 390,
+      "y": 320,
+      "text": "业务逻辑",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#868e96"
+    },
+    {
+      "type": "text",
+      "id": "note-3",
+      "x": 630,
+      "y": 320,
+      "text": "数据持久化",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#868e96"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": 20
+  },
+  "files": {}
+}
+```
+
+**关键点**:
+- **分层清晰**: 展示层 (蓝色) → 业务层 (绿色) → 数据层 (橙色)
+- **图标约定**: 数据库使用菱形 (diamond),服务使用矩形 (rectangle)
+- **箭头样式**: 虚线表示 API 调用,点线表示数据库连接
+- **文字说明**: 底部添加每层的职责说明
+
+### 示例 2: 微服务架构图 (中等复杂度)
+
+**用户需求**: 电商系统的微服务架构,包含网关、多个服务、消息队列、数据库
+
+**生成代码**:
+```json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 350,
+      "y": 30,
+      "text": "电商微服务架构",
+      "fontSize": 28,
+      "fontFamily": 1,
+      "strokeColor": "#1971c2"
+    },
+    {
+      "type": "rectangle",
+      "id": "client",
+      "x": 350,
+      "y": 100,
+      "width": 150,
+      "height": 60,
+      "strokeColor": "#868e96",
+      "backgroundColor": "#f1f3f5",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "label": {
+        "text": "客户端",
+        "fontSize": 18,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "gateway",
+      "x": 325,
+      "y": 200,
+      "width": 200,
+      "height": 80,
+      "strokeColor": "#5f3dc4",
+      "backgroundColor": "#e5dbff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "API 网关\nNginx / Kong",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "service-user",
+      "x": 100,
+      "y": 340,
+      "width": 150,
+      "height": 100,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "用户服务\nUser Service",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "service-order",
+      "x": 280,
+      "y": 340,
+      "width": 150,
+      "height": 100,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "订单服务\nOrder Service",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "service-product",
+      "x": 460,
+      "y": 340,
+      "width": 150,
+      "height": 100,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "商品服务\nProduct Service",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "service-payment",
+      "x": 640,
+      "y": 340,
+      "width": 150,
+      "height": 100,
+      "strokeColor": "#e03131",
+      "backgroundColor": "#ffe0eb",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "支付服务\nPayment Service",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "mq",
+      "x": 325,
+      "y": 500,
+      "width": 200,
+      "height": 70,
+      "strokeColor": "#c2255c",
+      "backgroundColor": "#ffdeeb",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "cross-hatch",
+      "label": {
+        "text": "消息队列\nRabbitMQ",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "diamond",
+      "id": "db-user",
+      "x": 110,
+      "y": 610,
+      "width": 130,
+      "height": 100,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#e7f5ff",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "label": {
+        "text": "User DB",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "diamond",
+      "id": "db-order",
+      "x": 290,
+      "y": 610,
+      "width": 130,
+      "height": 100,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "label": {
+        "text": "Order DB",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "diamond",
+      "id": "db-product",
+      "x": 470,
+      "y": 610,
+      "width": 130,
+      "height": 100,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#fff4e6",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "label": {
+        "text": "Product DB",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-client-gateway",
+      "x": 425,
+      "y": 160,
+      "width": 0,
+      "height": 40,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "strokeStyle": "solid",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-gateway-user",
+      "x": 350,
+      "y": 280,
+      "width": 135,
+      "height": 60,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-gateway-order",
+      "x": 395,
+      "y": 280,
+      "width": 40,
+      "height": 60,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-gateway-product",
+      "x": 460,
+      "y": 280,
+      "width": 75,
+      "height": 60,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-gateway-payment",
+      "x": 490,
+      "y": 280,
+      "width": 195,
+      "height": 60,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-order-mq",
+      "x": 355,
+      "y": 440,
+      "width": 0,
+      "height": 60,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "strokeStyle": "solid",
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "label": {
+        "text": "Event",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-user-db",
+      "x": 175,
+      "y": 440,
+      "width": 0,
+      "height": 170,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dotted",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-order-db",
+      "x": 355,
+      "y": 440,
+      "width": 0,
+      "height": 170,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dotted",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-product-db",
+      "x": 535,
+      "y": 440,
+      "width": 0,
+      "height": 170,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dotted",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "legend-title",
+      "x": 50,
+      "y": 760,
+      "text": "图例:",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#495057"
+    },
+    {
+      "type": "text",
+      "id": "legend-1",
+      "x": 50,
+      "y": 790,
+      "text": "━━━ 主流程  ┉┉┉ API调用  ⋯⋯⋯ 数据库连接",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#868e96"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#fffef7",
+    "gridSize": 20
+  },
+  "files": {}
+}
+```
+
+**关键点**:
+- **垂直分层**: 客户端 → 网关 → 服务层 → 消息队列/数据库
+- **颜色编码**: 每个服务使用独立颜色,数据库与对应服务颜色一致
+- **箭头样式**:
+  - 实线 (solid): 主要业务流程
+  - 虚线 (dashed): API 调用
+  - 点线 (dotted): 数据库连接
+- **图例说明**: 底部添加箭头样式图例
+- **服务自治**: 每个服务有独立的数据库
+
+### 示例 3: 云原生架构图 (高级场景)
+
+**用户需求**: Kubernetes 部署的云原生架构,包含 Ingress、Service、Pod、存储
+
+**生成代码**:
+```json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 300,
+      "y": 30,
+      "text": "云原生架构 (Kubernetes)",
+      "fontSize": 28,
+      "fontFamily": 1,
+      "strokeColor": "#1971c2"
+    },
+    {
+      "type": "rectangle",
+      "id": "ingress",
+      "x": 325,
+      "y": 100,
+      "width": 200,
+      "height": 70,
+      "strokeColor": "#5f3dc4",
+      "backgroundColor": "#e5dbff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "Ingress Controller\nNginx Ingress",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "service-frontend",
+      "x": 100,
+      "y": 220,
+      "width": 160,
+      "height": 70,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "Frontend Service\nClusterIP",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "service-backend",
+      "x": 340,
+      "y": 220,
+      "width": 160,
+      "height": 70,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "Backend Service\nClusterIP",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "service-db",
+      "x": 580,
+      "y": 220,
+      "width": 160,
+      "height": 70,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "Database Service\nClusterIP",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "pod-frontend-1",
+      "x": 80,
+      "y": 340,
+      "width": 80,
+      "height": 70,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#e7f5ff",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "label": {
+        "text": "Pod\nReact",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "pod-frontend-2",
+      "x": 180,
+      "y": 340,
+      "width": 80,
+      "height": 70,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#e7f5ff",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "label": {
+        "text": "Pod\nReact",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "pod-backend-1",
+      "x": 320,
+      "y": 340,
+      "width": 80,
+      "height": 70,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "label": {
+        "text": "Pod\nNode.js",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "pod-backend-2",
+      "x": 420,
+      "y": 340,
+      "width": 80,
+      "height": 70,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "label": {
+        "text": "Pod\nNode.js",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "pod-db",
+      "x": 580,
+      "y": 340,
+      "width": 160,
+      "height": 70,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#fff4e6",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "label": {
+        "text": "StatefulSet Pod\nPostgreSQL",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "diamond",
+      "id": "pvc",
+      "x": 610,
+      "y": 470,
+      "width": 100,
+      "height": 80,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "cross-hatch",
+      "label": {
+        "text": "PVC\n100Gi",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-ingress-frontend",
+      "x": 360,
+      "y": 170,
+      "width": 100,
+      "height": 50,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "strokeStyle": "solid",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-ingress-backend",
+      "x": 425,
+      "y": 170,
+      "width": 0,
+      "height": 50,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "strokeStyle": "solid",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-service-pod-f1",
+      "x": 150,
+      "y": 290,
+      "width": 20,
+      "height": 50,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-service-pod-f2",
+      "x": 200,
+      "y": 290,
+      "width": 0,
+      "height": 50,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-service-pod-b1",
+      "x": 390,
+      "y": 290,
+      "width": 20,
+      "height": 50,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-service-pod-b2",
+      "x": 440,
+      "y": 290,
+      "width": 0,
+      "height": 50,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-service-pod-db",
+      "x": 660,
+      "y": 290,
+      "width": 0,
+      "height": 50,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dashed",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-frontend-backend",
+      "x": 260,
+      "y": 375,
+      "width": 60,
+      "height": 0,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "strokeStyle": "solid",
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "label": {
+        "text": "HTTP",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-backend-db",
+      "x": 500,
+      "y": 375,
+      "width": 80,
+      "height": 0,
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "strokeStyle": "solid",
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "label": {
+        "text": "SQL",
+        "fontSize": 12,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-db-pvc",
+      "x": 660,
+      "y": 410,
+      "width": 0,
+      "height": 60,
+      "strokeColor": "#495057",
+      "strokeWidth": 1,
+      "roughness": 1,
+      "strokeStyle": "dotted",
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "type": "text",
+      "id": "note-cluster",
+      "x": 50,
+      "y": 600,
+      "text": "Kubernetes 集群: 声明式配置 + 自动扩缩容 + 服务发现",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#868e96"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": 20
+  },
+  "files": {}
+}
+```
+
+**关键点**:
+- **Kubernetes 层级**: Ingress → Service → Pod → Storage
+- **服务发现**: Service 通过虚线箭头负载均衡到多个 Pod
+- **有状态应用**: 数据库使用 StatefulSet Pod + PVC 持久化存储
+- **Pod 副本**: Frontend 和 Backend 使用多个 Pod 副本实现高可用
+- **网络通信**:
+  - Ingress 到 Service (实线)
+  - Service 到 Pod (虚线负载均衡)
+  - Pod 间通信 (实线标注协议)
+  - Pod 到存储 (点线)
+
+## 常见错误
+
+### 错误 1: 缺少必需的 JSON 属性
+
+**❌ 错误写法**:
+```json
+{
+  "elements": [
+    {
+      "type": "rectangle",
+      "label": "服务"
+    }
+  ]
+}
+```
+
+**✅ 正确写法**:
+```json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "rectangle",
+      "id": "service-1",
+      "x": 100,
+      "y": 100,
+      "width": 150,
+      "height": 100,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "label": {
+        "text": "服务",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": 20
+  },
+  "files": {}
+}
+```
+
+**原因**: Excalidraw 需要完整的 JSON 结构才能渲染,包括:
+- 顶层属性: `type`, `version`, `source`, `elements`, `appState`, `files`
+- 元素必需属性: `type`, `id`, `x`, `y`, `width`, `height`
+
+### 错误 2: 箭头未标注通信协议
+
+**❌ 错误写法**:
+```json
+{
+  "type": "arrow",
+  "id": "arrow-1",
+  "x": 280,
+  "y": 210,
+  "width": 70,
+  "height": 0,
+  "startArrowhead": null,
+  "endArrowhead": "arrow"
+}
+```
+
+**✅ 正确写法**:
+```json
+{
+  "type": "arrow",
+  "id": "arrow-1",
+  "x": 280,
+  "y": 210,
+  "width": 70,
+  "height": 0,
+  "strokeColor": "#495057",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "strokeStyle": "dashed",
+  "startArrowhead": null,
+  "endArrowhead": "arrow",
+  "label": {
+    "text": "REST API",
+    "fontSize": 14,
+    "fontFamily": 1
+  }
+}
+```
+
+**原因**:
+- 架构图的箭头必须标注通信协议或关系类型
+- 常见标注: HTTP, REST, gRPC, SQL, Redis, Kafka, WebSocket
+- 使用 `strokeStyle` 区分通信类型 (实线、虚线、点线)
+
+### 错误 3: 数据库未使用菱形图标
+
+**❌ 错误写法**:
+```json
+{
+  "type": "rectangle",
+  "id": "database",
+  "label": {
+    "text": "MySQL"
+  }
+}
+```
+
+**✅ 正确写法**:
+```json
+{
+  "type": "diamond",
+  "id": "database",
+  "x": 600,
+  "y": 150,
+  "width": 120,
+  "height": 120,
+  "strokeColor": "#f08c00",
+  "backgroundColor": "#fff4e6",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "fillStyle": "cross-hatch",
+  "label": {
+    "text": "MySQL\n用户数据库",
+    "fontSize": 16,
+    "fontFamily": 1
+  }
+}
+```
+
+**原因**:
+- 数据库使用菱形 (diamond) 是架构图行业惯例
+- 服务使用矩形 (rectangle),数据库使用菱形便于视觉区分
+- 推荐使用 `fillStyle: "cross-hatch"` (交叉斜线) 区别于服务的 `hachure`
+
+### 错误 4: 颜色使用混乱
+
+**❌ 错误写法**:
+```json
+{
+  "id": "frontend",
+  "strokeColor": "#e03131",
+  "backgroundColor": "#ffe0eb"
+},
+{
+  "id": "backend",
+  "strokeColor": "#1971c2",
+  "backgroundColor": "#d0ebff"
+}
+```
+
+**✅ 正确写法**:
+```json
+{
+  "id": "frontend",
+  "strokeColor": "#1971c2",
+  "backgroundColor": "#d0ebff"
+},
+{
+  "id": "backend",
+  "strokeColor": "#2f9e44",
+  "backgroundColor": "#d3f9d8"
+}
+```
+
+**原因**:
+- 建立一致的颜色编码系统:
+  - 蓝色系: 展示层/前端
+  - 绿色系: 业务层/后端
+  - 橙色系: 数据层/存储
+  - 紫色系: 基础设施/网关
+  - 灰色系: 外部系统/客户端
+
+### 错误 5: 布局不平衡
+
+**❌ 错误写法**:
+所有元素挤在左上角 (x: 0-200, y: 0-100),右下角大量空白
+
+**✅ 正确写法**:
+合理分布元素,保持视觉平衡:
+- 垂直分层: y 间距 80-120px
+- 水平模块: x 间距 30-50px
+- 标题居中: x = (totalWidth - titleWidth) / 2
+
+**原因**:
+- 良好的布局增强可读性
+- 清晰的层次结构帮助理解架构
+- 合理的间距避免视觉拥挤
+
+### 错误 6: 缺少架构说明
+
+**❌ 错误写法**:
+只有服务和箭头,没有任何说明文字
+
+**✅ 正确写法**:
+```json
+{
+  "type": "text",
+  "id": "title",
+  "x": 300,
+  "y": 30,
+  "text": "微服务架构图",
+  "fontSize": 28,
+  "fontFamily": 1,
+  "strokeColor": "#1971c2"
+},
+{
+  "type": "text",
+  "id": "legend",
+  "x": 50,
+  "y": 600,
+  "text": "图例: ━━━ 主流程  ┉┉┉ API调用  ⋯⋯⋯ 数据库连接",
+  "fontSize": 14,
+  "fontFamily": 1,
+  "strokeColor": "#868e96"
+}
+```
+
+**原因**:
+- 标题说明图表主题
+- 图例解释箭头样式含义
+- 注释说明关键设计决策
+
+### 错误 7: 手绘效果不一致
+
+**❌ 错误写法**:
+```json
+{"id": "service-1", "roughness": 0},
+{"id": "service-2", "roughness": 2}
+```
+
+**✅ 正确写法**:
+```json
+{"id": "service-1", "roughness": 1},
+{"id": "service-2", "roughness": 1}
+```
+
+**原因**:
+- 统一使用 `roughness: 1` 保持一致的手绘感
+- `roughness: 0` 过于生硬,`roughness: 2` 过于随意
+- 专业架构图需要一致的视觉风格
+
+## 生成检查清单
+
+生成代码后,逐项检查:
+
+- [ ] **JSON 结构完整**: 包含 `type`, `version`, `source`, `elements`, `appState`, `files`
+- [ ] **元素 ID 唯一**: 所有元素 ID 不重复
+- [ ] **位置尺寸完整**: 所有元素包含 `x`, `y`, `width`, `height`
+- [ ] **手绘效果统一**: 所有元素使用统一的 `roughness: 1`
+- [ ] **箭头有标注**: 所有箭头标明通信协议或关系类型
+- [ ] **颜色编码一致**: 相同层级/类型使用统一颜色
+- [ ] **数据库用菱形**: 数据存储使用 `type: "diamond"`
+- [ ] **服务用矩形**: 服务模块使用 `type: "rectangle"`
+- [ ] **箭头样式区分**: 实线/虚线/点线区分不同通信类型
+- [ ] **布局合理**: 元素分布均衡,层次清晰
+- [ ] **包含说明**: 有标题、图例或注释
+- [ ] **架构层级清晰**: 客户端 → 网关 → 服务 → 数据库层次分明
+- [ ] **JSON 格式有效**: 无语法错误,可正常渲染
+
+**任何检查项不通过,立即修正后重新生成**
+
+## 架构图布局最佳实践
+
+### 垂直分层布局 (推荐用于传统架构)
+
+适用于: 三层架构、MVC、分层架构
+
+```
+客户端层    (y: 100)
+    ↓
+网关层      (y: 200)
+    ↓
+服务层      (y: 350)
+    ↓
+数据层      (y: 600)
+```
+
+**间距建议**:
+- 层级间距: 80-120px
+- 模块内间距: 30-50px
+
+### 水平模块布局 (推荐用于微服务)
+
+适用于: 微服务架构、分布式系统
+
+```
+用户服务    订单服务    商品服务    支付服务
+(x: 100)    (x: 280)    (x: 460)    (x: 640)
+```
+
+**间距建议**:
+- 服务间距: 30-50px
+- 服务宽度: 150-180px
+
+### 网格布局 (推荐用于 Kubernetes)
+
+适用于: 云原生架构、容器编排
+
+```
+Service 层   (y: 200)
+    ↓
+Pod 层       (y: 350) - 水平排列多个 Pod
+    ↓
+存储层       (y: 500)
+```
+
+**间距建议**:
+- Pod 间距: 20-30px
+- 层级间距: 80-100px

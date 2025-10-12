@@ -27,10 +27,8 @@ export function ZoomableContainer({
     >
       {({ zoomIn, zoomOut, resetTransform }) => (
         <>
-          <div className="flex h-14 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-            <div className="text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>
-              图表预览
-            </div>
+          <div className="flex h-14 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm text-foreground">
+            <div className="text-sm font-medium">图表预览</div>
 
             <div className="flex items-center gap-2">
               <Button
@@ -76,7 +74,7 @@ export function ZoomableContainer({
             </div>
           </div>
 
-          <div className="flex flex-1 items-center justify-center overflow-hidden bg-white">
+          <div className="flex flex-1 items-center justify-center overflow-hidden bg-white dark:bg-slate-900">
             <TransformComponent
               wrapperClass="!w-full !h-full"
               contentClass="!w-full !h-full flex items-center justify-center"

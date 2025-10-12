@@ -9,7 +9,7 @@ export function Logo() {
   return (
     <Link
       href="/"
-      className="flex items-center gap-3 text-lg font-semibold text-white hover:opacity-80 transition-opacity"
+      className="flex items-center gap-3 text-lg font-semibold text-slate-900 dark:text-white hover:opacity-80 transition-opacity"
     >
       <Image
         src="/icons/app/logo.svg"

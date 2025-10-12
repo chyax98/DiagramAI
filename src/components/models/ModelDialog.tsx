@@ -184,16 +184,16 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+          className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between p-6 border-b border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-900">
+          <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {isEditMode ? "编辑 AI 模型" : "添加 AI 模型"}
             </h2>
             <button
               onClick={handleClose}
-              className="text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -208,13 +208,16 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
               </div>
             )}
 
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
                 模型名称 <span className="text-red-500">*</span>
               </label>
               <Input
@@ -224,11 +227,16 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 className={errors.name ? "border-destructive focus-visible:ring-destructive" : ""}
                 placeholder="例如: GPT-4 模型"
               />
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="provider" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="provider"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
                 AI 服务商 <span className="text-red-500">*</span>
               </label>
               <Select
@@ -278,14 +286,16 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 </SelectContent>
               </Select>
               {errors.provider && (
-                <p className="mt-1 text-sm text-red-600">{errors.provider.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.provider.message}
+                </p>
               )}
             </div>
 
             <div>
               <label
                 htmlFor="api_endpoint"
-                className="block text-sm font-medium text-slate-700 mb-2"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
               >
                 API 端点 <span className="text-red-500">*</span>
               </label>
@@ -299,12 +309,17 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 placeholder="https://api.openai.com/v1"
               />
               {errors.api_endpoint && (
-                <p className="mt-1 text-sm text-red-600">{errors.api_endpoint.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.api_endpoint.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="api_key" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="api_key"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
                 API 密钥 <span className="text-red-500">*</span>
                 {isEditMode && (
                   <span className="ml-2 text-xs text-slate-500">(留空表示不修改)</span>
@@ -320,12 +335,17 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 placeholder={isEditMode ? "留空表示不修改" : "输入 API 密钥"}
               />
               {errors.api_key && (
-                <p className="mt-1 text-sm text-red-600">{errors.api_key.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.api_key.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="model_id" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="model_id"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
                 模型 ID <span className="text-red-500">*</span>
               </label>
               <Input
@@ -338,12 +358,17 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 placeholder="例如: gpt-4, gemini-pro"
               />
               {errors.model_id && (
-                <p className="mt-1 text-sm text-red-600">{errors.model_id.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.model_id.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="parameters" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="parameters"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
                 参数 (可选, JSON 格式)
               </label>
               <Textarea
@@ -356,7 +381,9 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
                 placeholder='{"temperature": 0.7, "max_tokens": 2000}'
               />
               {errors.parameters && (
-                <p className="mt-1 text-sm text-red-600">{errors.parameters.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.parameters.message}
+                </p>
               )}
             </div>
 
@@ -364,8 +391,8 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex-1 px-6 py-3 border border-slate-300 rounded-lg
-                         text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+                className="flex-1 px-6 py-3 border border-slate-300 dark:border-slate-600 rounded-lg
+                         text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-200"
               >
                 取消
               </button>

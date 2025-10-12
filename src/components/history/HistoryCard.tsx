@@ -104,10 +104,12 @@ export function HistoryCard({ history, onLoad, onDelete }: HistoryCardProps) {
     codeLines.join("\n") + (history.generated_code.split("\n").length > 6 ? "\n..." : "");
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+    <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-slate-900 line-clamp-2">{truncatedInput}</h3>
+          <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100 line-clamp-2">
+            {truncatedInput}
+          </h3>
         </div>
         <span
           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badgeClassName}`}
@@ -117,15 +119,19 @@ export function HistoryCard({ history, onLoad, onDelete }: HistoryCardProps) {
       </div>
 
       <div className="mb-3">
-        <p className="text-xs text-slate-600 line-clamp-2">{history.input_text}</p>
+        <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
+          {history.input_text}
+        </p>
       </div>
 
-      <div className="mb-3 rounded bg-slate-50 p-2">
-        <pre className="text-xs text-slate-700 overflow-x-auto">{truncatedCode}</pre>
+      <div className="mb-3 rounded bg-slate-50 dark:bg-slate-900 p-2">
+        <pre className="text-xs text-slate-700 dark:text-slate-300 overflow-x-auto">
+          {truncatedCode}
+        </pre>
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1 text-xs text-slate-500">
+        <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
           <Clock className="w-3 h-3" />
           <span>{formatTime(history.created_at)}</span>
         </div>
@@ -143,7 +149,7 @@ export function HistoryCard({ history, onLoad, onDelete }: HistoryCardProps) {
           <button
             onClick={handleCopy}
             disabled={isCopying}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-100"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-700"
             aria-label="复制代码"
           >
             {isCopying ? (
@@ -162,7 +168,7 @@ export function HistoryCard({ history, onLoad, onDelete }: HistoryCardProps) {
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="inline-flex items-center gap-1.5 rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm transition-colors hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-100"
+            className="inline-flex items-center gap-1.5 rounded-md border border-red-300 dark:border-red-800 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-400 shadow-sm transition-colors hover:bg-red-50 dark:hover:bg-red-950 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-700"
             aria-label="删除记录"
           >
             {isDeleting ? (

@@ -130,6 +130,28 @@ package "com.example.service" {
 }
 ```
 
+### 注释（Notes）
+```plantuml
+' 方式1: 直接在类旁边添加注释
+note right of ClassName
+  这是注释内容
+  可以多行
+end note
+
+' 方式2: 定义独立注释并连接到类
+note "这是独立注释" as N1
+N1 .. ClassName
+
+' 方式3: 连接到关系
+note on link
+  关系说明
+end note
+```
+
+**注释位置**：
+- `note right of` / `note left of` / `note top of` / `note bottom of` - 注释相对于类的位置
+- `note on link` - 注释连接到关系上
+
 ## 生成示例
 
 ### 示例 1: 基础用户管理（简单场景）
@@ -307,6 +329,10 @@ note left of ISubject
   主题接口
   管理观察者
 end note
+
+' 注释连接到类的语法
+note "这是连接到主题的注释" as N1
+N1 .. ISubject
 
 @enduml
 ```

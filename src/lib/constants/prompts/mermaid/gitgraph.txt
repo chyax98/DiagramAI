@@ -42,8 +42,19 @@ branch develop
 checkout develop
 
 %% 合并分支（merge）
-merge main
+checkout main
+merge develop
 ```
+
+**merge 命令说明**：
+- 语法：`merge <源分支名>`
+- 含义：将指定分支合并到**当前所在分支**
+- 必须先 `checkout` 到目标分支，再执行 `merge`
+- 示例：将 feature 合并到 main
+  ```mermaid
+  checkout main      # 切换到 main
+  merge feature      # 将 feature 合并进来
+  ```
 
 ### 提交类型和标签
 

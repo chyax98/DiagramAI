@@ -294,7 +294,46 @@ end
 
 ## 常见错误
 
-### 错误 1: 缺少 C4 标注
+### 错误 1: 空 `!include` 语句（历史 60% 失败原因）
+
+⚠️ **这是 C4-PlantUML 最致命的错误！** 空的 `!include` 会导致 Kroki 渲染完全失败。
+
+**❌ 错误写法**：
+```plantuml
+@startuml
+!include
+
+participant "订单服务" as order <<Container>>
+@enduml
+```
+
+**Kroki 错误信息**：
+```
+Error: Syntax error at line 2: !include directive requires a file path
+Rendering failed: Invalid PlantUML syntax
+```
+
+**✅ 正确写法**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+title C4 Sequence - 订单处理流程
+
+participant "订单服务" as order <<Container>>
+@enduml
+```
+
+**原因**：
+- `!include` 必须指定完整的文件路径（如 `<C4/C4_Container>`）
+- 空的 `!include` 会导致 PlantUML 解析器崩溃
+- Kroki 对此零容忍，必须移除或补全路径
+
+**历史问题**：
+- 这是导致 C4-PlantUML 历史 60% 生成失败的根本原因
+- 早期 AI 模型经常生成空 `!include` 占位符
+
+### 错误 2: 缺少 C4 标注
 
 **❌ 错误写法**：
 ```plantuml
@@ -308,7 +347,7 @@ participant "订单服务" as order <<Container>>
 
 **原因**：C4 时序图应该标注组件类型（Container/Component/System），体现 C4 架构层次。
 
-### 错误 2: 消息方向错乱
+### 错误 3: 消息方向错乱
 
 **❌ 错误写法**：
 ```plantuml
@@ -324,7 +363,7 @@ B --> A: 响应
 
 **原因**：响应消息应该使用虚线箭头 `-->` 并指向调用方。
 
-### 错误 3: 缺少返回消息
+### 错误 4: 缺少返回消息
 
 **❌ 错误写法**：
 ```plantuml
@@ -342,7 +381,7 @@ api --> web: 响应数据
 
 **原因**：完整的交互应该包含请求和响应。
 
-### 错误 4: 未使用分组
+### 错误 5: 未使用分组
 
 **❌ 错误写法**：
 ```plantuml
@@ -362,7 +401,7 @@ end
 
 **原因**：使用 `group` 可以更清晰地组织相关交互。
 
-### 错误 5: 生命线激活混乱
+### 错误 6: 生命线激活混乱
 
 **❌ 错误写法**：
 ```plantuml
@@ -388,7 +427,7 @@ deactivate C
 
 **原因**：激活/去激活应该成对出现，表示组件的活动周期。
 
-### 错误 6: 缺少标题
+### 错误 7: 缺少标题
 
 **❌ 错误写法**：
 ```plantuml

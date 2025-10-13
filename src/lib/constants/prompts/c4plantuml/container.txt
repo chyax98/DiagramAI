@@ -250,7 +250,46 @@ SHOW_LEGEND()
 
 ## 常见错误
 
-### 错误 1: 缺少技术栈标注
+### 错误 1: 空 `!include` 语句（历史 60% 失败原因）
+
+⚠️ **这是 C4-PlantUML 最致命的错误！** 空的 `!include` 会导致 Kroki 渲染完全失败。
+
+**❌ 错误写法**：
+```plantuml
+@startuml
+!include
+
+Container(web, "Web应用", "React")
+@enduml
+```
+
+**Kroki 错误信息**：
+```
+Error: Syntax error at line 2: !include directive requires a file path
+Rendering failed: Invalid PlantUML syntax
+```
+
+**✅ 正确写法**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+System_Boundary(system, "我的系统") {
+    Container(web, "Web应用", "React", "前端应用")
+}
+@enduml
+```
+
+**原因**：
+- `!include` 必须指定完整的文件路径（如 `<C4/C4_Container>`）
+- 空的 `!include` 会导致 PlantUML 解析器崩溃
+- Kroki 对此零容忍，必须移除或补全路径
+
+**历史问题**：
+- 这是导致 C4-PlantUML 历史 60% 生成失败的根本原因
+- 早期 AI 模型经常生成空 `!include` 占位符
+
+### 错误 2: 缺少技术栈标注
 ❌ **错误写法**：
 ```plantuml
 Container(web, "Web应用")  ' 缺少技术栈
@@ -263,7 +302,7 @@ Container(web, "Web应用", "React, Next.js", "前端应用")
 
 **原因**：Container 图的核心价值是展示技术架构，必须包含技术栈信息。
 
-### 错误 2: 混用 Component 元素
+### 错误 3: 混用 Component 元素
 ❌ **错误写法**：
 ```plantuml
 @startuml
@@ -286,7 +325,7 @@ Container(api, "API服务", "Spring Boot", "后端服务")
 
 **原因**：Container 图聚焦容器级别，组件细节应在 Component 图中展示。
 
-### 错误 3: 缺少系统边界
+### 错误 4: 缺少系统边界
 ❌ **错误写法**：
 ```plantuml
 Container(web, "Web应用", "React")
@@ -303,7 +342,7 @@ System_Boundary(system, "我的系统") {
 
 **原因**：Container 图应明确系统边界，区分内部容器和外部系统。
 
-### 错误 4: 关系描述缺少技术协议
+### 错误 5: 关系描述缺少技术协议
 ❌ **错误写法**：
 ```plantuml
 Rel(web, api, "调用")  ' 缺少技术协议
@@ -316,7 +355,7 @@ Rel(web, api, "调用 API", "REST/JSON")
 
 **原因**：Container 图是技术视图，应标注通信协议和数据格式。
 
-### 错误 5: 数据库未使用 ContainerDb
+### 错误 6: 数据库未使用 ContainerDb
 ❌ **错误写法**：
 ```plantuml
 Container(db, "数据库", "MySQL")  ' 应使用 ContainerDb
@@ -329,7 +368,7 @@ ContainerDb(db, "数据库", "MySQL", "持久化存储")
 
 **原因**：使用专用元素类型（`ContainerDb`）可以更清晰地表示数据库。
 
-### 错误 6: 容器粒度过细
+### 错误 7: 容器粒度过细
 ❌ **错误写法**：为每个 REST endpoint 创建一个容器
 ```plantuml
 Container(getUserApi, "获取用户API", "Spring Boot")

@@ -72,6 +72,35 @@ John->>Bob: 调用
 deactivate John
 ```
 
+**激活生命线语法** (强烈推荐使用):
+- `+` = 激活对象 (在箭头末尾使用,如 `->>+`)
+- `-` = 去激活对象 (在箭头末尾使用,如 `-->>-`)
+- `activate` / `deactivate` = 手动激活/去激活命令
+
+**最佳实践**:
+```mermaid
+%% 推荐写法 1: 使用 +/- 符号 (简洁)
+Alice->>+John: 请求
+John->>+Database: 查询
+Database-->>-John: 数据
+John-->>-Alice: 响应
+
+%% 推荐写法 2: 手动激活 (更灵活)
+Alice->>John: 请求
+activate John
+John->>Database: 查询
+activate Database
+Database-->>John: 数据
+deactivate Database
+John-->>Alice: 响应
+deactivate John
+```
+
+**常见错误**:
+- ❌ 忘记去激活: `Alice->>+John` 但没有 `-` 去激活
+- ❌ 激活未配对: `activate John` 但缺少 `deactivate John`
+- ❌ 激活顺序错乱: 先去激活后激活
+
 ### 注释和标注
 ```mermaid
 %% Note 注释
@@ -221,7 +250,71 @@ sequenceDiagram
 
 ## 常见错误
 
-### 错误 1: 参与者名称不一致
+### 错误 1: 空消息在最后一行 (⚠️ Kroki 致命错误)
+
+**这是 Sequence Diagram 在 Kroki 中最常见的渲染失败原因！**
+
+**❌ 错误写法**:
+```mermaid
+sequenceDiagram
+    Alice->>Bob: 你好
+    Bob-->>Alice: 嗨
+    Alice->>Bob:           %% ❌ 空消息在最后一行
+```
+
+**✅ 正确写法 1**: 添加占位文本
+```mermaid
+sequenceDiagram
+    Alice->>Bob: 你好
+    Bob-->>Alice: 嗨
+    Alice->>Bob: (无消息)
+```
+
+**✅ 正确写法 2**: 将空消息移到中间
+```mermaid
+sequenceDiagram
+    Alice->>Bob: 你好
+    Bob-->>Alice:          %% ✅ 空消息不在最后
+    Alice->>Bob: 再见
+```
+
+**✅ 正确写法 3**: 添加 Note 代替空消息
+```mermaid
+sequenceDiagram
+    Alice->>Bob: 你好
+    Bob-->>Alice: 嗨
+    Note over Alice,Bob: 沉默...
+```
+
+**Kroki 编译错误信息**:
+```
+Empty message in mermaid sequence diagram not working
+Kroki throws error when empty message is the last line
+Error: unexpected end of input after empty message
+```
+
+**根本原因**:
+Kroki 在处理 Mermaid 代码时会执行 `trim()` 操作，导致最后一行的空消息被完全删除，引发解析器错误 "unexpected end of input"。
+
+**检测方法**:
+```javascript
+// 检测是否存在最后一行空消息
+const lines = code.split('\n');
+const lastLine = lines[lines.length - 1].trim();
+if (lastLine.match(/^[A-Za-z]+->+[A-Za-z]+:\s*$/)) {
+  throw new Error('Empty message on last line will cause Kroki rendering failure');
+}
+```
+
+**强制要求**:
+- ✅ **空消息不能在最后一行**
+- ✅ **使用占位文本** (如: `(无消息)`, `(空)`, `...`)
+- ✅ **或将空消息移到中间位置**
+- ✅ **或添加后续消息/Note**
+
+---
+
+### 错误 2: 参与者名称不一致
 **❌ 错误写法**：
 ```mermaid
 sequenceDiagram
@@ -238,7 +331,7 @@ sequenceDiagram
 
 **原因**：参与者名称大小写敏感，`Bob` 和 `bob` 是两个不同的参与者。
 
-### 错误 2: 箭头语法错误
+### 错误 3: 箭头语法错误
 **❌ 错误写法**：
 ```mermaid
 sequenceDiagram
@@ -253,7 +346,23 @@ sequenceDiagram
 
 **原因**：Mermaid 时序图使用 `->>` 而不是 `->`。
 
-### 错误 3: 激活框未配对
+**Sequence Diagram 箭头语法完整列表**:
+
+| 箭头 | 类型 | 说明 | 使用场景 |
+|------|------|------|----------|
+| `->>` | 实线箭头 | 同步调用 | 请求/响应 |
+| `-->>` | 虚线箭头 | 异步消息/返回值 | 回调/异步响应 |
+| `-x` | 实线 X | 丢失的消息 | 网络故障 |
+| `--x` | 虚线 X | 丢失的异步消息 | 超时 |
+| `-)` | 实线开放箭头 | 异步消息 | 发送后不等待 |
+| `--)` | 虚线开放箭头 | 异步返回 | 异步回调 |
+
+**最佳实践**:
+- 请求使用 `->>` (实线)，返回使用 `-->>` (虚线)
+- 异步场景使用 `-)` 或 `--)`
+- 表示消息丢失使用 `-x` 或 `--x`
+
+### 错误 4: 激活框未配对
 **❌ 错误写法**：
 ```mermaid
 sequenceDiagram
@@ -272,7 +381,7 @@ sequenceDiagram
 
 **原因**：每个 `+` 激活必须有对应的 `-` 去激活，否则激活框不会关闭。
 
-### 错误 4: alt/else 语法错误
+### 错误 5: alt/else 语法错误
 **❌ 错误写法**：
 ```mermaid
 sequenceDiagram
@@ -295,7 +404,7 @@ sequenceDiagram
 
 **原因**：Mermaid 的 `alt/else` 不支持 `else if`，只能有一个 `else`。
 
-### 错误 5: Note 位置错误
+### 错误 6: Note 位置错误
 **❌ 错误写法**：
 ```mermaid
 sequenceDiagram
@@ -311,7 +420,7 @@ sequenceDiagram
 
 **原因**：`Note` 必须指定位置：`left of`、`right of` 或 `over`。
 
-### 错误 6: 消息文本包含特殊字符未转义
+### 错误 7: 消息文本包含特殊字符未转义
 **❌ 错误写法**：
 ```mermaid
 sequenceDiagram
@@ -326,7 +435,7 @@ sequenceDiagram
 
 **原因**：消息文本中的特殊字符（如 `{}`）可能导致解析错误，建议使用其他符号。
 
-### 错误 7: loop 语法缺少 end
+### 错误 8: loop 语法缺少 end
 **❌ 错误写法**：
 ```mermaid
 sequenceDiagram

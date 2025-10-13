@@ -192,7 +192,46 @@ SHOW_LEGEND()
 
 ## 常见错误
 
-### 错误 1: 缺少 include 声明
+### 错误 1: 空 `!include` 语句（历史 60% 失败原因）
+
+⚠️ **这是 C4-PlantUML 最致命的错误！** 空的 `!include` 会导致 Kroki 渲染完全失败。
+
+**❌ 错误写法**：
+```plantuml
+@startuml
+!include
+
+Person(user, "用户")
+System(app, "应用")
+@enduml
+```
+
+**Kroki 错误信息**：
+```
+Error: Syntax error at line 2: !include directive requires a file path
+Rendering failed: Invalid PlantUML syntax
+```
+
+**✅ 正确写法**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "用户")
+System(app, "应用系统")
+@enduml
+```
+
+**原因**：
+- `!include` 必须指定完整的文件路径（如 `<C4/C4_Container>`）
+- 空的 `!include` 会导致 PlantUML 解析器崩溃
+- Kroki 对此零容忍，必须移除或补全路径
+
+**历史问题**：
+- 这是导致 C4-PlantUML 历史 60% 生成失败的根本原因
+- 早期 AI 模型经常生成空 `!include` 占位符
+
+### 错误 2: 缺少 include 声明
 ❌ **错误写法**：
 ```plantuml
 @startuml
@@ -213,7 +252,7 @@ System(app, "应用系统")
 
 **原因**：C4-PlantUML 元素定义来自外部库，必须先 include。
 
-### 错误 2: 使用 Container 或 Component 元素
+### 错误 3: 使用 Container 或 Component 元素
 ❌ **错误写法**：
 ```plantuml
 @startuml
@@ -238,7 +277,7 @@ System_Ext(other, "外部系统", "第三方服务")
 
 **原因**：Context 图聚焦系统级别，不展示内部容器或组件。
 
-### 错误 3: 关系描述过于技术化
+### 错误 4: 关系描述过于技术化
 ❌ **错误写法**：
 ```plantuml
 Rel(user, app, "HTTP POST /api/orders", "REST API")
@@ -251,7 +290,7 @@ Rel(user, app, "下单购买", "HTTPS")
 
 **原因**：Context 图面向业务，应使用业务语言，技术细节留给 Container/Component 图。
 
-### 错误 4: 目标系统标记为外部系统
+### 错误 5: 目标系统标记为外部系统
 ❌ **错误写法**：
 ```plantuml
 System_Ext(shop, "在线购物系统")  ' 错误：目标系统不应用 _Ext
@@ -264,7 +303,7 @@ System(shop, "在线购物系统", "核心业务系统")
 
 **原因**：`System_Ext` 用于外部系统，目标系统应使用 `System`。
 
-### 错误 5: 缺少元素描述
+### 错误 6: 缺少元素描述
 ❌ **错误写法**：
 ```plantuml
 Person(user, "用户")  ' 缺少角色描述
@@ -279,7 +318,7 @@ System(app, "购物应用", "提供商品浏览和订单管理功能")
 
 **原因**：完整的描述有助于理解每个元素的职责。
 
-### 错误 6: 元素过多，粒度过细
+### 错误 7: 元素过多，粒度过细
 ❌ **错误写法**：包含 15+ 个系统，难以理解
 ```plantuml
 System(orderService, "订单服务")

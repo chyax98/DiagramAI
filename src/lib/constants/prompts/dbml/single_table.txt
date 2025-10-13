@@ -20,57 +20,27 @@
    - 选择合适的字段类型优化存储
    - 考虑索引对写入性能的影响
 
-## DBML 语法规范
+## 单表设计要点
 
-**请参考 common.txt 中的完整语法说明，以下是关键要点**：
+### 1. 字段完整性 (必须)
+- 包含主键 `id` 字段 (通常使用 `[pk, increment]`)
+- 包含业务必需字段 (根据需求确定)
+- 包含时间戳字段 `created_at`, `updated_at` (推荐)
 
-### 表定义（强制规则）
-```dbml
-Table table_name {
-  id integer [pk, increment]
-  field_name type [constraints]
-  Note: '表级注释'
-}
-```
+### 2. 字段约束合理性 (必须)
+- 必填字段使用 `[not null]`
+- 唯一字段使用 `[unique]`
+- 设置合理的默认值 `[default: value]`
 
-⚠️ **关键规则**：
-- 必须使用 `Table`（首字母大写），不能使用小写 `table`
-- varchar 和 decimal 必须指定长度/精度：`varchar(n)`, `decimal(p,s)`
-- 主键使用 `[pk]` 或 `[primary key]`
-- 引用的表和字段必须存在
+### 3. 索引策略 (推荐)
+- 为常用查询条件创建索引
+- 为外键字段创建索引 (如果有关系)
+- 为唯一字段创建唯一索引
 
-### 字段类型（必须指定长度/精度）
-- **字符类型**: `varchar(n)`, `char(n)`, `text`
-- **数值类型**: `integer`, `bigint`, `decimal(p,s)`, `float`, `double`
-- **日期时间**: `date`, `time`, `timestamp`, `datetime`
-- **其他类型**: `boolean`, `json`, `uuid`
-
-### 字段约束
-- `[pk]` 或 `[primary key]` - 主键
-- `[not null]` - 非空约束
-- `[unique]` - 唯一约束
-- `[increment]` - 自增
-- `[default: value]` - 默认值
-- `[note: 'text']` - 字段注释
-
-### 关系定义（箭头指向"一"的一方）
-- `[ref: > table.field]` - 多对一（箭头指向父表）
-- `[ref: - table.field]` - 一对一
-
-### 索引定义
-```dbml
-Table table_name {
-  // 字段定义...
-
-  indexes {
-    field_name                      // 单列索引
-    (field1, field2)               // 复合索引
-    field_name [unique]            // 唯一索引
-  }
-}
-```
-
-**详细语法和常见错误请参考 common.txt**
+### 4. 数据类型选择 (必须)
+- varchar 长度根据实际需求设置 (避免过大或过小)
+- decimal 精度根据业务需求 (金额通常 `decimal(10,2)`)
+- 时间字段选择 `timestamp` (含时区) 或 `datetime`
 
 ## 生成示例
 

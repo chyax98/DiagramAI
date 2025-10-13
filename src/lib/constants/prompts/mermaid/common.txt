@@ -31,11 +31,19 @@ Possible fix: Use 'finish', 'done', or 'complete' instead of 'end'
 - ✅ **必须使用**: 英文字母（A-Z, a-z）、数字（0-9）、下划线 `_`、连字符 `-`
 - ❌ **禁止使用**: 中文、空格
 - ❌ **保留关键字**（禁止用作节点 ID）:
-  - `end` - 最常见的错误，极易误用
-  - `graph`, `subgraph`, `flowchart` - 图表声明关键字
-  - `class`, `classDef`, `style` - 样式关键字
-  - `click`, `call`, `href` - 交互关键字
-  - `direction` - 布局关键字
+  - **图表结构**: `end` (最常见！), `graph`, `subgraph`, `flowchart`
+  - **样式相关**: `class`, `classDef`, `style`
+  - **交互相关**: `click`, `call`, `href`, `callback`
+  - **其他**: `direction`, `title`, `section`
+
+**检测方法**:
+```javascript
+const reservedWords = ['end', 'graph', 'subgraph', 'flowchart', 'class', 'classDef', 'style', 'click', 'call', 'href', 'callback', 'direction', 'title', 'section'];
+const nodeId = 'end';  // 待检测的节点 ID
+if (reservedWords.includes(nodeId)) {
+  throw new Error(`'${nodeId}' is a reserved keyword and cannot be used as node ID`);
+}
+```
 
 ---
 
@@ -103,6 +111,58 @@ Error: Invalid arrow syntax for flowchart diagram type
 - **Sequence**: `->>` (实线箭头)、`-->>` (虚线箭头), `-x` (异步), `-)` (返回)
 - **State**: `-->`
 - **Class**: `--|>` (继承)、`..|>` (实现)、`*--` (组合)、`o--` (聚合)、`-->` (关联)、`..>` (依赖)、`--` (链接)
+
+---
+
+### ⚠️ 规则 4: Kroki 特定限制 - 空消息在最后一行（序列图）
+**这是 Sequence Diagram 在 Kroki 中最高频的渲染失败原因！**
+
+**错误示例**：
+```mermaid
+sequenceDiagram
+    Alice->>Bob: Hello
+    Bob-->>Alice:    %% ❌ 致命错误！空消息在最后一行
+```
+
+**正确写法**：
+```mermaid
+sequenceDiagram
+    Alice->>Bob: Hello
+    Bob-->>Alice: (无消息)    %% ✅ 添加占位文本
+```
+
+或
+
+```mermaid
+sequenceDiagram
+    Alice->>Bob: Hello
+    Bob-->>Alice:        %% ✅ 空消息不在最后
+    Alice->>Bob: Bye
+```
+
+**Kroki 编译错误信息**：
+```
+Empty message in mermaid sequence diagram not working
+Kroki throws error when empty message is the last line
+Error: unexpected end of input after empty message
+```
+
+**强制要求**：
+- ✅ **空消息不能在最后一行**
+- ✅ **使用占位文本** (如: `(无消息)`, `(空)`, `...`)
+- ✅ **或将空消息移到中间位置**
+- ✅ **或添加后续消息/Note**
+
+**根本原因**：Kroki 在处理 Mermaid 代码时会执行 `trim()` 操作，导致最后一行的空消息被完全删除，引发解析器错误 "unexpected end of input"。
+
+**检测方法**：
+```javascript
+const lines = code.split('\n');
+const lastLine = lines[lines.length - 1].trim();
+if (lastLine.match(/^[A-Za-z]+->+[A-Za-z]+:\s*$/)) {
+  throw new Error('Empty message on last line will cause Kroki rendering failure');
+}
+```
 
 ---
 

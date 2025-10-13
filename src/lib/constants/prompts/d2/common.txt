@@ -232,3 +232,117 @@ Error 400: border-radius must be style.border-radius
 ### 错误 6: 标签信息不足
 **❌ 错误**：连接线没有标签，关系不明确
 **✅ 正确**：为关键连接添加清晰的标签说明
+
+---
+
+## Kroki 渲染限制
+
+⚠️ **重要**: Kroki 使用的 D2 渲染引擎与官方 D2 有以下差异，违反限制会导致渲染失败！
+
+### 限制 1: 不支持 `tala` 布局引擎
+
+**❌ 错误写法**：
+```d2
+direction: tala         %% ❌ Kroki 不支持！tala 是 D2 商业版功能
+```
+
+**✅ 正确写法**：
+```d2
+direction: right        %% ✅ 使用 dagre 引擎（Kroki 默认）
+direction: down         %% ✅ 或者省略（默认）
+```
+
+**Kroki 错误信息**：
+```
+Error: Layout engine 'tala' is not available in this Kroki instance
+Suggestion: Use default layout engine or specify 'dagre'
+```
+
+### 限制 2: 不支持变量系统
+
+**❌ 错误写法**：
+```d2
+vars: {
+  primary_color: "#1976D2"
+  bg_color: "#E3F2FD"
+}
+
+节点: {
+  style.fill: ${bg_color}         %% ❌ Kroki 不支持变量引用
+  style.stroke: ${primary_color}  %% ❌ Kroki 不支持变量引用
+}
+```
+
+**✅ 正确写法**：
+```d2
+节点: {
+  style.fill: "#E3F2FD"          %% ✅ 直接使用颜色值
+  style.stroke: "#1976D2"        %% ✅ 直接使用颜色值
+}
+```
+
+**Kroki 错误信息**：
+```
+Error: Variable interpolation is not supported
+Use literal values instead of ${variable}
+```
+
+### 限制 3: 不支持导入系统
+
+**❌ 错误写法**：
+```d2
+...@import: common-styles.d2    %% ❌ Kroki 不支持文件导入
+...@import: icons.d2            %% ❌ Kroki 不支持文件导入
+```
+
+**✅ 正确写法**：
+直接在文件中定义所有内容，不使用导入
+
+**Kroki 错误信息**：
+```
+Error: Import statements are not supported in Kroki
+All D2 code must be self-contained
+```
+
+### 限制 4: 复杂图表渲染超时
+
+**性能限制**：
+- 节点数量: 建议 ≤ 100 个节点
+- 嵌套层级: 建议 ≤ 3 层容器
+- 连接数量: 建议 ≤ 200 条连接
+
+**超出限制的结果**：
+- Kroki 渲染超时 (30 秒)
+- 返回 504 Gateway Timeout 错误
+
+**优化建议**：
+1. 将大型图表拆分为多个小图
+2. 减少不必要的嵌套
+3. 简化连接关系
+4. 使用容器分组而非全部平铺
+
+### 限制 5: 特殊字符限制
+
+**部分高级特性不可用**：
+- SQL 表格的复杂约束语法
+- Sequence Diagram 的高级消息类型
+- Class Diagram 的泛型语法
+
+**建议**: 使用 D2 的基础语法,避免使用过于高级的特性
+
+---
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **样式前缀检查**: 所有样式属性都使用 `style.` 前缀
+- [ ] **路径引用正确**: 嵌套节点使用 `.` 路径引用
+- [ ] **节点 ID 合法**: 不包含保留字符 `[]` `{}` `:` `.`
+- [ ] **形状类型正确**: shape 值在支持列表中
+- [ ] **布局方向合法**: direction 值为 right/down/left/up 之一
+- [ ] **Kroki 兼容性**: 不使用 tala、变量、导入等不支持特性
+- [ ] **复杂度适中**: 节点 ≤ 100, 嵌套 ≤ 3 层, 连接 ≤ 200
+- [ ] **代码可渲染**: 语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

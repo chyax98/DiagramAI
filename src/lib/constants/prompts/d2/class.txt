@@ -576,6 +576,39 @@ Animal: {
 
 **任何检查项不通过,立即修正后重新生成**
 
+## 泛型支持说明
+
+**重要限制**：D2 通过 Kroki 渲染时**不支持泛型语法**。
+
+**❌ 不支持的写法**：
+```d2
+List: {
+  shape: class
+  +add(item: T): void        // ❌ 泛型参数 T 不支持
+  +get(index: int): T
+}
+
+Map<K, V>: {                 // ❌ 类名中的泛型不支持
+  shape: class
+}
+```
+
+**✅ 替代方案**：
+```d2
+List: {
+  shape: class
+  +add(item: Object): void   // ✅ 使用 Object 或具体类型
+  +get(index: int): Object
+}
+
+StringMap: {                 // ✅ 使用具体类型名称
+  shape: class
+  +put(key: string, value: string): void
+}
+```
+
+**建议**：如需展示泛型设计，在类注释中说明泛型类型。
+
 ## 最佳实践
 
 ### 1. 访问修饰符使用

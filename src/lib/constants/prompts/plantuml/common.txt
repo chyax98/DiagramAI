@@ -209,3 +209,142 @@ User -> System: 请求
 ```
 
 **原因**：元素 ID 应使用英文，中文应作为标签放在双引号中，或使用 `as` 定义别名。
+
+---
+
+## Kroki 渲染限制
+
+⚠️ **重要**: Kroki 使用的 PlantUML 渲染引擎与本地 PlantUML 有以下差异，违反限制会导致渲染失败！
+
+### 限制 1: 不支持 Preprocessor 预处理器
+
+**❌ 错误写法**：
+```plantuml
+@startuml
+!define SEQUENCE (S,#AABBCC) Database Sequence
+!define TABLE (T,#FFAACC) Database Table
+
+class "MyTable" <<TABLE>>
+@enduml
+```
+
+**✅ 正确写法**：
+```plantuml
+@startuml
+' 直接使用样式,不使用预处理器宏
+class "MyTable" <<Database>> #FFAACC
+@enduml
+```
+
+**Kroki 错误信息**：
+```
+Error: Preprocessor directives (!define, !include, !if) are not supported in Kroki
+Use inline styles and definitions instead
+```
+
+**不支持的预处理器指令**：
+- `!define` - 宏定义
+- `!include` - 文件包含
+- `!if` / `!else` / `!endif` - 条件编译
+- `!function` / `!procedure` - 函数定义
+
+### 限制 2: 不支持外部文件引用
+
+**❌ 错误写法**：
+```plantuml
+@startuml
+!include common-styles.puml    %% ❌ Kroki 不支持
+!include c4/C4_Context.puml    %% ❌ Kroki 不支持
+@enduml
+```
+
+**✅ 正确写法**：
+直接在文件中定义所有内容,不使用 `!include`
+
+**Kroki 错误信息**：
+```
+Error: File inclusion (!include) is not supported
+All PlantUML code must be self-contained
+```
+
+### 限制 3: 超大图表渲染超时
+
+**性能限制**：
+- 类图: 建议 ≤ 50 个类
+- 时序图: 建议 ≤ 30 个参与者 × 100 条消息
+- 用例图: 建议 ≤ 40 个用例
+- 组件图: 建议 ≤ 60 个组件
+- 嵌套深度: 建议 ≤ 4 层
+
+**超出限制的结果**：
+- Kroki 渲染超时 (60 秒)
+- 返回 504 Gateway Timeout 错误
+- 或返回部分渲染的图表
+
+**优化建议**：
+1. 将大型图表拆分为多个小图
+2. 减少不必要的细节 (如方法参数)
+3. 使用包 (package) 分组,隐藏内部细节
+4. 简化关系 (如合并相似的依赖关系)
+
+### 限制 4: 主题和配色限制
+
+**部分主题不可用**：
+- `!theme mars` - 部分高级主题不支持
+- 自定义主题文件不支持
+
+**✅ 推荐使用**：
+- 内置颜色: `#AABBCC` 格式
+- 基础主题: `!theme plain`, `!theme black-knight`
+- Inline 样式: `#line:red;back:yellow`
+
+### 限制 5: 图标和图片引用
+
+**❌ 错误写法**：
+```plantuml
+@startuml
+actor "<img:http://example.com/user.png>"    %% ❌ Kroki 不支持网络图片
+sprite $custom <http://example.com/sprite>   %% ❌ Kroki 不支持网络精灵图
+@enduml
+```
+
+**✅ 正确写法**：
+```plantuml
+@startuml
+' 使用 PlantUML 内置图标
+actor User <<person>>
+database "MySQL" <<database>>
+@enduml
+```
+
+**建议**: 使用 PlantUML 内置的构造型 (stereotype) 和形状,避免外部图片
+
+### 限制 6: 复杂的 SVG 特性
+
+**部分高级 SVG 特性不可用**：
+- 动画效果 (animation)
+- 渐变效果 (gradient) - 部分支持
+- 复杂的路径操作
+
+**建议**: 使用基础的样式和颜色,避免过度依赖高级 SVG 特性
+
+---
+
+## Kroki 兼容性检查清单
+
+生成 PlantUML 代码后,逐项检查:
+
+- [ ] **无预处理器**: 不使用 `!define`, `!include`, `!if` 等指令
+- [ ] **无外部引用**: 不使用 `!include` 引入外部文件
+- [ ] **复杂度适中**: 元素数量在建议范围内 (类 ≤ 50, 消息 ≤ 100)
+- [ ] **无网络资源**: 不引用网络图片或外部精灵图
+- [ ] **使用基础主题**: 避免使用高级自定义主题
+- [ ] **样式简洁**: 使用内联样式而非复杂的 CSS
+- [ ] **嵌套合理**: 包/组件嵌套 ≤ 4 层
+- [ ] **代码自包含**: 所有定义都在单个文件中
+
+**任何检查项不通过，立即修正后重新生成**
+
+---
+
+**提示**: 如果用户明确要求使用 Kroki 不支持的特性 (如 `!include`),应明确告知限制并提供替代方案。

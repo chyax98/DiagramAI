@@ -129,6 +129,12 @@ blockdiag {
 - `shape` - 节点形状（box, roundedbox, diamond, ellipse 等）
 - `color` - 节点颜色
 - `style` - 节点样式（dashed, dotted 等）
+- `width` - 节点宽度（可选，省略时自动根据标签长度调整）
+
+**节点宽度自动调整规则**：
+- 未设置 `width` 时，BlockDiag 自动根据 `label` 文本长度调整节点宽度
+- 中文字符比英文字符占用更多宽度
+- 建议让 BlockDiag 自动调整，手动设置 `width` 仅在需要统一节点尺寸时使用
 
 ### 3. 边（连接线）定义
 ```

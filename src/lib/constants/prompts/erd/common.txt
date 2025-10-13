@@ -60,6 +60,20 @@ relationship {color: "#333333", size: "14"}
 - 空格/特殊字符: 必须用引号 → `` [`Birth Place`] ``, `['User Account']`, `["Product Info"]`
 - 不能使用: ASCII 控制字符 (回车、换行等)
 
+**实体命名规范**:
+- ✅ **使用小写字母和下划线**: `user`, `order_item`, `product_category`
+- ✅ **单数形式**: `person` (not `persons`), `order` (not `orders`)
+- ✅ **清晰描述**: 命名应明确表达实体含义
+- ❌ **避免驼峰命名**: 不推荐 `OrderItem`, 使用 `order_item` 代替
+- ❌ **避免缩写**: 使用 `customer` 而非 `cust`, 除非是行业标准缩写
+
+**属性命名规范**:
+- ✅ **使用小写字母和下划线**: `user_id`, `created_at`, `full_name`
+- ✅ **主键统一后缀**: `id` 或 `<entity>_id` (如 `user_id`)
+- ✅ **外键统一格式**: `<referenced_entity>_id` (如 `order_id`)
+- ✅ **布尔值前缀**: `is_active`, `has_children`, `can_login`
+- ✅ **时间戳后缀**: `created_at`, `updated_at`, `deleted_at`
+
 ### 3. 属性标记
 
 **主键 (Primary Key)**: `*` 前缀

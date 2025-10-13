@@ -38,8 +38,18 @@ component "组件名" as C1
 ### 接口定义
 ```plantuml
 interface "接口名" as I1
-() "接口2" as I2  ' 简化写法
+() "接口2" as I2  ' 简化写法（圆圈符号）
 ```
+
+**接口符号 `()` 用法**：
+- `()` 是 PlantUML 中定义接口的简化符号（圆圈接口）
+- 等价于 `interface` 关键字，用于快速定义接口
+- 示例：
+  ```plantuml
+  () "REST API" as API
+  [组件A] - API : 提供
+  [组件B] --> API : 使用
+  ```
 
 ### 组件关系
 ```plantuml

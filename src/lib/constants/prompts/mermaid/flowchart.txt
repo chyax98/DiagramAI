@@ -311,6 +311,50 @@ graph TD
 
 **原因**：节点标签中包含 `[]` 等特殊字符时，整个标签需要用双引号包裹。
 
+### 错误 8: 子图嵌套层级过深
+
+**❌ 错误写法**:
+```mermaid
+graph TD
+    subgraph 第一层
+        subgraph 第二层
+            subgraph 第三层
+                subgraph 第四层  %% ❌ 超过限制
+                    A --> B
+                end
+            end
+        end
+    end
+```
+
+**✅ 正确写法**:
+```mermaid
+graph TD
+    subgraph 业务层
+        subgraph 服务层
+            subgraph 数据层  %% ✅ 最多 3 层
+                A --> B
+            end
+        end
+    end
+```
+
+**Kroki 编译错误信息**:
+```
+Error: Maximum subgraph nesting depth (3) exceeded
+Mermaid does not support more than 3 levels of subgraph nesting
+```
+
+**原因**: Mermaid 限制子图嵌套深度为 3 层，超过此限制会导致渲染失败。如需更深层级，考虑：
+1. **拆分为多个图表**: 将复杂的嵌套结构拆分为独立的图表
+2. **使用其他图表类型**: 考虑使用 C4 架构图或类图表示层次结构
+3. **简化结构**: 重新设计架构，减少嵌套层级
+
+**强制要求**:
+- ✅ **最多 3 层子图嵌套**
+- ✅ **超过限制时拆分图表**
+- ✅ **或使用其他图表类型**
+
 ## 生成检查清单
 
 生成代码后，逐项检查：

@@ -257,7 +257,7 @@ Ref: table1.field > table2.field
 ```dbml
 Table table_name {
   // 字段定义...
-  
+
   indexes {
     field_name                      // 单列索引
     (field1, field2)               // 复合索引
@@ -268,6 +268,16 @@ Table table_name {
   }
 }
 ```
+
+**索引类型说明**（DBML 标准支持，具体实现取决于数据库）：
+- `btree` - B-Tree 索引（默认，适合范围查询和排序）
+- `hash` - 哈希索引（适合等值查询，不支持范围）
+- `gin` - GIN 索引（PostgreSQL 专用，适合数组和全文搜索）
+- `gist` - GiST 索引（PostgreSQL 专用，适合空间数据）
+
+**注意**：
+- DBML 语法支持 `[type: ...]` 属性，但 Kroki 渲染时可能不显示索引类型
+- 索引类型主要用于文档目的，便于团队理解索引设计
 
 #### 枚举定义
 ```dbml
@@ -282,6 +292,14 @@ Table users {
   status status [not null, default: 'active']
 }
 ```
+
+**枚举语法详解**：
+- 使用 `Enum` 关键字定义枚举类型
+- 枚举值按行列出，无需引号
+- 枚举值使用小写下划线命名（如 `pending_review`）
+- 可添加枚举级别注释 `[note: '说明']`
+- 表字段引用枚举时，类型名即为枚举名
+- 默认值必须用引号包裹（如 `default: 'active'`）
 
 ### 命名规范
 

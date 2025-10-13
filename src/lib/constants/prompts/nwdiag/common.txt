@@ -135,20 +135,11 @@ Syntax Error: Unexpected character
 nwdiag {
   // 网络拓扑图内容
 }
-
-rackdiag {
-  // 机架图内容（使用 rackdiag 关键字）
-}
-
-packetdiag {
-  // 数据包图内容（使用 packetdiag 关键字）
-}
 ```
 
 **说明**：
-- `nwdiag` 用于网络拓扑图（network、group）
-- `rackdiag` 用于机架布局图（U 位布局）
-- `packetdiag` 用于网络协议包图（协议头字段）
+- 所有 NwDiag 代码必须使用 `nwdiag {}` 关键字包裹
+- NwDiag 专注于网络拓扑图，展示多网段网络结构和设备连接
 
 ### 2. 网络定义
 ```
@@ -195,7 +186,7 @@ group {
 
 生成代码后，逐项检查：
 
-- [ ] **图表声明正确**：使用 `nwdiag {}` 或对应的 `rackdiag {}`、`packetdiag {}`
+- [ ] **图表声明正确**：使用 `nwdiag {}` 包裹所有内容
 - [ ] **网络定义完整**：每个 `network` 都有名称和地址范围
 - [ ] **节点属性合法**：address、description、shape 等属性格式正确
 - [ ] **IP 地址合理**：IP 地址和网段匹配，符合网络规范

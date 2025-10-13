@@ -148,12 +148,16 @@ Directives must be declared before any nodes or connections
 
 ```nomnoml
 [A] -> [B]              // 关联（Association）
+[A] <-> [B]             // 双向关联（Bidirectional Association），两个类互相引用
 [A] --> [B]             // 依赖（Dependency）
 [A] -:> [B]             // 继承/泛化（Generalization），A 继承 B
 [A] <:- [B]             // 继承/泛化，B 继承 A
 [A] --:> [B]            // 实现（Implementation）
 [A] +-> [B]             // 组合（Composition），强拥有关系
+[A] ->o [B]             // 组合关系（带填充球），部分依赖整体存在
 [A] o-> [B]             // 聚合（Aggregation），弱拥有关系
+[A] -o) [B]             // 球插座关系（Socket），表示接口实现
+[A] o<-) [B]            // 球插座关系（反向），表示继承关系
 [A] -- [B]              // 注释连接
 [A] -/- [B]             // 隐藏连接
 ```

@@ -1,43 +1,188 @@
-
 # PacketDiag Protocol 生成要求
 
-## 图表类型：协议栈图（Protocol Stack Diagram）
+## 图表类型:协议栈图(Protocol Stack Diagram)
 
-协议栈图用于展示OSI七层模型或TCP/IP协议栈的分层结构。
+协议栈图用于展示**OSI七层模型**或**TCP/IP协议栈**的分层结构,每层包含典型协议字段,通过颜色区分不同协议层。
+
+---
+
+## 概念区分:Packet vs Protocol
+
+| 类型 | 用途 | 焦点 |
+|------|------|------|
+| **Packet** | 单一协议报文结构 | 某一层协议的详细字段布局 |
+| **Protocol** | 多层协议栈关系 | 展示数据如何跨多层协议封装 |
+
+**示例**:
+- **Packet**: TCP 报文头的 20 个字段详细布局
+- **Protocol**: HTTP → TCP → IP → Ethernet 的分层封装
+
+---
 
 ## 核心语法
 
-同 packet.txt，使用 PacketDiag 语法展示协议分层。
+Protocol 图使用与 packet.txt 完全相同的 PacketDiag 语法,但重点在于**分层展示**:
+
+### 1. 图表声明
+```
+packetdiag {
+  // 全局配置
+  colwidth = 64         // 列宽(推荐 64 位用于协议栈)
+  node_height = 100     // 节点高度(推荐 100 用于多层展示)
+
+  // 字段定义
+  位范围: 字段名 [属性]
+}
+```
+
+### 2. 分层颜色规范
+
+建议为不同协议层使用标准颜色:
+
+| 协议层 | 颜色 | 说明 |
+|--------|------|------|
+| **应用层** | `#FFE0E0` (淡红) | HTTP/HTTPS/FTP/DNS |
+| **传输层** | `#E0FFE0` (淡绿) | TCP/UDP |
+| **网络层** | `#E0E0FF` (淡蓝) | IP/ICMP/ARP |
+| **链路层** | `#FFFFE0` (淡黄) | Ethernet/PPP |
+
+### 3. 位范围分配规则
+
+- **按层从上到下递增**:上层协议占用低位,下层协议占用高位
+- **每层占用固定宽度**:建议每层 128-512 位(16-64 字节)
+- **关键字段优先**:每层仅展示最关键的 3-5 个字段
+
+---
 
 ## 生成示例
 
-### 示例：HTTP请求协议栈
+### 示例 1: HTTP 请求协议栈(4 层)
 ```
 packetdiag {
   colwidth = 64
   node_height = 100
 
-  // 应用层 - HTTP
-  0-511: "HTTP Request: GET /index.html" [color = "#FFE0E0"];
+  // 应用层 - HTTP (0-511, 64 字节)
+  0-511: "HTTP Request: GET /index.html HTTP/1.1" [color = "#FFE0E0"];
 
-  // 传输层 - TCP
-  512-527: Source Port [color = "#E0FFE0"];
-  528-543: Dest Port [color = "#E0FFE0"];
-  544-575: Sequence Number [color = "#E0FFE0"];
+  // 传输层 - TCP (512-895, 48 字节)
+  512-527: "Source Port: 52341" [color = "#E0FFE0"];
+  528-543: "Dest Port: 80" [color = "#E0FFE0"];
+  544-575: "Sequence Number" [color = "#E0FFE0"];
+  576-607: "Acknowledgment" [color = "#E0FFE0"];
+  608-895: "Flags + Checksum" [color = "#E0FFE0"];
 
-  // 网络层 - IP
-  576-579: Version [color = "#E0E0FF"];
-  580-583: IHL [color = "#E0E0FF"];
-  584-599: Total Length [color = "#E0E0FF"];
+  // 网络层 - IP (896-1055, 20 字节)
+  896-899: "Ver" [color = "#E0E0FF"];
+  900-903: "IHL" [color = "#E0E0FF"];
+  904-919: "Total Length" [color = "#E0E0FF"];
+  920-951: "Src IP: 192.168.1.10" [color = "#E0E0FF"];
+  952-983: "Dst IP: 93.184.216.34" [color = "#E0E0FF"];
+  984-1055: "Checksum + TTL" [color = "#E0E0FF"];
 
-  // 链路层 - Ethernet
-  600-647: Destination MAC [color = "#FFFFE0"];
-  648-695: Source MAC [color = "#FFFFE0"];
+  // 链路层 - Ethernet (1056-1311, 32 字节)
+  1056-1103: "Dest MAC: 00:1A:2B:3C:4D:5E" [color = "#FFFFE0"];
+  1104-1151: "Src MAC: AA:BB:CC:DD:EE:FF" [color = "#FFFFE0"];
+  1152-1167: "EtherType: 0x0800" [color = "#FFFFE0"];
+  1168-1311: "Padding" [color = "#FFFFE0"];
 }
 ```
 
+### 示例 2: OSI 七层模型(完整协议栈)
+```
+packetdiag {
+  colwidth = 128
+  node_height = 120
+
+  // Layer 7 - 应用层 (HTTP)
+  0-255: "Layer 7: Application (HTTP)" [color = "#FFE0E0"];
+
+  // Layer 6 - 表示层 (TLS/SSL)
+  256-511: "Layer 6: Presentation (TLS 1.3)" [color = "#FFC0C0"];
+
+  // Layer 5 - 会话层 (Session Management)
+  512-767: "Layer 5: Session (TCP Session)" [color = "#FFA0A0"];
+
+  // Layer 4 - 传输层 (TCP)
+  768-895: "Src Port" [color = "#E0FFE0"];
+  896-1023: "Dst Port" [color = "#E0FFE0"];
+
+  // Layer 3 - 网络层 (IP)
+  1024-1087: "Src IP" [color = "#E0E0FF"];
+  1088-1151: "Dst IP" [color = "#E0E0FF"];
+
+  // Layer 2 - 数据链路层 (Ethernet)
+  1152-1215: "Src MAC" [color = "#FFFFE0"];
+  1216-1279: "Dst MAC" [color = "#FFFFE0"];
+
+  // Layer 1 - 物理层 (提示)
+  1280-1407: "Layer 1: Physical (RJ45 Cable)" [color = "#D0D0D0"];
+}
+```
+
+### 示例 3: HTTPS 加密协议栈
+```
+packetdiag {
+  colwidth = 64
+  node_height = 100
+
+  // TLS Handshake - 应用层
+  0-511: "TLS ClientHello" [color = "#FFE0E0"];
+
+  // TCP - 传输层
+  512-527: "Src Port: 52342" [color = "#E0FFE0"];
+  528-543: "Dst Port: 443" [color = "#E0FFE0"];
+  544-895: "TCP Flags: SYN/ACK" [color = "#E0FFE0"];
+
+  // IP - 网络层
+  896-951: "Src IP" [color = "#E0E0FF"];
+  952-1007: "Dst IP" [color = "#E0E0FF"];
+
+  // Ethernet - 链路层
+  1008-1055: "Src MAC" [color = "#FFFFE0"];
+  1056-1103: "Dst MAC" [color = "#FFFFE0"];
+}
+```
+
+---
+
+## 常见错误
+
+### 错误 1: 位范围重叠
+**❌ 错误**:
+```
+packetdiag {
+  0-255: "Layer 7"
+  200-511: "Layer 6"   // 与 Layer 7 重叠(200-255)
+}
+```
+
+**✅ 正确**:
+```
+packetdiag {
+  0-255: "Layer 7"
+  256-511: "Layer 6"   // 无重叠
+}
+```
+
+### 错误 2: 颜色不区分
+**❌ 错误**: 所有层使用相同颜色,无法区分
+**✅ 正确**: 每层使用不同颜色,清晰展示分层
+
+### 错误 3: 字段过多
+**❌ 错误**: 每层展示 10+ 个字段,导致图表混乱
+**✅ 正确**: 每层仅展示 3-5 个关键字段
+
+---
+
 ## 生成检查清单
 
-- [ ] **分层清晰**：不同协议层使用不同颜色
-- [ ] **字段完整**：包含关键协议字段
-- [ ] **代码可渲染**：语法正确
+- [ ] **图表声明完整**:使用 `packetdiag {}` 包裹
+- [ ] **全局配置合理**:`colwidth = 64`, `node_height = 100`
+- [ ] **分层清晰**:不同协议层使用不同颜色
+- [ ] **字段关键**:每层仅包含 3-5 个最重要的字段
+- [ ] **位范围无重叠**:所有字段位范围互不冲突
+- [ ] **协议准确**:协议名称和字段符合标准(如 TCP/IP/Ethernet)
+- [ ] **代码可渲染**:语法正确,可通过 Kroki 渲染
+
+**任何检查项不通过,立即修正后重新生成**

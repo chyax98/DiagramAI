@@ -162,7 +162,7 @@ export const RENDER_LANGUAGES: readonly RenderLanguageInfo[] = [
   {
     value: "pikchr",
     label: "Pikchr",
-    description: "图表脚本语言，2 种图表",
+    description: "图表脚本语言，1 种图表",
     iconPath: "/icons/languages/pikchr.svg",
   },
   {

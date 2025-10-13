@@ -42,31 +42,31 @@ kroki/
 ## 📊 支持的渲染语言 (23 种)
 
 ### 主流语言 (前 10)
-- [x] mermaid - 14 种图表类型
-- [x] plantuml - 8 种 UML 图表
-- [x] c4plantuml - 4 种 C4 架构图
-- [ ] d2 - 6 种现代化图表
-- [ ] graphviz - 5 种图形可视化
-- [ ] wavedrom - 3 种数字信号图
-- [ ] nomnoml - 3 种简化 UML 图
-- [ ] excalidraw - 3 种手绘风格图表
-- [ ] vegalite - 6 种数据可视化
-- [ ] dbml - 4 种数据库图表
+- [x] mermaid - 14 种图表类型 ⭐ 5 文件
+- [x] plantuml - 8 种 UML 图表 ⭐ 5 文件
+- [x] c4plantuml - 4 种 C4 架构图 ⭐ 5 文件
+- [x] d2 - 6 种现代化图表
+- [x] graphviz - 5 种图形可视化
+- [x] wavedrom - 3 种数字信号图
+- [x] nomnoml - 3 种简化 UML 图
+- [x] excalidraw - 3 种手绘风格图表
+- [x] vegalite - 6 种数据可视化
+- [x] dbml - 4 种数据库图表
 
 ### 扩展语言 (13 种)
-- [ ] bpmn - 业务流程建模
-- [ ] ditaa - ASCII 艺术转图形
-- [ ] nwdiag - 网络拓扑图
-- [ ] blockdiag - 块状流程图
-- [ ] actdiag - 活动图（泳道图）
-- [ ] packetdiag - 网络数据包图
-- [ ] rackdiag - 机柜图
-- [ ] seqdiag - 时序图（BlockDiag 风格）
-- [ ] structurizr - C4 架构建模 DSL
-- [ ] erd - 简洁 ER 图语法
-- [ ] pikchr - 图表脚本语言
-- [ ] svgbob - ASCII 转 SVG 美化
-- [ ] umlet - 轻量级 UML 工具
+- [x] bpmn - 业务流程建模
+- [x] ditaa - ASCII 艺术转图形
+- [x] nwdiag - 网络拓扑图
+- [x] blockdiag - 块状流程图
+- [x] actdiag - 活动图（泳道图）
+- [x] packetdiag - 网络数据包图 ⭐ 5 文件
+- [x] rackdiag - 机柜图 ⭐ 5 文件
+- [x] seqdiag - 时序图（BlockDiag 风格）
+- [x] structurizr - C4 架构建模 DSL
+- [x] erd - 简洁 ER 图语法
+- [x] pikchr - 图表脚本语言
+- [x] svgbob - ASCII 转 SVG 美化
+- [x] umlet - 轻量级 UML 工具
 
 ## 🔄 使用方式
 
@@ -93,8 +93,29 @@ kroki/
 
 ## 📝 维护日志
 
-- 2025-10-13: 创建文档索引结构
-- 2025-10-13: 完成 C4-PlantUML 官方语法验证
+- **2025-10-13**: 创建文档索引结构
+- **2025-10-13**: 完成所有 23 种渲染语言的官方文档收集
+  - 文档文件数: 97 个
+  - 文档总大小: 926.2 KB (0.90 MB)
+  - 文档总行数: 50,673 行
+  - 完整性: 100%
+
+## 📈 文档统计
+
+| 指标 | 数值 |
+|------|------|
+| **支持语言** | 23 种 |
+| **文档文件** | 97 个 |
+| **总大小** | 926.2 KB |
+| **总行数** | 50,673 行 |
+| **完整性** | 100% |
+
+### 文档规模 Top 5
+1. **structurizr** - 3,589 行 (C4 DSL 最详尽)
+2. **actdiag** - 3,556 行 (泳道图完整指南)
+3. **blockdiag** - 3,300 行 (块状图基础)
+4. **nomnoml** - 3,184 行 (UML 简化语法)
+5. **pikchr** - 3,028 行 (脚本语言详解)
 
 ---
 

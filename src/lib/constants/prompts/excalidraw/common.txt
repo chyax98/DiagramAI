@@ -305,6 +305,10 @@ Error: Invalid Excalidraw JSON: Missing required property 'type'
 - 标准形状高度：50-150px
 - 字体大小：16-20px（正文），28-36px（标题）
 - 箭头起点/终点：精确绑定到元素 ID
+- **元素数量限制**:建议单个图表不超过 30 个手绘元素
+  - **可读性原因**:过多元素会导致画布混乱,难以理解
+  - **性能考虑**:手绘风格渲染计算量大,过多元素会降低性能
+  - **最佳实践**:如需展示复杂系统,拆分为多个子图,每个图聚焦一个模块
 
 ## 手绘风格控制
 
@@ -312,6 +316,20 @@ Error: Invalid Excalidraw JSON: Missing required property 'type'
 - `0` - 精确线条（适合线框图 wireframe）
 - `1` - 标准手绘（推荐用于通用图表 diagram）
 - `2` - 强烈手绘（适合手绘草图 sketch）
+
+### 字体风格选择
+
+`fontFamily` 参数控制字体样式：
+
+**字体编号**:
+- `1` - 手绘风格字体（Virgil）- 推荐用于草图和创意图表
+- `2` - 正常字体（Helvetica）- 推荐用于正式文档和专业图表
+- `3` - 代码字体（Cascadia）- 推荐用于技术架构图和代码流程
+
+**搭配建议**:
+- 手绘风格 (`roughness: 1-2`) + 手绘字体 (`fontFamily: 1`)
+- 精确线条 (`roughness: 0`) + 正常字体 (`fontFamily: 2`)
+- 技术图表 (`roughness: 0`) + 代码字体 (`fontFamily: 3`)
 
 ## Kroki 兼容性要求
 

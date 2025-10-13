@@ -2,8 +2,8 @@
 
 ## 强制规则（Mandatory Rules）
 
-### ⚠️ 规则 1: workspace 必须包含 model 和 views 块
-workspace 是 Structurizr DSL 的根节点,缺少任一块会导致渲染失败。
+### ⚠️ 规则 1: workspace 必须是根元素
+workspace 是 Structurizr DSL 的**唯一根元素**,必须包含 model 和 views 块,不允许有其他顶层元素。
 
 **错误示例**：
 ```structurizr
@@ -352,10 +352,18 @@ dynamic 系统 "键值" {
 ## 架构设计最佳实践
 
 ### 命名规范
+
+**元素显示名称**（使用中文）：
 - **Person**: 使用业务角色名称（如 "用户", "管理员", "外部系统管理员"）
 - **Software System**: 使用系统名称（如 "订单管理系统", "支付系统"）
 - **Container**: 体现技术和功能（如 "React Web 应用", "Spring Boot API", "PostgreSQL 数据库"）
 - **Component**: 体现职责（如 "订单控制器", "支付服务", "用户仓储"）
+
+**元素 ID 命名规范**（代码标识符）：
+- **推荐**: 驼峰命名法（camelCase） - `orderSystem`, `webApp`, `userService`
+- **备选**: 全小写下划线（snake_case） - `order_system`, `web_app`, `user_service`
+- **避免**: 中文、空格、特殊字符 - ❌ `订单系统`, `web-app`
+- **示例**: `orderSystem = softwareSystem "订单管理系统"`
 
 ### 关系描述
 - 使用主动语态动词短语（"查询订单", "发送通知", "调用 API"）

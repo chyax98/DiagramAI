@@ -261,6 +261,26 @@ digraph {
 - `BT` (Bottom to Top) - 从下到上
 - `RL` (Right to Left) - 从右到左
 
+### 配色方案建议
+
+#### 蓝绿色调（专业清新）
+```dot
+node [fillcolor="#e3f2fd", style=filled];
+edge [color="#1976d2"];
+```
+
+#### 暖色调（活力温暖）
+```dot
+node [fillcolor="#fff3e0", style=filled];
+edge [color="#f57f17"];
+```
+
+#### 单色渐变（简约优雅）
+```dot
+node [fillcolor="#f5f5f5:#e0e0e0", style=filled, gradientangle=90];
+edge [color="#424242"];
+```
+
 ### 布局引擎
 - `dot` - 层次化布局（默认，适合流程图）
 - `neato` - 弹簧模型（适合无向图）

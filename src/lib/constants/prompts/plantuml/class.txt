@@ -197,6 +197,44 @@ Role "1" --> "0..*" Permission : contains
 - 关系上标注基数（如 `"1"`、`"0..*"`）
 - 关系可以添加标签说明关系的含义
 
+### 示例 1.2: 电商商品管理（实际业务场景）
+**用户需求**：电商系统的商品分类和库存管理
+
+**生成代码**：
+```plantuml
+@startuml
+class Category {
+  - id: Long
+  - name: String
+  - parentId: Long
+  + getSubCategories(): List<Category>
+}
+
+class Product {
+  - id: Long
+  - name: String
+  - price: BigDecimal
+  - categoryId: Long
+  + updatePrice(newPrice: BigDecimal): void
+}
+
+class Inventory {
+  - id: Long
+  - productId: Long
+  - stock: int
+  - warehouseId: Long
+  + deduct(quantity: int): void
+}
+
+Category "1" --> "0..*" Product : contains
+Product "1" --> "0..*" Inventory : stored_in
+@enduml
+```
+
+**关键点**：
+- 展示真实电商业务场景
+- 体现商品分类、库存管理的业务逻辑
+
 ### 示例 2: 电商订单系统（中等复杂度）
 **用户需求**：电商订单系统，包含用户、订单、商品、支付
 

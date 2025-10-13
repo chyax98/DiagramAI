@@ -51,6 +51,14 @@ ORDER {
 - **约束**: PK（主键）、FK（外键）、UK（唯一键）、NN（非空）
 - **注释**: 可选，用双引号包裹
 
+**常用数据类型参考**：
+- **整数**: int, bigint, smallint
+- **字符串**: string, varchar(n), text
+- **小数**: decimal(p,s), float, double
+- **日期时间**: date, datetime, timestamp
+- **布尔**: boolean, bit
+- **二进制**: blob, binary
+
 ### 关系定义
 
 ## 关系基数符号详解

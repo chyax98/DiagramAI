@@ -61,15 +61,15 @@ Project project_name {
 **生成代码**：
 ```dbml
 Table users {
-  id integer [primary key, increment]
-  username varchar(50) [not null, unique]
-  email varchar(100) [not null, unique]
-  password_hash varchar(255) [not null]
-  phone varchar(20)
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
-  
-  Note: '用户账户表'
+  id integer [primary key, increment, note: '主键ID，自增']
+  username varchar(50) [not null, unique, note: '唯一用户名']
+  email varchar(100) [not null, unique, note: '邮箱地址']
+  password_hash varchar(255) [not null, note: '密码哈希值']
+  phone varchar(20) [note: '手机号（可选）']
+  created_at timestamp [default: `now()`, note: '账户创建时间']
+  updated_at timestamp [default: `now()`, note: '最后更新时间']
+
+  Note: '用户账户表 - 存储用户基本信息和认证凭据'
 }
 
 Table products {

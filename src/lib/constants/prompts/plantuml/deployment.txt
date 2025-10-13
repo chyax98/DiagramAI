@@ -35,6 +35,16 @@ node "节点名" as N1
 node "Web服务器" as WebServer
 ```
 
+**节点类型完整列表**：
+- `node` - 通用节点/服务器
+- `component` - 组件节点
+- `artifact` - 软件工件（jar, war, exe）
+- `database` - 数据库节点
+- `cloud` - 云服务
+- `folder` - 文件夹
+- `package` - 软件包
+- `frame` - 框架容器
+
 ### 工件定义
 ```plantuml
 artifact "工件名" as A1

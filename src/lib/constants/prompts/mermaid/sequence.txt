@@ -109,6 +109,13 @@ Note right of Bob: 右侧注释
 Note over Alice,Bob: 跨越多个参与者的注释
 ```
 
+**Note 使用最佳实践**：
+- **说明异步等待**: `Note over User,Server: 用户等待处理...`
+- **标注重要状态**: `Note right of DB: 数据已持久化`
+- **解释业务逻辑**: `Note over Service: 检查库存并锁定`
+- **强调时间点**: `Note left of Client: 超时后重试`
+- **何时使用**: 当消息标签不足以说明上下文时，使用 Note 补充关键信息
+
 ### 循环和条件
 ```mermaid
 %% 循环

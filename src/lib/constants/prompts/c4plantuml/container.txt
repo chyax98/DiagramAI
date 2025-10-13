@@ -54,12 +54,18 @@ System_Boundary(alias, "系统名称") {
 }
 ```
 
-#### 容器
+#### 容器（Container）
 ```plantuml
 Container(alias, "容器名称", "技术栈", "容器描述")
 ContainerDb(alias, "数据库名称", "数据库类型", "数据描述")
 ContainerQueue(alias, "消息队列", "RabbitMQ", "异步消息")
 ```
+
+**术语说明**：
+- **Container（容器）**: 在 C4 模型中指独立部署的应用、服务或数据库
+  - 应用容器：Web 应用、移动应用、桌面应用
+  - 服务容器：微服务、API 网关、认证服务
+  - 数据存储容器：数据库、缓存、消息队列
 
 **容器类型选择**：
 - `Container`: 应用、服务、API 网关等

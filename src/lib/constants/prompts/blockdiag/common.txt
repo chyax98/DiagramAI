@@ -128,8 +128,15 @@ blockdiag {
 - `label` - 节点标签文本
 - `shape` - 节点形状（box, roundedbox, diamond, ellipse 等）
 - `color` - 节点颜色
-- `style` - 节点样式（dashed, dotted 等）
+- `style` - 节点样式（dashed, dotted, solid）
 - `width` - 节点宽度（可选，省略时自动根据标签长度调整）
+
+**边框样式选项**：
+- `solid` - 实线边框（默认）
+- `dashed` - 虚线边框
+- `dotted` - 点线边框
+- `bold` - 加粗边框
+- `none` - 无边框
 
 **节点宽度自动调整规则**：
 - 未设置 `width` 时，BlockDiag 自动根据 `label` 文本长度调整节点宽度

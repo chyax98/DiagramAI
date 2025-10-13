@@ -116,6 +116,28 @@ graph TD
 - 失败路径可以回到输入步骤形成循环
 - 起点和终点使用圆角矩形 `([])`
 
+### 示例 1.2: 快速排序算法流程（算法场景）
+**用户需求**：展示快速排序的递归流程
+
+**生成代码**：
+```mermaid
+graph TD
+    start([开始]) --> input[输入数组]
+    input --> check{数组长度 ≤ 1?}
+    check -->|是| return([直接返回])
+    check -->|否| pivot[选择基准元素]
+    pivot --> partition[分区操作]
+    partition --> sortLeft[递归排序左子数组]
+    partition --> sortRight[递归排序右子数组]
+    sortLeft --> merge[合并结果]
+    sortRight --> merge
+    merge --> finish([结束])
+```
+
+**关键点**：
+- 展示递归算法的分治思想
+- 判断节点表示递归终止条件
+
 ### 示例 2: 订单处理流程（中等复杂度）
 **用户需求**：电商订单处理流程，包括库存检查、支付、发货
 

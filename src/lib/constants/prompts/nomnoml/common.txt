@@ -378,6 +378,29 @@ Directives must be declared before any nodes or connections
 
 ## 样式系统
 
+### 分组使用场景
+
+#### 何时使用分组？
+- **模块划分**：将相关类组织到包（`<package>`）中
+  ```nomnoml
+  [<package> com.example.service|
+    [UserService]
+    [OrderService]
+  ]
+  ```
+
+- **层次结构**：使用框架（`<frame>`）表示系统分层
+  ```nomnoml
+  [<frame> 表示层|
+    [Controller]
+  ]
+  [<frame> 业务层|
+    [Service]
+  ]
+  ```
+
+- **组件边界**：分组相关组件展示内聚性
+
 ### 常用样式属性
 
 ```nomnoml

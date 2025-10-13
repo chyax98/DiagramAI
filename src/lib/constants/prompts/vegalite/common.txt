@@ -294,6 +294,47 @@ Vega-Lite 使用声明式 JSON 格式定义图表，基本结构：
 - ✅ 轴标签使用 `axis: { title: "标题" }`
 - ✅ 图例使用 `legend: { title: "标题" }`
 
+## 数据格式示例
+
+### 正确的 data.values 格式
+
+Vega-Lite 要求数据为**对象数组**,每个对象是一行数据:
+
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "values": [
+      {"category": "A", "value": 10},
+      {"category": "B", "value": 20},
+      {"category": "C", "value": 15}
+    ]
+  },
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "category", "type": "nominal"},
+    "y": {"field": "value", "type": "quantitative"}
+  }
+}
+```
+
+### 错误的格式示例
+
+**❌ 原始数组** (不支持):
+```json
+{"values": [10, 20, 15]}
+```
+
+**❌ 单个对象** (不支持):
+```json
+{"values": {"category": "A", "value": 10}}
+```
+
+**❌ 嵌套数组** (不支持):
+```json
+{"values": [["A", 10], ["B", 20]]}
+```
+
 ## 样式系统
 
 ### 基础样式
@@ -305,6 +346,33 @@ Vega-Lite 使用声明式 JSON 格式定义图表，基本结构：
     "color": "#4285f4",       // 单一颜色
     "opacity": 0.8,           // 透明度
     "tooltip": true           // 启用交互提示
+  }
+}
+```
+
+### 内置配色方案
+
+Vega-Lite 提供多种预设配色方案，用于 `color` 通道：
+
+**分类配色** (适合离散数据):
+- `category10` - 10 色标准配色（默认）
+- `category20` - 20 色扩展配色
+- `tableau10` - Tableau 10 色配色
+- `tableau20` - Tableau 20 色配色
+
+**顺序配色** (适合数值数据):
+- `blues`, `greens`, `reds` - 单色渐变
+- `viridis`, `plasma`, `inferno` - 科学配色
+
+**使用方法**:
+```json
+{
+  "encoding": {
+    "color": {
+      "field": "category",
+      "type": "nominal",
+      "scale": {"scheme": "tableau10"}
+    }
   }
 }
 ```

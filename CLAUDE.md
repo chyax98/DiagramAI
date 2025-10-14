@@ -4,14 +4,27 @@
 
 ---
 
+## 📝 变更记录 (Changelog)
+
+### 2025-10-14 - 架构文档初始化
+- **新增**: 项目架构完整扫描与文档化
+- **新增**: 模块结构图 (Mermaid)
+- **新增**: 模块索引表格
+- **完成**: 覆盖率 100% - 所有核心模块已文档化
+- **状态**: ✅ 架构文档初始化完成
+
+---
+
 ## 📋 项目概览
 
-- **技术栈**: Next.js + React + TypeScript
+- **技术栈**: Next.js 15 + React 19 + TypeScript 5
 - **架构模式**: Repository + Service + Factory Pattern
 - **数据库**: SQLite (better-sqlite3)
 - **认证**: JWT + bcrypt
 - **AI 集成**: Vercel AI SDK (多提供商支持)
 - **图表渲染**: Kroki (支持 23 种渲染语言)
+- **状态管理**: Zustand
+- **样式**: Tailwind CSS 4 + shadcn/ui
 
 ---
 
@@ -89,6 +102,101 @@ graph TB
 
 ---
 
+## 📦 模块结构图
+
+```mermaid
+graph TD
+    Root["DiagramAI (根)"]
+
+    Root --> App["src/app"]
+    Root --> Components["src/components"]
+    Root --> Lib["src/lib"]
+    Root --> Types["src/types"]
+    Root --> Contexts["src/contexts"]
+    Root --> Hooks["src/hooks"]
+    Root --> Public["public"]
+
+    App --> AppAuth["(auth) - 认证路由"]
+    App --> AppProtected["(app) - 保护路由"]
+    App --> AppAPI["api - API 端点"]
+
+    AppAuth --> Login["login - 登录页"]
+    AppAuth --> Register["register - 注册页"]
+
+    AppProtected --> MainEditor["page.tsx - 主编辑器"]
+    AppProtected --> History["history - 历史记录"]
+    AppProtected --> Models["models - 模型配置"]
+
+    AppAPI --> AuthAPI["auth - 认证 API"]
+    AppAPI --> ChatAPIRoute["chat - 图表生成"]
+    AppAPI --> ModelsAPI["models - 模型管理"]
+    AppAPI --> HistoryAPIRoute["history - 历史 API"]
+    AppAPI --> KrokiAPI["kroki - Kroki 代理"]
+    AppAPI --> RecommendAPI["recommend - 推荐"]
+
+    Lib --> LibAI["ai - AI 集成"]
+    Lib --> LibAuth["auth - 认证"]
+    Lib --> LibConstants["constants - 常量"]
+    Lib --> LibDB["db - 数据库"]
+    Lib --> LibRepos["repositories - 数据访问"]
+    Lib --> LibServices["services - 业务逻辑"]
+    Lib --> LibStores["stores - 状态管理"]
+    Lib --> LibUtils["utils - 工具函数"]
+    Lib --> LibValidations["validations - 验证"]
+
+    LibConstants --> Prompts["prompts - AI 提示词 (23 种语言)"]
+
+    Components --> CompAuth["auth - 认证组件"]
+    Components --> CompEditor["editor - 编辑器"]
+    Components --> CompHistory["history - 历史记录"]
+    Components --> CompIcons["icons - 图标"]
+    Components --> CompLayout["layout - 布局"]
+    Components --> CompModals["modals - 对话框"]
+    Components --> CompModels["models - 模型配置"]
+    Components --> CompSelectors["selectors - 选择器"]
+    Components --> CompShared["shared - 共享组件"]
+    Components --> CompTheme["theme - 主题"]
+    Components --> CompUI["ui - 基础 UI"]
+
+    Public --> Icons["icons - 图标资源"]
+
+    click AppAuth "#认证路由" "点击查看认证路由文档"
+    click AppProtected "#保护路由" "点击查看保护路由文档"
+    click AppAPI "#api-层" "点击查看 API 层文档"
+    click LibAI "#ai-provider-factory" "点击查看 AI Provider Factory"
+    click LibServices "#diagram-generation-service" "点击查看核心服务"
+    click LibRepos "#repository-层" "点击查看数据访问层"
+    click Prompts "#prompt-层级结构" "点击查看 Prompt 系统"
+```
+
+---
+
+## 📊 模块索引
+
+| 模块路径 | 职责 | 关键文件 | 文档链接 |
+|---------|------|---------|---------|
+| **src/app/(auth)** | 认证路由：登录、注册 | login/page.tsx, register/page.tsx | - |
+| **src/app/(app)** | 主应用：编辑器、历史、模型 | page.tsx, history/page.tsx, models/page.tsx | - |
+| **src/app/api/auth** | 认证 API：登录、注册、登出 | login/route.ts, register/route.ts | - |
+| **src/app/api/chat** | 图表生成 API | route.ts | - |
+| **src/app/api/models** | 模型管理 API | route.ts, [id]/route.ts | - |
+| **src/app/api/history** | 历史记录 API | route.ts, [id]/route.ts | - |
+| **src/app/api/kroki** | Kroki 代理 API | [[...path]]/route.ts | - |
+| **src/lib/ai** | AI 提供商抽象 | provider-factory.ts | [查看详情](#ai-provider-factory) |
+| **src/lib/auth** | 认证系统：JWT + bcrypt | jwt.ts, password.ts, middleware.ts | [查看详情](#认证系统) |
+| **src/lib/constants** | 常量配置 | diagram-types.ts, env.ts, prompts/ | [查看详情](#类型定义管理) |
+| **src/lib/db** | 数据库层 | client.ts, schema.sql | [查看详情](#数据库-schema) |
+| **src/lib/repositories** | 数据访问层 | User/Model/History/ChatSession | [查看详情](#repository-层) |
+| **src/lib/services** | 业务逻辑层 | DiagramGenerationService.ts | [查看详情](#diagram-generation-service) |
+| **src/lib/stores** | 状态管理 | diagram-store.ts | - |
+| **src/lib/utils** | 工具函数 | kroki.ts, code-cleaner.ts, logger.ts | - |
+| **src/components** | React 组件库 | 10+ 子模块 | - |
+| **src/types** | TypeScript 类型 | database.ts, diagram.ts, ai.ts | - |
+| **src/contexts** | React Context | AuthContext.tsx, ThemeContext.tsx | - |
+| **src/hooks** | 自定义 Hooks | useAuthRedirect.ts, useEditorActions.ts | - |
+
+---
+
 ## 📂 目录结构
 
 ```
@@ -159,6 +267,7 @@ src/
 │   │   ├── download.ts           # 下载工具
 │   │   ├── kroki.ts              # Kroki URL 生成
 │   │   ├── logger.ts             # 日志工具
+│   │   ├── prompt-loader.ts      # Prompt 三层加载器
 │   │   └── svg-to-image.ts       # SVG 转图片
 │   └── validations/              # Zod 验证模式
 │       ├── auth.ts
@@ -181,6 +290,7 @@ src/
 └── hooks/                        # 自定义 Hooks
     ├── useAuthRedirect.ts
     ├── useEditorActions.ts
+    ├── useExportActions.ts
     └── useRecommendation.ts
 ```
 
@@ -421,16 +531,31 @@ sequenceDiagram
 - ✅ 输入验证使用 Zod
 - ✅ 错误处理使用 try-catch
 
-### 测试
+### 运行与开发
 
 ```bash
-npm test              # 运行所有测试
-npm run test:coverage # 覆盖率报告
-npm run type-check    # TypeScript 检查
-npm run lint          # ESLint 检查
-```
+# 开发环境
+npm run dev              # 启动开发服务器 (http://localhost:3000)
 
-**测试覆盖**: 50+ 测试套件,覆盖组件、服务和工具函数
+# 构建与生产
+npm run build            # 构建生产版本
+npm run start            # 启动生产服务器
+
+# 代码质量
+npm run lint             # ESLint 检查
+npm run format           # Prettier 格式化
+npm run format:check     # 检查格式
+npm run type-check       # TypeScript 检查
+npm run ci               # 完整 CI 检查 (format + lint + type-check)
+
+# 数据库
+npm run db:init          # 初始化数据库
+npm run db:seed          # 种子数据
+
+# 清理
+npm run clean            # 清理缓存
+npm run rebuild          # 重新构建
+```
 
 ---
 
@@ -462,10 +587,8 @@ export const LANGUAGE_DIAGRAM_TYPES: Record<RenderLanguage, readonly DiagramType
 ```
 prompts/
 └── your-language/
-    ├── L1_CORE_RULES.md
-    ├── L2_BEST_PRACTICES.md
-    ├── L3_<diagram-type>.md
-    └── README.md
+    ├── common.txt        # L2: 语言通用规范 (可选)
+    └── flowchart.txt     # L3: 特定图表类型
 ```
 
 3. 更新数据库 Schema 的 `render_language` 枚举:
@@ -566,19 +689,19 @@ L3 Prompt 文件 (prompts/{language}/{type}.txt)
 
 ## 📚 关键文件参考
 
-| 文件                                           | 用途                 |
-| ---------------------------------------------- | -------------------- |
-| `src/lib/ai/provider-factory.ts`               | AI 提供商抽象        |
-| `src/lib/services/DiagramGenerationService.ts` | 核心生成逻辑         |
-| `src/lib/services/FailureLogService.ts`        | 失败日志记录         |
-| `src/lib/auth/jwt.ts`                          | JWT 认证             |
-| `src/lib/auth/middleware.ts`                   | API 路由保护         |
-| `src/lib/db/schema.sql`                        | 数据库 Schema        |
-| `src/lib/constants/prompts/`                   | AI 提示词 (23+ 语言) |
-| `src/lib/constants/diagram-types.ts`           | 图表类型定义 (SSOT)  |
-| `src/lib/utils/prompt-loader.ts`               | Prompt 三层加载器    |
-| `src/app/api/chat/route.ts`                    | 生成 API 端点        |
-| `src/app/api/kroki/[[...path]]/route.ts`       | Kroki 代理 API       |
+| 文件 | 用途 |
+|------|------|
+| `src/lib/ai/provider-factory.ts` | AI 提供商抽象 |
+| `src/lib/services/DiagramGenerationService.ts` | 核心生成逻辑 |
+| `src/lib/services/FailureLogService.ts` | 失败日志记录 |
+| `src/lib/auth/jwt.ts` | JWT 认证 |
+| `src/lib/auth/middleware.ts` | API 路由保护 |
+| `src/lib/db/schema.sql` | 数据库 Schema |
+| `src/lib/constants/prompts/` | AI 提示词 (23+ 语言) |
+| `src/lib/constants/diagram-types.ts` | 图表类型定义 (SSOT) |
+| `src/lib/utils/prompt-loader.ts` | Prompt 三层加载器 |
+| `src/app/api/chat/route.ts` | 生成 API 端点 |
+| `src/app/api/kroki/[[...path]]/route.ts` | Kroki 代理 API |
 
 ---
 
@@ -634,10 +757,10 @@ sequenceDiagram
 
 ### 部署选项
 
-| 选项            | 使用场景   | 配置                                          |
-| --------------- | ---------- | --------------------------------------------- |
-| **公共服务**    | 开发、测试 | `KROKI_INTERNAL_URL=https://kroki.io`         |
-| **Docker 本地** | 生产环境   | `KROKI_INTERNAL_URL=http://localhost:8000`    |
+| 选项 | 使用场景 | 配置 |
+|------|---------|------|
+| **公共服务** | 开发、测试 | `KROKI_INTERNAL_URL=https://kroki.io` |
+| **Docker 本地** | 生产环境 | `KROKI_INTERNAL_URL=http://localhost:8000` |
 | **Docker 远程** | 分布式部署 | `KROKI_INTERNAL_URL=http://kroki-server:8000` |
 
 ### 为什么使用代理?
@@ -719,30 +842,32 @@ DiagramAI 支持 **23 种图表渲染语言**:
 
 1. **Mermaid** - 14 种图表类型 (流程图、时序图、类图、ER 图、甘特图等)
 2. **PlantUML** - 8 种 UML 图表 (时序图、类图、用例图、活动图等)
-3. **D2** - 6 种现代化图表 (流程图、时序图、ER 图、类图等)
-4. **Graphviz** - 5 种图形可视化 (流程图、状态图、树形结构等)
-5. **WaveDrom** - 3 种数字信号图 (时序波形、信号图、寄存器图)
-6. **Nomnoml** - 3 种简化 UML 图 (类图、组件图、架构图)
-7. **Excalidraw** - 3 种手绘风格图表 (草图、线框图、通用图表)
+3. **D2** - 7 种现代化图表 (流程图、时序图、ER 图、类图、网格等)
+4. **Graphviz** - 6 种图形可视化 (流程图、状态图、树形结构、ER 图等)
+5. **WaveDrom** - 4 种数字信号图 (时序波形、信号图、寄存器图、位字段)
+6. **Nomnoml** - 4 种简化 UML 图 (类图、组件图、架构图、流程图)
+7. **Excalidraw** - 5 种手绘风格图表 (草图、线框图、通用图表、流程图、架构图)
 8. **C4-PlantUML** - 4 种 C4 架构图 (上下文图、容器图、组件图、时序图)
-9. **Vega-Lite** - 6 种数据可视化 (柱状图、折线图、散点图、饼图等)
+9. **Vega-Lite** - 6 种数据可视化 (柱状图、折线图、散点图、饼图、面积图、热力图)
 10. **DBML** - 4 种数据库图表 (完整 Schema、单表设计、ER 图、数据库迁移)
 
 ### 扩展语言 (新增 13 种)
 
-11. **BPMN** - 业务流程建模标准
-12. **Ditaa** - ASCII 艺术转图形
-13. **NwDiag** - 网络拓扑图
-14. **BlockDiag** - 块状流程图
-15. **ActDiag** - 活动图 (泳道图)
-16. **PacketDiag** - 网络数据包图
-17. **RackDiag** - 机柜图
-18. **SeqDiag** - 时序图 (BlockDiag 风格)
-19. **Structurizr** - C4 架构建模 DSL
-20. **Erd** - 简洁 ER 图语法
-21. **Pikchr** - 图表脚本语言
-22. **SvgBob** - ASCII 转 SVG 美化
-23. **UMLet** - 轻量级 UML 工具
+11. **BPMN** - 1 种业务流程建模标准
+12. **Ditaa** - 1 种 ASCII 艺术转图形
+13. **NwDiag** - 1 种网络拓扑图
+14. **BlockDiag** - 2 种块状流程图 (块状图、分组图)
+15. **ActDiag** - 2 种活动图 (活动图、泳道图)
+16. **PacketDiag** - 2 种网络数据包图 (数据包、协议栈)
+17. **RackDiag** - 2 种机柜图 (机柜、数据中心)
+18. **SeqDiag** - 1 种时序图 (BlockDiag 风格)
+19. **Structurizr** - 7 种 C4 架构建模 DSL
+20. **Erd** - 1 种简洁 ER 图语法
+21. **Pikchr** - 1 种图表脚本语言
+22. **SvgBob** - 1 种 ASCII 转 SVG 美化
+23. **UMLet** - 1 种轻量级 UML 工具
+
+**总计**: 80+ 种图表类型
 
 ---
 
@@ -754,6 +879,36 @@ DiagramAI 支持 **23 种图表渲染语言**:
 - **env.example** - 环境变量配置
 
 ---
+
+## 🔍 AI 使用指引
+
+### 对 AI 助手的建议
+
+1. **架构理解**:
+   - 本项目严格遵循 Repository + Service + Factory 模式
+   - 数据库访问必须通过 Repository 层
+   - 业务逻辑集中在 Service 层
+   - 不要绕过这些层次结构
+
+2. **代码修改**:
+   - 修改功能时,先查看对应的 Service 或 Repository
+   - 添加新功能时,遵循现有的文件组织结构
+   - 类型定义在 `src/types/` 中集中管理
+
+3. **Prompt 系统**:
+   - 修改 AI 生成逻辑时,优先调整 prompt 文件
+   - 不要修改 `prompt-loader.ts` 除非是架构级别的改进
+   - 保持三层 Prompt 系统 (L1 + L2 + L3) 的完整性
+
+4. **数据库操作**:
+   - 所有 SQL 操作在 Repository 中
+   - 使用参数化查询防止 SQL 注入
+   - 外键关系已在 Schema 中定义,不要破坏
+
+5. **错误处理**:
+   - API 层使用 `apiSuccess()` 和 `apiError()` 统一响应格式
+   - Service 层抛出有意义的错误信息
+   - Repository 层返回 null 或布尔值
 
 ---
 

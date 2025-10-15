@@ -1,14 +1,49 @@
-/** 编辑器操作 - 图表生成/调整/修复/保存 */
+/**
+ * 编辑器操作 Hook - UI 交互层
+ *
+ * 职责：
+ * - 调用 DiagramEditorService 处理业务逻辑
+ * - 管理 UI 状态 (loading、error)
+ * - 显示用户提示 (toast、dialog)
+ * - 处理路由导航
+ * - 实现打字机效果
+ *
+ * 不包含：
+ * - 业务逻辑 (已迁移到 Service 层)
+ * - API 调用 (已迁移到 Service 层)
+ */
 
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useDiagramStore } from "@/lib/stores/diagram-store";
 import { toast } from "@/components/ui/toast";
 import { dialog } from "@/components/ui/dialog";
-import { apiClient } from "@/lib/utils/api-client";
+import { diagramEditorService } from "@/lib/services/DiagramEditorService";
 import type { RenderLanguage } from "@/types/database";
 
-import { logger } from "@/lib/utils/logger";
+// ========== 工具函数 ==========
+
+/**
+ * 打字机效果 - 逐字符显示代码
+ *
+ * @param code - 完整代码
+ * @param setCode - 设置代码的函数
+ */
+async function _typewriterEffect(code: string, setCode: (code: string) => void): Promise<void> {
+  let currentCode = "";
+  const chars = code.split("");
+  const chunkSize = Math.max(1, Math.floor(chars.length / 20));
+
+  for (let i = 0; i < chars.length; i += chunkSize) {
+    const chunk = chars.slice(i, i + chunkSize).join("");
+    currentCode += chunk;
+    setCode(currentCode);
+    await new Promise((resolve) => setTimeout(resolve, 30));
+  }
+}
+
+// ========== Hook ==========
+
 export function useEditorActions() {
   const router = useRouter();
 
@@ -26,8 +61,19 @@ export function useEditorActions() {
     setSessionId,
   } = useDiagramStore();
 
+  /**
+   * 生成新图表
+   *
+   * UI 逻辑：
+   * - 验证模型配置
+   * - 启动 loading 状态
+   * - 清空当前代码
+   * - 实现打字机效果
+   * - 显示成功/失败提示
+   */
   const handleGenerate = useCallback(
     async (inputText: string) => {
+      // 1. UI 验证
       if (!selectedModelId) {
         toast.error("请先在模型管理页面添加 AI 模型配置");
         return;
@@ -38,35 +84,30 @@ export function useEditorActions() {
         return;
       }
 
+      // 2. 启动 loading
       startGeneration();
       setCode("");
 
       try {
-        const result = await apiClient.post<{ code: string; sessionId: number }>("/api/chat", {
-          userMessage: inputText,
+        // 3. 调用业务逻辑层
+        const { code: generatedCode, sessionId } = await diagramEditorService.generate({
+          input: inputText,
           renderLanguage,
           diagramType,
           modelId: selectedModelId,
-          taskType: "generate", // ⭐ 显式指定：生成按钮
         });
 
-        const { code: generatedCode, sessionId } = result;
+        // 4. 打字机效果
+        await _typewriterEffect(generatedCode, setCode);
 
-        let currentCode = "";
-        const chars = generatedCode.split("");
-        const chunkSize = Math.max(1, Math.floor(chars.length / 20));
-
-        for (let i = 0; i < chars.length; i += chunkSize) {
-          const chunk = chars.slice(i, i + chunkSize).join("");
-          currentCode += chunk;
-          setCode(currentCode);
-          await new Promise((resolve) => setTimeout(resolve, 30));
-        }
-
+        // 5. 更新状态
         finishGeneration(generatedCode);
         setSessionId(sessionId);
+
+        // 6. 成功提示
         toast.success("图表生成成功！");
       } catch (error) {
+        // 7. 错误处理
         const message = error instanceof Error ? error.message : "未知错误";
         setError(message);
         toast.error(`生成失败：${message}`);
@@ -78,6 +119,7 @@ export function useEditorActions() {
       selectedModelId,
       renderLanguage,
       diagramType,
+      code,
       startGeneration,
       setCode,
       finishGeneration,
@@ -86,6 +128,14 @@ export function useEditorActions() {
     ]
   );
 
+  /**
+   * 切换渲染语言
+   *
+   * UI 逻辑：
+   * - 如果有代码，弹出确认对话框
+   * - 清空当前代码
+   * - 切换语言并级联更新图表类型
+   */
   const handleLanguageChange = useCallback(
     async (newLanguage: RenderLanguage) => {
       if (code.trim()) {
@@ -108,44 +158,58 @@ export function useEditorActions() {
     [code, setCode, setLanguageWithCascade]
   );
 
+  /**
+   * 调整现有图表
+   *
+   * UI 逻辑：
+   * - 验证输入不为空
+   * - 启动 loading 状态
+   * - 直接更新代码（不使用打字机效果）
+   * - 显示成功/失败提示
+   */
   const handleAdjust = useCallback(
     async (adjustInput: string) => {
+      // 1. UI 验证
       if (!adjustInput.trim()) return;
+
+      if (!selectedModelId) {
+        toast.error("请先在模型管理页面添加 AI 模型配置");
+        return;
+      }
 
       const currentState = useDiagramStore.getState();
       if (currentState.isGenerating) {
         return;
       }
 
+      // 2. 启动 loading
       startGeneration();
 
       try {
-        // 使用统一的 /api/chat 接口
-        const result = await apiClient.post<{
-          code: string;
-          sessionId: number;
-          roundCount: number;
-        }>("/api/chat", {
+        // 3. 调用业务逻辑层
+        const { code: newCode, sessionId } = await diagramEditorService.adjust({
+          input: adjustInput,
           sessionId: currentSessionId,
-          userMessage: adjustInput,
-          renderLanguage: renderLanguage,
+          renderLanguage,
           modelId: selectedModelId,
-          taskType: "adjust", // ⭐ 显式指定：调整按钮
         });
 
-        const { code: newCode, sessionId } = result;
+        // 4. 更新状态（调整不使用打字机效果，直接更新）
         finishGeneration(newCode);
         setSessionId(sessionId);
+
+        // 5. 成功提示
         toast.success("图表调整成功！");
       } catch (error) {
+        // 6. 错误处理
         const message = error instanceof Error ? error.message : "未知错误";
         setError(message);
         toast.error(`调整失败：${message}`);
       }
     },
     [
-      renderLanguage,
       selectedModelId,
+      renderLanguage,
       currentSessionId,
       startGeneration,
       finishGeneration,
@@ -157,58 +221,57 @@ export function useEditorActions() {
   /**
    * 修复渲染错误
    *
-   * 设计理由：
-   * 1. 依赖任务标记 <<<SYSTEM_INSTRUCTION: FIX_SYNTAX_ERRORS_ONLY>>> 指导 AI 行为
-   * 2. L1 prompt 中已详细说明修复任务的执行策略和禁止项
-   * 3. 用户消息只需提供错误信息，避免冗余指令（减少 token 消耗）
-   *
-   * @param renderError - Kroki 渲染器返回的错误信息
-   *
-   * @example
-   * // Kroki 返回错误: "Syntax error: invalid node ID '开始'"
-   * handleFix("Syntax error: invalid node ID '开始'")
-   * // AI 收到的完整消息：
-   * // <<<SYSTEM_INSTRUCTION: FIX_SYNTAX_ERRORS_ONLY>>>
-   * // 渲染错误：Syntax error: invalid node ID '开始'
+   * UI 逻辑：
+   * - 验证错误信息不为空
+   * - 启动 loading 状态
+   * - 直接更新代码（不使用打字机效果）
+   * - 清除错误状态
+   * - 显示成功/失败提示
    */
   const handleFix = useCallback(
     async (renderError: string) => {
+      // 1. UI 验证
       if (!renderError) return;
+
+      if (!selectedModelId) {
+        toast.error("请先在模型管理页面添加 AI 模型配置");
+        return;
+      }
 
       const currentState = useDiagramStore.getState();
       if (currentState.isGenerating) {
         return;
       }
 
-      // ✅ 简化消息：只提供错误信息，依赖任务标记 + L1 prompt 指导行为
-      const fixMessage = `渲染错误：${renderError}`;
-
+      // 2. 启动 loading
       startGeneration();
 
       try {
-        const result = await apiClient.post<{ code: string; sessionId: number }>("/api/chat", {
+        // 3. 调用业务逻辑层
+        const { code: fixedCode, sessionId } = await diagramEditorService.fix({
+          renderError,
           sessionId: currentSessionId,
-          userMessage: fixMessage, // ✅ 简化后的修复消息（节省 ~100 tokens）
-          renderLanguage: renderLanguage,
+          renderLanguage,
           modelId: selectedModelId,
-          taskType: "fix", // ⭐ 显式指定：修复按钮（会注入任务标记）
-          renderError: renderError, // ⭐ 传递渲染错误，用于自动记录失败日志
         });
 
-        const { code: fixedCode, sessionId } = result;
+        // 4. 更新状态（修复不使用打字机效果，直接更新）
         finishGeneration(fixedCode);
         setSessionId(sessionId);
-        setError(null);
+        setError(null); // 清除错误状态
+
+        // 5. 成功提示
         toast.success("图表修复成功！");
       } catch (error) {
+        // 6. 错误处理
         const message = error instanceof Error ? error.message : "未知错误";
         setError(message);
         toast.error(`修复失败：${message}`);
       }
     },
     [
-      renderLanguage,
       selectedModelId,
+      renderLanguage,
       currentSessionId,
       startGeneration,
       finishGeneration,
@@ -217,33 +280,48 @@ export function useEditorActions() {
     ]
   );
 
+  /**
+   * 保存图表到历史记录
+   *
+   * UI 逻辑：
+   * - 验证代码不为空
+   * - 显示成功/失败提示
+   */
   const handleSave = useCallback(async () => {
+    // 1. UI 验证
     if (!code || !code.trim()) {
       toast.error("图表代码不能为空，请先生成或编辑图表内容");
       return;
     }
 
     try {
-      await apiClient.post("/api/history", {
-        inputText: "手动编辑",
-        renderLanguage: renderLanguage,
+      // 2. 调用业务逻辑层
+      await diagramEditorService.save({
+        code,
+        renderLanguage,
         diagramType,
-        generatedCode: code,
-        modelId: selectedModelId,
+        modelId: selectedModelId ?? undefined, // null 转换为 undefined
       });
 
+      // 3. 成功提示
       toast.success("保存成功！", { duration: 3000 });
     } catch (error) {
+      // 4. 错误处理
       const message = error instanceof Error ? error.message : "未知错误";
-      logger.error("❌ 保存失败:", error);
-      toast.error(message);
+      toast.error(`保存失败：${message}`);
     }
   }, [code, renderLanguage, diagramType, selectedModelId]);
 
+  /**
+   * 导航到模型配置页面
+   */
   const handleNavigateModels = useCallback(() => {
     router.push("/models");
   }, [router]);
 
+  /**
+   * 导航到历史记录页面
+   */
   const handleNavigateHistory = useCallback(() => {
     router.push("/history");
   }, [router]);

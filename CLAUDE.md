@@ -6,7 +6,17 @@
 
 ## 📝 变更记录 (Changelog)
 
+### 2025-10-15 - 前端 Service 层重构
+
+- **新增**: `DiagramEditorService` 前端业务逻辑服务层
+- **重构**: 将 `useEditorActions` Hook 中的业务逻辑迁移到 Service 层
+- **改进**: 实现清晰的分层架构: Component → Hook (UI) → Service (业务) → API
+- **完成**: 4 个核心功能已迁移 (generate, adjust, fix, save)
+- **验证**: TypeScript 类型检查通过,功能完整性保持不变
+- **状态**: ✅ 前端架构优化完成
+
 ### 2025-10-14 - 架构文档初始化
+
 - **新增**: 项目架构完整扫描与文档化
 - **新增**: 模块结构图 (Mermaid)
 - **新增**: 模块索引表格
@@ -173,27 +183,27 @@ graph TD
 
 ## 📊 模块索引
 
-| 模块路径 | 职责 | 关键文件 | 文档链接 |
-|---------|------|---------|---------|
-| **src/app/(auth)** | 认证路由：登录、注册 | login/page.tsx, register/page.tsx | - |
-| **src/app/(app)** | 主应用：编辑器、历史、模型 | page.tsx, history/page.tsx, models/page.tsx | - |
-| **src/app/api/auth** | 认证 API：登录、注册、登出 | login/route.ts, register/route.ts | - |
-| **src/app/api/chat** | 图表生成 API | route.ts | - |
-| **src/app/api/models** | 模型管理 API | route.ts, [id]/route.ts | - |
-| **src/app/api/history** | 历史记录 API | route.ts, [id]/route.ts | - |
-| **src/app/api/kroki** | Kroki 代理 API | [[...path]]/route.ts | - |
-| **src/lib/ai** | AI 提供商抽象 | provider-factory.ts | [查看详情](#ai-provider-factory) |
-| **src/lib/auth** | 认证系统：JWT + bcrypt | jwt.ts, password.ts, middleware.ts | [查看详情](#认证系统) |
-| **src/lib/constants** | 常量配置 | diagram-types.ts, env.ts, prompts/ | [查看详情](#类型定义管理) |
-| **src/lib/db** | 数据库层 | client.ts, schema.sql | [查看详情](#数据库-schema) |
-| **src/lib/repositories** | 数据访问层 | User/Model/History/ChatSession | [查看详情](#repository-层) |
-| **src/lib/services** | 业务逻辑层 | DiagramGenerationService.ts | [查看详情](#diagram-generation-service) |
-| **src/lib/stores** | 状态管理 | diagram-store.ts | - |
-| **src/lib/utils** | 工具函数 | kroki.ts, code-cleaner.ts, logger.ts | - |
-| **src/components** | React 组件库 | 10+ 子模块 | - |
-| **src/types** | TypeScript 类型 | database.ts, diagram.ts, ai.ts | - |
-| **src/contexts** | React Context | AuthContext.tsx, ThemeContext.tsx | - |
-| **src/hooks** | 自定义 Hooks | useAuthRedirect.ts, useEditorActions.ts | - |
+| 模块路径                 | 职责                       | 关键文件                                             | 文档链接                                |
+| ------------------------ | -------------------------- | ---------------------------------------------------- | --------------------------------------- |
+| **src/app/(auth)**       | 认证路由：登录、注册       | login/page.tsx, register/page.tsx                    | -                                       |
+| **src/app/(app)**        | 主应用：编辑器、历史、模型 | page.tsx, history/page.tsx, models/page.tsx          | -                                       |
+| **src/app/api/auth**     | 认证 API：登录、注册、登出 | login/route.ts, register/route.ts                    | -                                       |
+| **src/app/api/chat**     | 图表生成 API               | route.ts                                             | -                                       |
+| **src/app/api/models**   | 模型管理 API               | route.ts, [id]/route.ts                              | -                                       |
+| **src/app/api/history**  | 历史记录 API               | route.ts, [id]/route.ts                              | -                                       |
+| **src/app/api/kroki**    | Kroki 代理 API             | [[...path]]/route.ts                                 | -                                       |
+| **src/lib/ai**           | AI 提供商抽象              | provider-factory.ts                                  | [查看详情](#ai-provider-factory)        |
+| **src/lib/auth**         | 认证系统：JWT + bcrypt     | jwt.ts, password.ts, middleware.ts                   | [查看详情](#认证系统)                   |
+| **src/lib/constants**    | 常量配置                   | diagram-types.ts, env.ts, prompts/                   | [查看详情](#类型定义管理)               |
+| **src/lib/db**           | 数据库层                   | client.ts, schema.sql                                | [查看详情](#数据库-schema)              |
+| **src/lib/repositories** | 数据访问层                 | User/Model/History/ChatSession                       | [查看详情](#repository-层)              |
+| **src/lib/services**     | 业务逻辑层                 | DiagramGenerationService.ts, DiagramEditorService.ts | [查看详情](#diagram-generation-service) |
+| **src/lib/stores**       | 状态管理                   | diagram-store.ts                                     | -                                       |
+| **src/lib/utils**        | 工具函数                   | kroki.ts, code-cleaner.ts, logger.ts                 | -                                       |
+| **src/components**       | React 组件库               | 10+ 子模块                                           | -                                       |
+| **src/types**            | TypeScript 类型            | database.ts, diagram.ts, ai.ts                       | -                                       |
+| **src/contexts**         | React Context              | AuthContext.tsx, ThemeContext.tsx                    | -                                       |
+| **src/hooks**            | 自定义 Hooks               | useAuthRedirect.ts, useEditorActions.ts              | -                                       |
 
 ---
 
@@ -642,6 +652,7 @@ L3: {language}/{type}.txt
 ```
 
 **Prompt 构建逻辑** (`src/lib/utils/prompt-loader.ts`):
+
 ```typescript
 最终 Prompt = L1 + L2 + L3 (用 --- 分隔)
 ```
@@ -651,6 +662,7 @@ L3: {language}/{type}.txt
 **SSOT (Single Source of Truth)**: `src/lib/constants/diagram-types.ts`
 
 **三方对齐关系**:
+
 ```
 前端类型定义 (diagram-types.ts)
      ↓
@@ -660,6 +672,7 @@ L3 Prompt 文件 (prompts/{language}/{type}.txt)
 ```
 
 **维护规则**:
+
 1. **添加新图表类型**:
    - ✅ 先创建 `prompts/{language}/{type}.txt` 文件
    - ✅ 然后在 `LANGUAGE_DIAGRAM_TYPES` 添加对应类型定义
@@ -668,18 +681,20 @@ L3 Prompt 文件 (prompts/{language}/{type}.txt)
 2. **删除图表类型**:
    - ✅ 先从 `LANGUAGE_DIAGRAM_TYPES` 移除类型定义
    - ✅ 然后删除或重命名 `prompts/{language}/{type}.txt`
-   - ⚠️  保留有价值的 prompt 内容,避免误删
+   - ⚠️ 保留有价值的 prompt 内容,避免误删
 
 3. **重命名图表类型**:
    - ✅ 同时修改前端定义和 prompt 文件名
    - ✅ 更新 `RENDER_LANGUAGES` 的图表数量描述
 
 **常见错误**:
+
 - ❌ 前端定义了类型但没有对应 prompt 文件
 - ❌ 存在 prompt 文件但前端没有定义 (用户无法选择)
 - ❌ 复制粘贴导致把其他语言的类型混进来
 
 **历史教训 (2025-10-12)**:
+
 - 发现所有 23 种语言的类型定义都存在严重混乱
 - 原因: 复制粘贴错误,把其他语言的类型混在一起
 - 修复: 完全基于实际 prompt 文件重建类型定义
@@ -689,19 +704,19 @@ L3 Prompt 文件 (prompts/{language}/{type}.txt)
 
 ## 📚 关键文件参考
 
-| 文件 | 用途 |
-|------|------|
-| `src/lib/ai/provider-factory.ts` | AI 提供商抽象 |
-| `src/lib/services/DiagramGenerationService.ts` | 核心生成逻辑 |
-| `src/lib/services/FailureLogService.ts` | 失败日志记录 |
-| `src/lib/auth/jwt.ts` | JWT 认证 |
-| `src/lib/auth/middleware.ts` | API 路由保护 |
-| `src/lib/db/schema.sql` | 数据库 Schema |
-| `src/lib/constants/prompts/` | AI 提示词 (23+ 语言) |
-| `src/lib/constants/diagram-types.ts` | 图表类型定义 (SSOT) |
-| `src/lib/utils/prompt-loader.ts` | Prompt 三层加载器 |
-| `src/app/api/chat/route.ts` | 生成 API 端点 |
-| `src/app/api/kroki/[[...path]]/route.ts` | Kroki 代理 API |
+| 文件                                           | 用途                 |
+| ---------------------------------------------- | -------------------- |
+| `src/lib/ai/provider-factory.ts`               | AI 提供商抽象        |
+| `src/lib/services/DiagramGenerationService.ts` | 核心生成逻辑         |
+| `src/lib/services/FailureLogService.ts`        | 失败日志记录         |
+| `src/lib/auth/jwt.ts`                          | JWT 认证             |
+| `src/lib/auth/middleware.ts`                   | API 路由保护         |
+| `src/lib/db/schema.sql`                        | 数据库 Schema        |
+| `src/lib/constants/prompts/`                   | AI 提示词 (23+ 语言) |
+| `src/lib/constants/diagram-types.ts`           | 图表类型定义 (SSOT)  |
+| `src/lib/utils/prompt-loader.ts`               | Prompt 三层加载器    |
+| `src/app/api/chat/route.ts`                    | 生成 API 端点        |
+| `src/app/api/kroki/[[...path]]/route.ts`       | Kroki 代理 API       |
 
 ---
 
@@ -757,10 +772,10 @@ sequenceDiagram
 
 ### 部署选项
 
-| 选项 | 使用场景 | 配置 |
-|------|---------|------|
-| **公共服务** | 开发、测试 | `KROKI_INTERNAL_URL=https://kroki.io` |
-| **Docker 本地** | 生产环境 | `KROKI_INTERNAL_URL=http://localhost:8000` |
+| 选项            | 使用场景   | 配置                                          |
+| --------------- | ---------- | --------------------------------------------- |
+| **公共服务**    | 开发、测试 | `KROKI_INTERNAL_URL=https://kroki.io`         |
+| **Docker 本地** | 生产环境   | `KROKI_INTERNAL_URL=http://localhost:8000`    |
 | **Docker 远程** | 分布式部署 | `KROKI_INTERNAL_URL=http://kroki-server:8000` |
 
 ### 为什么使用代理?

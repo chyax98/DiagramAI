@@ -11,6 +11,7 @@
 ### 错误现象
 
 **错误代码**:
+
 ```plantuml
 @startuml
 !include   <-- 没有指定要包含的文件
@@ -23,6 +24,7 @@ Rel(customer, ecommerce, "浏览商品、下单购买", "HTTPS/Web")
 ```
 
 **Kroki 返回的错误信息**:
+
 ```
 Error 400: Syntax Error? (Assumed diagram type: sequence) (line: 4)
 ```
@@ -40,6 +42,7 @@ C4-PlantUML 是一个**宏库**,不是 PlantUML 的内置语法。必须通过 `
 ### 解决方案
 
 **✅ 正确代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>  <-- 必须包含 C4 库
@@ -67,6 +70,7 @@ LAYOUT_WITH_LEGEND()
 ### 错误现象
 
 **错误代码**:
+
 ```plantuml
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
@@ -79,11 +83,13 @@ Rel(user, sys, "使用")
 ```
 
 **Kroki 返回的错误信息**:
+
 ```
 Error: Cannot include from URL in SECURE mode
 ```
 
 或者:
+
 ```
 Error 403: Forbidden - Remote file includes disabled
 ```
@@ -96,17 +102,18 @@ Error 403: Forbidden - Remote file includes disabled
 
 ### Kroki 安全模式说明
 
-| 模式 | 文件系统访问 | 网络访问 | 标准库 `<C4/...>` |
-|------|--------------|----------|-------------------|
-| **SECURE** (默认) | ❌ 禁止 | ❌ 禁止 | ✅ **允许** (内置) |
-| **SAFE** | ⚠️ 白名单控制 | ⚠️ 白名单控制 | ✅ 允许 |
-| **UNSAFE** | ✅ 允许 | ✅ 允许 | ✅ 允许 |
+| 模式              | 文件系统访问  | 网络访问      | 标准库 `<C4/...>`  |
+| ----------------- | ------------- | ------------- | ------------------ |
+| **SECURE** (默认) | ❌ 禁止       | ❌ 禁止       | ✅ **允许** (内置) |
+| **SAFE**          | ⚠️ 白名单控制 | ⚠️ 白名单控制 | ✅ 允许            |
+| **UNSAFE**        | ✅ 允许       | ✅ 允许       | ✅ 允许            |
 
 ### 解决方案
 
 #### 方案 1: 使用标准库格式 (推荐)
 
 **✅ 正确代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>  <-- 使用尖括号,表示标准库
@@ -119,6 +126,7 @@ Rel(user, sys, "使用")
 ```
 
 **优点**:
+
 - 无需网络访问
 - 兼容 Kroki SECURE 模式
 - PlantUML v1.2020.11+ 内置支持
@@ -134,6 +142,7 @@ java -DKROKI_SAFE_MODE=unsafe -jar kroki-server.jar
 ```
 
 **缺点**:
+
 - **安全风险**: 允许任意文件/网络访问
 - 需要修改服务器配置
 - 生产环境**不推荐**使用
@@ -149,6 +158,7 @@ java -DKROKI_SAFE_MODE=safe \
 ```
 
 **whitelist.txt 示例**:
+
 ```
 ^https://raw\.githubusercontent\.com/plantuml-stdlib/C4-PlantUML/.*$
 ^https://raw\.githubusercontent\.com/awslabs/aws-icons-for-plantuml/.*$
@@ -168,6 +178,7 @@ java -DKROKI_SAFE_MODE=safe \
 ### 错误现象
 
 **代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -182,6 +193,7 @@ SHOW_LEGEND()  <-- 旧版宏,可能引发警告
 ```
 
 **警告信息**:
+
 ```
 Warning: SHOW_LEGEND() is deprecated, consider using LAYOUT_WITH_LEGEND() or SHOW_FLOATING_LEGEND()
 ```
@@ -197,6 +209,7 @@ Warning: SHOW_LEGEND() is deprecated, consider using LAYOUT_WITH_LEGEND() or SHO
 #### 方案 1: 使用 `LAYOUT_WITH_LEGEND()` (推荐)
 
 **✅ 正确代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -211,6 +224,7 @@ Rel(user, sys, "使用")
 ```
 
 **优点**:
+
 - 自动布局
 - 自动添加图例
 - 无需单独的布局宏
@@ -218,6 +232,7 @@ Rel(user, sys, "使用")
 #### 方案 2: 使用 `SHOW_FLOATING_LEGEND()` (高级)
 
 **✅ 自定义图例位置**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -232,17 +247,18 @@ Lay_Distance(sys, LEGEND(), 1)  <-- 控制图例位置
 ```
 
 **使用场景**:
+
 - 需要精确控制图例位置
 - 多图例场景
 - 复杂布局调整
 
 ### 对比总结
 
-| 宏 | 位置 | 布局控制 | 使用难度 | 推荐场景 |
-|---|------|----------|----------|----------|
-| `SHOW_LEGEND()` | 固定右下方 | 无 | 简单 | ❌ 已弃用 |
-| `LAYOUT_WITH_LEGEND()` | 固定右下方 | 自动 | 简单 | ✅ **首选** |
-| `SHOW_FLOATING_LEGEND()` | 可自定义 | 手动 | 中等 | 高级场景 |
+| 宏                       | 位置       | 布局控制 | 使用难度 | 推荐场景    |
+| ------------------------ | ---------- | -------- | -------- | ----------- |
+| `SHOW_LEGEND()`          | 固定右下方 | 无       | 简单     | ❌ 已弃用   |
+| `LAYOUT_WITH_LEGEND()`   | 固定右下方 | 自动     | 简单     | ✅ **首选** |
+| `SHOW_FLOATING_LEGEND()` | 可自定义   | 手动     | 中等     | 高级场景    |
 
 ---
 
@@ -251,6 +267,7 @@ Lay_Distance(sys, LEGEND(), 1)  <-- 控制图例位置
 ### 错误现象
 
 **错误代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -264,6 +281,7 @@ Rel(user, sys, "使用")
 ```
 
 **错误信息**:
+
 ```
 Error: Duplicate identifier 'user'
 ```
@@ -277,6 +295,7 @@ Error: Duplicate identifier 'user'
 ### 解决方案
 
 **✅ 正确代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -304,6 +323,7 @@ Rel(user_b, sys, "访问")
 ### 错误现象
 
 **代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -328,6 +348,7 @@ Rel_Up(user, sys, "使用")  <-- 期望: user 在 sys 上方,但实际可能相�
 #### 方案 1: 使用布局宏
 
 **✅ 正确代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -343,6 +364,7 @@ Rel(user, sys, "使用")  <-- 使用普通关系,布局已控制
 #### 方案 2: 使用 `LAYOUT_WITH_LEGEND()`
 
 **✅ 自动布局**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -357,11 +379,11 @@ Rel(user, sys, "使用")
 
 ### 布局宏说明
 
-| 宏 | 含义 | 示例 |
-|---|------|------|
-| `Lay_U(a, b)` | a 在 b 上方 | 用户在系统上方 |
+| 宏            | 含义        | 示例             |
+| ------------- | ----------- | ---------------- |
+| `Lay_U(a, b)` | a 在 b 上方 | 用户在系统上方   |
 | `Lay_D(a, b)` | a 在 b 下方 | 系统在数据库下方 |
-| `Lay_L(a, b)` | a 在 b 左侧 | 前端在后端左侧 |
+| `Lay_L(a, b)` | a 在 b 左侧 | 前端在后端左侧   |
 | `Lay_R(a, b)` | a 在 b 右侧 | API 在数据库右侧 |
 
 ---
@@ -371,6 +393,7 @@ Rel(user, sys, "使用")
 ### 错误现象
 
 **错误代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Container>
@@ -386,6 +409,7 @@ System_Boundary(sys, "系统边界") {
 ```
 
 **错误信息**:
+
 ```
 Error: Cannot nest System_Boundary inside System_Boundary
 ```
@@ -397,16 +421,17 @@ Error: Cannot nest System_Boundary inside System_Boundary
 
 ### C4 层级规则
 
-| 边界类型 | 可包含元素 | 典型用途 |
-|----------|-----------|----------|
-| `Enterprise_Boundary` | System, System_Boundary | 企业范围 |
-| `System_Boundary` | Container, ContainerDb, ContainerQueue | 单个系统 |
-| `Container_Boundary` | Component, ComponentDb | 单个容器 |
-| `Boundary` | 任意元素 (通用边界) | 自定义分组 |
+| 边界类型              | 可包含元素                             | 典型用途   |
+| --------------------- | -------------------------------------- | ---------- |
+| `Enterprise_Boundary` | System, System_Boundary                | 企业范围   |
+| `System_Boundary`     | Container, ContainerDb, ContainerQueue | 单个系统   |
+| `Container_Boundary`  | Component, ComponentDb                 | 单个容器   |
+| `Boundary`            | 任意元素 (通用边界)                    | 自定义分组 |
 
 ### 解决方案
 
 **✅ 正确代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Container>
@@ -445,6 +470,7 @@ System_Boundary(sys, "系统边界") {
 ### 错误现象
 
 **错误代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -455,6 +481,7 @@ System(sys, "系统", "描述", "额外参数")  <-- 错误: 参数过多
 ```
 
 **错误信息**:
+
 ```
 Error: Invalid number of parameters for Person
 Error: Invalid number of parameters for System
@@ -492,7 +519,7 @@ Component(alias, "标签", "技术栈")         ' 最少 3 个参数
 Component(alias, "标签", "技术栈", "描述") ' 可选描述
 ```
 
-#### Rel / Rel_*
+#### Rel / Rel\_\*
 
 ```plantuml
 Rel(from, to, "标签")                      ' 最少 3 个参数
@@ -507,6 +534,7 @@ Rel(from, to, "标签", "技术", $tags="tag") ' 可选参数
 ### 错误现象
 
 **代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -517,6 +545,7 @@ Container(storage, "对象存储", "S3", "", $sprite="S3")
 ```
 
 **错误信息**:
+
 ```
 Error: Cannot include <aws/Storage/S3>
 Error: Sprite 'S3' not found
@@ -527,6 +556,7 @@ Error: Sprite 'S3' not found
 #### 1. 验证 Sprite 路径
 
 查阅官方 sprite 库文档:
+
 - **AWS**: https://github.com/awslabs/aws-icons-for-plantuml
 - **Azure**: https://github.com/plantuml-stdlib/Azure-PlantUML
 - **GCP**: https://github.com/plantuml-stdlib/gcp-plantuml
@@ -629,6 +659,7 @@ Person(user2, "用户2")  ' ✅ 别名不同
 **问题**: AI 有时只生成中间部分,缺少包裹标签
 
 **错误代码**:
+
 ```plantuml
 !include <C4/C4_Context>
 Person(user, "用户")
@@ -636,12 +667,13 @@ System(sys, "系统")
 ```
 
 **解决**: 代码清理阶段自动添加
+
 ```typescript
-if (!code.includes('@startuml')) {
-  code = '@startuml\n' + code;
+if (!code.includes("@startuml")) {
+  code = "@startuml\n" + code;
 }
-if (!code.includes('@enduml')) {
-  code = code + '\n@enduml';
+if (!code.includes("@enduml")) {
+  code = code + "\n@enduml";
 }
 ```
 
@@ -650,6 +682,7 @@ if (!code.includes('@enduml')) {
 **问题**: AI 在 Context 图中使用 Container 元素
 
 **错误代码**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -661,6 +694,7 @@ Container(web, "Web应用", "React")  <-- 错误: Context 图不应有 Container
 ```
 
 **解决**: Prompt 中强调层级规则
+
 ```
 - Context 图 (Level 1): 只用 Person, System
 - Container 图 (Level 2): 用 Person, System_Boundary, Container

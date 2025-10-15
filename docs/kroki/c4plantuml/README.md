@@ -6,12 +6,12 @@
 
 ## 📚 文档结构
 
-| 文件 | 说明 | 适用对象 |
-|------|------|----------|
-| [1_official_docs.md](./1_official_docs.md) | 官方资源汇总、Include 语法详解、Kroki 集成要点 | 开发者、架构师 |
-| [2_quick_reference.md](./2_quick_reference.md) | 快速参考手册、常用宏定义、实战示例 | 所有用户 |
-| [3_common_errors.md](./3_common_errors.md) | 10 大常见错误及解决方案、调试技巧 | 故障排查 |
-| [4_optimization_guide.md](./4_optimization_guide.md) | 核心优化策略、代码后处理、监控日志 | 系统优化 |
+| 文件                                                 | 说明                                           | 适用对象       |
+| ---------------------------------------------------- | ---------------------------------------------- | -------------- |
+| [1_official_docs.md](./1_official_docs.md)           | 官方资源汇总、Include 语法详解、Kroki 集成要点 | 开发者、架构师 |
+| [2_quick_reference.md](./2_quick_reference.md)       | 快速参考手册、常用宏定义、实战示例             | 所有用户       |
+| [3_common_errors.md](./3_common_errors.md)           | 10 大常见错误及解决方案、调试技巧              | 故障排查       |
+| [4_optimization_guide.md](./4_optimization_guide.md) | 核心优化策略、代码后处理、监控日志             | 系统优化       |
 
 ---
 
@@ -45,6 +45,7 @@ Rel(user, sys, "使用")
 ### 1. `!include` 不能为空
 
 **❌ 致命错误**:
+
 ```plantuml
 @startuml
 !include   <-- 空 include,导致所有 C4 宏无法识别
@@ -52,6 +53,7 @@ Rel(user, sys, "使用")
 ```
 
 **✅ 正确做法**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>  <-- 必须指定文件
@@ -64,12 +66,13 @@ Rel(user, sys, "使用")
 
 ### 2. 标准库格式 vs HTTPS URL
 
-| 格式 | 示例 | Kroki SECURE | 推荐 |
-|------|------|--------------|------|
-| **标准库** | `!include <C4/C4_Context>` | ✅ 支持 | ⭐⭐⭐⭐⭐ |
-| **HTTPS URL** | `!include https://raw.githubusercontent.com/...` | ❌ 阻止 | ❌ 不推荐 |
+| 格式          | 示例                                             | Kroki SECURE | 推荐       |
+| ------------- | ------------------------------------------------ | ------------ | ---------- |
+| **标准库**    | `!include <C4/C4_Context>`                       | ✅ 支持      | ⭐⭐⭐⭐⭐ |
+| **HTTPS URL** | `!include https://raw.githubusercontent.com/...` | ❌ 阻止      | ❌ 不推荐  |
 
 **为什么?**
+
 - Kroki 默认 SECURE 模式会阻止网络访问
 - 标准库是 PlantUML 内置的,无需网络
 - 渲染速度更快,兼容性更好
@@ -81,6 +84,7 @@ Rel(user, sys, "使用")
 ### 3. `SHOW_LEGEND()` 已弃用
 
 **⚠️ 旧做法**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -90,6 +94,7 @@ SHOW_LEGEND()  <-- 已弃用
 ```
 
 **✅ 新做法**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -103,11 +108,11 @@ LAYOUT_WITH_LEGEND()  <-- 一行搞定
 
 ### 4. Kroki SECURE 模式限制
 
-| 安全模式 | 文件系统 | 网络 | 标准库 `<C4/...>` |
-|----------|----------|------|-------------------|
-| **SECURE** (默认) | ❌ | ❌ | ✅ |
-| **SAFE** | ⚠️ 白名单 | ⚠️ 白名单 | ✅ |
-| **UNSAFE** | ✅ | ✅ | ✅ |
+| 安全模式          | 文件系统  | 网络      | 标准库 `<C4/...>` |
+| ----------------- | --------- | --------- | ----------------- |
+| **SECURE** (默认) | ❌        | ❌        | ✅                |
+| **SAFE**          | ⚠️ 白名单 | ⚠️ 白名单 | ✅                |
+| **UNSAFE**        | ✅        | ✅        | ✅                |
 
 **DiagramAI 策略**: 永远使用标准库格式,兼容所有模式
 
@@ -120,6 +125,7 @@ LAYOUT_WITH_LEGEND()  <-- 一行搞定
 ### 我是新手,想快速入门
 
 → 阅读 [2_quick_reference.md](./2_quick_reference.md)
+
 - 基础模板
 - 核心宏定义
 - 常用场景示例
@@ -127,6 +133,7 @@ LAYOUT_WITH_LEGEND()  <-- 一行搞定
 ### 我遇到了渲染错误
 
 → 查看 [3_common_errors.md](./3_common_errors.md)
+
 - 10 大常见错误
 - 逐步调试流程
 - 错误分类索引
@@ -134,6 +141,7 @@ LAYOUT_WITH_LEGEND()  <-- 一行搞定
 ### 我想优化生成质量
 
 → 参考 [4_optimization_guide.md](./4_optimization_guide.md)
+
 - Prompt 优化策略
 - 代码后处理流程
 - 验证与监控
@@ -141,6 +149,7 @@ LAYOUT_WITH_LEGEND()  <-- 一行搞定
 ### 我需要查阅官方资料
 
 → 访问 [1_official_docs.md](./1_official_docs.md)
+
 - 官方文档汇总
 - 核心教程链接
 - 语法详细说明
@@ -152,6 +161,7 @@ LAYOUT_WITH_LEGEND()  <-- 一行搞定
 ### 技巧 1: 标准模板 (复制即用)
 
 **系统上下文图**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -169,6 +179,7 @@ Rel(system, external, "调用", "API")
 ```
 
 **容器图**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Container>
@@ -196,33 +207,30 @@ Rel(api, db, "读写", "SQL")
 // 自动修复常见错误
 function autoFixC4Code(code: string): string {
   // 1. 添加缺失的 @startuml/@enduml
-  if (!code.includes('@startuml')) {
-    code = '@startuml\n' + code;
+  if (!code.includes("@startuml")) {
+    code = "@startuml\n" + code;
   }
-  if (!code.includes('@enduml')) {
-    code = code + '\n@enduml';
+  if (!code.includes("@enduml")) {
+    code = code + "\n@enduml";
   }
 
   // 2. 替换 HTTPS URL 为标准库格式
   code = code.replace(
     /!include\s+https:\/\/raw\.githubusercontent\.com\/.*\/(C4_\w+)\.puml/g,
-    '!include <C4/$1>'
+    "!include <C4/$1>"
   );
 
   // 3. 添加缺失的 C4 include
   if (!code.match(/!include\s+<C4\/C4_\w+>/)) {
-    code = code.replace('@startuml', '@startuml\n!include <C4/C4_Context>');
+    code = code.replace("@startuml", "@startuml\n!include <C4/C4_Context>");
   }
 
   // 4. 优化布局
-  code = code.replace(/SHOW_LEGEND\(\)/g, '');
-  code = code.replace(/LAYOUT_TOP_DOWN\(\)/g, '');
+  code = code.replace(/SHOW_LEGEND\(\)/g, "");
+  code = code.replace(/LAYOUT_TOP_DOWN\(\)/g, "");
 
-  if (!code.includes('LAYOUT_WITH_LEGEND')) {
-    code = code.replace(
-      /(!include\s+<C4\/C4_\w+>)/,
-      '$1\nLAYOUT_WITH_LEGEND()'
-    );
+  if (!code.includes("LAYOUT_WITH_LEGEND")) {
+    code = code.replace(/(!include\s+<C4\/C4_\w+>)/, "$1\nLAYOUT_WITH_LEGEND()");
   }
 
   return code;
@@ -314,8 +322,8 @@ function autoFixC4Code(code: string): string {
 
 ## 📝 版本历史
 
-| 版本 | 日期 | 主要变更 |
-|------|------|----------|
+| 版本 | 日期       | 主要变更                      |
+| ---- | ---------- | ----------------------------- |
 | v1.0 | 2025-10-13 | 初始版本,基于实战失败案例整理 |
 | v1.1 | 2025-10-13 | 新增优化指南,成功率提升至 95% |
 
@@ -326,6 +334,7 @@ function autoFixC4Code(code: string): string {
 本文档基于 DiagramAI 项目实战经验整理,遵循 MIT License。
 
 引用官方资源时,请遵守原项目许可证:
+
 - C4-PlantUML: MIT License
 - PlantUML: GPL License
 - Kroki: MIT License

@@ -18,6 +18,7 @@
 Ditaa 将包含类似线条的字符(`| / - +`)的 ASCII 艺术图转换为漂亮的位图图形。
 
 **示例输入**:
+
 ```
 +--------+   +-------+    +-------+
 |        | --+ ditaa +--> |       |
@@ -70,6 +71,7 @@ java -jar ditaa.jar input.ditaa output.png
 - `scale=<XYZ>`: 缩放图表
 
 **示例**:
+
 ```plantuml
 @startditaa -E
 // 无分隔线的图表
@@ -86,17 +88,18 @@ java -jar ditaa.jar input.ditaa output.png
 
 在矩形内使用 `{tag}` 来指定特殊形状:
 
-| 标签 | 说明 | 示例 |
-|------|------|------|
-| `{c}` | Choice/Decision (菱形) | 决策节点 |
-| `{d}` | Document (文档符号) | 文档图标 |
-| `{io}` | Input/Output (输入输出) | I/O 符号 |
-| `{mo}` | Manual Operation (手动操作) | 手动流程 |
-| `{o}` | Ellipse (椭圆) | 椭圆形状 |
-| `{s}` | Storage (存储) | 数据库/硬盘 |
-| `{tr}` | Trapezoid (梯形) | 梯形符号 |
+| 标签   | 说明                        | 示例        |
+| ------ | --------------------------- | ----------- |
+| `{c}`  | Choice/Decision (菱形)      | 决策节点    |
+| `{d}`  | Document (文档符号)         | 文档图标    |
+| `{io}` | Input/Output (输入输出)     | I/O 符号    |
+| `{mo}` | Manual Operation (手动操作) | 手动流程    |
+| `{o}`  | Ellipse (椭圆)              | 椭圆形状    |
+| `{s}`  | Storage (存储)              | 数据库/硬盘 |
+| `{tr}` | Trapezoid (梯形)            | 梯形符号    |
 
 **示例**:
+
 ```
 +------+------+------+
 | c {c}|d {d} |io{io}|
@@ -321,6 +324,7 @@ Markdeep 原生支持 ASCII 图表渲染。
 ## 示例图库
 
 ### 基础流程图
+
 ```
 +--------+   +-------+    +-------+
 |  Start | ->|Process| -> |  End  |
@@ -328,6 +332,7 @@ Markdeep 原生支持 ASCII 图表渲染。
 ```
 
 ### 带决策节点
+
 ```
 +-------+
 |Input  |
@@ -348,6 +353,7 @@ Yes   No
 ```
 
 ### 系统架构
+
 ```
 /----------\     +---------+     /--------\
 | Client   |---->| Server  |---->|Database|

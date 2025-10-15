@@ -13,6 +13,7 @@
 ## 核心特性
 
 ### 1. 简洁的文本语法
+
 - 实体声明使用 `[实体名]`
 - 属性直接列在实体下方
 - 主键使用 `*` 前缀
@@ -20,12 +21,15 @@
 - 关系使用基数符号连接
 
 ### 2. 多种输出格式
+
 使用 GraphViz 作为渲染引擎，支持：
+
 - PDF、SVG、EPS (矢量格式)
 - PNG、JPG (位图格式)
 - Plain text、DOT (中间格式)
 
 ### 3. 丰富的自定义选项
+
 - 颜色配置 (实体、属性、关系)
 - 字体样式 (大小、字体族)
 - 边框样式
@@ -55,12 +59,14 @@ full_name {label: "varchar, null"}
 ### 关系定义
 
 **基数符号**:
+
 - `?` - 0 或 1
 - `1` - 恰好 1
 - `*` - 0 或多个
 - `+` - 1 或多个
 
 **关系语法**:
+
 ```erd
 # Person 有恰好一个 Birth Place
 Person *--1 `Birth Place`
@@ -75,6 +81,7 @@ game 1--* drive
 ### 实体和属性名称
 
 **支持特殊字符**:
+
 - 使用反引号: `` `Birth Place` ``
 - 使用单引号: `'birth state'`
 - 使用双引号: `"birth country"`
@@ -111,6 +118,7 @@ team {label: "varchar, not null"}
 ### 属性格式化
 
 支持的属性:
+
 - `label` - 显示在方括号中的标签文本
 - `color` - 字体颜色 (十六进制或颜色名)
 - `bgcolor` - 背景色
@@ -144,6 +152,7 @@ erd -c > ~/.erd.yaml
 ```
 
 配置文件支持:
+
 - 全局颜色方案
 - 默认字体设置
 - 边框样式
@@ -151,16 +160,16 @@ erd -c > ~/.erd.yaml
 
 ## 命令行选项
 
-| 短选项 | 长选项 | 说明 |
-|--------|--------|------|
-| `-i FILE` | `--input=FILE` | 输入文件 (默认 stdin) |
-| `-o FILE` | `--output=FILE` | 输出文件 (默认 stdout) |
-| `-f FMT` | `--fmt=FMT` | 强制输出格式 |
-| `-e EDGE` | `--edge=EDGE` | 边类型: compound, noedge, ortho, poly, spline |
-| `-d` | `--dot-entity` | 使用 DOT 表格而非 HTML 表格 |
-| `-p PATTERN` | `--edge-pattern=PATTERN` | 边样式: dashed, dotted, solid |
-| `-n NOTATION` | `--notation=NOTATION` | 基数符号: ie, uml |
-| `-c [FILE]` | `--config[=FILE]` | 配置文件 |
+| 短选项        | 长选项                   | 说明                                          |
+| ------------- | ------------------------ | --------------------------------------------- |
+| `-i FILE`     | `--input=FILE`           | 输入文件 (默认 stdin)                         |
+| `-o FILE`     | `--output=FILE`          | 输出文件 (默认 stdout)                        |
+| `-f FMT`      | `--fmt=FMT`              | 强制输出格式                                  |
+| `-e EDGE`     | `--edge=EDGE`            | 边类型: compound, noedge, ortho, poly, spline |
+| `-d`          | `--dot-entity`           | 使用 DOT 表格而非 HTML 表格                   |
+| `-p PATTERN`  | `--edge-pattern=PATTERN` | 边样式: dashed, dotted, solid                 |
+| `-n NOTATION` | `--notation=NOTATION`    | 基数符号: ie, uml                             |
+| `-c [FILE]`   | `--config[=FILE]`        | 配置文件                                      |
 
 ## 完整示例
 
@@ -198,16 +207,19 @@ game *--1 team {label: "away"}
 ## 安装方法
 
 ### MacPorts
+
 ```bash
 port install erd
 ```
 
 ### Docker
+
 ```bash
 docker run -i ghcr.io/burntsushi/erd:latest < schema.er > output.pdf
 ```
 
 ### Stack (Haskell)
+
 ```bash
 git clone https://github.com/BurntSushi/erd
 cd erd
@@ -215,6 +227,7 @@ stack install
 ```
 
 ### Cabal
+
 ```bash
 cabal new-install erd
 ```
@@ -224,6 +237,7 @@ cabal new-install erd
 Erd 的文件格式受 [Erwiz](https://github.com/slopjong/Erwiz) 启发，但更加轻量级。
 
 **类似工具**:
+
 - **Mermaid** (JavaScript) - 支持 ER 图语法
 - **PlantUML** (Java) - 支持 IE 图语法
 - **dbdiagram.io** (Web) - 在线 ER 图工具
@@ -241,6 +255,7 @@ Erd 的文件格式受 [Erwiz](https://github.com/slopjong/Erwiz) 启发，但�
 Erd 需要 GraphViz 支持文本格式化:
 
 ### macOS 注意事项
+
 对于粗体和斜体支持，需要 Pango 支持:
 
 ```bash
@@ -248,6 +263,7 @@ brew install graphviz
 ```
 
 验证 Pango 支持:
+
 ```bash
 dot -v | grep pango
 ```

@@ -14,6 +14,7 @@
 **问题**: 为什么不能在定义元素之前引用它？
 
 **背景**:
+
 ```structurizr
 // 用户期望这样工作
 model {
@@ -24,14 +25,17 @@ model {
 ```
 
 **官方解释** (Simon Brown):
+
 > Structurizr DSL 是 Structurizr for Java 库的包装器，而 Java 主要是命令式语言。模型是按代码编写顺序逐步构建的，因此不支持前向引用/提升。
 
 **解决方案**:
+
 1. **按顺序定义**: 先定义再引用
 2. **使用隐式关系**: 在元素块内部可以有限前向引用
 3. **延迟关系定义**: 所有元素定义后再定义关系
 
 **最佳实践**:
+
 ```structurizr
 workspace {
   !identifiers hierarchical
@@ -60,12 +64,14 @@ workspace {
 **常见投诉**: "每次修改 DSL 后手动调整的布局都丢失了！"
 
 **根本原因**:
+
 - DSL 文件不存储布局信息
 - 布局存储在 `workspace.json` 中
 - 元素重命名或顺序变化导致内部 ID 变化
 - Structurizr 无法匹配新旧元素
 
 **影响因素**:
+
 1. **元素重命名**
 2. **改变元素定义顺序**
 3. **删除后重新添加元素**
@@ -131,6 +137,7 @@ views {
 **问题**: 何时使用分层标识符？
 
 **扁平标识符 (默认)**:
+
 ```structurizr
 model {
   system1_api = container "API"
@@ -139,14 +146,17 @@ model {
 ```
 
 **优点**:
+
 - 简单直接
 - 适合小型模型
 
 **缺点**:
+
 - 标识符污染全局命名空间
 - 必须手动确保唯一性
 
 **分层标识符**:
+
 ```structurizr
 workspace {
   !identifiers hierarchical
@@ -163,15 +173,18 @@ workspace {
 ```
 
 **优点**:
+
 - 命名空间隔离
 - 更清晰的结构
 - 适合大型模型
 
 **缺点**:
+
 - 引用时需要完整路径
 - 轻微增加复杂性
 
 **社区建议**:
+
 - **小型模型 (< 5 系统)**: 扁平标识符
 - **大型模型 (5+ 系统)**: 分层标识符
 - **模块化项目**: 分层标识符 + !include
@@ -439,6 +452,7 @@ views {
 **问题**: 何时使用 Structurizr 动态视图 vs PlantUML 时序图？
 
 **Structurizr 动态视图**:
+
 ```structurizr
 views {
   dynamic system "UserLogin" "User login flow" {
@@ -455,11 +469,13 @@ views {
 ```
 
 **优点**:
+
 - 与模型集成
 - 自动布局
 - 一致的样式
 
 **缺点**:
+
 - 简单的顺序流
 - 缺少分支/循环
 - 不支持生命线
@@ -467,6 +483,7 @@ views {
 ---
 
 **PlantUML 时序图** (导出后):
+
 ```plantuml
 @startuml
 User -> WebApp: Submit credentials
@@ -479,15 +496,18 @@ WebApp --> User: Show dashboard
 ```
 
 **优点**:
+
 - 丰富的时序图特性
 - 支持 alt/opt/loop
 - 生命线管理
 
 **缺点**:
+
 - 与 Structurizr 模型分离
 - 手动维护同步
 
 **社区建议**:
+
 - **简单流程**: Structurizr 动态视图
 - **复杂时序**: PlantUML/Mermaid 时序图
 - **两者结合**: 在文档中混合使用
@@ -501,6 +521,7 @@ WebApp --> User: Show dashboard
 **社区共识**:
 
 **Level 1: System Context** - 总是需要
+
 ```structurizr
 views {
   systemContext system "L1_Context" {
@@ -510,6 +531,7 @@ views {
 ```
 
 **Level 2: Container** - 大多数情况需要
+
 ```structurizr
 views {
   container system "L2_Container" {
@@ -519,6 +541,7 @@ views {
 ```
 
 **Level 3: Component** - 选择性使用
+
 ```structurizr
 views {
   component system.api "L3_Component_API" {
@@ -528,16 +551,19 @@ views {
 ```
 
 **何时不用 Component 视图**:
+
 - 容器内部逻辑简单
 - 使用微服务架构 (容器即组件)
 - 团队更喜欢直接看代码
 
 **Level 4: Code** - 几乎不用
+
 - IDE 已提供类图
 - 维护成本高
 - Structurizr 不直接支持
 
 **建议**:
+
 1. **所有系统**: Context + Container
 2. **复杂容器**: 添加 Component 视图
 3. **代码级**: 使用 IDE 工具
@@ -550,23 +576,25 @@ views {
 
 **对比**:
 
-| 特性 | Structurizr DSL | C4-PlantUML |
-|------|----------------|-------------|
-| **学习曲线** | 中等 | 低 (如果熟悉 PlantUML) |
-| **模型复用** | ✅ 单一模型，多视图 | ❌ 每个图表独立 |
-| **工具生态** | Lite/Cloud/CLI | PlantUML 生态 |
-| **自动布局** | Graphviz | PlantUML 布局 |
-| **样式控制** | 主题 + 样式 | PlantUML skinparam |
-| **交互性** | ✅ (Lite/Cloud) | ❌ 静态图片 |
-| **文档集成** | ✅ 原生 | ❌ 需手动同步 |
-| **版本控制** | ✅ DSL 文本 | ✅ PlantUML 文本 |
-| **协作** | Workspace 共享 | 文件共享 |
-| **导出** | 多格式 | PNG/SVG |
+| 特性         | Structurizr DSL     | C4-PlantUML            |
+| ------------ | ------------------- | ---------------------- |
+| **学习曲线** | 中等                | 低 (如果熟悉 PlantUML) |
+| **模型复用** | ✅ 单一模型，多视图 | ❌ 每个图表独立        |
+| **工具生态** | Lite/Cloud/CLI      | PlantUML 生态          |
+| **自动布局** | Graphviz            | PlantUML 布局          |
+| **样式控制** | 主题 + 样式         | PlantUML skinparam     |
+| **交互性**   | ✅ (Lite/Cloud)     | ❌ 静态图片            |
+| **文档集成** | ✅ 原生             | ❌ 需手动同步          |
+| **版本控制** | ✅ DSL 文本         | ✅ PlantUML 文本       |
+| **协作**     | Workspace 共享      | 文件共享               |
+| **导出**     | 多格式              | PNG/SVG                |
 
 **社区建议 (Simon Brown)**:
+
 > 大多数人应该使用 Structurizr DSL，并在需要时导出为 C4-PlantUML，而不是手工编写 PlantUML 定义。
 
 **使用场景**:
+
 - **Structurizr DSL**: 长期维护的架构文档、团队协作、多视图需求
 - **C4-PlantUML**: 已有 PlantUML 工作流、简单单一图表、快速原型
 
@@ -580,10 +608,12 @@ views {
 
 ```markdown
 <!-- Markdown 文档 -->
+
 ![System Context](https://kroki.io/structurizr/svg/eNp1UsFOwzAM...)
 ```
 
 **限制**:
+
 - URI 长度限制
 - 样式支持有限
 - 无交互性
@@ -612,6 +642,7 @@ workspace {
 ```
 
 **优点**:
+
 - 文档即代码
 - 自动生成
 - 版本控制
@@ -715,6 +746,7 @@ deploymentNode "Kubernetes Cluster" {
 **问题**: 如何在 Structurizr 中管理架构决策？
 
 **目录结构**:
+
 ```
 project/
 ├── workspace.dsl
@@ -731,6 +763,7 @@ project/
 ```
 
 **DSL 配置**:
+
 ```structurizr
 workspace {
   model {
@@ -743,6 +776,7 @@ workspace {
 ```
 
 **ADR 格式** (MADR):
+
 ```markdown
 # 2. Choose PostgreSQL as Primary Database
 
@@ -763,16 +797,19 @@ We will use PostgreSQL 15...
 ## Consequences
 
 Positive:
+
 - ACID compliance
 - JSON support
 - Strong community
 
 Negative:
+
 - Operational overhead
 - Scaling challenges
 ```
 
 **好处**:
+
 - 决策历史可追溯
 - 与架构模型关联
 - 在 Structurizr 中浏览
@@ -792,10 +829,12 @@ workspace.json
 ```
 
 **优点**:
+
 - DSL 是源文件
 - 避免合并冲突
 
 **缺点**:
+
 - 手动布局丢失
 
 ---
@@ -808,15 +847,18 @@ workspace.json
 ```
 
 **优点**:
+
 - 保留布局信息
 
 **缺点**:
+
 - JSON 合并冲突
 - 仓库体积增大
 
 ---
 
 **社区建议**:
+
 1. **DSL 必须版本控制**
 2. **workspace.json 可选版本控制**
 3. **使用自动布局避免依赖 JSON**
@@ -871,6 +913,7 @@ workspace {
 ```
 
 **优点**:
+
 - 减少冲突
 - 清晰的所有权
 
@@ -890,10 +933,12 @@ enterprise/
 ```
 
 **优点**:
+
 - 团队自治
 - 独立演进
 
 **缺点**:
+
 - 同步复杂性
 
 ---
@@ -904,14 +949,15 @@ enterprise/
 
 **社区经验**:
 
-| 规模 | 元素数量 | 性能 | 建议 |
-|------|---------|------|------|
-| 小型 | < 50 | ✅ 优秀 | 单一 workspace |
-| 中型 | 50-200 | ✅ 良好 | 分层标识符 + 模块化 |
-| 大型 | 200-500 | ⚠️ 可用 | Workspace 扩展 + 按系统拆分 |
-| 超大型 | 500+ | ❌ 慢 | 多个独立 workspace |
+| 规模   | 元素数量 | 性能    | 建议                        |
+| ------ | -------- | ------- | --------------------------- |
+| 小型   | < 50     | ✅ 优秀 | 单一 workspace              |
+| 中型   | 50-200   | ✅ 良好 | 分层标识符 + 模块化         |
+| 大型   | 200-500  | ⚠️ 可用 | Workspace 扩展 + 按系统拆分 |
+| 超大型 | 500+     | ❌ 慢   | 多个独立 workspace          |
 
 **优化技巧**:
+
 1. **拆分视图**: 不要在一个视图中包含所有元素
 2. **使用过滤**: `include` 特定元素而非 `*`
 3. **延迟加载**: 按需加载详细视图
@@ -924,12 +970,14 @@ enterprise/
 **选择指南**:
 
 **Structurizr Cloud** (付费):
+
 - ✅ 托管服务
 - ✅ 团队协作
 - ✅ 完整功能
 - ❌ 需订阅
 
 **Structurizr Lite** (免费):
+
 - ✅ 开源
 - ✅ 本地运行
 - ✅ 适合开发
@@ -937,12 +985,14 @@ enterprise/
 - ❌ 无持久化 (需手动保存)
 
 **Structurizr On-Premises** (免费):
+
 - ✅ 自托管
 - ✅ 多用户
 - ✅ 完整功能
 - ❌ 需自行维护
 
 **社区建议**:
+
 - **个人/小团队**: Lite
 - **企业**: Cloud 或 On-Premises
 - **开发**: Lite + CLI
@@ -992,6 +1042,7 @@ user -> system.webapp.controller
 ```
 
 **建议**: 使用常量
+
 ```structurizr
 !const API_URL "https://api.example.com"
 url "${API_URL}"

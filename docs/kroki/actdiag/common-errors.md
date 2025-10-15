@@ -21,11 +21,13 @@ actdiag {
 ```
 
 **错误信息**:
+
 ```
 Error: Activity 'process_request' not found in flow
 ```
 
 **原因**:
+
 - 活动必须先在流程中定义,才能分配到泳道
 - ActDiag 需要知道活动的流向关系
 
@@ -67,11 +69,13 @@ actdiag {
 ```
 
 **错误信息**:
+
 ```
 Error: Activity 'A' assigned to multiple lanes
 ```
 
 **原因**:
+
 - 每个活动只能属于一个泳道
 - 这是泳道图的基本规则
 
@@ -111,6 +115,7 @@ actdiag {
 ```
 
 **错误信息**:
+
 ```
 Error: Lane must have a 'label' attribute
 ```
@@ -143,6 +148,7 @@ actdiag {
 ```
 
 **错误信息**:
+
 ```
 Syntax error: unexpected token
 ```
@@ -171,6 +177,7 @@ actdiag {
 ```
 
 **错误信息**:
+
 ```
 Syntax error: invalid flow direction
 ```
@@ -220,6 +227,7 @@ actdiag {
 ```
 
 **现象**:
+
 - 泳道按定义顺序显示,而非逻辑顺序
 - 显示顺序: third → first → second
 
@@ -270,6 +278,7 @@ actdiag {
 ```
 
 **现象**:
+
 - B 和 C 显示在泳道之外
 - 布局混乱
 
@@ -317,6 +326,7 @@ actdiag {
 ```
 
 **问题**:
+
 - 可能产生交叉的流程线
 - 布局不清晰
 
@@ -357,6 +367,7 @@ actdiag {
 ```
 
 **错误信息**:
+
 ```
 Syntax error: unclosed string
 ```
@@ -388,6 +399,7 @@ actdiag {
 ```
 
 **错误信息**:
+
 ```
 Error: Invalid shape 'square'
 ```
@@ -463,6 +475,7 @@ actdiag {
 ```
 
 **现象**:
+
 - 显示空白泳道
 - 浪费空间
 
@@ -683,6 +696,7 @@ actdiag {
 系统找不到合适的字体渲染文本。
 
 **错误信息**:
+
 ```
 Font not found
 ```
@@ -708,6 +722,7 @@ fontpath = /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
 复杂图表生成时间过长导致超时。
 
 **错误信息**:
+
 ```
 Timeout error
 ```
@@ -770,6 +785,7 @@ actdiag {
 Kroki URL 编码不正确导致渲染失败。
 
 **错误信息**:
+
 ```
 Invalid diagram data
 ```
@@ -809,6 +825,7 @@ const url = `https://kroki.io/actdiag/svg/${encoded}`;
 浏览器 CORS 限制阻止 Kroki 请求。
 
 **错误信息**:
+
 ```
 CORS policy error
 ```
@@ -817,7 +834,7 @@ CORS policy error
 
 ```typescript
 // DiagramAI 的解决方案
-const krokiUrl = '/api/kroki/actdiag/svg/' + encodedCode;
+const krokiUrl = "/api/kroki/actdiag/svg/" + encodedCode;
 // 通过 Next.js API 代理到 Kroki
 ```
 
@@ -910,6 +927,7 @@ actdiag {
 ### 24. 检查清单
 
 **语法检查**:
+
 - [ ] 所有大括号 `{}` 都正确闭合
 - [ ] 所有流程定义以分号 `;` 结束
 - [ ] 所有字符串用双引号 `"` 包围
@@ -917,17 +935,20 @@ actdiag {
 - [ ] 使用正确的流向符号 `->`
 
 **泳道检查**:
+
 - [ ] 所有泳道都有 `label` 属性
 - [ ] 活动先在流程中定义,再分配到泳道
 - [ ] 每个活动只分配到一个泳道
 - [ ] 没有空泳道
 
 **布局检查**:
+
 - [ ] 泳道按期望顺序定义
 - [ ] 泳道内活动尽量连续
 - [ ] 所有活动都分配到泳道
 
 **样式检查**:
+
 - [ ] 颜色格式正确
 - [ ] 形状名称有效
 - [ ] 标签长度合理
@@ -988,30 +1009,38 @@ actdiag {
 
 ## 📝 错误报告模板
 
-```markdown
+````markdown
 ### 问题描述
+
 [简要描述问题]
 
 ### 复现代码
+
 ```actdiag
 [最小化的复现代码]
 ```
+````
 
 ### 错误信息
+
 ```
 [完整的错误信息]
 ```
 
 ### 环境信息
+
 - ActDiag 版本: [版本号]
 - Kroki 版本: [版本号]
 - 浏览器: [如适用]
 
 ### 预期结果
+
 [描述预期行为]
 
 ### 实际结果
+
 [描述实际行为]
+
 ```
 
 ---
@@ -1030,3 +1059,4 @@ actdiag {
 ---
 
 *文档整理: DiagramAI 项目 | 常见错误汇总*
+```

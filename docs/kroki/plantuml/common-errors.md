@@ -12,6 +12,7 @@
 #### 错误 1.1: 缺少 @startuml/@enduml 标记
 
 **错误代码**:
+
 ```plantuml
 Alice -> Bob : Hello
 ```
@@ -19,6 +20,7 @@ Alice -> Bob : Hello
 **错误信息**: `Syntax Error: Missing @startuml declaration`
 
 **正确代码**:
+
 ```plantuml
 @startuml
 Alice -> Bob : Hello
@@ -32,6 +34,7 @@ Alice -> Bob : Hello
 #### 错误 1.2: 标记大小写错误
 
 **错误代码**:
+
 ```plantuml
 @startUML    ❌ 错误：U 大写
 Alice -> Bob
@@ -41,6 +44,7 @@ Alice -> Bob
 **错误信息**: `Unknown directive @startUML`
 
 **正确代码**:
+
 ```plantuml
 @startuml    ✅ 正确：全小写
 Alice -> Bob
@@ -56,6 +60,7 @@ Alice -> Bob
 #### 错误 2.1: 箭头符号不完整
 
 **错误代码**:
+
 ```plantuml
 @startuml
 Alice > Bob    ❌ 缺少 -
@@ -66,6 +71,7 @@ Alice < Bob    ❌ 缺少 -
 **错误信息**: `Syntax Error: Invalid arrow syntax`
 
 **正确代码**:
+
 ```plantuml
 @startuml
 Alice -> Bob   ✅ 完整箭头
@@ -78,6 +84,7 @@ Alice <- Bob   ✅ 完整箭头
 #### 错误 2.2: 箭头修饰符位置错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 Alice x-> Bob    ❌ x 应在末尾
@@ -86,6 +93,7 @@ Alice o-> Bob    ❌ o 应在末尾
 ```
 
 **正确代码**:
+
 ```plantuml
 @startuml
 Alice ->x Bob    ✅ 丢失消息
@@ -103,6 +111,7 @@ Alice o<- Bob    ✅ 开始圆圈
 #### 错误 3.1: 参与者名称包含特殊字符
 
 **错误代码**:
+
 ```plantuml
 @startuml
 participant User@Domain    ❌ @ 不允许
@@ -114,6 +123,7 @@ participant User Name      ❌ 空格需引号
 **错误信息**: `Syntax Error: Invalid character in identifier`
 
 **正确代码**:
+
 ```plantuml
 @startuml
 participant "User@Domain" as User1   ✅ 使用引号
@@ -123,6 +133,7 @@ participant "User Name" as User3     ✅ 使用引号
 ```
 
 **解决方案**:
+
 - 包含特殊字符的名称用双引号包裹
 - 使用 `as` 关键字创建简短别名
 
@@ -131,6 +142,7 @@ participant "User Name" as User3     ✅ 使用引号
 #### 错误 3.2: 别名语法错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 participant "Very Long Name" = VLN    ❌ 使用 = 错误
@@ -138,6 +150,7 @@ participant "Very Long Name" = VLN    ❌ 使用 = 错误
 ```
 
 **正确代码**:
+
 ```plantuml
 @startuml
 participant "Very Long Name" as VLN   ✅ 使用 as
@@ -152,6 +165,7 @@ VLN -> Bob : Hello
 #### 错误 4.1: 关系符号方向错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 ClassA --|> ClassB    ❌ 继承符号反了
@@ -160,6 +174,7 @@ ClassC ..|> ClassD    ❌ 实现符号反了
 ```
 
 **正确代码**:
+
 ```plantuml
 @startuml
 ClassA <|-- ClassB    ✅ B 继承 A
@@ -168,6 +183,7 @@ ClassC <|.. ClassD    ✅ D 实现 C
 ```
 
 **记忆技巧**:
+
 - 三角形 `<|` 指向父类/接口
 - 实线 `--` 表示继承
 - 虚线 `..` 表示实现
@@ -177,6 +193,7 @@ ClassC <|.. ClassD    ✅ D 实现 C
 #### 错误 4.2: 可见性修饰符错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 class MyClass {
@@ -187,6 +204,7 @@ class MyClass {
 ```
 
 **正确代码**:
+
 ```plantuml
 @startuml
 class MyClass {
@@ -205,6 +223,7 @@ class MyClass {
 #### 错误 5.1: 缺少 start/stop
 
 **错误代码**:
+
 ```plantuml
 @startuml
 :Action 1;    ❌ 缺少 start
@@ -215,6 +234,7 @@ class MyClass {
 **错误信息**: `Syntax Error: Missing start keyword`
 
 **正确代码**:
+
 ```plantuml
 @startuml
 start         ✅ 必须以 start 开始
@@ -229,6 +249,7 @@ stop          ✅ 必须以 stop 或 end 结束
 #### 错误 5.2: if/endif 不匹配
 
 **错误代码**:
+
 ```plantuml
 @startuml
 start
@@ -243,6 +264,7 @@ stop
 **错误信息**: `Syntax Error: Unmatched if statement`
 
 **正确代码**:
+
 ```plantuml
 @startuml
 start
@@ -260,6 +282,7 @@ stop
 #### 错误 5.3: fork/end fork 不匹配
 
 **错误代码**:
+
 ```plantuml
 @startuml
 start
@@ -273,6 +296,7 @@ stop
 ```
 
 **正确代码**:
+
 ```plantuml
 @startuml
 start
@@ -292,6 +316,7 @@ stop
 #### 错误 6.1: 混用 package（不支持）
 
 **错误代码**:
+
 ```plantuml
 @startuml
 package "System" {
@@ -304,6 +329,7 @@ package "System" {
 **错误信息**: `Syntax Error: package not allowed in state diagrams`
 
 **解决方案 1 - 使用 allowmixing**:
+
 ```plantuml
 @startuml
 allowmixing
@@ -315,6 +341,7 @@ package "System" {
 ```
 
 **解决方案 2 - 使用复合状态**:
+
 ```plantuml
 @startuml
 state "System" as System {
@@ -331,6 +358,7 @@ state "System" as System {
 #### 错误 6.2: [*] 初始/终止状态语法错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 state [*]              ❌ 声明错误
@@ -342,6 +370,7 @@ StateB -> [*]
 **错误信息**: `Syntax Error: Invalid state declaration`
 
 **正确代码**:
+
 ```plantuml
 @startuml
 [*] -> StateA          ✅ 直接使用，不声明
@@ -358,6 +387,7 @@ StateB -> [*]          ✅ 直接使用
 #### 错误 7.1: !define 语法错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 !define MYCONST = "value"    ❌ 不需要 =
@@ -365,6 +395,7 @@ StateB -> [*]          ✅ 直接使用
 ```
 
 **正确代码**:
+
 ```plantuml
 @startuml
 !define MYCONST "value"      ✅ 直接赋值
@@ -377,6 +408,7 @@ StateB -> [*]          ✅ 直接使用
 #### 错误 7.2: !include 路径错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 !include common.puml         ❌ 相对路径可能失败
@@ -386,6 +418,7 @@ StateB -> [*]          ✅ 直接使用
 **错误信息**: `File not found: common.puml`
 
 **正确代码**:
+
 ```plantuml
 @startuml
 !include ./common.puml       ✅ 明确相对路径
@@ -401,6 +434,7 @@ StateB -> [*]          ✅ 直接使用
 #### 错误 8.1: skinparam 拼写错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 skinParam backgroundColor yellow    ❌ P 大写
@@ -409,6 +443,7 @@ SkinParam shadowing false           ❌ S 大写
 ```
 
 **正确代码**:
+
 ```plantuml
 @startuml
 skinparam backgroundColor yellow    ✅ 全小写
@@ -421,6 +456,7 @@ skinparam shadowing false           ✅ 全小写
 #### 错误 8.2: 颜色格式错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 participant Alice #GGGGGG    ❌ G 不是有效的十六进制
@@ -429,6 +465,7 @@ participant Bob #12345       ❌ 缺少一位
 ```
 
 **正确代码**:
+
 ```plantuml
 @startuml
 participant Alice #CCCCCC    ✅ 有效的 HEX
@@ -438,6 +475,7 @@ participant Charlie red      ✅ 颜色名称
 ```
 
 **颜色格式**:
+
 - 颜色名称: `red`, `blue`, `green` 等
 - HEX: `#RRGGBB` (6 位) 或 `#RGB` (3 位)
 
@@ -448,6 +486,7 @@ participant Charlie red      ✅ 颜色名称
 #### 错误 9.1: 多行注释未闭合
 
 **错误代码**:
+
 ```plantuml
 @startuml
 /'
@@ -459,6 +498,7 @@ Alice -> Bob
 **错误信息**: `Syntax Error: Unclosed comment`
 
 **正确代码**:
+
 ```plantuml
 @startuml
 /'
@@ -473,6 +513,7 @@ Alice -> Bob
 #### 错误 9.2: 文本换行错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 Alice -> Bob : This is a very long message
@@ -481,6 +522,7 @@ that spans multiple lines    ❌ 直接换行不工作
 ```
 
 **正确代码**:
+
 ```plantuml
 @startuml
 Alice -> Bob : This is a very long message\nthat spans multiple lines
@@ -497,6 +539,7 @@ that spans multiple lines    ✅ 在某些上下文中允许
 #### 错误 10.1: 时序图 - autonumber 位置错误
 
 **错误代码**:
+
 ```plantuml
 @startuml
 Alice -> Bob : msg1
@@ -506,6 +549,7 @@ Alice -> Charlie : msg2
 ```
 
 **正确代码**:
+
 ```plantuml
 @startuml
 autonumber              ✅ 在第一条消息之前
@@ -519,6 +563,7 @@ Alice -> Charlie : msg2
 #### 错误 10.2: 甘特图 - 日期格式错误
 
 **错误代码**:
+
 ```plantuml
 @startgantt
 [Task 1] starts 01/15/2025    ❌ 错误的日期格式
@@ -526,6 +571,7 @@ Alice -> Charlie : msg2
 ```
 
 **正确代码**:
+
 ```plantuml
 @startgantt
 [Task 1] starts 2025-01-15    ✅ ISO 格式 YYYY-MM-DD
@@ -544,6 +590,7 @@ Alice -> Charlie : msg2
 **错误信息**: `Error: Diagram too complex or too large`
 
 **解决方案**:
+
 1. 拆分成多个小图表
 2. 减少元素数量
 3. 简化关系连接
@@ -556,6 +603,7 @@ Alice -> Charlie : msg2
 **错误信息**: `Timeout: Rendering took too long`
 
 **解决方案**:
+
 1. 检查是否有循环引用
 2. 减少预处理复杂度
 3. 避免过深的嵌套
@@ -568,6 +616,7 @@ Alice -> Charlie : msg2
 #### 问题 12.1: 参与者顺序混乱
 
 **问题代码**:
+
 ```plantuml
 @startuml
 Alice -> Bob
@@ -578,6 +627,7 @@ Bob -> Charlie
 ```
 
 **改进方案**:
+
 ```plantuml
 @startuml
 ' 显式声明参与者顺序
@@ -596,6 +646,7 @@ Bob -> Charlie
 #### 问题 12.2: 箭头交叉混乱
 
 **解决方案**:
+
 1. 使用分组（`group`）
 2. 调整参与者顺序
 3. 使用分隔符（`==`）
@@ -606,11 +657,13 @@ Bob -> Charlie
 ## 🎯 调试技巧
 
 ### 1. 使用在线编辑器
+
 - 访问 http://www.plantuml.com/plantuml/uml
 - 实时查看错误提示
 - 逐步添加元素验证
 
 ### 2. 注释调试法
+
 ```plantuml
 @startuml
 Alice -> Bob
@@ -623,11 +676,13 @@ Bob -> Charlie
 ```
 
 ### 3. 分段验证
+
 - 从最简单的图表开始
 - 逐步添加复杂元素
 - 每次添加后验证
 
 ### 4. 使用 IDE 插件
+
 - VS Code PlantUML 扩展
 - IntelliJ IDEA PlantUML 插件
 - 提供语法高亮和错误检查
@@ -636,16 +691,16 @@ Bob -> Charlie
 
 ## 📚 错误速查表
 
-| 错误类型 | 常见原因 | 快速解决 |
-|---------|---------|---------|
-| `Missing @startuml` | 缺少声明标记 | 添加 `@startuml` 和 `@enduml` |
-| `Invalid arrow syntax` | 箭头格式错误 | 使用 `->` 或 `<-` |
-| `Invalid character` | 特殊字符未转义 | 使用双引号包裹名称 |
-| `Unmatched if` | 条件语句未闭合 | 添加 `endif` |
-| `Unmatched fork` | 并行语句未闭合 | 添加 `end fork` |
-| `Unknown directive` | 关键字拼写错误 | 检查大小写（全小写） |
-| `File not found` | !include 路径错误 | 使用正确的相对/绝对路径 |
-| `Syntax Error` | 通用语法错误 | 逐行检查语法 |
+| 错误类型               | 常见原因          | 快速解决                      |
+| ---------------------- | ----------------- | ----------------------------- |
+| `Missing @startuml`    | 缺少声明标记      | 添加 `@startuml` 和 `@enduml` |
+| `Invalid arrow syntax` | 箭头格式错误      | 使用 `->` 或 `<-`             |
+| `Invalid character`    | 特殊字符未转义    | 使用双引号包裹名称            |
+| `Unmatched if`         | 条件语句未闭合    | 添加 `endif`                  |
+| `Unmatched fork`       | 并行语句未闭合    | 添加 `end fork`               |
+| `Unknown directive`    | 关键字拼写错误    | 检查大小写（全小写）          |
+| `File not found`       | !include 路径错误 | 使用正确的相对/绝对路径       |
+| `Syntax Error`         | 通用语法错误      | 逐行检查语法                  |
 
 ---
 
@@ -658,5 +713,5 @@ Bob -> Charlie
 
 ---
 
-*最后更新: 2025-10-13*
-*维护者: DiagramAI Team*
+_最后更新: 2025-10-13_
+_维护者: DiagramAI Team_

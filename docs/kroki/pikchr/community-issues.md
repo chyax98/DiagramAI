@@ -15,21 +15,23 @@
 **问题来源**: 用户期望 Pikchr 完全兼容原始 PIC
 
 **现状**:
+
 - Pikchr 受 PIC 启发，但**不是**完全兼容
 - 大部分 PIC 脚本需要修改才能在 Pikchr 中运行
 - Pikchr 移除了 PIC 的一些复杂特性
 
 **主要差异**:
 
-| 特性 | PIC | Pikchr |
-|------|-----|--------|
-| 单位 | 仅英寸 | 支持 cm, mm, px, pt 等 |
-| .PS/.PE 标记 | 必需 | 不需要 |
-| troff 依赖 | 是 | 否 (零依赖) |
-| 输出格式 | 多种 (依赖 troff) | 仅 SVG |
-| 文本处理 | troff 格式 | 简化的文本属性 |
+| 特性         | PIC               | Pikchr                 |
+| ------------ | ----------------- | ---------------------- |
+| 单位         | 仅英寸            | 支持 cm, mm, px, pt 等 |
+| .PS/.PE 标记 | 必需              | 不需要                 |
+| troff 依赖   | 是                | 否 (零依赖)            |
+| 输出格式     | 多种 (依赖 troff) | 仅 SVG                 |
+| 文本处理     | troff 格式        | 简化的文本属性         |
 
 **解决方案**:
+
 1. 参考官方差异文档: https://pikchr.org/home/doc/trunk/doc/differences.md
 2. 使用转换脚本 (如果有)
 3. 手动调整 PIC 脚本
@@ -43,6 +45,7 @@
 **原因**: Pikchr 需要估算文本渲染尺寸，但无法访问实际字体度量
 
 **症状**:
+
 ```pikchr
 box "Very long text that should fit" fit
 # 可能文本溢出或留白过多
@@ -51,17 +54,20 @@ box "Very long text that should fit" fit
 **workaround 解决方案**:
 
 **方案 1: 调整字符宽度估计**
+
 ```pikchr
 charwid = 0.1      # 默认 0.08，调大让盒子更宽
 box "Long text" fit
 ```
 
 **方案 2: 手动微调**
+
 ```pikchr
 box "Long text" fit width 110%  # fit 后再调整
 ```
 
 **方案 3: 添加空格**
+
 ```pikchr
 box " Long text "  # 前后加空格增加边距
 ```
@@ -73,6 +79,7 @@ box " Long text "  # 前后加空格增加边距
 **问题**: 中文字符显示为方框或布局错误
 
 **原因**:
+
 1. SVG 查看器缺少中文字体
 2. `charwid` 估计不准 (中文字符通常更宽)
 3. 文件编码非 UTF-8
@@ -80,6 +87,7 @@ box " Long text "  # 前后加空格增加边距
 **解决方案**:
 
 **步骤 1: 确保 UTF-8 编码**
+
 ```bash
 # 检查编码
 file -I diagram.pikchr
@@ -89,6 +97,7 @@ iconv -f GBK -t UTF-8 diagram.pikchr -o diagram_utf8.pikchr
 ```
 
 **步骤 2: 调整字符宽度**
+
 ```pikchr
 # 中文字符更宽
 charwid = 0.15     # 默认 0.08
@@ -98,11 +107,12 @@ box "中文文本" fit
 ```
 
 **步骤 3: 指定字体 (在 CSS 中)**
+
 ```html
 <style>
-text {
-  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-}
+  text {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  }
 </style>
 ```
 
@@ -113,6 +123,7 @@ text {
 **问题**: 多段线条或闭合路径显示不正确
 
 **示例**:
+
 ```pikchr
 line from B1.s \\
   go down 1cm \\
@@ -124,6 +135,7 @@ line from B1.s \\
 ```
 
 **可能原因**:
+
 1. 路径自相交
 2. SVG 渲染器的 fill-rule 问题
 3. 路径过于复杂
@@ -131,6 +143,7 @@ line from B1.s \\
 **解决方案**:
 
 **方案 1: 简化路径**
+
 ```pikchr
 # 分成多个简单路径
 line from B1.s down 1cm then right 2cm
@@ -138,6 +151,7 @@ line from previous.end up 1cm then right 1cm
 ```
 
 **方案 2: 使用容器**
+
 ```pikchr
 [
   # 复杂图形在独立坐标系
@@ -156,18 +170,19 @@ line from previous.end up 1cm then right 1cm
 
 **支持情况**:
 
-| 平台/工具 | 支持 | 备注 |
-|----------|------|------|
-| Fossil SCM | ✅ 原生支持 | 默认启用 |
-| GitHub | ❌ 不支持 | 需要预渲染 |
-| GitLab | ❌ 不支持 | 需要预渲染 |
-| Kroki | ✅ 支持 | 通过 API |
-| Pandoc | ⚠️ 需要插件 | 需要自定义 filter |
-| Hugo | ⚠️ 需要配置 | 需要 shortcode |
+| 平台/工具  | 支持        | 备注              |
+| ---------- | ----------- | ----------------- |
+| Fossil SCM | ✅ 原生支持 | 默认启用          |
+| GitHub     | ❌ 不支持   | 需要预渲染        |
+| GitLab     | ❌ 不支持   | 需要预渲染        |
+| Kroki      | ✅ 支持     | 通过 API          |
+| Pandoc     | ⚠️ 需要插件 | 需要自定义 filter |
+| Hugo       | ⚠️ 需要配置 | 需要 shortcode    |
 
 **通用解决方案**:
 
 **方案 1: 预渲染 (CI/CD)**
+
 ```yaml
 # GitHub Actions 示例
 - name: Render Pikchr
@@ -178,6 +193,7 @@ line from previous.end up 1cm then right 1cm
 ```
 
 **方案 2: 使用 Kroki API**
+
 ```bash
 # 通过 Kroki 生成 SVG
 curl -X POST https://kroki.io/pikchr/svg \\
@@ -186,12 +202,13 @@ curl -X POST https://kroki.io/pikchr/svg \\
 ```
 
 **方案 3: JavaScript 客户端渲染**
+
 ```html
 <script src="pikchr.js"></script>
 <script>
-document.querySelectorAll('code.language-pikchr').forEach(el => {
-  el.innerHTML = pikchr(el.textContent);
-});
+  document.querySelectorAll("code.language-pikchr").forEach((el) => {
+    el.innerHTML = pikchr(el.textContent);
+  });
 </script>
 ```
 
@@ -202,6 +219,7 @@ document.querySelectorAll('code.language-pikchr').forEach(el => {
 **问题 1: 语法未被识别**
 
 **错误示例**:
+
 ```
 <verbatim>
 box "Hello"
@@ -209,6 +227,7 @@ box "Hello"
 ```
 
 **解决方案**: 添加 `type="pikchr"`
+
 ```
 <verbatim type="pikchr">
 box "Hello"
@@ -224,6 +243,7 @@ box "Hello"
 **原因**: Fossil 版本过旧
 
 **解决方案**:
+
 ```bash
 # 更新 Fossil
 fossil update
@@ -241,6 +261,7 @@ box "Hello"
 **问题**: 在网页中渲染大量 Pikchr 图表导致页面卡顿
 
 **场景**:
+
 ```html
 <!-- 页面中有 50+ 个 pikchr 代码块 -->
 <code class="language-pikchr">box "A"</code>
@@ -251,9 +272,10 @@ box "Hello"
 **优化策略**:
 
 **策略 1: 懒加载**
+
 ```javascript
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     if (entry.isIntersecting) {
       const code = entry.target;
       code.innerHTML = pikchr(code.textContent);
@@ -262,21 +284,22 @@ const observer = new IntersectionObserver((entries) => {
   });
 });
 
-document.querySelectorAll('code.language-pikchr').forEach(el => {
+document.querySelectorAll("code.language-pikchr").forEach((el) => {
   observer.observe(el);
 });
 ```
 
 **策略 2: Web Worker**
+
 ```javascript
 // worker.js
-importScripts('pikchr.js');
+importScripts("pikchr.js");
 self.onmessage = (e) => {
   self.postMessage(pikchr(e.data));
 };
 
 // main.js
-const worker = new Worker('worker.js');
+const worker = new Worker("worker.js");
 worker.postMessage(pikchrCode);
 worker.onmessage = (e) => {
   element.innerHTML = e.data;
@@ -284,6 +307,7 @@ worker.onmessage = (e) => {
 ```
 
 **策略 3: 服务端预渲染**
+
 ```bash
 # 构建时渲染
 node render-pikchr.js docs/ > rendered.html
@@ -298,11 +322,13 @@ node render-pikchr.js docs/ > rendered.html
 **问题**: `pikchr.c` 编译失败
 
 **常见错误**:
+
 ```
 error: implicit declaration of function 'malloc'
 ```
 
 **解决方案**:
+
 ```c
 // 确保包含必要的头文件
 #include <stdio.h>
@@ -318,6 +344,7 @@ error: implicit declaration of function 'malloc'
 **问题**: 内存泄漏或 double free
 
 **错误代码**:
+
 ```c
 char *svg1 = pikchr("box", NULL, 0, NULL, NULL);
 char *svg2 = pikchr("circle", NULL, 0, NULL, NULL);
@@ -326,6 +353,7 @@ pikchr_free(svg2);
 ```
 
 **正确做法**:
+
 ```c
 char *svg = pikchr("box; circle", NULL, 0, NULL, NULL);
 if (svg[0] != '<') {
@@ -346,6 +374,7 @@ pikchr_free(svg);  // 总是释放
 **原因**: Pikchr 使用全局状态，非线程安全
 
 **解决方案**:
+
 ```c
 #include <pthread.h>
 
@@ -370,6 +399,7 @@ void* render_thread(void* arg) {
 **问题**: Python ctypes 调用失败
 
 **错误代码**:
+
 ```python
 import ctypes
 lib = ctypes.CDLL('./pikchr.so')
@@ -377,6 +407,7 @@ svg = lib.pikchr(b"box")  # ❌ 参数不完整
 ```
 
 **正确代码**:
+
 ```python
 import ctypes
 
@@ -407,6 +438,7 @@ lib.pikchr_free(svg)  # 重要: 释放内存
 **问题**: Emscripten 编译 Pikchr 到 WASM 失败
 
 **解决方案**:
+
 ```bash
 # 使用特定编译选项
 emcc pikchr.c -o pikchr.js \\
@@ -417,12 +449,17 @@ emcc pikchr.c -o pikchr.js \\
 ```
 
 **JavaScript 调用**:
+
 ```javascript
-const pikchr_c = Module.cwrap('pikchr', 'string', [
-  'string', 'string', 'number', 'number', 'number'
+const pikchr_c = Module.cwrap("pikchr", "string", [
+  "string",
+  "string",
+  "number",
+  "number",
+  "number",
 ]);
 
-const svg = pikchr_c('box', null, 0, 0, 0);
+const svg = pikchr_c("box", null, 0, 0, 0);
 console.log(svg);
 ```
 
@@ -437,6 +474,7 @@ console.log(svg);
 **Bug Tracker**: https://fossil-scm.org/forum (搜索 "pikchr text truncation")
 
 **Workaround**:
+
 ```pikchr
 # 方案 1: 分行
 box "Very long" "text that" "was truncated"
@@ -457,12 +495,14 @@ box "Very long text" fit width 150%
 **问题**: `arc` 的起点/终点与预期不符
 
 **示例**:
+
 ```pikchr
 arc from B1.e to B1.n cw
 # 弧线位置可能不准确
 ```
 
 **Workaround**:
+
 ```pikchr
 # 使用 spline 代替
 spline from B1.e \\
@@ -478,6 +518,7 @@ spline from B1.e \\
 **问题**: 容器内的 `fit` 不工作
 
 **示例**:
+
 ```pikchr
 [
   box "Text" fit  # ❌ 可能不准确
@@ -485,6 +526,7 @@ spline from B1.e \\
 ```
 
 **Workaround**:
+
 ```pikchr
 # 先在外部测试 fit
 # box "Text" fit  # 查看宽度
@@ -502,11 +544,13 @@ spline from B1.e \\
 ### 6.1 对象数量限制
 
 **事实**: Pikchr 没有硬性对象限制，但实践中:
+
 - **< 100 对象**: 流畅
 - **100-500 对象**: 可接受
 - **> 500 对象**: 可能慢
 
 **优化建议**:
+
 ```pikchr
 # 使用宏减少重复
 define component {
@@ -525,12 +569,14 @@ component("B")
 **问题**: 复杂图表生成的 SVG 文件很大
 
 **测量**:
+
 ```bash
 pikchr < complex.pikchr | wc -c
 # 可能输出 100KB+
 ```
 
 **优化**:
+
 ```pikchr
 # 1. 减少不必要的样式
 # 避免: fill 0x123456 color 0xABCDEF
@@ -550,17 +596,20 @@ box "简短"
 ## 7. 文档和学习资源
 
 ### 7.1 官方资源
+
 - **用户手册**: https://pikchr.org/home/doc/trunk/doc/userman.md
 - **语法规范**: https://pikchr.org/home/doc/trunk/doc/grammar.md
 - **与 PIC 的差异**: https://pikchr.org/home/doc/trunk/doc/differences.md
 - **SQLite 用例**: https://pikchr.org/home/doc/trunk/doc/sqlitesyntax.md
 
 ### 7.2 第三方教程
+
 - **Kernighan 的 PIC 论文**: https://pikchr.org/home/uv/pic.pdf (经典参考)
 - **DPIC 文档**: https://pikchr.org/home/uv/dpic-doc.pdf
 - **Fossil 文档**: https://fossil-scm.org/home/doc/tip/www/pikchr.md
 
 ### 7.3 示例库
+
 - **Pikchr Show**: https://pikchr.org/home/pikchrshow (交互式编辑器)
 - **SQLite 语法图**: https://sqlite.org/lang.html (实际应用)
 - **Fossil 论坛**: https://fossil-scm.org/forum (社区示例)
@@ -572,11 +621,13 @@ box "简短"
 ### 8.1 报告 Bug
 
 **在哪里报告**:
+
 - **Fossil 论坛**: https://fossil-scm.org/forum
 - **邮件列表**: fossil-users@lists.fossil-scm.org
 
 **报告模板**:
-```
+
+````
 标题: [Pikchr] 简短描述
 
 环境:
@@ -590,7 +641,7 @@ box "简短"
 最小可复现示例:
 ```pikchr
 [最简代码]
-```
+````
 
 预期行为:
 [应该怎样]
@@ -600,6 +651,7 @@ box "简短"
 
 附加信息:
 [错误信息、截图等]
+
 ```
 
 ---
@@ -614,6 +666,7 @@ box "简短"
 
 **示例**:
 ```
+
 标题: Feature Request - 支持渐变填充
 
 用例:
@@ -624,9 +677,11 @@ box "简短"
 box fill gradient(lightblue, darkblue, vertical)
 
 影响:
+
 - 需要扩展 SVG 输出
 - 可能与现有 fill 语法冲突
 - 建议作为可选特性
+
 ```
 
 ---
@@ -665,22 +720,26 @@ box fill gradient(lightblue, darkblue, vertical)
 
 **文档工作流**:
 ```
+
 Pikchr (简单图表)
-    ↓
+↓
 Fossil/Markdown
-    ↓
+↓
 SVG 输出
-    ↓
+↓
 (可选) ImageMagick → PNG
+
 ```
 
 **复杂图表工作流**:
 ```
+
 设计阶段: Pikchr (快速原型)
-    ↓
+↓
 生产阶段: PlantUML/Graphviz (精细化)
-    ↓
+↓
 发布: 转换为 SVG/PNG
+
 ```
 
 ---
@@ -783,3 +842,4 @@ SVG 输出
 - **论坛**: https://fossil-scm.org/forum
 - **邮件**: fossil-users@lists.fossil-scm.org
 - **Twitter**: @fossil_scm (官方账号)
+```

@@ -16,6 +16,7 @@ blockdiag admin {
 ```
 
 **规则**:
+
 - 必须以 `blockdiag` 关键字开始
 - 可选的图表名称
 - 使用花括号 `{}` 包裹内容
@@ -26,6 +27,7 @@ blockdiag admin {
 ### 1. 节点定义
 
 #### 隐式定义
+
 ```blockdiag
 blockdiag {
    A;          // 定义节点 A
@@ -35,6 +37,7 @@ blockdiag {
 ```
 
 #### 显式定义(带属性)
+
 ```blockdiag
 blockdiag {
    A [label = "Node A"];  // 定义并设置标签
@@ -45,6 +48,7 @@ blockdiag {
 ### 2. 节点命名规则
 
 **合法命名**:
+
 ```blockdiag
 blockdiag {
    node1;          // ✅ 字母数字
@@ -55,6 +59,7 @@ blockdiag {
 ```
 
 **避免使用**:
+
 ```blockdiag
 blockdiag {
    node-1;         // ❌ 连字符(可能解析错误)
@@ -66,16 +71,19 @@ blockdiag {
 ### 3. 节点属性语法
 
 #### 单个属性
+
 ```blockdiag
 A [label = "Text"];
 ```
 
 #### 多个属性
+
 ```blockdiag
 A [label = "Text", color = "red", shape = "box"];
 ```
 
 **属性分隔**:
+
 - 使用逗号 `,` 分隔
 - 等号 `=` 连接键值
 - 字符串值需要引号
@@ -84,12 +92,12 @@ A [label = "Text", color = "red", shape = "box"];
 
 ### 1. 基本连接操作符
 
-| 操作符 | 说明 | 示例 |
-|--------|------|------|
-| `->` | 从左到右的箭头 | `A -> B` |
-| `<-` | 从右到左的箭头 | `A <- B` 等同于 `B -> A` |
-| `--` | 无箭头连接 | `A -- B` |
-| `<->` | 双向箭头 | `A <-> B` |
+| 操作符 | 说明           | 示例                     |
+| ------ | -------------- | ------------------------ |
+| `->`   | 从左到右的箭头 | `A -> B`                 |
+| `<-`   | 从右到左的箭头 | `A <- B` 等同于 `B -> A` |
+| `--`   | 无箭头连接     | `A -- B`                 |
+| `<->`  | 双向箭头       | `A <-> B`                |
 
 ### 2. 链式连接
 
@@ -149,12 +157,14 @@ blockdiag {
 ### 1. 通用属性
 
 #### label (标签)
+
 ```blockdiag
 A [label = "Display Text"];
 B [label = "多行\n文本"];  // 支持 \n 换行
 ```
 
 #### color (颜色)
+
 ```blockdiag
 // 颜色名称
 A [color = "red"];
@@ -166,11 +176,13 @@ B [color = "#888"];     // 短格式
 ```
 
 **支持的颜色名称**:
+
 - red, green, blue, yellow, orange, purple, pink
 - lightblue, lightgreen, lightyellow
 - gray, darkgray, black, white
 
 #### textcolor (文本颜色, v0.9.2+)
+
 ```blockdiag
 A [textcolor = "white"];
 B [textcolor = "#FFFFFF"];
@@ -181,6 +193,7 @@ B [textcolor = "#FFFFFF"];
 #### shape (形状)
 
 **基本形状**:
+
 ```blockdiag
 box [shape = "box"];              // 矩形(默认)
 square [shape = "square"];        // 正方形
@@ -193,6 +206,7 @@ dots [shape = "dots"];            // 点状(v0.8.2+)
 ```
 
 **特殊形状**:
+
 ```blockdiag
 note [shape = "note"];            // 便签
 mail [shape = "mail"];            // 邮件
@@ -203,6 +217,7 @@ endpoint [shape = "endpoint"];    // 终点
 ```
 
 **流程图形状**:
+
 ```blockdiag
 condition [shape = "flowchart.condition"];   // 条件(菱形)
 database [shape = "flowchart.database"];     // 数据库(圆柱)
@@ -215,6 +230,7 @@ loopout [shape = "flowchart.loopout"];       // 循环出口
 ### 3. 样式属性
 
 #### style (边框样式)
+
 ```blockdiag
 // 预定义样式
 A [style = "solid"];    // 实线(默认)
@@ -227,6 +243,7 @@ D [style = "3,3,3,3,15,3"];
 ```
 
 #### stacked (堆叠, v0.8.2+)
+
 ```blockdiag
 A [stacked];                          // 添加堆叠效果
 B [shape = "diamond", stacked];       // 堆叠菱形
@@ -236,12 +253,14 @@ C [shape = "flowchart.database", stacked]; // 堆叠数据库
 ### 4. 装饰属性
 
 #### numbered (编号, v0.9.0+)
+
 ```blockdiag
 A [numbered = 1];
 B [numbered = 99];
 ```
 
 #### icon (图标, v0.9.0+)
+
 ```blockdiag
 // 本地文件
 A [icon = "./icons/server.png"];
@@ -251,6 +270,7 @@ B [icon = "http://example.com/icon.png"];
 ```
 
 #### background (背景图, v0.9.0+)
+
 ```blockdiag
 // 图片作为背景(通常清空 label)
 A [label = "", background = "logo.png"];
@@ -273,6 +293,7 @@ blockdiag {
 ### 6. 边属性
 
 #### dir (方向)
+
 ```blockdiag
 A -> B [dir = "forward"];  // 前向箭头(默认)
 B -> C [dir = "back"];     // 后向箭头
@@ -281,11 +302,13 @@ D -> E [dir = "none"];     // 无箭头
 ```
 
 #### thick (粗线)
+
 ```blockdiag
 A -> B [thick];  // 粗线连接
 ```
 
 #### folded (折叠, v0.6.1+)
+
 ```blockdiag
 blockdiag {
    A -> B -> C -> D -> E;
@@ -360,6 +383,7 @@ blockdiag {
 ```
 
 **嵌套规则**:
+
 - 支持任意层级嵌套
 - 子组继承父组的部分属性
 - 子组可覆盖父组属性
@@ -544,28 +568,33 @@ blockdiag {
 ## 语法限制和约束
 
 ### 1. 命名约束
+
 - ✅ 节点名区分大小写
 - ✅ 关键字(blockdiag, group, class)不能作为节点名
 - ✅ 使用引号可包含任意字符
 - ❌ 避免使用纯数字或特殊符号开头
 
 ### 2. 属性约束
+
 - 字符串值必须用引号包裹
 - 数字值不需要引号
 - 布尔值不存在(使用存在性判断,如 `stacked`)
 - 未知属性会被忽略(不报错)
 
 ### 3. 连接约束
+
 - 必须在定义节点后才能连接
 - 循环连接是允许的
 - 自连接(A -> A)是允许的
 
 ### 4. 分组约束
+
 - 一个节点只能属于一个组
 - 后定义的组会覆盖先前的组分配
 - 嵌套组不能引用外层组的节点
 
 ### 5. 类约束
+
 - 类必须在使用前定义
 - 类名不能与节点名冲突
 - 类属性不能包含引用(如 icon, background 路径)
@@ -573,6 +602,7 @@ blockdiag {
 ## 注释语法
 
 ### 单行注释
+
 ```blockdiag
 blockdiag {
    A -> B;  // 这是单行注释
@@ -581,6 +611,7 @@ blockdiag {
 ```
 
 ### 多行注释
+
 ```blockdiag
 blockdiag {
    /*
@@ -594,6 +625,7 @@ blockdiag {
 ## 转义和特殊字符
 
 ### 引号内的转义
+
 ```blockdiag
 A [label = "Text with \"quotes\""];     // 转义引号
 B [label = "Line 1\nLine 2"];          // 换行符
@@ -601,6 +633,7 @@ C [label = "Tab\there"];               // Tab 符
 ```
 
 ### Unicode 支持
+
 ```blockdiag
 blockdiag {
    // UTF-8 编码的任意字符
@@ -617,6 +650,7 @@ blockdiag {
 ### 常见语法错误
 
 #### 1. 缺少分号或逗号
+
 ```blockdiag
 // 错误
 A [label = "Text"    // ❌ 缺少分号
@@ -628,6 +662,7 @@ A [label = "Text",   // ✅ 逗号分隔
 ```
 
 #### 2. 引号不匹配
+
 ```blockdiag
 // 错误
 A [label = "Text'];  // ❌ 引号不匹配
@@ -638,6 +673,7 @@ A [label = 'Text'];  // ✅ (单引号也可以)
 ```
 
 #### 3. 花括号不匹配
+
 ```blockdiag
 // 错误
 blockdiag {
@@ -655,6 +691,7 @@ blockdiag {
 ```
 
 #### 4. 未定义的节点
+
 ```blockdiag
 // 允许但可能非预期
 blockdiag {
@@ -672,6 +709,7 @@ blockdiag {
 ## 调试技巧
 
 ### 1. 逐步构建
+
 ```blockdiag
 // 第 1 步: 基本结构
 blockdiag {
@@ -698,6 +736,7 @@ blockdiag {
 ```
 
 ### 2. 使用注释隔离问题
+
 ```blockdiag
 blockdiag {
    A -> B;
@@ -707,6 +746,7 @@ blockdiag {
 ```
 
 ### 3. 简化复杂图表
+
 ```blockdiag
 // 复杂图表难以调试
 blockdiag {
@@ -726,11 +766,13 @@ blockdiag {
 ## 性能和优化
 
 ### 1. 避免过度复杂
+
 - ❌ 超过 50 个节点考虑拆分
 - ❌ 超过 5 层嵌套组简化结构
 - ✅ 使用类减少重复属性定义
 
 ### 2. 属性优化
+
 ```blockdiag
 // 低效: 重复定义
 A [color = "blue", style = "dashed"];
@@ -745,6 +787,7 @@ C [class = "mystyle"];
 ```
 
 ### 3. 输出格式选择
+
 - PNG: 快速,适合文档
 - SVG: 可缩放,适合 Web
 - PDF: 高质量,适合打印
@@ -752,15 +795,18 @@ C [class = "mystyle"];
 ## 兼容性说明
 
 ### BlockDiag 版本
+
 - v1.0+: 最新特性完整支持
 - v0.9+: 大部分特性支持
 - v0.8-: 部分高级特性不可用
 
 ### Python 版本
+
 - Python 3.x: 完全支持
 - Python 2.7: 基本支持(已废弃)
 
 ### Kroki 支持
+
 - 完全兼容 BlockDiag 语法
 - 支持 PNG, SVG, PDF 输出
 - 在线服务无需本地安装

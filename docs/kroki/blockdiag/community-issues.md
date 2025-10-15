@@ -21,27 +21,32 @@ BlockDiag 是一个用 Python 编写的简单块状图表生成工具,采用类�
 BlockDiag 与 Pillow 10.x 及更高版本不兼容,导致项目无法构建或渲染失败。
 
 **错误信息**:
+
 ```python
 AttributeError: 'FreeTypeFont' object has no attribute 'getsize'
 ```
 
 **根本原因**:
+
 - Pillow 10.0 移除了已弃用的 `getsize()` 方法
 - BlockDiag 使用旧版 API 进行文本测量
 - 需要迁移到 `textbbox()` 方法
 
 **影响范围**:
-- BlockDiag 及所有 *diag 系列工具 (SeqDiag, ActDiag, NwDiag 等)
+
+- BlockDiag 及所有 \*diag 系列工具 (SeqDiag, ActDiag, NwDiag 等)
 - sphinxcontrib-blockdiag 插件
 - 依赖 BlockDiag 的 OpenStack 文档项目
 
 **解决方案 1: 固定 Pillow 版本** (临时)
+
 ```bash
 # requirements.txt
 Pillow<10.0.0
 ```
 
 **解决方案 2: 使用社区补丁** (部分修复)
+
 ```bash
 # 2023 年 2 月有部分补丁提交,但未合并
 git clone https://github.com/blockdiag/blockdiag
@@ -52,6 +57,7 @@ pip install .
 ```
 
 **解决方案 3: 切换到 Kroki** (推荐)
+
 ```bash
 # 使用 Kroki 服务替代本地渲染
 # 不依赖 Python/Pillow 环境
@@ -61,10 +67,12 @@ curl -X POST https://kroki.io/blockdiag/svg \
 ```
 
 **OpenStack 社区的做法**:
+
 > "我们最终将图表渲染为静态 SVG,然后移除了 sphinxcontrib-blockdiag 的使用,直接包含 SVG 图像。"
 > — OpenStack 邮件列表, 2023-07-27
 
 **状态**: 🔴 **项目维护停滞**
+
 - 最后有意义的更新: 2019
 - Issue #176 提交于 2020 年,至今未解决
 - 社区正在寻找维护者
@@ -76,6 +84,7 @@ curl -X POST https://kroki.io/blockdiag/svg \
 **问题来源**: GitHub Issue "Looking for maintainers?"
 
 **现状分析**:
+
 - **最后发布**: BlockDiag 1.5.4 (2015-12)
 - **最后提交**: 零星更新,无活跃维护
 - **开放 Issue**: 68 个未解决
@@ -83,14 +92,15 @@ curl -X POST https://kroki.io/blockdiag/svg \
 
 **社区建议的替代方案**:
 
-| 工具 | 适用场景 | 优势 | 劣势 |
-|------|---------|------|------|
-| **Kroki** | 所有场景 | 无需本地安装,API 调用 | 需要网络连接 |
-| **Mermaid** | Web 文档 | 活跃维护,广泛支持 | 语法不同 |
-| **PlantUML** | UML 图表 | 功能强大 | 需要 Java |
-| **D2** | 现代化图表 | 美观,活跃维护 | 生态较新 |
+| 工具         | 适用场景   | 优势                  | 劣势         |
+| ------------ | ---------- | --------------------- | ------------ |
+| **Kroki**    | 所有场景   | 无需本地安装,API 调用 | 需要网络连接 |
+| **Mermaid**  | Web 文档   | 活跃维护,广泛支持     | 语法不同     |
+| **PlantUML** | UML 图表   | 功能强大              | 需要 Java    |
+| **D2**       | 现代化图表 | 美观,活跃维护         | 生态较新     |
 
 **迁移策略**:
+
 ```bash
 # 1. 导出现有 BlockDiag 为 SVG
 blockdiag *.diag -Tsvg
@@ -115,11 +125,13 @@ blockdiag *.diag -Tsvg
 **问题**: GitHub Issue "ERROR: font size must be greater than 0"
 
 **错误信息**:
+
 ```
 ERROR: font size must be greater than 0
 ```
 
 **可能原因**:
+
 1. 系统缺少默认字体
 2. `fontsize` 属性设置为 0 或负数
 3. 环境变量 `FC_DEBUG` 干扰字体检测
@@ -127,6 +139,7 @@ ERROR: font size must be greater than 0
 **解决方案**:
 
 **方案 1: 显式指定字体**
+
 ```blockdiag
 blockdiag {
   default_fontsize = 12;  // 明确设置大小
@@ -136,6 +149,7 @@ blockdiag {
 ```
 
 **方案 2: 安装字体包** (Linux)
+
 ```bash
 # Debian/Ubuntu
 sudo apt-get install fonts-liberation
@@ -145,6 +159,7 @@ sudo yum install liberation-fonts
 ```
 
 **方案 3: 指定字体文件**
+
 ```bash
 blockdiag --font=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf diagram.diag
 ```
@@ -156,6 +171,7 @@ blockdiag --font=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf diagram.diag
 **问题**: GitHub Issue "Labels in PNG broken (Windows OS)"
 
 **症状**:
+
 - SVG 输出正常
 - PNG 输出中文本标签显示为乱码或方框
 
@@ -165,16 +181,19 @@ Windows 字体路径处理问题,Pillow 在 Windows 上字体回退机制不同�
 **Workaround**:
 
 **方案 1: 使用 SVG 输出**
+
 ```bash
 blockdiag diagram.diag -Tsvg -o output.svg
 ```
 
 **方案 2: 手动指定字体**
+
 ```bash
 blockdiag --font="C:\\Windows\\Fonts\\arial.ttf" diagram.diag -Tpng
 ```
 
 **方案 3: 转换 SVG → PNG** (推荐)
+
 ```bash
 # 使用 Inkscape 或 ImageMagick
 blockdiag diagram.diag -Tsvg -o temp.svg
@@ -188,24 +207,28 @@ convert temp.svg output.png  # ImageMagick
 **问题**: GitHub Issue "Portrait mode not working"
 
 **期望行为**:
+
 ```blockdiag
 blockdiag {
   orientation = portrait;
   A -> B -> C;
 }
 ```
+
 应该垂直布局。
 
 **实际行为**:
 `orientation` 参数被忽略,仍然水平布局。
 
 **状态**: 🟡 **部分实现**
+
 - 仅在特定条件下工作
 - 与分组 (group) 结合使用时可能失效
 
 **Workaround**:
 
 **方案 1: 使用 rotate 插件** (如果可用)
+
 ```blockdiag
 blockdiag {
   plugin = rotate;
@@ -215,6 +238,7 @@ blockdiag {
 ```
 
 **方案 2: 后处理旋转**
+
 ```bash
 # 使用 ImageMagick 旋转输出
 blockdiag diagram.diag -o temp.png
@@ -222,6 +246,7 @@ convert temp.png -rotate 90 output.png
 ```
 
 **方案 3: 重新设计图表**
+
 ```blockdiag
 // 改用垂直流向的节点布局
 blockdiag {
@@ -247,6 +272,7 @@ blockdiag {
 **问题**: GitHub Issue "url images in svg not working"
 
 **场景**:
+
 ```blockdiag
 blockdiag {
   A [background = "https://example.com/image.png"];
@@ -254,6 +280,7 @@ blockdiag {
 ```
 
 **问题描述**:
+
 - 本地文件路径的图像可以显示
 - HTTP/HTTPS URL 的图像不显示
 
@@ -263,6 +290,7 @@ BlockDiag 不支持网络图像获取,仅支持本地文件系统。
 **Workaround**:
 
 **方案 1: 预下载图像**
+
 ```bash
 # 下载图像到本地
 wget https://example.com/image.png -O local_image.png
@@ -278,6 +306,7 @@ blockdiag {
 ```
 
 **方案 2: 使用 icon 属性**
+
 ```blockdiag
 blockdiag {
   A [icon = "./icons/logo.png"];
@@ -285,6 +314,7 @@ blockdiag {
 ```
 
 **方案 3: 后处理 SVG**
+
 ```python
 # 手动替换 SVG 中的图像引用
 import xml.etree.ElementTree as ET
@@ -310,6 +340,7 @@ tree.write('output_fixed.svg')
 **问题**: GitHub Issue "Specify different sizes for different groups"
 
 **需求**:
+
 ```blockdiag
 blockdiag {
   group small {
@@ -330,6 +361,7 @@ BlockDiag 不支持组级别的样式覆盖,`node_width` 等参数是全局的�
 **Workaround**:
 
 **方案 1: 手动调整每个节点**
+
 ```blockdiag
 blockdiag {
   default_node_width = 100;
@@ -342,6 +374,7 @@ blockdiag {
 ```
 
 **方案 2: 使用多个图表**
+
 ```bash
 # small_group.diag
 blockdiag {
@@ -357,6 +390,7 @@ blockdiag {
 ```
 
 **方案 3: 使用标签控制视觉大小**
+
 ```blockdiag
 blockdiag {
   A [label = "A"];
@@ -381,6 +415,7 @@ BlockDiag 生成的 SVG 没有 `<rect>` 背景元素。
 **Workaround**:
 
 **方案 1: 后处理 SVG**
+
 ```python
 import xml.etree.ElementTree as ET
 
@@ -404,16 +439,18 @@ tree.write('output_bg.svg')
 ```
 
 **方案 2: CSS 样式**
+
 ```html
 <style>
-svg {
-  background-color: #f0f0f0;
-}
+  svg {
+    background-color: #f0f0f0;
+  }
 </style>
 <img src="output.svg" />
 ```
 
 **方案 3: 使用 PNG 输出**
+
 ```bash
 # PNG 支持背景色参数
 blockdiag --background=white diagram.diag -Tpng
@@ -428,27 +465,32 @@ blockdiag --background=white diagram.diag -Tpng
 **问题来源**: sphinxcontrib-blockdiag 用户反馈
 
 **常见错误 1: 模块未找到**
+
 ```
 Extension error: Could not import extension sphinxcontrib.blockdiag
 ```
 
 **解决方案**:
+
 ```bash
 pip install sphinxcontrib-blockdiag
 ```
 
 **常见错误 2: Pillow 依赖**
+
 ```
 ImportError: cannot import name 'PILLOW_VERSION' from 'PIL'
 ```
 
 **解决方案**:
+
 ```bash
 # 固定兼容版本
 pip install "Pillow<10.0.0" "sphinxcontrib-blockdiag>=2.0.0"
 ```
 
 **Sphinx conf.py 配置**:
+
 ```python
 # conf.py
 extensions = [
@@ -462,6 +504,7 @@ blockdiag_antialias = True
 ```
 
 **使用示例**:
+
 ```rst
 .. blockdiag::
 
@@ -480,6 +523,7 @@ blockdiag_antialias = True
 **Kroki API 使用**:
 
 **方案 1: POST 请求** (推荐,无 URL 长度限制)
+
 ```bash
 curl -X POST https://kroki.io/blockdiag/svg \
   -H "Content-Type: text/plain" \
@@ -488,8 +532,9 @@ curl -X POST https://kroki.io/blockdiag/svg \
 ```
 
 **方案 2: GET 请求** (适合短代码)
+
 ```javascript
-import pako from 'pako';
+import pako from "pako";
 
 function generateBlockDiagURL(code) {
   // 1. Deflate 压缩
@@ -497,9 +542,9 @@ function generateBlockDiagURL(code) {
 
   // 2. Base64 URL 编码
   const base64 = btoa(String.fromCharCode(...compressed))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 
   // 3. 构建 URL
   return `https://kroki.io/blockdiag/svg/${base64}`;
@@ -507,11 +552,12 @@ function generateBlockDiagURL(code) {
 ```
 
 **Next.js 代理配置** (避免 CORS):
+
 ```typescript
 // app/api/kroki/[...path]/route.ts
 export async function GET(request: NextRequest) {
-  const pathname = request.nextUrl.pathname.replace('/api/kroki', '');
-  const krokiUrl = process.env.KROKI_INTERNAL_URL || 'https://kroki.io';
+  const pathname = request.nextUrl.pathname.replace("/api/kroki", "");
+  const krokiUrl = process.env.KROKI_INTERNAL_URL || "https://kroki.io";
   const targetUrl = `${krokiUrl}${pathname}`;
 
   const response = await fetch(targetUrl);
@@ -519,8 +565,8 @@ export async function GET(request: NextRequest) {
 
   return new NextResponse(content, {
     headers: {
-      'Content-Type': 'image/svg+xml',
-      'Cache-Control': 'public, max-age=3600', // 1 小时缓存
+      "Content-Type": "image/svg+xml",
+      "Cache-Control": "public, max-age=3600", // 1 小时缓存
     },
   });
 }
@@ -535,11 +581,13 @@ export async function GET(request: NextRequest) {
 **案例来源**: 开源项目文档
 
 **需求**:
+
 - 展示微服务架构
 - 清晰的分层结构
 - 组件间依赖关系
 
 **实现**:
+
 ```blockdiag
 blockdiag {
   // 样式定义
@@ -601,6 +649,7 @@ blockdiag {
 **提示**: 网络图建议使用 **NwDiag** (BlockDiag 系列工具)
 
 **BlockDiag 实现** (简化版):
+
 ```blockdiag
 blockdiag {
   default_shape = "roundedbox";
@@ -631,18 +680,19 @@ blockdiag {
 
 ## 🆚 BlockDiag 系列工具对比
 
-### 13. 何时使用哪个 *diag 工具?
+### 13. 何时使用哪个 \*diag 工具?
 
-| 工具 | 用途 | 典型场景 | 特点 |
-|------|------|---------|------|
-| **BlockDiag** | 块状图、流程图 | 架构图、数据流图 | 最基础,自由度高 |
-| **SeqDiag** | 序列图 | 时序交互、API 调用 | 自动布局 |
-| **ActDiag** | 活动图 | 业务流程、泳道图 | 支持泳道 |
-| **NwDiag** | 网络图 | 网络拓扑、服务器布局 | 专业网络图 |
-| **PacketDiag** | 数据包图 | 协议头部、数据结构 | 字节级可视化 |
-| **RackDiag** | 机柜图 | 数据中心、机架布局 | 3D 视觉效果 |
+| 工具           | 用途           | 典型场景             | 特点            |
+| -------------- | -------------- | -------------------- | --------------- |
+| **BlockDiag**  | 块状图、流程图 | 架构图、数据流图     | 最基础,自由度高 |
+| **SeqDiag**    | 序列图         | 时序交互、API 调用   | 自动布局        |
+| **ActDiag**    | 活动图         | 业务流程、泳道图     | 支持泳道        |
+| **NwDiag**     | 网络图         | 网络拓扑、服务器布局 | 专业网络图      |
+| **PacketDiag** | 数据包图       | 协议头部、数据结构   | 字节级可视化    |
+| **RackDiag**   | 机柜图         | 数据中心、机架布局   | 3D 视觉效果     |
 
 **选择建议**:
+
 ```
 需求: 展示系统组件关系
   → 有时序 → SeqDiag
@@ -719,6 +769,7 @@ blockdiag {
 **优化技巧**:
 
 **技巧 1: 减少节点数量**
+
 ```blockdiag
 // ❌ 100 个独立节点
 blockdiag {
@@ -735,6 +786,7 @@ blockdiag {
 ```
 
 **技巧 2: 简化边样式**
+
 ```blockdiag
 // ❌ 复杂样式
 blockdiag {
@@ -748,12 +800,14 @@ blockdiag {
 ```
 
 **技巧 3: 使用 SVG 而非 PNG**
+
 ```bash
 # SVG 生成更快,文件更小
 blockdiag diagram.diag -Tsvg -o output.svg
 ```
 
 **技巧 4: 拆分大图**
+
 ```blockdiag
 // ✅ 拆分为多个小图表
 // overview.diag
@@ -772,6 +826,7 @@ blockdiag {
 ### 16. 可维护性建议
 
 **版本控制友好**:
+
 ```blockdiag
 // ✅ 使用描述性标签
 blockdiag {
@@ -790,6 +845,7 @@ blockdiag {
 ```
 
 **模块化**:
+
 ```bash
 # 使用文件拆分
 /diagrams
@@ -816,14 +872,14 @@ blockdiag {
 
 ### 17. 不支持的特性
 
-| 特性 | BlockDiag 支持 | 替代方案 |
-|------|---------------|---------|
-| 动画 | ❌ | CSS 动画 (后处理 SVG) |
-| 交互 | ❌ | JavaScript 事件 (后处理) |
-| 3D 效果 | ⚠️ 有限 (RackDiag) | 3D 建模工具 |
-| 公式渲染 | ❌ | 图像标签 + MathJax |
-| 子图 | ❌ | 手动组合多个图表 |
-| 条件渲染 | ❌ | 脚本生成 .diag 文件 |
+| 特性     | BlockDiag 支持     | 替代方案                 |
+| -------- | ------------------ | ------------------------ |
+| 动画     | ❌                 | CSS 动画 (后处理 SVG)    |
+| 交互     | ❌                 | JavaScript 事件 (后处理) |
+| 3D 效果  | ⚠️ 有限 (RackDiag) | 3D 建模工具              |
+| 公式渲染 | ❌                 | 图像标签 + MathJax       |
+| 子图     | ❌                 | 手动组合多个图表         |
+| 条件渲染 | ❌                 | 脚本生成 .diag 文件      |
 
 ---
 
@@ -893,22 +949,26 @@ A -> B: calls
 ## 🔗 参考资源
 
 ### 官方资源
+
 - **BlockDiag 主页**: http://blockdiag.com/en/blockdiag/
 - **示例集**: http://blockdiag.com/en/blockdiag/examples.html
 - **属性参考**: http://blockdiag.com/en/blockdiag/attributes/
 - **GitHub 仓库**: https://github.com/blockdiag/blockdiag
 
 ### 社区资源
+
 - **PyPI**: https://pypi.org/project/blockdiag/
 - **Stack Overflow**: 搜索 `[blockdiag]` 标签
 - **OpenStack 讨论**: https://lists.openstack.org (搜索 "blockdiag")
 
 ### 相关工具
+
 - **Kroki API**: https://kroki.io
 - **sphinxcontrib-blockdiag**: https://pypi.org/project/sphinxcontrib-blockdiag/
 - **Asciidoctor Diagram**: https://docs.asciidoctor.org/diagram-extension/
 
 ### DiagramAI 文档
+
 - **官方文档**: `/docs/kroki/blockdiag/official-docs.md`
 - **语法规则**: `/docs/kroki/blockdiag/syntax-rules.md`
 - **常见错误**: `/docs/kroki/blockdiag/common-errors.md`
@@ -920,31 +980,40 @@ A -> B: calls
 ### 报告问题
 
 **GitHub Issues**:
+
 - 仓库: https://github.com/blockdiag/blockdiag/issues
 - 搜索现有 Issue 避免重复
 - 提供最小可复现示例
 
 **问题模板**:
-```markdown
+
+````markdown
 ### 环境信息
+
 - BlockDiag 版本: X.X.X
 - Python 版本: 3.x
 - Pillow 版本: X.X.X
 - 操作系统: Linux/macOS/Windows
 
 ### 问题描述
+
 [简要描述]
 
 ### 复现步骤
+
 ```blockdiag
 [最小化代码]
 ```
+````
 
 ### 期望输出
+
 [描述期望行为]
 
 ### 实际输出
+
 [错误信息或截图]
+
 ```
 
 ---
@@ -982,21 +1051,24 @@ A -> B: calls
 ### 快速诊断流程
 
 ```
+
 问题: BlockDiag 渲染失败
-  ↓
+↓
 检查 Pillow 版本
-  ↓ < 10.0
+↓ < 10.0
 检查字体路径
-  ↓ OK
+↓ OK
 检查语法错误
-  ↓ OK
+↓ OK
 检查图表复杂度
-  ↓ 简单
+↓ 简单
 检查依赖版本
-  ↓ 都正常
+↓ 都正常
 → 使用 Kroki 替代
+
 ```
 
 ---
 
 *文档整理: DiagramAI 项目 | 基于 GitHub Issues、社区邮件列表和实践经验*
+```

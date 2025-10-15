@@ -25,15 +25,18 @@
 **GitHub Issue**: https://github.com/umlet/umlet/issues/352
 
 **社区反馈**:
+
 > "UML generation crashes when encountering a java enum."
 > — Eclipse Marketplace 用户报告
 
 **状态**:
+
 - 已知问题（自 2016 年开放）
 - 低优先级
 - 暂无修复计划
 
 **Workaround**:
+
 ```
 手动创建 Enum 表示:
 
@@ -61,15 +64,18 @@ EnumName
 **GitHub Issue**: https://github.com/umlet/umlet/issues/399
 
 **表现**:
+
 - Eclipse 启动时冻结
 - UMLet 视图无法打开
 - 绘图区域空白
 
 **根本原因**:
+
 - Eclipse + macOS 的特定兼容性问题
 - SWT (Standard Widget Toolkit) 绘图问题
 
 **社区解决方案**:
+
 ```
 1. 使用独立版本 UMLet:
    下载 standalone 版本而非 Eclipse 插件
@@ -93,11 +99,13 @@ EnumName
 **GitHub Issue**: https://github.com/umlet/umlet/issues/545
 
 **原因**:
+
 - 启动时检查更新
 - 防火墙阻止网络请求
 - 导致启动超时
 
 **解决方案**:
+
 ```
 禁用更新检查:
 File > Options > 取消勾选 "Check for UMLet updates"
@@ -115,18 +123,21 @@ java -jar umlet.jar --no-update-check
 **GitHub Issue**: https://github.com/umlet/umlet/issues/546
 
 **错误信息**:
+
 ```
 CustomElement has error when running UMLet standalone
 Eclipse compiler version incompatible
 ```
 
 **官方回应**:
+
 > "This is a problem with the eclipse compiler we're using to compile custom elements and some new java versions. I have updated the compiler."
 > — @afdia (维护者)
 
 **状态**: 已在后续版本修复
 
 **解决方案**:
+
 ```
 1. 更新到 UMLet 15.1 或更高版本
 2. 使用 Java 8（如果无法更新）
@@ -144,11 +155,13 @@ Eclipse compiler version incompatible
 **问题描述**: 导出大型图表时文件为空或程序崩溃
 
 **表现**:
+
 - PDF 导出失败
 - SVG 文件大小为 0
 - OutOfMemoryError
 
 **社区解决方案**:
+
 ```bash
 # 临时增加 JVM 内存
 java -Xmx2048m -jar umlet.jar
@@ -162,6 +175,7 @@ export JAVA_OPTS="-Xmx2048m"
 ```
 
 **最佳实践**:
+
 ```
 1. 分解大图表为多个小图表
 2. 使用子图表引用
@@ -178,11 +192,13 @@ export JAVA_OPTS="-Xmx2048m"
 **影响版本**: 所有版本（取决于系统配置）
 
 **原因**:
+
 - 字体不支持 Unicode
 - 文件编码问题
 - JVM 默认编码设置
 
 **解决方案**:
+
 ```
 1. 确保 .uxf 文件使用 UTF-8 编码:
    <?xml version="1.0" encoding="UTF-8"?>
@@ -206,6 +222,7 @@ export JAVA_OPTS="-Xmx2048m"
 **来源**: GitHub Wiki
 
 **方法**:
+
 ```
 1. 创建项目模板调色板:
    - 定义常用类样式
@@ -221,6 +238,7 @@ export JAVA_OPTS="-Xmx2048m"
 ```
 
 **示例模板**:
+
 ```
 项目特定调色板:
 - Entity 类（bg=lightblue）
@@ -237,11 +255,13 @@ export JAVA_OPTS="-Xmx2048m"
 **来源**: 社区讨论
 
 **.uxf 文件特点**:
+
 - XML 格式，文本可读
 - 适合版本控制
 - 支持文本对比和合并
 
 **最佳实践**:
+
 ```xml
 <!-- 保持 XML 格式化 -->
 <element>
@@ -263,6 +283,7 @@ attributes</panel_attributes>
 ```
 
 **Diff 技巧**:
+
 ```bash
 # 配置 Git 对 .uxf 文件使用文本对比
 # .gitattributes
@@ -279,6 +300,7 @@ git diff --word-diff diagram.uxf
 **来源**: 企业用户分享
 
 **场景 1: Markdown 文档**
+
 ```markdown
 # 架构设计
 
@@ -288,6 +310,7 @@ git diff --word-diff diagram.uxf
 ```
 
 **场景 2: 代码注释**
+
 ```java
 /**
  * 系统架构
@@ -302,6 +325,7 @@ public class System {
 ```
 
 **场景 3: Wiki 集成**
+
 ```
 自动化流程:
 1. 提交 .uxf 文件到 Git
@@ -316,6 +340,7 @@ public class System {
 ### 工具 1: 命令行批处理
 
 **社区脚本** (convert-all.sh):
+
 ```bash
 #!/bin/bash
 # 批量转换 UMLet 文件为多种格式
@@ -344,13 +369,14 @@ echo "Conversion complete!"
 ### 工具 2: CI/CD 集成
 
 **GitHub Actions 示例**:
+
 ```yaml
 name: Generate UML Diagrams
 
 on:
   push:
     paths:
-      - 'diagrams/**/*.uxf'
+      - "diagrams/**/*.uxf"
 
 jobs:
   generate:
@@ -361,7 +387,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
-          java-version: '11'
+          java-version: "11"
 
       - name: Download UMLet
         run: |
@@ -392,11 +418,13 @@ jobs:
 ### 案例 1: 教育领域
 
 **大学软件工程课程**:
+
 - 用于教学 UML 概念
 - 学生快速绘制作业
 - 简单易学，降低工具学习成本
 
 **反馈**:
+
 > "UMLet's simplicity makes it perfect for teaching. Students focus on UML concepts rather than tool complexity."
 > — 大学教授反馈
 
@@ -405,11 +433,13 @@ jobs:
 ### 案例 2: 敏捷开发团队
 
 **使用模式**:
+
 - 快速白板式设计
 - 会议中实时绘制
 - 迭代式细化设计
 
 **工作流**:
+
 ```
 1. 团队讨论 → UMLet 快速草图
 2. 保存为 .uxf → 提交到 Git
@@ -424,6 +454,7 @@ jobs:
 **使用场景**: RESTful API 设计文档
 
 **示例**:
+
 ```
 API 类图:
 - Request DTO
@@ -446,6 +477,7 @@ API 类图:
 **问题**: 包含 500+ 元素的图表编辑卡顿
 
 **社区建议**:
+
 ```
 1. 使用包（Package）分组
 2. 创建多个子图表
@@ -463,6 +495,7 @@ main.uxf (主图表)
 ### 优化 2: 启动速度优化
 
 **技巧**:
+
 ```
 1. 禁用不必要的功能:
    File > Options >
@@ -484,17 +517,20 @@ main.uxf (主图表)
 ### 如何报告 Bug
 
 **GitHub Issue 模板**:
+
 ```markdown
 **Bug 描述**
 简要描述问题
 
 **环境信息**
+
 - UMLet 版本: [如 15.1]
 - Java 版本: [如 11.0.12]
 - 操作系统: [如 Ubuntu 22.04]
 - 使用方式: [Standalone / Eclipse / VS Code]
 
 **重现步骤**
+
 1. 打开 UMLet
 2. 创建元素
 3. 设置属性: ...
@@ -507,6 +543,7 @@ main.uxf (主图表)
 实际显示/执行...
 
 **附加信息**
+
 - 截图
 - .uxf 文件（最小化复现）
 - 错误日志
@@ -517,6 +554,7 @@ main.uxf (主图表)
 ### 如何贡献代码
 
 **流程**:
+
 ```
 1. Fork 仓库
 2. 创建功能分支:
@@ -534,6 +572,7 @@ main.uxf (主图表)
 ```
 
 **测试要求**:
+
 ```
 每次发布前测试:
 1. 手动测试主要功能
@@ -577,6 +616,7 @@ main.uxf (主图表)
 ### 社区期望功能
 
 **高呼声功能** (来自 Issues):
+
 1. ✨ 深色主题支持
 2. ✨ 实时协作编辑
 3. ✨ 更好的自动布局
@@ -584,6 +624,7 @@ main.uxf (主图表)
 5. ✨ 代码生成/逆向工程增强
 
 **已实现功能** (近期版本):
+
 - ✅ Flat Darcula 主题 (#757, #566)
 - ✅ UI 缩放选项 (#430)
 - ✅ Eclipse 编译器更新 (Java 17 支持)
@@ -604,6 +645,7 @@ main.uxf (主图表)
 ### 活跃贡献者
 
 **核心团队**:
+
 - @afdia (主要维护者)
 - @e01306821
 - @hirzraimund
@@ -615,12 +657,14 @@ main.uxf (主图表)
 ## 📊 采用统计
 
 **使用情况** (2025年):
+
 - GitHub Stars: 1.6k+
 - Eclipse Marketplace: 10k+ 安装
 - VS Code Marketplace: 1k+ 安装
 - 月活跃用户: 估计 5k+
 
 **集成平台**:
+
 - ✅ Eclipse IDE
 - ✅ VS Code
 - ✅ Web (UMLetino)
@@ -629,6 +673,7 @@ main.uxf (主图表)
 - ⏳ Confluence (第三方集成)
 
 **行业分布**:
+
 - 教育: 40%
 - 软件开发: 35%
 - 企业架构: 15%

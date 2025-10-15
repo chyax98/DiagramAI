@@ -7,6 +7,7 @@
 #### 错误 1.1: 缺少机架高度定义
 
 **错误示例**:
+
 ```
 rackdiag {
   1: Server          // ❌ 未定义机架高度
@@ -14,11 +15,13 @@ rackdiag {
 ```
 
 **错误信息**:
+
 ```
 Error: rack height not specified
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;               // ✅ 添加机架高度
@@ -29,6 +32,7 @@ rackdiag {
 #### 错误 1.2: 高度格式错误
 
 **错误示例**:
+
 ```
 rackdiag {
   12                 // ❌ 缺少 U
@@ -38,6 +42,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;               // ✅ 正确格式
@@ -47,6 +52,7 @@ rackdiag {
 #### 错误 1.3: 缺少冒号分隔符
 
 **错误示例**:
+
 ```
 rackdiag {
   12U;
@@ -55,6 +61,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;
@@ -65,6 +72,7 @@ rackdiag {
 #### 错误 1.4: 括号不匹配
 
 **错误示例**:
+
 ```
 rackdiag {
   12U;
@@ -72,6 +80,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;
@@ -84,6 +93,7 @@ rackdiag {
 #### 错误 2.1: 设备位置重叠
 
 **错误示例**:
+
 ```
 rackdiag {
   12U;
@@ -93,11 +103,13 @@ rackdiag {
 ```
 
 **错误信息**:
+
 ```
 ValueError: position 2 is already occupied
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;
@@ -109,6 +121,7 @@ rackdiag {
 #### 错误 2.2: 设备超出机架高度
 
 **错误示例**:
+
 ```
 rackdiag {
   12U;
@@ -117,11 +130,13 @@ rackdiag {
 ```
 
 **错误信息**:
+
 ```
 ValueError: device exceeds rack height (position 11 + 3U = 14 > 12U)
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;
@@ -138,6 +153,7 @@ rackdiag {
 #### 错误 2.3: 位置编号为零或负数
 
 **错误示例**:
+
 ```
 rackdiag {
   12U;
@@ -147,6 +163,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;
@@ -160,6 +177,7 @@ rackdiag {
 #### 错误 3.1: 高度属性值无效
 
 **错误示例**:
+
 ```
 rackdiag {
   12U;
@@ -170,6 +188,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;
@@ -182,6 +201,7 @@ rackdiag {
 #### 错误 3.2: 属性格式错误
 
 **错误示例**:
+
 ```
 rackdiag {
   12U;
@@ -192,6 +212,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;
@@ -202,6 +223,7 @@ rackdiag {
 #### 错误 3.3: 重量/功耗格式错误
 
 **错误示例**:
+
 ```
 rackdiag {
   12U;
@@ -211,6 +233,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;
@@ -224,6 +247,7 @@ rackdiag {
 #### 错误 4.1: description 缺少引号
 
 **错误示例**:
+
 ```
 rackdiag {
   description = Tokyo Rack A1;    // ❌ 缺少引号
@@ -232,6 +256,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   description = "Tokyo Rack A1";  // ✅ 添加引号
@@ -242,6 +267,7 @@ rackdiag {
 #### 错误 4.2: ascending 拼写错误
 
 **错误示例**:
+
 ```
 rackdiag {
   acending;          // ❌ 拼写错误
@@ -251,6 +277,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   ascending;         // ✅ 正确拼写
@@ -263,6 +290,7 @@ rackdiag {
 #### 错误 5.1: 多机架配置混乱
 
 **错误示例**:
+
 ```
 rackdiag {
   12U;               // ❌ 多机架不应在外层定义高度
@@ -276,6 +304,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   rack {
@@ -292,6 +321,7 @@ rackdiag {
 #### 错误 5.2: rack 块缺少大括号
 
 **错误示例**:
+
 ```
 rackdiag {
   rack              // ❌ 缺少大括号
@@ -301,6 +331,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   rack {            // ✅ 添加大括号
@@ -315,6 +346,7 @@ rackdiag {
 #### 错误 6.1: 位置跳跃过大
 
 **问题示例**:
+
 ```
 rackdiag {
   42U;
@@ -326,6 +358,7 @@ rackdiag {
 **说明**: 不是语法错误，但会导致大量空白
 
 **改进方案**:
+
 ```
 rackdiag {
   42U;
@@ -340,6 +373,7 @@ rackdiag {
 #### 错误 6.2: 同位置设备过多
 
 **问题示例**:
+
 ```
 rackdiag {
   12U;
@@ -352,6 +386,7 @@ rackdiag {
 ```
 
 **改进方案**:
+
 ```
 rackdiag {
   12U;
@@ -367,6 +402,7 @@ rackdiag {
 #### 错误 6.3: 编号顺序与 ascending 不符
 
 **问题示例**:
+
 ```
 rackdiag {
   ascending;        // 从下到上
@@ -376,6 +412,7 @@ rackdiag {
 ```
 
 **改进方案**:
+
 ```
 rackdiag {
   ascending;
@@ -397,6 +434,7 @@ rackdiag {
 #### 错误 7.1: 设备名过长
 
 **问题示例**:
+
 ```
 rackdiag {
   12U;
@@ -405,6 +443,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```
 rackdiag {
   12U;
@@ -417,6 +456,7 @@ rackdiag {
 #### 错误 7.2: 字体不支持字符
 
 **问题示例**:
+
 ```
 rackdiag {
   12U;
@@ -425,6 +465,7 @@ rackdiag {
 ```
 
 **解决方案**:
+
 ```bash
 # 指定支持的字体
 rackdiag --font=/path/to/chinese-font.ttf diagram.diag
@@ -533,6 +574,7 @@ calculate_capacity(devices, 12)
 ## 错误预防清单
 
 ### 规划阶段
+
 - [ ] 确定机架高度（标准: 12U, 16U, 42U）
 - [ ] 列出所有设备及其高度
 - [ ] 计算总高度，确保 ≤ 机架高度
@@ -540,6 +582,7 @@ calculate_capacity(devices, 12)
 - [ ] 预留 10-20% 扩展空间
 
 ### 编写阶段
+
 - [ ] 先定义机架高度（NU;）
 - [ ] 每个设备有位置编号和冒号
 - [ ] 高度属性在方括号中（[NU]）
@@ -548,6 +591,7 @@ calculate_capacity(devices, 12)
 - [ ] 位置编号从 1 开始
 
 ### 验证阶段
+
 - [ ] 无位置重叠
 - [ ] 无设备超出机架
 - [ ] 属性格式正确
@@ -558,7 +602,9 @@ calculate_capacity(devices, 12)
 ## 常见问题 FAQ
 
 ### Q1: 如何表示空位？
+
 **A**: 可以跳过位置编号，或使用 N/A：
+
 ```
 rackdiag {
   12U;
@@ -572,7 +618,9 @@ rackdiag {
 ```
 
 ### Q2: 同一位置能放多少设备？
+
 **A**: 理论上无限制，但实际建议 2-3 个以保证可读性：
+
 ```
 rackdiag {
   12U;
@@ -583,7 +631,9 @@ rackdiag {
 ```
 
 ### Q3: ascending 什么时候用？
+
 **A**: 当你希望位置 1 在底部时：
+
 ```
 // 默认: 1 在顶部
 rackdiag {
@@ -602,7 +652,9 @@ rackdiag {
 ```
 
 ### Q4: 如何处理半高设备？
+
 **A**: RackDiag 不支持半高（0.5U），使用 1U 代替或在名称中说明：
+
 ```
 rackdiag {
   12U;
@@ -611,15 +663,18 @@ rackdiag {
 ```
 
 ### Q5: 能否自定义机架宽度？
+
 **A**: RackDiag 假定标准 19 英寸机架，不支持自定义宽度。
 
 ## 工具支持
 
 ### 在线验证
+
 - **Kroki Live Editor**: https://kroki.io/
 - **BlockDiag Playground**: http://interactive.blockdiag.com/
 
 ### 本地验证
+
 ```bash
 # 安装
 pip install nwdiag
@@ -632,23 +687,25 @@ rackdiag -v test.diag
 ```
 
 ### IDE 支持
+
 - **VS Code**: 安装 "PlantUML" 扩展（支持 BlockDiag 系列）
 - **IntelliJ IDEA**: PlantUML Integration 插件
 
 ## 错误信息参考
 
-| 错误信息 | 原因 | 解决方案 |
-|----------|------|----------|
-| `rack height not specified` | 未定义机架高度 | 添加 `NU;` |
-| `position X already occupied` | 位置重叠 | 调整设备位置 |
-| `device exceeds rack height` | 设备超出机架 | 减少高度或增加机架 |
-| `invalid syntax` | 语法错误 | 检查冒号、括号 |
-| `unmatched bracket` | 括号不匹配 | 补全括号 |
-| `invalid attribute` | 属性格式错误 | 检查 [NU], [Nkg], [NA] |
+| 错误信息                      | 原因           | 解决方案               |
+| ----------------------------- | -------------- | ---------------------- |
+| `rack height not specified`   | 未定义机架高度 | 添加 `NU;`             |
+| `position X already occupied` | 位置重叠       | 调整设备位置           |
+| `device exceeds rack height`  | 设备超出机架   | 减少高度或增加机架     |
+| `invalid syntax`              | 语法错误       | 检查冒号、括号         |
+| `unmatched bracket`           | 括号不匹配     | 补全括号               |
+| `invalid attribute`           | 属性格式错误   | 检查 [NU], [Nkg], [NA] |
 
 ## 最佳实践建议
 
 ### 1. 标准化命名
+
 ```
 // 推荐格式
 位置: 类型-功能-编号
@@ -660,6 +717,7 @@ rackdiag -v test.diag
 ```
 
 ### 2. 容量规划
+
 ```
 rackdiag {
   42U;
@@ -674,6 +732,7 @@ rackdiag {
 ```
 
 ### 3. 文档化
+
 ```
 rackdiag {
   description = "DC01-ROW3-RACK15 (Production Web Tier)";

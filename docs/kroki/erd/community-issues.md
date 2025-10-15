@@ -16,6 +16,7 @@
 
 **用户期望**:
 Mermaid 用户希望使用 Erd 的简洁语法:
+
 ```erd
 [player]
 *player_id
@@ -27,11 +28,13 @@ team_id
 ```
 
 **现状**:
+
 - Mermaid 有自己的 ER 图语法
 - PlantUML 也有类似但不同的语法 ([Issue #1309](https://github.com/mermaid-js/mermaid/issues/1309))
 - Erd 语法不被其他工具原生支持
 
 **解决方案**:
+
 1. 使用转换工具 (如果存在)
 2. 学习目标工具的原生语法
 3. 使用 Kroki 统一接口 (支持多种图表工具)
@@ -41,17 +44,20 @@ team_id
 ### 1.2 配置文件不生效
 
 **症状**:
+
 ```bash
 erd -c ~/.erd.yaml -i schema.er -o output.pdf
 # 样式没有应用
 ```
 
 **常见原因**:
+
 1. **文件不存在**: `~/.erd.yaml` 未创建
 2. **YAML 格式错误**: 缩进或语法问题
 3. **选项冲突**: 命令行参数覆盖配置文件
 
 **诊断步骤**:
+
 ```bash
 # 1. 检查文件是否存在
 ls -la ~/.erd.yaml
@@ -71,6 +77,7 @@ erd -c ./myconfig.yaml -i schema.er
 ### 1.3 Docker 容器文件访问问题
 
 **问题**:
+
 ```bash
 docker run -i ghcr.io/burntsushi/erd:latest schema.er
 # Error: cannot open file
@@ -81,19 +88,22 @@ docker run -i ghcr.io/burntsushi/erd:latest schema.er
 **解决方案**:
 
 **方法 1: 使用标准输入**
+
 ```bash
 docker run -i ghcr.io/burntsushi/erd:latest < schema.er > output.pdf
 ```
 
 **方法 2: 挂载卷**
+
 ```bash
 docker run -i -v $(pwd):/data ghcr.io/burntsushi/erd:latest \\
   < /data/schema.er > /data/output.pdf
 ```
 
 **方法 3: 使用 docker-compose**
+
 ```yaml
-version: '3'
+version: "3"
 services:
   erd:
     image: ghcr.io/burntsushi/erd:latest
@@ -111,6 +121,7 @@ services:
 **症状**: 文本显示为方框或乱码
 
 **解决方案 (macOS)**:
+
 ```bash
 # 安装完整的 GraphViz
 brew install graphviz
@@ -120,6 +131,7 @@ fc-list | grep Helvetica
 ```
 
 **解决方案 (Linux)**:
+
 ```bash
 # 安装字体
 sudo apt-get install fonts-liberation
@@ -135,6 +147,7 @@ fc-cache -fv
 **症状**: 粗体和斜体不显示
 
 **解决方案**:
+
 ```bash
 # macOS: 重新编译带 Pango 的 GraphViz
 brew reinstall graphviz
@@ -156,6 +169,7 @@ sudo apt-get install libpango1.0-dev
 **问题**: 多对多关系导致线条交叉、重叠
 
 **示例**:
+
 ```erd
 [Student]
 *student_id
@@ -174,12 +188,14 @@ Student ?--* Teacher
 **解决策略**:
 
 **策略 1: 使用不同边类型**
+
 ```bash
 erd -e ortho  # 正交边
 erd -e spline # 平滑曲线
 ```
 
 **策略 2: 引入关联实体**
+
 ```erd
 [Student]
 *student_id
@@ -197,6 +213,7 @@ Course 1--* Enrollment
 ```
 
 **策略 3: 手动调整 DOT**
+
 ```bash
 # 生成 DOT
 erd -i schema.er -o schema.dot
@@ -216,6 +233,7 @@ dot -Tpdf schema.dot -o output.pdf
 ### 2.1 Windows 平台
 
 **问题 1: 路径分隔符**
+
 ```bash
 # ❌ 错误
 erd -i C:\\Users\\name\\schema.er
@@ -225,6 +243,7 @@ erd -i "C:/Users/name/schema.er"
 ```
 
 **问题 2: 字符编码**
+
 ```bash
 # 使用 UTF-8
 chcp 65001
@@ -232,6 +251,7 @@ erd -i schema.er
 ```
 
 **问题 3: Stack 安装路径**
+
 ```powershell
 # 添加到 PATH
 $env:Path += ";C:\Users\<user>\AppData\Roaming\local\bin"
@@ -242,6 +262,7 @@ $env:Path += ";C:\Users\<user>\AppData\Roaming\local\bin"
 ### 2.2 macOS 平台
 
 **问题 1: Homebrew 版本过旧**
+
 ```bash
 # 更新 Homebrew
 brew update
@@ -249,6 +270,7 @@ brew upgrade erd
 ```
 
 **问题 2: GraphViz 缺少 Pango**
+
 ```bash
 # 完全卸载重装
 brew uninstall graphviz
@@ -264,6 +286,7 @@ brew reinstall graphviz
 ### 2.3 Linux 平台
 
 **问题 1: 依赖缺失**
+
 ```bash
 # Debian/Ubuntu
 sudo apt-get install libgraphviz-dev libpango1.0-dev
@@ -273,6 +296,7 @@ sudo dnf install graphviz-devel pango-devel
 ```
 
 **问题 2: Stack 二进制路径**
+
 ```bash
 # 添加到 ~/.bashrc 或 ~/.zshrc
 export PATH="$HOME/.local/bin:$PATH"
@@ -289,6 +313,7 @@ export PATH="$HOME/.local/bin:$PATH"
 **优化策略**:
 
 **策略 1: 分拆图表**
+
 ```erd
 # 按模块分离
 # user-module.er
@@ -303,6 +328,7 @@ export PATH="$HOME/.local/bin:$PATH"
 ```
 
 **策略 2: 使用更快的布局引擎**
+
 ```bash
 # 使用 neato 代替 dot
 erd -i schema.er -o schema.dot
@@ -310,6 +336,7 @@ neato -Tpdf schema.dot -o output.pdf
 ```
 
 **策略 3: 减少格式化**
+
 ```erd
 # 简化样式，移除不必要的格式化
 entity {bgcolor: "#fff"}  # 单一背景色
@@ -323,6 +350,7 @@ entity {bgcolor: "#fff"}  # 单一背景色
 **问题**: 处理大型图表时内存不足
 
 **解决方案**:
+
 ```bash
 # 增加 GHC 运行时内存
 erd +RTS -M4G -RTS -i large-schema.er
@@ -338,6 +366,7 @@ cat schema.er | erd | dot -Tpdf > output.pdf
 ### 4.1 CI/CD 集成
 
 **GitHub Actions 示例**:
+
 ```yaml
 name: Generate ER Diagrams
 on: [push]
@@ -377,8 +406,10 @@ jobs:
 **问题**: 预览不更新
 
 **解决方案**:
+
 1. 安装 [vscode-erd](https://github.com/kaishuu0123/vscode-erd)
 2. 配置 settings.json:
+
 ```json
 {
   "erd.executablePath": "/path/to/erd",
@@ -391,6 +422,7 @@ jobs:
 **问题**: 语法高亮不工作
 
 **解决方案**:
+
 ```vim
 " 在 ~/.vimrc 添加
 Plugin 'flniu/er.vim'
@@ -408,6 +440,7 @@ git clone https://github.com/flniu/er.vim ~/.vim/bundle/er.vim
 **问题**: Label 中的类型信息被截断
 
 **示例**:
+
 ```erd
 [User]
 *id {label: "uuid PRIMARY KEY DEFAULT gen_random_uuid()"}
@@ -415,6 +448,7 @@ git clone https://github.com/flniu/er.vim ~/.vim/bundle/er.vim
 ```
 
 **解决方案**:
+
 ```erd
 # 方案 1: 简化标签
 *id {label: "uuid, PK"}
@@ -439,6 +473,7 @@ git clone https://github.com/flniu/er.vim ~/.vim/bundle/er.vim
 **原因**: GraphViz 缺少中文字体
 
 **解决方案 (Linux)**:
+
 ```bash
 # 安装中文字体
 sudo apt-get install fonts-wqy-zenhei
@@ -448,6 +483,7 @@ entity {font: "WenQuanYi Zen Hei"}
 ```
 
 **解决方案 (macOS)**:
+
 ```bash
 # 使用系统字体
 entity {font: "PingFang SC"}
@@ -460,6 +496,7 @@ entity {font: "PingFang SC"}
 **问题**: 特殊字符显示异常
 
 **解决方案**:
+
 ```erd
 # 使用 HTML 实体
 [用户] {label: "&#29992;&#25143;"}  # 用户
@@ -473,17 +510,20 @@ file -I schema.er  # 检查编码
 ## 7. 社区资源
 
 ### 官方资源
+
 - **GitHub**: https://github.com/BurntSushi/erd
 - **Hackage**: https://hackage.haskell.org/package/erd
 - **Docker Hub**: ghcr.io/burntsushi/erd
 
 ### 替代工具
+
 - **Mermaid ER**: https://mermaid.js.org/syntax/entityRelationshipDiagram.html
 - **PlantUML**: https://plantuml.com/ie-diagram
 - **dbdiagram.io**: https://dbdiagram.io
 - **QuickDBD**: https://www.quickdatabasediagrams.com
 
 ### 学习资源
+
 - **ER 图基础**: https://www.lucidchart.com/pages/er-diagrams
 - **数据库设计**: https://www.simplilearn.com/tutorials/sql-tutorial/er-diagram-in-dbms
 - **GraphViz 文档**: https://graphviz.org/documentation/
@@ -493,6 +533,7 @@ file -I schema.er  # 检查编码
 ## 8. 贡献指南
 
 ### 报告 Bug
+
 1. 访问 https://github.com/BurntSushi/erd/issues
 2. 搜索是否已有类似问题
 3. 提供最小可复现示例
@@ -503,11 +544,13 @@ file -I schema.er  # 检查编码
    ```
 
 ### 功能请求
+
 1. 描述使用场景
 2. 提供示例语法
 3. 说明与现有功能的关系
 
 ### Pull Request
+
 1. Fork 仓库
 2. 创建功能分支
 3. 遵循 Haskell 代码规范
@@ -523,6 +566,7 @@ file -I schema.er  # 检查编码
 **问题**: 从现有数据库生成 Erd 文件
 
 **解决方案**:
+
 ```bash
 # MySQL
 mysqldump --no-data mydb | mysql2erd > schema.er
@@ -540,6 +584,7 @@ pg_dump --schema-only mydb | pg2erd > schema.er
 **问题**: 合并冲突难以解决
 
 **建议**:
+
 ```bash
 # .gitattributes
 *.er diff=erd
@@ -553,6 +598,7 @@ diagrams/
 ```
 
 **冲突解决**:
+
 ```bash
 # 使用自定义合并工具
 git config merge.erd.driver "./merge-erd.sh %O %A %B %A"
@@ -563,12 +609,14 @@ git config merge.erd.driver "./merge-erd.sh %O %A %B %A"
 ## 10. 未来发展
 
 ### 计划中的功能
+
 - 更好的 Unicode 支持
 - 交互式编辑器
 - Web 预览界面
 - 数据库逆向工程内置支持
 
 ### 社区需求
+
 - VS Code 扩展改进
 - 在线编辑器
 - 模板库
@@ -584,7 +632,8 @@ git config merge.erd.driver "./merge-erd.sh %O %A %B %A"
 4. **Discord**: Haskell 社区服务器
 
 **提问模板**:
-```
+
+````
 环境:
 - OS: [e.g. macOS 12.0]
 - Erd 版本: [erd --version]
@@ -606,4 +655,4 @@ git config merge.erd.driver "./merge-erd.sh %O %A %B %A"
 最小示例:
 ```erd
 [示例代码]
-```
+````

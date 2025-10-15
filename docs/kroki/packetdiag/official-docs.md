@@ -38,6 +38,7 @@ packetdiag {
 ```
 
 **示例**:
+
 ```
 0-15: Source Port               // 单行字段
 16-31: Destination Port
@@ -50,6 +51,7 @@ packetdiag {
 - `colheight = N`: 字段跨越 N 行高度
 
 **示例**:
+
 ```
 106: URG [rotate = 270]         // 垂直文本
 192-223: data [colheight = 3]   // 3 行高度
@@ -108,6 +110,7 @@ packetdiag {
 ### Kroki 集成
 
 PacketDiag 已集成到 Kroki 服务中：
+
 ```
 https://kroki.io/packetdiag/svg/...
 ```

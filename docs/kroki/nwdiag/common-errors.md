@@ -21,11 +21,13 @@ nwdiag {
 ```
 
 **错误信息**:
+
 ```
 Syntax error at line X
 ```
 
 **原因**:
+
 - NwDiag 不支持在节点名或网络名中使用连字符 `-`
 - 连字符被解析为减号运算符
 
@@ -41,6 +43,7 @@ nwdiag {
 ```
 
 **相关资源**:
+
 - [PlantUML Forum #14346](https://forum.plantuml.net/14346/hyphen-in-node-id-causes-syntax-error)
 
 ---
@@ -59,6 +62,7 @@ nwdiag {
 ```
 
 **错误信息**:
+
 ```
 Syntax error: unexpected token
 ```
@@ -188,6 +192,7 @@ nwdiag {
 ```
 
 **相关资源**:
+
 - [GitHub Issue #1301](https://github.com/plantuml/plantuml/issues/1301)
 
 ---
@@ -325,6 +330,7 @@ nwdiag {
 ```
 
 **相关资源**:
+
 - [PlantUML Forum #14458](https://forum.plantuml.net/14458/nwdiag-issue-other-internal-networks-with-the-layout-engine)
 
 ---
@@ -351,6 +357,7 @@ nwdiag {
 ```
 
 **错误信息**:
+
 ```
 Syntax error in nwdiag block
 ```
@@ -370,6 +377,7 @@ nwdiag {
 ```
 
 **相关资源**:
+
 - [GitHub Issue #800](https://github.com/plantuml/plantuml/issues/800)
 
 ---
@@ -456,6 +464,7 @@ nwdiag {
 系统找不到合适的字体渲染文本。
 
 **错误信息**:
+
 ```
 Font not found
 ```
@@ -481,6 +490,7 @@ fontpath = /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
 复杂图表生成时间过长导致超时。
 
 **错误信息**:
+
 ```
 Timeout error
 ```
@@ -698,7 +708,7 @@ function encodeKrokiURL(code: string): string {
 
 ```typescript
 // DiagramAI 的解决方案
-const krokiUrl = '/api/kroki/nwdiag/svg/' + encodedCode;
+const krokiUrl = "/api/kroki/nwdiag/svg/" + encodedCode;
 // 通过 Next.js API 代理到 Kroki
 ```
 
@@ -738,15 +748,18 @@ const krokiUrl = '/api/kroki/nwdiag/svg/' + encodedCode;
 ## 🔗 参考资源
 
 ### 官方资源
+
 - **NwDiag 文档**: http://blockdiag.com/en/nwdiag/
 - **PlantUML NwDiag**: https://plantuml.com/nwdiag
 
 ### 社区资源
+
 - **PlantUML Forum**: https://forum.plantuml.net/
 - **GitHub Issues**: https://github.com/plantuml/plantuml/issues
 - **Stack Overflow**: 搜索 `nwdiag` 标签
 
 ### DiagramAI 文档
+
 - **语法规则**: `/docs/kroki/nwdiag/syntax-rules.md`
 - **官方文档**: `/docs/kroki/nwdiag/official-docs.md`
 
@@ -756,33 +769,42 @@ const krokiUrl = '/api/kroki/nwdiag/svg/' + encodedCode;
 
 当遇到新错误时,请提供以下信息:
 
-```markdown
+````markdown
 ### 问题描述
+
 [简要描述问题]
 
 ### 复现代码
+
 ```nwdiag
 [最小化的复现代码]
 ```
+````
 
 ### 错误信息
+
 ```
 [完整的错误信息]
 ```
 
 ### 环境信息
+
 - NwDiag 版本: [版本号]
 - Kroki 版本: [版本号]
 - PlantUML 版本: [如适用]
 - 浏览器: [如适用]
 
 ### 预期结果
+
 [描述预期行为]
 
 ### 实际结果
+
 [描述实际行为]
+
 ```
 
 ---
 
 *文档整理: DiagramAI 项目 | 常见错误汇总*
+```

@@ -98,6 +98,7 @@ Person_Ext(alias, "标签", "描述")  ' 外部人员 (灰色)
 ```
 
 **可选参数**:
+
 ```plantuml
 Person(user, "用户", "描述", $sprite="person2", $link="https://...")
 ```
@@ -200,6 +201,7 @@ Lay_Distance(from, to, 2)  ' 设置距离为 2 个单位
 ```
 
 **示例**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -238,6 +240,7 @@ Lay_Distance(element, LEGEND(), 1)  ' 将图例放在元素下方
 ```
 
 **完整示例**:
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>

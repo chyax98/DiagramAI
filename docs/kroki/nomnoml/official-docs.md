@@ -8,6 +8,7 @@
 Nomnoml 是一个基于简洁文本语法绘制 UML 图表的工具。它的设计理念是让语法尽可能接近最终生成的 UML 图,而不使用 ASCII 艺术。
 
 **特点**:
+
 - 简洁直观的语法
 - 实时在线编辑器
 - SVG 输出
@@ -20,26 +21,26 @@ Nomnoml 是一个基于简洁文本语法绘制 UML 图表的工具。它的设�
 
 定义节点之间的关系:
 
-| 语法 | 类型 | 说明 |
-|-----|------|------|
-| `[A]-[B]` | association | 关联 |
-| `[A]->[B]` | association | 关联(带方向) |
-| `[A]<->[B]` | association | 双向关联 |
-| `[A]-->[B]` | dependency | 依赖 |
-| `[A]<-->[B]` | dependency | 双向依赖 |
-| `[A]-:>[B]` | generalization | 泛化(继承) |
-| `[A]<:-[B]` | generalization | 反向泛化 |
-| `[A]--:>[B]` | implementation | 实现 |
-| `[A]<:--[B]` | implementation | 反向实现 |
-| `[A]+-[B]` | composition | 组合 |
-| `[A]+->[B]` | composition | 组合(带方向) |
-| `[A]o-[B]` | aggregation | 聚合 |
-| `[A]o->[B]` | aggregation | 聚合(带方向) |
-| `[A]-o)[B]` | ball and socket | 球窝关联 |
-| `[A]o<-)[B]` | ball and socket | 反向球窝 |
-| `[A]->o[B]` | ball and socket | 球窝箭头 |
-| `[A]--[B]` | note | 注释线 |
-| `[A]-/-[B]` | hidden | 隐藏关联 |
+| 语法         | 类型            | 说明         |
+| ------------ | --------------- | ------------ |
+| `[A]-[B]`    | association     | 关联         |
+| `[A]->[B]`   | association     | 关联(带方向) |
+| `[A]<->[B]`  | association     | 双向关联     |
+| `[A]-->[B]`  | dependency      | 依赖         |
+| `[A]<-->[B]` | dependency      | 双向依赖     |
+| `[A]-:>[B]`  | generalization  | 泛化(继承)   |
+| `[A]<:-[B]`  | generalization  | 反向泛化     |
+| `[A]--:>[B]` | implementation  | 实现         |
+| `[A]<:--[B]` | implementation  | 反向实现     |
+| `[A]+-[B]`   | composition     | 组合         |
+| `[A]+->[B]`  | composition     | 组合(带方向) |
+| `[A]o-[B]`   | aggregation     | 聚合         |
+| `[A]o->[B]`  | aggregation     | 聚合(带方向) |
+| `[A]-o)[B]`  | ball and socket | 球窝关联     |
+| `[A]o<-)[B]` | ball and socket | 反向球窝     |
+| `[A]->o[B]`  | ball and socket | 球窝箭头     |
+| `[A]--[B]`   | note            | 注释线       |
+| `[A]-/-[B]`  | hidden          | 隐藏关联     |
 
 ### 分类器类型 (Classifier Types)
 
@@ -117,6 +118,7 @@ Nomnoml 是一个基于简洁文本语法绘制 UML 图表的工具。它的设�
 ```
 
 **格式**:
+
 ```
 [<type> ClassName|
   attributes
@@ -147,6 +149,7 @@ Nomnoml 是一个基于简洁文本语法绘制 UML 图表的工具。它的设�
 ```
 
 **应用场景**:
+
 - 多个同名类的不同实例
 - 避免节点混淆
 - 复杂图表中的精确引用
@@ -212,24 +215,28 @@ empty                      // 空白
 #### 样式属性
 
 **颜色**:
+
 ```nomnoml
 fill=(any css color)       // 填充色
 stroke=(any css color)     // 描边色
 ```
 
 **对齐**:
+
 ```nomnoml
 align=center               // 居中对齐
 align=left                 // 左对齐
 ```
 
 **方向**:
+
 ```nomnoml
 direction=right            // 右侧布局
 direction=down             // 下方布局
 ```
 
 **可视化类型**:
+
 ```nomnoml
 visual=actor               // 参与者
 visual=class               // 类
@@ -254,12 +261,14 @@ visual=transceiver         // 收发器
 ```
 
 **文本样式**:
+
 ```nomnoml
 title=left,italic,bold     // 标题样式
 body=center,italic,bold    // 正文样式
 ```
 
 **文本修饰符**:
+
 - `bold`: 粗体
 - `center`: 居中
 - `italic`: 斜体
@@ -394,6 +403,7 @@ body=center,italic,bold    // 正文样式
 将复杂图表拆分为多个文件:
 
 **main.nomnoml**:
+
 ```nomnoml
 #import: styles.nomnoml
 #import: components.nomnoml
@@ -402,11 +412,13 @@ body=center,italic,bold    // 正文样式
 ```
 
 **styles.nomnoml**:
+
 ```nomnoml
 #.component: fill=#e3f2fd
 ```
 
 **components.nomnoml**:
+
 ```nomnoml
 [<component> Header]
 [<component> Footer]
@@ -427,18 +439,21 @@ body=center,italic,bold    // 正文样式
 ### 3. 布局优化
 
 **垂直布局**:
+
 ```nomnoml
 #direction: down
 [A] -> [B] -> [C]
 ```
 
 **水平布局**:
+
 ```nomnoml
 #direction: right
 [A] -> [B] -> [C]
 ```
 
 **紧凑布局**:
+
 ```nomnoml
 #fontSize: 8
 #spacing: 12
@@ -449,12 +464,14 @@ body=center,italic,bold    // 正文样式
 ### 4. 颜色主题
 
 **浅色主题**:
+
 ```nomnoml
 #fill: #eee8d5; #fdf6e3
 #stroke: #33322E
 ```
 
 **深色主题**:
+
 ```nomnoml
 #fill: #2d2d2d; #3d3d3d
 #stroke: #ffffff
@@ -462,6 +479,7 @@ body=center,italic,bold    // 正文样式
 ```
 
 **自定义配色**:
+
 ```nomnoml
 #.primary: fill=#2196F3 stroke=#1976D2
 #.secondary: fill=#4CAF50 stroke=#388E3C
@@ -479,36 +497,36 @@ body=center,italic,bold    // 正文样式
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <script src="https://unpkg.com/graphre/dist/graphre.js"></script>
-  <script src="https://unpkg.com/nomnoml/dist/nomnoml.js"></script>
-</head>
-<body>
-  <canvas id="canvas"></canvas>
-  <script>
-    var source = '[A] -> [B]'
-    var canvas = document.getElementById('canvas')
-    nomnoml.draw(canvas, source)
-  </script>
-</body>
+  <head>
+    <script src="https://unpkg.com/graphre/dist/graphre.js"></script>
+    <script src="https://unpkg.com/nomnoml/dist/nomnoml.js"></script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <script>
+      var source = "[A] -> [B]";
+      var canvas = document.getElementById("canvas");
+      nomnoml.draw(canvas, source);
+    </script>
+  </body>
 </html>
 ```
 
 ### Node.js 使用
 
 ```javascript
-const nomnoml = require('nomnoml')
+const nomnoml = require("nomnoml");
 
 const source = `
   [<frame>Decorator pattern|
     [<abstract>Component||+ operation()]
     [Client] depends --> [Component]
   ]
-`
+`;
 
 // 渲染 SVG
-const svg = nomnoml.renderSvg(source)
-console.log(svg)
+const svg = nomnoml.renderSvg(source);
+console.log(svg);
 
 // 带数据属性的 SVG
 // 节点名称会附加到 data-name 属性
@@ -530,14 +548,14 @@ nomnoml main.nomnoml output.svg
 ### TypeScript 集成
 
 ```typescript
-import nomnoml from 'nomnoml'
+import nomnoml from "nomnoml";
 
 interface DiagramSource {
-  source: string
+  source: string;
 }
 
 function renderDiagram({ source }: DiagramSource): string {
-  return nomnoml.renderSvg(source)
+  return nomnoml.renderSvg(source);
 }
 ```
 

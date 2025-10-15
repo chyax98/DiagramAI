@@ -12,6 +12,7 @@
 **Error Message**: `Syntax error at line X`
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A -> B [label = "request"]  // ❌ Missing semicolon
@@ -19,6 +20,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   A -> B [label = "request"];  // ✅ Semicolon added
@@ -34,6 +36,7 @@ seqdiag {
 **Error Message**: `Unexpected end of file` or `Syntax error`
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A -> B;
@@ -41,6 +44,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   A -> B;
@@ -56,6 +60,7 @@ seqdiag {
 **Error Message**: `Syntax error at line X`
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A -> B [label = HTTP request];  // ❌ Spaces without quotes
@@ -63,6 +68,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   A -> B [label = "HTTP request"];  // ✅ Quotes added
@@ -70,6 +76,7 @@ seqdiag {
 ```
 
 **Rule**: Always quote strings containing:
+
 - Spaces
 - Special characters
 - Newlines (`\n`)
@@ -81,6 +88,7 @@ seqdiag {
 **Error Message**: `Unknown attribute: <name>`
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A -> B [text = "message"];      // ❌ 'text' is invalid
@@ -89,6 +97,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   A -> B [label = "message"];     // ✅ Use 'label'
@@ -97,6 +106,7 @@ seqdiag {
 ```
 
 **Valid Attributes**:
+
 - `label`, `return`
 - `note`, `leftnote`, `rightnote`
 - `color`, `diagonal`, `failed`
@@ -108,6 +118,7 @@ seqdiag {
 **Error Message**: `Syntax error` or unexpected token
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A <-> B;   // ❌ Bidirectional not supported
@@ -117,6 +128,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   A -> B;    // ✅ Left to right
@@ -136,6 +148,7 @@ seqdiag {
 **Error Message**: Element ordering issues or missing lifelines
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   // Elements used but not defined
@@ -146,6 +159,7 @@ seqdiag {
 ```
 
 **Solution** (explicit ordering):
+
 ```seqdiag
 seqdiag {
   // Define order explicitly
@@ -165,6 +179,7 @@ seqdiag {
 **Error Message**: Nesting not allowed or syntax error
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   // ❌ Wrong: Using -> instead of =>
@@ -175,6 +190,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   // ✅ Use => for auto-return edges
@@ -185,6 +201,7 @@ seqdiag {
 ```
 
 **Rules**:
+
 - Only `=>` edges can have nested blocks
 - Maximum one level of nesting
 - Inner edges must involve the target element
@@ -196,6 +213,7 @@ seqdiag {
 **Error Message**: May render but look incorrect
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A => B;  // ❌ No return label specified
@@ -203,6 +221,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   A => B [label = "request", return = "response"];  // ✅ Both labels
@@ -220,6 +239,7 @@ seqdiag {
 **Error Message**: Invalid color or no visible effect
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A -> B [color = "light-green"];  // ❌ Hyphenated not supported
@@ -228,6 +248,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   A -> B [color = lightgreen];     // ✅ Named color (no quotes)
@@ -236,6 +257,7 @@ seqdiag {
 ```
 
 **Valid Colors**:
+
 - Named: `red`, `green`, `blue`, `lightblue`, `orange`, etc.
 - Hex: `#RRGGBB` format
 
@@ -246,6 +268,7 @@ seqdiag {
 **Error Message**: Attribute not supported (pre-v0.5.0)
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A -> B [failed = true];  // ❌ Boolean not needed
@@ -253,6 +276,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   A -> B [failed];         // ✅ Flag attribute (no value)
@@ -268,6 +292,7 @@ seqdiag {
 **Error Message**: Note not displaying correctly
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A -> B [note = "text", leftnote = "other"];  // ❌ Conflicting
@@ -275,6 +300,7 @@ seqdiag {
 ```
 
 **Solution** (choose one):
+
 ```seqdiag
 seqdiag {
   // Option 1: Default right-side note
@@ -298,6 +324,7 @@ seqdiag {
 **Error Message**: Unknown attribute or no effect
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   edge_width = 300;        // ❌ Wrong attribute name
@@ -306,6 +333,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   edge_length = 300;       // ✅ Correct name
@@ -314,6 +342,7 @@ seqdiag {
 ```
 
 **Valid Diagram Attributes**:
+
 - `edge_length`, `span_height`
 - `default_fontsize`
 - `activation`, `autonumber`
@@ -326,6 +355,7 @@ seqdiag {
 **Error Message**: Activity lines still visible
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   activation = false;  // ❌ Wrong value
@@ -334,6 +364,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   activation = none;   // ✅ Use 'none'
@@ -350,6 +381,7 @@ seqdiag {
 **Error Message**: Numbers not appearing
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   autonumber = 1;      // ❌ Should be boolean
@@ -358,6 +390,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   autonumber = True;   // ✅ Boolean value (capital T)
@@ -381,17 +414,20 @@ seqdiag {
 **Solutions**:
 
 **Option 1: Command-line**
+
 ```bash
 seqdiag -f /path/to/font.ttf diagram.diag
 ```
 
 **Option 2: Config file** (`~/.blockdiagrc`)
+
 ```ini
 [seqdiag]
 fontpath = /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf
 ```
 
 **Option 3: Install fonts**
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get install fonts-dejavu-core
@@ -407,11 +443,13 @@ sudo apt-get install fonts-dejavu-core
 **Error Message**: Encoding error or garbled text
 
 **Problem**:
+
 ```python
 # Wrong: File not saved as UTF-8
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   // Ensure file is saved as UTF-8
@@ -421,6 +459,7 @@ seqdiag {
 ```
 
 **Fix**:
+
 - Save file with UTF-8 encoding
 - Specify encoding in Python: `open('file.diag', encoding='utf-8')`
 
@@ -433,6 +472,7 @@ seqdiag {
 **Problem**: Missing dependencies or unsupported features
 
 **Solution**:
+
 ```bash
 # Ensure all dependencies installed
 pip install seqdiag[svg]
@@ -452,6 +492,7 @@ seqdiag -Tsvg diagram.diag
 **Error Message**: Syntax error or unexpected behavior
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A => B {
@@ -462,6 +503,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   A => B;
@@ -479,6 +521,7 @@ seqdiag {
 **Error Message**: Syntax error
 
 **Problem**:
+
 ```seqdiag
 seqdiag {
   A -> B;
@@ -488,6 +531,7 @@ seqdiag {
 ```
 
 **Solution**:
+
 ```seqdiag
 seqdiag {
   A -> B;
@@ -507,6 +551,7 @@ seqdiag {
 **Problem**: Incorrect encoding of diagram text
 
 **Solution**:
+
 ```python
 import pako  # JavaScript compression library
 import base64
@@ -519,6 +564,7 @@ encoded = base64.urlsafe_b64encode(compressed).decode('utf-8')
 ```
 
 **Kroki URL Format**:
+
 ```
 https://kroki.io/seqdiag/svg/<base64url_encoded>
 ```
@@ -532,12 +578,13 @@ https://kroki.io/seqdiag/svg/<base64url_encoded>
 **Problem**: Direct browser access to Kroki
 
 **Solution**: Use server-side proxy
+
 ```javascript
 // ❌ Wrong: Direct browser call
-fetch('https://kroki.io/seqdiag/svg/...')
+fetch("https://kroki.io/seqdiag/svg/...");
 
 // ✅ Correct: Use proxy
-fetch('/api/kroki/seqdiag/svg/...')
+fetch("/api/kroki/seqdiag/svg/...");
 ```
 
 ---
@@ -572,6 +619,7 @@ echo 'seqdiag { A -> B; }' | seqdiag -Tsvg -o test.svg -
 ### Common Fixes
 
 **Reset to basics**:
+
 ```seqdiag
 seqdiag {
   A -> B;  // If this works, problem is elsewhere
@@ -579,6 +627,7 @@ seqdiag {
 ```
 
 **Isolate features**:
+
 ```seqdiag
 seqdiag {
   // Test one feature at a time
@@ -588,6 +637,7 @@ seqdiag {
 ```
 
 **Check dependencies**:
+
 ```bash
 pip show seqdiag
 pip show blockdiag
@@ -676,16 +726,16 @@ seqdiag {
 
 ### When to Use What
 
-| Feature | Use Case | Syntax |
-|---------|----------|--------|
-| Basic edge | Simple interaction | `A -> B;` |
-| Return edge | Response | `A <- B;` |
-| Dotted edge | Optional/async | `A --> B;` |
+| Feature     | Use Case              | Syntax                            |
+| ----------- | --------------------- | --------------------------------- |
+| Basic edge  | Simple interaction    | `A -> B;`                         |
+| Return edge | Response              | `A <- B;`                         |
+| Dotted edge | Optional/async        | `A --> B;`                        |
 | Auto-return | Request-response pair | `A => B [label="x", return="y"];` |
-| Note | Additional info | `[note="text"]` |
-| Separator | Section break | `=== Title ===` |
-| Color | Highlight state | `[color=red]` |
-| Failed | Error indication | `[failed]` |
+| Note        | Additional info       | `[note="text"]`                   |
+| Separator   | Section break         | `=== Title ===`                   |
+| Color       | Highlight state       | `[color=red]`                     |
+| Failed      | Error indication      | `[failed]`                        |
 
 ---
 

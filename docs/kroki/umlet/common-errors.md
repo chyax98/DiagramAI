@@ -24,11 +24,13 @@ methods
 ```
 
 **原因**:
+
 - 使用单横线 `-` 而不是双横线 `--`
 - 使用了全角或特殊字符
 - 横线前后有多余空格
 
 **解决方案**:
+
 ```
 正确示例:
 ClassName
@@ -57,6 +59,7 @@ _AbstractClass_     ← 使用下划线（这是静态）
 ```
 
 **正确语法**:
+
 ```
 /AbstractClass/     ← 使用正斜杠
 
@@ -79,6 +82,7 @@ method() -         ← 符号在后面
 ```
 
 **正确格式**:
+
 ```
 +publicAttribute
 -privateAttribute
@@ -105,6 +109,7 @@ m1=1..            ← 不完整的范围
 ```
 
 **正确配置**:
+
 ```
 m1=1              ← 无空格
 m2=*              ← 使用 * 表示多个
@@ -126,6 +131,7 @@ r1=                ← 空值（应省略或给值）
 ```
 
 **正确配置**:
+
 ```
 r1=employer       ← 精确的 r1=
 r2=employee       ← 精确的 r2=
@@ -152,6 +158,7 @@ bg=#FF00          ← 不完整的颜色代码
 ```
 
 **正确配置**:
+
 ```
 bg=red            ← 小写，无空格
 bg=#FF0000        ← 完整的 6 位十六进制
@@ -159,6 +166,7 @@ bg=#F00           ← 简写的 3 位十六进制
 ```
 
 **支持的颜色名**:
+
 ```
 red, green, blue, yellow, orange
 pink, purple, gray, white, black
@@ -179,6 +187,7 @@ alpha=50           ← 错误的属性名
 ```
 
 **正确设置**:
+
 ```
 transparency=0     ← 完全不透明（0-100 整数）
 transparency=50    ← 半透明
@@ -202,6 +211,7 @@ Actor Name~id_    ← 缺少开始下划线
 ```
 
 **正确格式**:
+
 ```
 _ActorName~id_    ← 完整格式
 _Object~obj_      ← 完整格式
@@ -227,6 +237,7 @@ a->:message       ← 缺少目标 ID
 ```
 
 **正确格式**:
+
 ```
 a->b:message      ← 同步消息（实线）
 a-->b:message     ← 异步消息（虚线，三个字符）
@@ -250,6 +261,7 @@ TABYes: Action     ← TAB 和文本之间没有空格
 ```
 
 **正确格式**:
+
 ```
 Decision?
 --
@@ -274,6 +286,7 @@ Decision?
 ```
 
 **正确格式**:
+
 ```
 Activity 1
 --                 ← 每个活动后需要分隔线
@@ -296,11 +309,13 @@ OutOfMemoryError: Java heap space
 ```
 
 **原因**:
+
 - JVM 默认内存太小
 - 图表尺寸过大
 - 包含大量元素
 
 **解决方案**:
+
 ```bash
 # 增加 JVM 内存
 java -Xmx1024m -jar umlet.jar
@@ -317,11 +332,13 @@ umlet
 **症状**: Eclipse 中 UMLet 无法启动或崩溃
 
 **常见原因**:
+
 - Java 版本不兼容
 - Eclipse 版本过旧
 - OS X 特定问题 (#399)
 
 **解决方案**:
+
 ```
 检查清单:
 ✓ Java 8 或更高版本
@@ -346,11 +363,13 @@ CustomElement has error when running UMLet
 ```
 
 **原因**:
+
 - 使用了新版 Java 语法但编译器版本旧
 - 代码语法错误
 - 缺少必要的导入
 
 **解决方案**:
+
 ```
 1. 更新 Eclipse 编译器:
    已在 v15.2 中修复
@@ -380,6 +399,7 @@ CustomElement has error when running UMLet
 ```
 
 **解决方案**:
+
 ```
 1. 检查文件路径:
    - 避免特殊字符
@@ -411,6 +431,7 @@ java -jar umlet.jar -action=convert \
 ```
 
 **正确方法**:
+
 ```bash
 # 使用 shell 循环
 for file in *.uxf; do
@@ -437,11 +458,13 @@ java -jar umlet.jar -action=convert \
 **症状**: UMLetino 中保存文件失败
 
 **原因**:
+
 - 浏览器存储限制
 - 权限问题
 - 网络连接问题（如需云存储）
 
 **解决方案**:
+
 ```
 1. 检查浏览器设置:
    - 允许下载
@@ -464,11 +487,13 @@ java -jar umlet.jar -action=convert \
 **症状**: 修改 .uxf 文件后预览不刷新
 
 **原因**:
+
 - VS Code 缓存
 - 扩展版本问题
 - 文件监视器失效
 
 **解决方案**:
+
 ```
 1. 手动刷新:
    Ctrl+Shift+P > UMLet: Refresh Preview
@@ -534,32 +559,40 @@ attribute
 ### GitHub Issues
 
 **报告问题前**:
+
 1. 搜索已有 Issues: https://github.com/umlet/umlet/issues
 2. 准备最小复现示例
 3. 包含环境信息（OS, Java 版本, UMLet 版本）
 
 **问题模板**:
+
 ```markdown
 ### 环境
+
 - UMLet 版本: 15.1
 - Java 版本: 11.0.12
 - 操作系统: Ubuntu 22.04
 
 ### 问题描述
+
 简要描述问题
 
 ### 重现步骤
+
 1. 创建元素
 2. 设置属性: ...
 3. 观察到: ...
 
 ### 预期行为
+
 应该显示...
 
 ### 实际行为
+
 实际显示...
 
 ### 附加信息
+
 截图、.uxf 文件
 ```
 
@@ -570,6 +603,7 @@ attribute
 **官方 FAQ**: https://www.umlet.com/faq.htm
 
 **常见主题**:
+
 - 安装和配置
 - 语法和标记
 - 导出和集成
@@ -589,6 +623,7 @@ attribute
 ## 📊 错误统计
 
 **最常见错误 (Top 5)**:
+
 1. 分隔线语法错误 (35%)
 2. 多重性/角色配置错误 (20%)
 3. JVM 内存问题 (15%)
@@ -596,6 +631,7 @@ attribute
 5. 导出文件问题 (15%)
 
 **解决率**:
+
 - 语法问题: 95% 可自行解决
 - 环境问题: 80% 可通过配置解决
 - Bug: 需等待官方修复或使用 workaround

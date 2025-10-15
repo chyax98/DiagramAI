@@ -16,6 +16,7 @@ seqdiag {
 ```
 
 **Rules**:
+
 - Must start with `seqdiag {` keyword
 - Must end with closing brace `}`
 - Case-insensitive: `seqdiag` or `SEQDIAG` both work
@@ -28,6 +29,7 @@ seqdiag {
 ### Declaration
 
 **Implicit Declaration** (recommended):
+
 ```seqdiag
 seqdiag {
   A -> B;  // A and B are auto-declared
@@ -35,6 +37,7 @@ seqdiag {
 ```
 
 **Explicit Declaration** (for ordering):
+
 ```seqdiag
 seqdiag {
   browser; webserver; database;  // Defines order
@@ -50,6 +53,7 @@ seqdiag {
 - **Reserved Words**: Avoid `label`, `return`, etc.
 
 **Examples**:
+
 ```seqdiag
 seqdiag {
   // Valid names
@@ -74,17 +78,17 @@ source <- destination [attributes];
 
 ### Edge Types
 
-| Symbol | Type | Description |
-|--------|------|-------------|
-| `->` | Normal | Solid arrow left-to-right |
-| `<-` | Return | Solid arrow right-to-left |
-| `-->` | Dotted | Dotted arrow left-to-right |
-| `<--` | Dotted Return | Dotted arrow right-to-left |
-| `->>` | Async | Async solid arrow |
-| `<<-` | Async Return | Async solid return |
-| `-->>` | Async Dotted | Async dotted arrow |
-| `<<--` | Async Dotted Return | Async dotted return |
-| `=>` | Auto-Return | Auto-generates return edge |
+| Symbol | Type                | Description                |
+| ------ | ------------------- | -------------------------- |
+| `->`   | Normal              | Solid arrow left-to-right  |
+| `<-`   | Return              | Solid arrow right-to-left  |
+| `-->`  | Dotted              | Dotted arrow left-to-right |
+| `<--`  | Dotted Return       | Dotted arrow right-to-left |
+| `->>`  | Async               | Async solid arrow          |
+| `<<-`  | Async Return        | Async solid return         |
+| `-->>` | Async Dotted        | Async dotted arrow         |
+| `<<--` | Async Dotted Return | Async dotted return        |
+| `=>`   | Auto-Return         | Auto-generates return edge |
 
 ### Self-Reference
 
@@ -101,6 +105,7 @@ seqdiag {
 ### Basic Attributes
 
 **label** - Edge description:
+
 ```seqdiag
 seqdiag {
   A -> B [label = "request"];
@@ -108,6 +113,7 @@ seqdiag {
 ```
 
 **return** - Used with `=>` for auto-return label:
+
 ```seqdiag
 seqdiag {
   A => B [label = "call", return = "response"];
@@ -117,6 +123,7 @@ seqdiag {
 ### Visual Attributes
 
 **color** - Edge color (since v0.2.2):
+
 ```seqdiag
 seqdiag {
   A -> B [label = "success", color = green];
@@ -125,10 +132,12 @@ seqdiag {
 ```
 
 **Available colors**:
+
 - Named colors: `red`, `green`, `blue`, `orange`, `yellow`, `purple`, `pink`, `brown`, `gray`, `black`, `white`
 - Hex colors: `#FF0000`, `#00FF00`, etc.
 
 **diagonal** - Diagonal edge:
+
 ```seqdiag
 seqdiag {
   A -> B [diagonal, label = "async"];
@@ -136,6 +145,7 @@ seqdiag {
 ```
 
 **failed** - Error indication (since v0.5.0):
+
 ```seqdiag
 seqdiag {
   A -> B [label = "timeout", failed];
@@ -145,6 +155,7 @@ seqdiag {
 ### Notes
 
 **note** - Right-side note (since v0.6.0):
+
 ```seqdiag
 seqdiag {
   A -> B [note = "HTTP GET"];
@@ -152,6 +163,7 @@ seqdiag {
 ```
 
 **leftnote** - Left-side note:
+
 ```seqdiag
 seqdiag {
   A -> B [leftnote = "validate"];
@@ -159,6 +171,7 @@ seqdiag {
 ```
 
 **rightnote** - Right-side note (explicit):
+
 ```seqdiag
 seqdiag {
   A -> B [rightnote = "cache hit"];
@@ -166,6 +179,7 @@ seqdiag {
 ```
 
 **Multi-line notes**:
+
 ```seqdiag
 seqdiag {
   A -> B [note = "Line 1\nLine 2\nLine 3"];
@@ -188,6 +202,7 @@ seqdiag {
 ```
 
 **Rules**:
+
 - Only works with auto-return edges (`=>`)
 - Maximum one level of nesting
 - Inner edges must use same lifeline as outer target
@@ -219,6 +234,7 @@ seqdiag {
 ```
 
 **Rules**:
+
 - Must be on separate line
 - Text is optional
 - Separators affect all lifelines
@@ -239,6 +255,7 @@ seqdiag {
 ### Available Attributes
 
 **edge_length** - Horizontal spacing (default: 192):
+
 ```seqdiag
 seqdiag {
   edge_length = 300;
@@ -247,6 +264,7 @@ seqdiag {
 ```
 
 **span_height** - Vertical spacing (default: 40):
+
 ```seqdiag
 seqdiag {
   span_height = 80;
@@ -255,6 +273,7 @@ seqdiag {
 ```
 
 **default_fontsize** - Font size (default: 11):
+
 ```seqdiag
 seqdiag {
   default_fontsize = 14;
@@ -263,6 +282,7 @@ seqdiag {
 ```
 
 **activation** - Activity line display (since v0.5.0):
+
 ```seqdiag
 seqdiag {
   activation = none;  // hide activity lines
@@ -271,6 +291,7 @@ seqdiag {
 ```
 
 **autonumber** - Auto-number edges (since v0.5.0):
+
 ```seqdiag
 seqdiag {
   autonumber = True;
@@ -280,6 +301,7 @@ seqdiag {
 ```
 
 **default_note_color** - Default note background (since v0.6.0):
+
 ```seqdiag
 seqdiag {
   default_note_color = lightblue;
@@ -319,6 +341,7 @@ seqdiag {
 ### Quoting Rules
 
 **Optional quotes** (no spaces):
+
 ```seqdiag
 seqdiag {
   A -> B [label = request];  // OK
@@ -326,6 +349,7 @@ seqdiag {
 ```
 
 **Required quotes** (with spaces):
+
 ```seqdiag
 seqdiag {
   A -> B [label = "HTTP request"];  // Required
@@ -333,6 +357,7 @@ seqdiag {
 ```
 
 **Escape sequences**:
+
 ```seqdiag
 seqdiag {
   A -> B [label = "Line 1\nLine 2"];      // Newline
@@ -397,6 +422,7 @@ seqdiag {
 ### Common Mistakes
 
 **1. Missing braces**:
+
 ```seqdiag
 // ❌ Wrong
 seqdiag
@@ -409,6 +435,7 @@ seqdiag {
 ```
 
 **2. Semicolon placement**:
+
 ```seqdiag
 // ❌ Wrong
 seqdiag {
@@ -422,6 +449,7 @@ seqdiag {
 ```
 
 **3. Unquoted strings with spaces**:
+
 ```seqdiag
 // ❌ Wrong
 A -> B [label = HTTP request];
@@ -431,6 +459,7 @@ A -> B [label = "HTTP request"];
 ```
 
 **4. Invalid attribute names**:
+
 ```seqdiag
 // ❌ Wrong
 A -> B [text = "message"];  // 'text' not valid
@@ -440,6 +469,7 @@ A -> B [label = "message"];
 ```
 
 **5. Nested separators**:
+
 ```seqdiag
 seqdiag {
   A => B {
@@ -451,6 +481,7 @@ seqdiag {
 ```
 
 **6. Multiple auto-return paths**:
+
 ```seqdiag
 // ❌ Wrong - confusing
 A => B => C => D;

@@ -18,6 +18,7 @@
 ```
 
 **特殊图表类型标记**:
+
 ```plantuml
 @startuml         ' UML 图表（默认）
 @startditaa       ' Ditaa ASCII 艺术图
@@ -31,6 +32,7 @@
 ```
 
 **错误示例**:
+
 ```plantuml
 ❌ Alice -> Bob  ' 缺少 @startuml
 
@@ -39,6 +41,7 @@
 ```
 
 **正确示例**:
+
 ```plantuml
 ✅ @startuml
    Alice -> Bob
@@ -52,11 +55,13 @@
 **基本箭头格式**: `参与者1 箭头类型 参与者2 : 消息`
 
 #### 箭头方向
-- `->` 或 `->`  : 从左到右
-- `<-` 或 `<-`  : 从右到左
+
+- `->` 或 `->` : 从左到右
+- `<-` 或 `<-` : 从右到左
 - `<->` 或 `<->` : 双向箭头
 
 #### 箭头样式修饰符
+
 - `-` : 实线
 - `--` : 虚线
 - `>>` : 细箭头
@@ -65,6 +70,7 @@
 - `->o` : 末尾带圆圈
 
 **示例**:
+
 ```plantuml
 @startuml
 Bob ->x Alice   ' 丢失消息
@@ -81,6 +87,7 @@ Bob <->o Alice  ' 双向带圆圈
 ```
 
 #### 箭头颜色
+
 ```plantuml
 @startuml
 Bob -[#red]> Alice : hello
@@ -93,6 +100,7 @@ Alice -[#0000FF]->Bob : ok
 ### 3. 注释语法
 
 **单行注释**: 使用 `'` (单引号)
+
 ```plantuml
 @startuml
 ' 这是单行注释
@@ -101,6 +109,7 @@ Alice -> Bob
 ```
 
 **多行注释**: 使用 `/'` 和 `'/`
+
 ```plantuml
 @startuml
 /'
@@ -116,7 +125,9 @@ Alice -> Bob
 ### 4. 文本和标签规则
 
 #### 多行文本
+
 使用 `\n` 或实际换行符：
+
 ```plantuml
 @startuml
 Alice->Alice: This is a signal to self.\nIt also demonstrates\nmultiline \ntext
@@ -124,6 +135,7 @@ Alice->Alice: This is a signal to self.\nIt also demonstrates\nmultiline \ntext
 ```
 
 #### 特殊字符转义
+
 - 引号: 使用 `\"` 或直接使用（在某些上下文中）
 - 反斜杠: `\\`
 - 冒号: 在消息中使用空格分隔 `: `
@@ -133,6 +145,7 @@ Alice->Alice: This is a signal to self.\nIt also demonstrates\nmultiline \ntext
 ### 5. 参与者声明（时序图）
 
 **显式声明参与者**:
+
 ```plantuml
 @startuml
 participant Alice
@@ -148,6 +161,7 @@ queue Queue
 ```
 
 **参与者类型**:
+
 - `participant` : 默认参与者（矩形框）
 - `actor` : 人形图标
 - `boundary` : 边界（圆形）
@@ -162,6 +176,7 @@ queue Queue
 ### 6. 类图语法规则
 
 #### 类声明
+
 ```plantuml
 @startuml
 class ClassName {
@@ -177,12 +192,14 @@ class ClassName {
 ```
 
 #### 可见性修饰符
+
 - `+` : public（公共）
 - `-` : private（私有）
 - `#` : protected（保护）
 - `~` : package/internal（包级）
 
 #### 关系类型
+
 ```plantuml
 @startuml
 ClassA <|-- ClassB    ' 继承（泛化）
@@ -196,6 +213,7 @@ ClassM ..> ClassN     ' 虚线依赖
 ```
 
 **关系符号规则**:
+
 - `<|--` : 继承/泛化（实心三角形）
 - `<|..` : 实现接口（空心三角形 + 虚线）
 - `*--` : 组合（实心菱形）
@@ -208,6 +226,7 @@ ClassM ..> ClassN     ' 虚线依赖
 ### 7. 活动图语法规则（新语法）
 
 **基本结构**:
+
 ```plantuml
 @startuml
 start
@@ -218,6 +237,7 @@ stop
 ```
 
 #### 条件分支
+
 ```plantuml
 @startuml
 start
@@ -231,6 +251,7 @@ stop
 ```
 
 #### 并行处理
+
 ```plantuml
 @startuml
 start
@@ -244,12 +265,14 @@ stop
 ```
 
 **合并方式**:
+
 - `end fork` : 默认合并（同步）
 - `end merge` : 第一个完成即继续
 - `end fork {and}` : 显式 AND 合并
 - `end fork {or}` : 显式 OR 合并
 
 #### 循环
+
 ```plantuml
 @startuml
 start
@@ -266,6 +289,7 @@ stop
 ### 8. 预处理指令
 
 #### 变量定义
+
 ```plantuml
 @startuml
 !define SEQUENCE (S,#AAAAAA) Database Sequence
@@ -277,6 +301,7 @@ class PRODUCT_SEQ << SEQUENCE >>
 ```
 
 #### 条件包含
+
 ```plantuml
 @startuml
 !if %getenv("ENVIRONMENT") == "production"
@@ -288,6 +313,7 @@ class PRODUCT_SEQ << SEQUENCE >>
 ```
 
 #### 文件包含
+
 ```plantuml
 @startuml
 !include https://example.com/common-styles.puml
@@ -296,6 +322,7 @@ class PRODUCT_SEQ << SEQUENCE >>
 ```
 
 #### 宏定义
+
 ```plantuml
 @startuml
 !procedure $success($name)
@@ -318,6 +345,7 @@ stop
 ### 9. 样式和主题（Skinparam）
 
 **全局样式**:
+
 ```plantuml
 @startuml
 skinparam backgroundColor transparent
@@ -329,6 +357,7 @@ skinparam defaultFontColor #333333
 ```
 
 **图表特定样式**:
+
 ```plantuml
 @startuml
 skinparam sequence {
@@ -350,11 +379,13 @@ skinparam sequence {
 ### 10. 颜色和格式规则
 
 #### 颜色格式
+
 - **颜色名称**: `red`, `blue`, `green`, `yellow` 等
 - **HEX 格式**: `#FF0000`, `#00FF00`, `#0000FF`
 - **RGB 格式**: `rgb(255,0,0)` (某些上下文)
 
 #### 应用颜色
+
 ```plantuml
 @startuml
 ' 背景色
@@ -376,6 +407,7 @@ end note
 ### 11. 特殊图表类型规则
 
 #### 甘特图
+
 ```plantuml
 @startgantt
 [Task 1] lasts 3 days
@@ -385,6 +417,7 @@ end note
 ```
 
 **关键字**:
+
 - `lasts` : 持续时间
 - `starts` : 开始时间
 - `ends` : 结束时间
@@ -392,6 +425,7 @@ end note
 - `is colored in` : 颜色
 
 #### 思维导图
+
 ```plantuml
 @startmindmap
 * Root
@@ -403,12 +437,14 @@ end note
 ```
 
 **规则**:
+
 - `*` : 根节点（1 个）
 - `**` : 二级节点
 - `***` : 三级节点
 - 左右自动平衡
 
 #### JSON 数据
+
 ```plantuml
 @startjson
 {
@@ -424,11 +460,13 @@ end note
 ### 12. 命名规则和约束
 
 #### 标识符规则
+
 - **允许字符**: 字母、数字、下划线 `_`
 - **不允许**: 空格（使用引号包裹）
 - **大小写敏感**: `Alice` 和 `alice` 是不同的参与者
 
 **示例**:
+
 ```plantuml
 @startuml
 participant Alice
@@ -438,6 +476,7 @@ participant User_123            ' 下划线允许
 ```
 
 #### 别名（Alias）
+
 ```plantuml
 @startuml
 participant "Very Long Participant Name" as VLPN
@@ -450,6 +489,7 @@ VLPN -> Alice : Hello
 ### 13. 布局和排版规则
 
 #### 顺序控制
+
 ```plantuml
 @startuml
 ' 参与者声明顺序决定左右位置
@@ -463,6 +503,7 @@ Alice -> Charlie
 ```
 
 #### 分组和分隔符
+
 ```plantuml
 @startuml
 Alice -> Bob : msg1
@@ -474,6 +515,7 @@ Alice -> Bob : msg3
 ```
 
 #### 激活/停用（Activation）
+
 ```plantuml
 @startuml
 Alice -> Bob : Request
@@ -492,24 +534,29 @@ deactivate Bob
 ### 14. 错误处理规则
 
 #### 常见语法错误
+
 1. **缺少声明标记**
+
    ```plantuml
    ❌ Alice -> Bob  ' 错误：缺少 @startuml
    ```
 
 2. **箭头格式错误**
+
    ```plantuml
    ❌ Alice > Bob    ' 错误：缺少 - 或 --
    ✅ Alice -> Bob   ' 正确
    ```
 
 3. **括号不匹配**
+
    ```plantuml
    ❌ class A {
         +method()   ' 错误：缺少 }
    ```
 
 4. **关键字拼写错误**
+
    ```plantuml
    ❌ @startUML      ' 错误：大小写不正确
    ✅ @startuml      ' 正确：全小写
@@ -528,6 +575,7 @@ deactivate Bob
 #### 新旧语法对比
 
 **活动图 - 旧语法**:
+
 ```plantuml
 @startuml
 (*) --> "Action"
@@ -536,6 +584,7 @@ deactivate Bob
 ```
 
 **活动图 - 新语法（推荐）**:
+
 ```plantuml
 @startuml
 start
@@ -551,21 +600,25 @@ stop
 ## 🎯 最佳实践建议
 
 ### 1. 代码组织
+
 - ✅ 使用注释分隔不同部分
 - ✅ 保持缩进一致性
 - ✅ 一个文件一个图表类型
 
 ### 2. 命名规范
+
 - ✅ 使用有意义的名称
 - ✅ 复杂名称使用别名
 - ✅ 避免特殊字符
 
 ### 3. 样式管理
+
 - ✅ 提取公共样式到单独文件
 - ✅ 使用预处理变量
 - ✅ 保持风格一致
 
 ### 4. 错误预防
+
 - ✅ 使用在线编辑器实时验证
 - ✅ 逐步构建复杂图表
 - ✅ 保存可工作的版本
@@ -580,5 +633,5 @@ stop
 
 ---
 
-*最后更新: 2025-10-13*
-*基于 PlantUML 1.2025.0 版本*
+_最后更新: 2025-10-13_
+_基于 PlantUML 1.2025.0 版本_

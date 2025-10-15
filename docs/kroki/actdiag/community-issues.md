@@ -22,14 +22,14 @@ ActDiag 与标准 UML 活动图有什么区别?如何选择?
 
 **对比分析**:
 
-| 特性 | ActDiag | UML Activity Diagram |
-|------|---------|---------------------|
-| 语法复杂度 | 简单 | 中等 |
-| 泳道支持 | ✅ 原生支持 | ✅ 支持 |
-| 决策节点 | 手动定义 | 标准语法 |
-| 并行流程 | 手动定义 | 标准语法 |
-| 学习曲线 | 平缓 | 较陡 |
-| 适用场景 | 简单业务流程 | 复杂系统建模 |
+| 特性       | ActDiag      | UML Activity Diagram |
+| ---------- | ------------ | -------------------- |
+| 语法复杂度 | 简单         | 中等                 |
+| 泳道支持   | ✅ 原生支持  | ✅ 支持              |
+| 决策节点   | 手动定义     | 标准语法             |
+| 并行流程   | 手动定义     | 标准语法             |
+| 学习曲线   | 平缓         | 较陡                 |
+| 适用场景   | 简单业务流程 | 复杂系统建模         |
 
 **ActDiag 示例**:
 
@@ -65,6 +65,7 @@ stop
 ```
 
 **建议**:
+
 - **简单流程**: 使用 ActDiag,语法简洁
 - **复杂建模**: 使用标准 UML 活动图
 - **团队熟悉度**: 选择团队熟悉的工具
@@ -79,6 +80,7 @@ stop
 如何表示一个活动可以从多个泳道访问?
 
 **问题场景**:
+
 ```
 用户角色 1: 可以执行活动 A
 用户角色 2: 也可以执行活动 A
@@ -86,6 +88,7 @@ stop
 ```
 
 **ActDiag 限制**:
+
 - 每个活动只能属于一个泳道
 - 不支持跨泳道的活动
 
@@ -166,6 +169,7 @@ actdiag {
 如何在 ActDiag 中使用查询条件来显示特定活动?
 
 **ActDiag 限制**:
+
 - ActDiag 是静态图表工具
 - 不支持动态查询或过滤
 - 无法根据条件显示/隐藏泳道
@@ -246,6 +250,7 @@ actdiag {
 ```
 
 **注意事项**:
+
 - 并非所有渲染器都支持 `orientation`
 - Kroki 可能不支持此参数
 - 建议测试具体渲染环境
@@ -260,6 +265,7 @@ actdiag {
 如何控制泳道的宽度?
 
 **ActDiag 限制**:
+
 - 不支持直接设置泳道宽度
 - 宽度由内容自动决定
 
@@ -426,20 +432,17 @@ actdiag {
 
 ```typescript
 // 正确的 Kroki 编码
-import pako from 'pako';
+import pako from "pako";
 
-export function generateActDiagURL(
-  code: string,
-  outputFormat: 'svg' | 'png' = 'svg'
-): string {
+export function generateActDiagURL(code: string, outputFormat: "svg" | "png" = "svg"): string {
   // 1. Deflate 压缩
   const compressed = pako.deflate(code, { level: 9 });
 
   // 2. Base64 URL 编码
   const base64 = btoa(String.fromCharCode(...compressed))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 
   // 3. 构建 URL
   return `/api/kroki/actdiag/${outputFormat}/${base64}`;
@@ -451,7 +454,7 @@ export function generateActDiagURL(
 ```typescript
 // Next.js API Route: /api/kroki/[...path]/route.ts
 export async function GET(request: NextRequest) {
-  const pathname = request.nextUrl.pathname.replace('/api/kroki', '');
+  const pathname = request.nextUrl.pathname.replace("/api/kroki", "");
   const krokiUrl = process.env.KROKI_INTERNAL_URL;
   const targetUrl = `${krokiUrl}${pathname}`;
 
@@ -460,8 +463,8 @@ export async function GET(request: NextRequest) {
 
   return new NextResponse(content, {
     headers: {
-      'Content-Type': 'image/svg+xml',
-      'Cache-Control': 'public, max-age=3600',
+      "Content-Type": "image/svg+xml",
+      "Cache-Control": "public, max-age=3600",
     },
   });
 }
@@ -476,6 +479,7 @@ export async function GET(request: NextRequest) {
 **案例来源**: 电商系统实践
 
 **需求**:
+
 - 客户下单
 - 库存检查
 - 支付处理
@@ -547,6 +551,7 @@ actdiag {
 **案例来源**: DevOps 实践
 
 **需求**:
+
 - 代码提交
 - 自动测试
 - 代码审查
@@ -735,15 +740,18 @@ actdiag {
 ## 🔗 参考资源
 
 ### 官方资源
+
 - **ActDiag 主页**: http://blockdiag.com/en/actdiag/
 - **示例集**: http://blockdiag.com/en/actdiag/examples.html
 - **Asciidoctor 集成**: https://docs.asciidoctor.org/diagram-extension/latest/diagram_types/actdiag/
 
 ### 社区资源
+
 - **Stack Overflow**: 搜索 `[actdiag]` 标签
 - **GitHub**: https://github.com/blockdiag/actdiag
 
 ### DiagramAI 文档
+
 - **官方文档**: `/docs/kroki/actdiag/official-docs.md`
 - **语法规则**: `/docs/kroki/actdiag/syntax-rules.md`
 - **常见错误**: `/docs/kroki/actdiag/common-errors.md`
@@ -765,6 +773,7 @@ actdiag {
 ### 分享经验
 
 欢迎分享您的:
+
 - 实际应用案例
 - 最佳实践建议
 - 工具集成经验
@@ -774,34 +783,44 @@ actdiag {
 
 ## 📝 问题讨论模板
 
-```markdown
+````markdown
 ### 问题描述
+
 [简要描述您的问题或需求]
 
 ### 使用场景
+
 [描述具体的使用场景]
 
 ### 代码示例
+
 ```actdiag
 [提供代码示例]
 ```
+````
 
 ### 期望结果
+
 [描述期望的行为或输出]
 
 ### 实际结果
+
 [描述实际的行为或输出]
 
 ### 环境信息
+
 - ActDiag 版本: X.X.X
 - 渲染工具: Kroki / Asciidoctor / 其他
 - 浏览器/OS: [如适用]
 
 ### 已尝试的方案
+
 - [ ] 方案 1
 - [ ] 方案 2
+
 ```
 
 ---
 
 *文档整理: DiagramAI 项目 | 基于社区讨论和实践经验*
+```

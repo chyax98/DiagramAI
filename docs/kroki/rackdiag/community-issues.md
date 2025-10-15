@@ -11,6 +11,7 @@
 #### Issue: 设备名称显示不完整
 
 **问题描述**:
+
 ```
 rackdiag {
   42U;
@@ -20,6 +21,7 @@ rackdiag {
 ```
 
 **社区解决方案**:
+
 ```
 // 方案 1: 使用缩写
 rackdiag {
@@ -48,6 +50,7 @@ rackdiag {
 **原因**: 默认字体不支持多字节字符
 
 **解决方案**:
+
 ```bash
 # Linux 系统
 rackdiag --font=/usr/share/fonts/truetype/wqy/wqy-microhei.ttf rack.diag
@@ -70,6 +73,7 @@ rackdiag {
 #### Issue: 如何计算机架剩余容量？
 
 **社区工具**:
+
 ```python
 #!/usr/bin/env python3
 # rack_capacity.py - 机架容量计算工具
@@ -130,6 +134,7 @@ if __name__ == '__main__':
 ```
 
 **使用**:
+
 ```bash
 python rack_capacity.py datacenter.diag
 ```
@@ -141,6 +146,7 @@ python rack_capacity.py datacenter.diag
 **问题**: 手动维护机架图效率低
 
 **社区方案**:
+
 ```python
 #!/usr/bin/env python3
 # dcim_to_rackdiag.py - DCIM 数据转 RackDiag
@@ -201,6 +207,7 @@ print(generate_rackdiag(dcim_data))
 ```
 
 **输出**:
+
 ```
 rackdiag {
   description = "DC01-A1";
@@ -221,6 +228,7 @@ rackdiag {
 **问题**: 刀片机箱包含多个刀片，如何表示？
 
 **最佳实践**:
+
 ```
 // 方案 1: 简化表示
 rackdiag {
@@ -250,6 +258,7 @@ rackdiag {
 **回答**: RackDiag 专注于物理布局，不支持连接线。建议组合使用：
 
 **推荐方案**:
+
 ```
 // 1. 使用 RackDiag 显示物理布局
 rackdiag {
@@ -272,6 +281,7 @@ nwdiag {
 ### Q3: 如何处理配线架和理线器？
 
 **最佳实践**:
+
 ```
 rackdiag {
   42U;
@@ -302,6 +312,7 @@ rackdiag {
 **社区共识**:
 
 1. **使用标准化命名**:
+
 ```
 rackdiag {
   description = "DC-LOCATION-ROW-RACK";
@@ -315,6 +326,7 @@ rackdiag {
 ```
 
 2. **版本控制**:
+
 ```bash
 # 将 .diag 文件纳入 Git
 git add datacenter/*.diag
@@ -322,6 +334,7 @@ git commit -m "Update rack A1 layout"
 ```
 
 3. **自动化文档**:
+
 ```bash
 # CI/CD 自动生成 SVG
 for file in racks/*.diag; do
@@ -334,6 +347,7 @@ done
 **问题**: 42U 机架塞满设备，图表过于拥挤
 
 **社区方案**:
+
 ```
 // 方案 1: 分区显示
 rackdiag {
@@ -369,6 +383,7 @@ rackdiag {
 **需求**: 典型的企业服务器机架配置
 
 **实现**:
+
 ```
 rackdiag {
   description = "Enterprise Standard Rack - 42U";
@@ -403,6 +418,7 @@ rackdiag {
 ```
 
 **关键设计**:
+
 - 电源在底部，便于布线
 - 网络在顶部，便于管理
 - 按功能分层
@@ -413,6 +429,7 @@ rackdiag {
 **需求**: 5G 边缘节点小型机架
 
 **实现**:
+
 ```
 rackdiag {
   description = "5G Edge Node - Rack 001";
@@ -429,6 +446,7 @@ rackdiag {
 ```
 
 **特点**:
+
 - 紧凑型 12U 机架
 - 包含边缘计算和 GPU 加速
 - 考虑散热（风扇）
@@ -438,6 +456,7 @@ rackdiag {
 **需求**: 展示整个机房布局
 
 **实现**:
+
 ```
 rackdiag {
   // 第一排 - 网络核心
@@ -491,6 +510,7 @@ rackdiag {
 **场景**: 从 Ansible inventory 生成机架图
 
 **实现**:
+
 ```yaml
 # ansible_playbook.yml
 - name: Generate Rack Diagrams
@@ -512,6 +532,7 @@ rackdiag {
 ```
 
 **模板** (rack.diag.j2):
+
 ```jinja2
 rackdiag {
   description = "{{ rack_name }}";
@@ -528,6 +549,7 @@ rackdiag {
 **场景**: 在机架图上标记故障设备
 
 **实现**:
+
 ```python
 #!/usr/bin/env python3
 # monitoring_rack.py
@@ -570,6 +592,7 @@ with open('rack_status.diag', 'w') as f:
 **场景**: 与 CMDB 保持同步
 
 **流程**:
+
 ```bash
 #!/bin/bash
 # sync_cmdb.sh
@@ -600,6 +623,7 @@ fi
 **问题**: 100+ 机架时，单个文件过大
 
 **解决方案**:
+
 ```bash
 # 分文件管理
 datacenter/
@@ -620,6 +644,7 @@ done
 ### 2. 命名标准化
 
 **推荐规范**:
+
 ```
 // 机架命名: DC-ROW-RACK
 description = "DC01-R03-A15";
@@ -633,6 +658,7 @@ description = "DC01-R03-A15";
 ### 3. 文档自动化
 
 **Makefile 示例**:
+
 ```makefile
 # Makefile
 DIAG_FILES := $(wildcard racks/*.diag)
@@ -654,6 +680,7 @@ clean:
 ```
 
 **使用**:
+
 ```bash
 make          # 生成所有图表
 make clean    # 清理生成文件
@@ -666,6 +693,7 @@ make clean    # 清理生成文件
 **问题报告**: "我的 42U 机架塞不下所有设备"
 
 **排查**:
+
 ```python
 # 检查脚本
 def check_capacity(diag_file):
@@ -697,6 +725,7 @@ def check_capacity(diag_file):
 **问题**: Kroki 渲染大型机架图超时
 
 **解决**:
+
 ```javascript
 // 增加超时时间
 const fetchWithTimeout = async (url, timeout = 30000) => {
@@ -720,21 +749,25 @@ const svg = await fetchWithTimeout(krokiUrl, 30000);
 ## 资源和工具链接
 
 ### 官方资源
+
 - [BlockDiag 文档](http://blockdiag.com/en/)
 - [RackDiag 示例](http://blockdiag.com/en/nwdiag/rackdiag-examples.html)
 - [GitHub 仓库](https://github.com/blockdiag/nwdiag)
 
 ### 社区工具
+
 - [RackDiag Generator](https://github.com/username/rackdiag-generator) - Web 界面
 - [DCIM to RackDiag](https://github.com/username/dcim2rackdiag) - 转换工具
 - [Rack Capacity Calculator](https://rackdiag-tools.example.com) - 在线工具
 
 ### 相关标准
+
 - [TIA-942 数据中心标准](https://www.tia-942.org/)
 - [19-inch Rack 标准](https://en.wikipedia.org/wiki/19-inch_rack)
 - [EIA-310-D 机架标准](https://global.ihs.com/doc_detail.cfm?document_name=EIA%2D310%2DD)
 
 ### 集成示例
+
 - [Ansible Integration](https://github.com/ansible-examples/rackdiag)
 - [Terraform Provider](https://github.com/terraform-providers/terraform-provider-rackdiag)
 - [Kubernetes Operator](https://github.com/k8s-operators/rackdiag-operator)

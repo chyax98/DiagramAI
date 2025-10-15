@@ -8,6 +8,7 @@
 ## 📚 核心官方文档
 
 ### 主文档站点
+
 - **官方网站**: https://plantuml.com
   - 完整的语言参考和示例
   - 支持所有图表类型的详细说明
@@ -20,6 +21,7 @@
 ### 图表类型文档
 
 #### UML 图表
+
 - **时序图**: https://plantuml.com/sequence-diagram
   - 参与者声明、消息传递、激活框
   - 循环、分支、并行结构
@@ -71,6 +73,7 @@
   - 约束和事件
 
 #### 非 UML 图表
+
 - **实体关系图 (ER)**: https://plantuml.com/ie-diagram
   - 实体和属性
   - 关系类型（一对一、一对多、多对多）
@@ -135,6 +138,7 @@
 ## 🔧 语法和功能文档
 
 ### 通用语法
+
 - **关键字参考**: https://plantuml-documentation.readthedocs.io/en/latest/
   - Ashley's PlantUML Documentation
   - 所有图表通用关键字
@@ -148,6 +152,7 @@
   - 自定义 Sprite 和宏
 
 ### 样式和主题
+
 - **Skinparam**: https://plantuml.com/skinparam
   - 全局样式参数
   - 颜色、字体、边框
@@ -164,6 +169,7 @@
   - 渐变色
 
 ### 高级功能
+
 - **预处理**: https://plantuml.com/preprocessing
   - 变量定义 (!define)
   - 条件包含 (!if/!else/!endif)
@@ -185,12 +191,14 @@
 ## 🐛 故障排查和 FAQ
 
 ### 官方 FAQ
+
 - **常见问题**: https://plantuml.com/faq
   - 布局问题解决方案
   - 性能优化建议
   - 社区论坛链接
 
 ### 社区资源
+
 - **官方论坛**: https://forum.plantuml.net
   - 用户讨论
   - 问题解答
@@ -206,6 +214,7 @@
 ## 📦 工具和集成
 
 ### 开发工具
+
 - **GitHub 仓库**: https://github.com/plantuml/plantuml
   - 源代码
   - Issue 跟踪: https://github.com/plantuml/plantuml/issues
@@ -217,6 +226,7 @@
   - API 接口
 
 ### 在线工具
+
 - **官方在线编辑器**: http://www.plantuml.com/plantuml/uml
   - 实时预览
   - 多种输出格式
@@ -232,12 +242,14 @@
 ## 📝 示例和教程
 
 ### 官方示例
+
 - **示例库**: https://plantuml.com/commons
   - 各类图表示例
   - 最佳实践
   - 模板代码
 
 ### 第三方教程
+
 - **ChatUML 文档**: https://docs.chatuml.com/docs/overview/dealing-with-syntax-errors
   - AI 辅助生成
   - 语法错误处理
@@ -248,12 +260,14 @@
 ## 🔗 相关资源
 
 ### Kroki 集成
+
 - **Kroki 官网**: https://kroki.io
   - PlantUML 渲染支持
   - API 文档
   - 多语言 SDK
 
 ### 依赖工具
+
 - **Graphviz**: https://graphviz.org
   - 某些图表类型需要
   - 布局引擎
@@ -272,21 +286,24 @@
 ## 🎯 学习路径建议
 
 ### 初学者
+
 1. 从**时序图**开始 - 语法最简单
 2. 学习**类图** - 理解关系类型
 3. 掌握**活动图** - 了解流程控制
 
 ### 进阶用户
+
 1. 学习**预处理**功能 - 提高代码复用
 2. 使用**标准库** - 减少重复工作
 3. 自定义**主题** - 统一视觉风格
 
 ### 高级用户
+
 1. 编写**宏和函数** - 创建 DSL
 2. 集成**CI/CD** - 自动生成文档
 3. 贡献**开源社区** - 提交 PR 和 Issue
 
 ---
 
-*最后更新: 2025-10-13*
-*维护者: DiagramAI Team*
+_最后更新: 2025-10-13_
+_维护者: DiagramAI Team_

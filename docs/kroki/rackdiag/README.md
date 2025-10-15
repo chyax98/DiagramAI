@@ -5,6 +5,7 @@ RackDiag 是 BlockDiag 包家族的一部分，专门用于生成机架服务器
 ## 📚 文档列表
 
 ### 1. [官方文档](./official-docs.md)
+
 - 基本概念和机架单元（U）
 - 核心语法和配置
 - 标准机架配置示例
@@ -12,6 +13,7 @@ RackDiag 是 BlockDiag 包家族的一部分，专门用于生成机架服务器
 - 命令行使用和集成
 
 ### 2. [语法规则详解](./syntax-rules.md)
+
 - 完整语法结构
 - 设备定位规则
 - 属性配置详解
@@ -19,6 +21,7 @@ RackDiag 是 BlockDiag 包家族的一部分，专门用于生成机架服务器
 - 语法检查清单
 
 ### 3. [常见错误及解决方案](./common-errors.md)
+
 - 语法错误处理
 - 位置冲突解决
 - 容量规划问题
@@ -26,6 +29,7 @@ RackDiag 是 BlockDiag 包家族的一部分，专门用于生成机架服务器
 - 调试技巧和验证脚本
 
 ### 4. [社区问题与案例](./community-issues.md)
+
 - GitHub Issues 精选
 - 数据中心最佳实践
 - 自动化集成方案
@@ -35,16 +39,18 @@ RackDiag 是 BlockDiag 包家族的一部分，专门用于生成机架服务器
 ## 🚀 快速开始
 
 ### 安装
+
 ```bash
 pip install nwdiag
 ```
 
 ### 基础示例
+
 ```
 rackdiag {
   // 机架配置
   16U;
-  
+
   // 设备定义
   1: UPS [2U];
   3: DB Server
@@ -54,12 +60,13 @@ rackdiag {
 ```
 
 ### 高级示例
+
 ```
 rackdiag {
   description = "Production Rack A1";
   ascending;
   42U;
-  
+
   1: PDU [2U] [30kg] [8A];
   5: Core Switch [2U];
   10: App Server 1 [2U];
@@ -69,6 +76,7 @@ rackdiag {
 ```
 
 ### 生成图表
+
 ```bash
 # 生成 SVG
 rackdiag -T svg rack.diag -o rack.svg
@@ -107,18 +115,21 @@ rackdiag --font=/path/to/font.ttf rack.diag
 ## 🏗️ 典型应用
 
 ### 企业数据中心
+
 - 42U 标准机架配置
 - 电源冗余设计
 - 网络分层架构
 - 存储和计算分离
 
 ### 边缘计算节点
+
 - 12U/16U 小型机架
 - 紧凑型设备布局
 - 5G MEC 部署
 - IoT 网关配置
 
 ### 云服务提供商
+
 - 高密度计算机架
 - 刀片服务器配置
 - 大规模存储阵列
@@ -127,6 +138,7 @@ rackdiag --font=/path/to/font.ttf rack.diag
 ## 🛠️ 自动化工具
 
 文档中包含多个实用脚本：
+
 - 容量计算工具
 - DCIM 数据转换
 - Ansible 集成

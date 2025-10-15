@@ -41,6 +41,7 @@ statement4
 ```
 
 **对象类型**:
+
 - `box` - 矩形
 - `circle` - 圆形
 - `ellipse` - 椭圆
@@ -129,6 +130,7 @@ box width boxwid height boxht
 ### 3.3 预定义变量
 
 **尺寸变量**:
+
 - `boxwid`, `boxht`, `boxrad`
 - `circlerad`, `circlewid`, `circleht`
 - `ellipsewid`, `ellipseht`
@@ -137,6 +139,7 @@ box width boxwid height boxht
 - 等等 (每种对象类型都有对应的变量)
 
 **全局变量**:
+
 - `charwid` - 字符宽度估计
 - `charht` - 字符高度估计
 - `thickness` - 默认线宽
@@ -163,6 +166,7 @@ box width boxwid height boxht
 ```
 
 **换算**:
+
 - 1 in = 2.54 cm = 25.4 mm
 - 1 in = 72 pt = 6 pc = 96 px (默认)
 
@@ -268,9 +272,11 @@ go <距离> <罗盘方向>
 ```
 
 **方向**:
+
 - `right`, `left`, `up`, `down`
 
 **罗盘方向**:
+
 - `n`, `north`
 - `ne`, `e`, `east`, `se`
 - `s`, `south`
@@ -324,6 +330,7 @@ behind <对象>            # 置于对象后面
 ### 6.2 文本属性
 
 **位置**:
+
 - `above` - 上方
 - `below` - 下方
 - `ljust` - 左对齐
@@ -331,6 +338,7 @@ behind <对象>            # 置于对象后面
 - `center` - 居中 (取消之前的对齐)
 
 **样式**:
+
 - `bold` - 粗体
 - `italic` - 斜体
 - `mono` / `monospace` - 等宽字体
@@ -363,6 +371,7 @@ arrow "Label" above aligned
 ```
 
 **锚点**:
+
 - `.n`, `.north`, `.t`, `.top`
 - `.ne`
 - `.e`, `.east`, `.right`

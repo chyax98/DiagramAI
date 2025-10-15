@@ -10,6 +10,7 @@
 ### 1. Workspace Structure
 
 **必需结构**:
+
 ```structurizr
 workspace [name] [description] {
   model {
@@ -23,6 +24,7 @@ workspace [name] [description] {
 ```
 
 **规则**:
+
 - `workspace` 是顶层结构，必须包含 `model` 块
 - `views` 块是可选的，但强烈推荐
 - `name` 和 `description` 可选
@@ -45,6 +47,7 @@ softwareSystem System Name
 ```
 
 **关键规则**:
+
 - 行尾换行符很重要
 - 长行可用 `\` 续行 (必须是行尾最后一个字符)
 - Token 之间必须有空白符
@@ -60,6 +63,7 @@ softwareSystem System Name
 ### 3. 命名唯一性
 
 **唯一性要求**:
+
 ```structurizr
 model {
   // ✅ 正确 - 不同类型可同名
@@ -82,6 +86,7 @@ model {
 ```
 
 **规则**:
+
 - 人员 (person) 名称必须全局唯一
 - 软件系统 (softwareSystem) 名称必须全局唯一
 - 容器 (container) 名称在同一软件系统内唯一
@@ -105,6 +110,7 @@ model {
 ```
 
 **规则**:
+
 - 标识符全局作用域
 - 允许字符: `a-zA-Z_0-9`
 - 必须全局唯一
@@ -134,6 +140,7 @@ workspace {
 ```
 
 **规则**:
+
 - 使用 `!identifiers hierarchical` 启用
 - 标识符作用域限定在父级元素内
 - 使用点号访问: `parent.child.grandchild`
@@ -327,11 +334,13 @@ views {
 ```
 
 **参数**:
+
 - `direction`: `lr` (左右), `rl`, `tb` (上下), `bt`
 - `rankSeparation`: 层级间距离 (像素, 默认 300)
 - `nodeSeparation`: 节点间距离 (像素, 默认 300)
 
 **示例**:
+
 ```structurizr
 autoLayout lr        // 左右，默认间距
 autoLayout tb 200    // 上下，层级间距 200px
@@ -396,6 +405,7 @@ model {
 ```
 
 **示例**:
+
 ```structurizr
 deploymentEnvironment "Production" {
   deploymentNode "AWS" {
@@ -422,6 +432,7 @@ views {
 ```
 
 **示例**:
+
 ```structurizr
 dynamic system "Login" "User login flow" {
   user -> webapp "1. Submits credentials"
@@ -444,6 +455,7 @@ views {
 ```
 
 **示例**:
+
 ```structurizr
 views {
   themes https://static.structurizr.com/themes/amazon-web-services-2023.04.30/theme.json
@@ -464,6 +476,7 @@ workspace {
 ```
 
 **规则**:
+
 - 相对路径或绝对路径
 - 文件内容会被插入到 `!include` 位置
 - 可嵌套包含
@@ -493,6 +506,7 @@ workspace {
 ```
 
 **规则**:
+
 - 常量名只能包含: `a-zA-Z0-9-_.`
 - 未找到的变量不会被替换
 - 支持环境变量
@@ -533,6 +547,7 @@ source -> destination "Description" {
 ```
 
 **规则**:
+
 - 逗号分隔
 - 无空格
 - 用于样式匹配
@@ -591,21 +606,22 @@ workspace extends base.dsl {
 
 ### 核心差异
 
-| 特性 | Structurizr DSL | C4-PlantUML |
-|------|----------------|-------------|
-| **语法类型** | 专用 DSL | PlantUML 宏 |
-| **模型概念** | 单一模型，多视图 | 每个图表独立 |
-| **关系管理** | 自动隐含关系 | 必须显式声明 |
-| **标识符** | 分层标识符支持 | 无 |
-| **布局控制** | 自动布局 (Graphviz) | PlantUML 布局 |
-| **导出格式** | 多种 (PlantUML/Mermaid/DOT) | PNG/SVG |
-| **工具链** | Structurizr Lite/CLI | PlantUML |
-| **文档集成** | 原生 Markdown/ADR | 无 |
-| **主题** | JSON 主题文件 | 样式命令 |
+| 特性         | Structurizr DSL             | C4-PlantUML   |
+| ------------ | --------------------------- | ------------- |
+| **语法类型** | 专用 DSL                    | PlantUML 宏   |
+| **模型概念** | 单一模型，多视图            | 每个图表独立  |
+| **关系管理** | 自动隐含关系                | 必须显式声明  |
+| **标识符**   | 分层标识符支持              | 无            |
+| **布局控制** | 自动布局 (Graphviz)         | PlantUML 布局 |
+| **导出格式** | 多种 (PlantUML/Mermaid/DOT) | PNG/SVG       |
+| **工具链**   | Structurizr Lite/CLI        | PlantUML      |
+| **文档集成** | 原生 Markdown/ADR           | 无            |
+| **主题**     | JSON 主题文件               | 样式命令      |
 
 ### 语法对比示例
 
 **Structurizr DSL**:
+
 ```structurizr
 workspace {
   model {
@@ -628,6 +644,7 @@ workspace {
 ```
 
 **C4-PlantUML**:
+
 ```plantuml
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
@@ -707,13 +724,13 @@ container "Name" "" "Technology"  // 跳过 description
 
 ### 支持的输出格式
 
-| 格式 | 支持 |
-|------|------|
-| SVG | ✅ |
-| PNG | ✅ |
-| PDF | ❌ |
-| TXT | ✅ |
-| BASE64 | ✅ |
+| 格式   | 支持 |
+| ------ | ---- |
+| SVG    | ✅   |
+| PNG    | ✅   |
+| PDF    | ❌   |
+| TXT    | ✅   |
+| BASE64 | ✅   |
 
 ### Kroki 限制
 

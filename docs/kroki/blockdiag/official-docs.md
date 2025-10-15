@@ -119,6 +119,7 @@ blockdiag --debug simple.diag
 ### 1. 节点定义
 
 #### 简单节点
+
 ```blockdiag
 blockdiag {
    A;
@@ -128,6 +129,7 @@ blockdiag {
 ```
 
 #### 带标签的节点
+
 ```blockdiag
 blockdiag {
    A [label = "Node A"];
@@ -139,6 +141,7 @@ blockdiag {
 ### 2. 边(连接)定义
 
 #### 基本连接
+
 ```blockdiag
 blockdiag {
    A -> B;
@@ -147,6 +150,7 @@ blockdiag {
 ```
 
 #### 链式连接
+
 ```blockdiag
 blockdiag {
    A -> B -> C -> D;
@@ -154,6 +158,7 @@ blockdiag {
 ```
 
 #### 分支连接 (v0.7.5+)
+
 ```blockdiag
 blockdiag {
    // 分支到多个子节点
@@ -565,16 +570,19 @@ fontpath = /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf
 ### 3. 多语言字体
 
 #### Linux (中文)
+
 ```bash
 blockdiag --font=/usr/share/fonts/truetype/wqy-microhei.ttc diagram.diag
 ```
 
 #### macOS (中文)
+
 ```bash
 blockdiag --font=/System/Library/Fonts/PingFang.ttc diagram.diag
 ```
 
 #### Windows (中文)
+
 ```bash
 blockdiag --font=C:\Windows\Fonts\msyh.ttc diagram.diag
 ```
@@ -717,21 +725,25 @@ blockdiag {
 ## 最佳实践
 
 ### 1. 命名约定
+
 - 使用有意义的节点名
 - 组名使用 snake_case
 - 避免特殊字符
 
 ### 2. 布局技巧
+
 - 合理使用分组组织结构
 - 使用 `folded` 控制复杂布局
 - 利用 `orientation` 调整方向
 
 ### 3. 样式一致性
+
 - 定义类以保持样式统一
 - 使用默认颜色设置主题
 - 保持字体大小适中
 
 ### 4. 性能优化
+
 - 避免过度嵌套分组
 - 大图拆分为多个小图
 - 使用 SVG 格式减小文件体积

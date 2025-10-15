@@ -13,6 +13,8 @@ import { dialog } from "@/components/ui/dialog/dialog";
 import { RENDER_LANGUAGES } from "@/lib/constants/diagram-types";
 
 import { logger } from "@/lib/utils/logger";
+
+// eslint-disable-next-line max-lines-per-function -- 页面组件包含完整的 UI 逻辑,拆分会降低可读性
 export default function HistoryPage() {
   const router = useRouter();
   const [histories, setHistories] = useState<GenerationHistory[]>([]);
@@ -170,6 +172,7 @@ export default function HistoryPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element -- SVG 图标,无需优化 */}
           <img
             src="/icons/alert-circle.svg"
             alt="错误"
@@ -300,6 +303,7 @@ export default function HistoryPage() {
         ) : (
           <div className="flex min-h-[400px] items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-white">
             <div className="text-center">
+              {/* eslint-disable-next-line @next/next/no-img-element -- SVG 图标,无需优化 */}
               <img src="/icons/inbox.svg" alt="空白" className="mx-auto h-16 w-16 opacity-40" />
               <p className="mt-4 text-lg font-medium text-slate-900">暂无历史记录</p>
               <p className="mt-2 text-sm text-slate-600">

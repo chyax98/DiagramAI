@@ -2,6 +2,7 @@
 
 > **Last Updated**: 2025-10-13
 > **Primary Sources**:
+>
 > - [Structurizr DSL Documentation](https://docs.structurizr.com/dsl)
 > - [Structurizr Official Site](https://structurizr.com/)
 
@@ -12,6 +13,7 @@
 Structurizr DSL is a text-based domain-specific language for creating software architecture diagrams based on the C4 model. It provides "diagrams as code" capabilities with a focus on architecture documentation.
 
 **Key Features**:
+
 - C4 model native support (System Context, Container, Component, Deployment)
 - Single model, multiple views
 - Workspace extension and composition
@@ -42,6 +44,7 @@ workspace "Name" "Description" {
 ```
 
 **Key Components**:
+
 - **model**: Elements (people, systems, containers, components) and relationships
 - **views**: Diagrams created from the model
 - **configuration**: Workspace-level settings
@@ -241,6 +244,7 @@ views {
 ### 10. Identifiers
 
 **Flat (default)**:
+
 ```structurizr
 model {
   user = person "User"
@@ -249,6 +253,7 @@ model {
 ```
 
 **Hierarchical**:
+
 ```structurizr
 workspace {
   !identifiers hierarchical
@@ -329,6 +334,7 @@ workspace {
 ```
 
 **model.dsl**:
+
 ```structurizr
 model {
   user = person "User"
@@ -353,6 +359,7 @@ workspace {
 ```
 
 **Directory structure**:
+
 ```
 docs/
 └── system/
@@ -376,6 +383,7 @@ workspace {
 ```
 
 **ADR format** (adr-001-use-microservices.md):
+
 ```markdown
 # 1. Use Microservices Architecture
 
@@ -396,10 +404,12 @@ We will use microservices...
 ## Consequences
 
 Positive:
+
 - Independent scaling
 - Technology diversity
 
 Negative:
+
 - Increased complexity
 - Distributed system challenges
 ```
@@ -472,6 +482,7 @@ views {
 ```
 
 **Popular themes**:
+
 - Amazon Web Services
 - Microsoft Azure
 - Google Cloud Platform
@@ -493,6 +504,7 @@ views {
 ```
 
 **Parameters**:
+
 - Direction: `lr` (left-right), `rl`, `tb` (top-bottom), `bt`
 - Rank separation: pixels between ranks (default: 300)
 - Node separation: pixels between nodes (default: 300)

@@ -11,6 +11,7 @@
 #### Issue: 中文字符显示为方框
 
 **问题描述**:
+
 ```
 packetdiag {
   0-15: 源端口    // 中文显示为方框
@@ -20,6 +21,7 @@ packetdiag {
 **原因**: 默认字体不支持中文字符
 
 **解决方案**:
+
 ```bash
 # 方法 1: 指定支持中文的字体
 packetdiag --font=/usr/share/fonts/truetype/wqy/wqy-microhei.ttf diagram.diag
@@ -37,6 +39,7 @@ packetdiag {
 **问题**: SVG 输出的文字模糊或重叠
 
 **解决方案**:
+
 ```bash
 # 调整 node_height 提高清晰度
 packetdiag {
@@ -55,6 +58,7 @@ packetdiag -T svg diagram.diag -o output.svg
 #### Issue: 特殊字符导致解析失败
 
 **问题代码**:
+
 ```
 packetdiag {
   0-15: Field (with parentheses)    // 可能导致问题
@@ -63,6 +67,7 @@ packetdiag {
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   0-15: Field with parentheses      // ✅ 避免特殊字符
@@ -73,6 +78,7 @@ packetdiag {
 #### Issue: 注释语法不生效
 
 **错误写法**:
+
 ```
 packetdiag {
   # 这样的注释不支持
@@ -81,6 +87,7 @@ packetdiag {
 ```
 
 **正确写法**:
+
 ```
 packetdiag {
   // 单行注释
@@ -101,6 +108,7 @@ packetdiag {
 **原因**: 位宽不是 colwidth 的倍数
 
 **示例**:
+
 ```
 packetdiag {
   colwidth = 32
@@ -110,6 +118,7 @@ packetdiag {
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   colwidth = 16     // ✅ 调整 colwidth 适应位宽
@@ -132,6 +141,7 @@ packetdiag {
 **回答**: PacketDiag 不直接支持多行文本，但可以用缩写或符号
 
 **解决方案**:
+
 ```
 // 方案 1: 使用缩写
 packetdiag {
@@ -154,6 +164,7 @@ packetdiag {
 **问题**: 协议中某些字段长度可变（如 Options）
 
 **最佳实践**:
+
 ```
 packetdiag {
   colwidth = 32
@@ -176,6 +187,7 @@ packetdiag {
 **回答**: 字段名可以包含简单说明
 
 **示例**:
+
 ```
 packetdiag {
   0: ECN (1=enabled) [rotate = 270]
@@ -193,11 +205,13 @@ packetdiag {
 **问题**: "PacketDiag、Bytefield、手绘图，哪个更适合文档?"
 
 **社区共识**:
+
 - **PacketDiag**: 适合标准协议头部（TCP、IP、UDP）
 - **Bytefield**: 更灵活，支持复杂布局
 - **手绘图**: Excalidraw 适合快速草图
 
 **最佳实践**:
+
 ```
 # PacketDiag 适用场景
 - RFC 风格的网络协议文档
@@ -215,6 +229,7 @@ packetdiag {
 **问题**: "能否从 Wireshark 抓包自动生成 PacketDiag?"
 
 **社区方案**:
+
 ```python
 # 示例: 从协议定义生成 PacketDiag
 protocol = {
@@ -241,6 +256,7 @@ print(generate_packetdiag(protocol))
 **需求**: 绘制标准 TCP 头部（RFC 793）
 
 **实现**:
+
 ```
 packetdiag {
   colwidth = 32
@@ -267,6 +283,7 @@ packetdiag {
 ```
 
 **关键点**:
+
 - 使用 rotate 处理单比特标志位
 - colheight 表示可变长度字段
 - 严格按照 RFC 规范的位顺序
@@ -276,6 +293,7 @@ packetdiag {
 **需求**: 设计游戏网络协议
 
 **实现**:
+
 ```
 packetdiag {
   colwidth = 32
@@ -293,6 +311,7 @@ packetdiag {
 ```
 
 **设计考虑**:
+
 - 版本字段用于协议演进
 - Session ID 用于多路复用
 - Timestamp 用于延迟测量
@@ -303,6 +322,7 @@ packetdiag {
 **需求**: 低功耗传感器协议
 
 **实现**:
+
 ```
 packetdiag {
   colwidth = 16
@@ -319,6 +339,7 @@ packetdiag {
 ```
 
 **优化要点**:
+
 - 使用 16 位 colwidth 节省带宽
 - 紧凑布局减少包大小
 - CRC 校验确保数据完整性
@@ -332,11 +353,12 @@ packetdiag {
 **原因**: 复杂图表或网络延迟
 
 **解决方案**:
+
 ```javascript
 // 设置超时时间
 const krokiUrl = `https://kroki.io/packetdiag/svg/${encoded}`;
 const response = await fetch(krokiUrl, {
-  timeout: 10000  // 10 秒超时
+  timeout: 10000, // 10 秒超时
 });
 ```
 
@@ -345,6 +367,7 @@ const response = await fetch(krokiUrl, {
 **问题**: 在 CI 中自动生成图表
 
 **解决方案**:
+
 ```yaml
 # GitHub Actions 示例
 - name: Generate PacketDiag
@@ -360,6 +383,7 @@ const response = await fetch(krokiUrl, {
 **问题**: 字段过多导致渲染慢
 
 **优化**:
+
 ```
 // 优化前: 64 个单比特字段
 0: Bit0
@@ -377,6 +401,7 @@ const response = await fetch(krokiUrl, {
 ### 2. 合理使用 colwidth
 
 **建议**:
+
 ```
 // 小型协议头（< 64 位）
 colwidth = 8
@@ -393,6 +418,7 @@ colwidth = 64
 **问题**: 每个字段都用 rotate 或 colheight
 
 **优化**:
+
 ```
 // 仅在必要时使用属性
 0-7: Normal Field
@@ -403,16 +429,19 @@ colwidth = 64
 ## 资源链接
 
 ### 官方资源
+
 - [BlockDiag 官方文档](http://blockdiag.com/en/)
 - [GitHub 仓库](https://github.com/blockdiag/nwdiag)
 - [PyPI 包页面](https://pypi.org/project/nwdiag/)
 
 ### 社区资源
+
 - [Stack Overflow - packetdiag 标签](https://stackoverflow.com/questions/tagged/packetdiag)
 - [r/networking 相关讨论](https://www.reddit.com/r/networking/comments/8dbs0k/tip_for_documenting_rack_rackdiagram/)
 - [Asciidoctor Diagram 文档](https://docs.asciidoctor.org/diagram-extension/latest/diagram_types/nwdiag/)
 
 ### 示例集合
+
 - [官方示例库](http://blockdiag.com/en/nwdiag/packetdiag-examples.html)
 - [RFC 风格示例](https://github.com/blockdiag/nwdiag/tree/master/examples)
 

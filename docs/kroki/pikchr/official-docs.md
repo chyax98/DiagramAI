@@ -13,11 +13,13 @@
 ## 核心特性
 
 ### 1. 简洁设计
+
 - 单遍解析器，简单直观
 - 受 Kernighan 的 PIC 语言启发
 - 相对定位，避免硬编码坐标
 
 ### 2. Markdown 集成
+
 设计为嵌入 Markdown 的 fenced code blocks:
 
 ````markdown
@@ -29,12 +31,14 @@ circle "Done"
 ````
 
 ### 3. 零依赖
+
 - 纯 C 实现，单个源文件
 - 不依赖外部库
 - 直接生成 SVG
 - 易于集成到其他系统
 
 ### 4. 相对布局
+
 - 自动对象堆叠
 - 相对位置引用
 - 动态尺寸计算
@@ -98,6 +102,7 @@ ellipse wid 3cm ht 1.5cm
 ```
 
 **支持的单位**:
+
 - `in` - 英寸 (默认)
 - `cm` - 厘米
 - `mm` - 毫米
@@ -121,6 +126,7 @@ line color red thickness 0.05
 ```
 
 **颜色格式**:
+
 - 颜色名: `red`, `lightblue`, `AliceBlue`
 - 十六进制: `0xFF0000` (注意是整数格式)
 - 负数或 "None"/"Off": 透明
@@ -146,6 +152,7 @@ oval invisible
 ```
 
 另外还有:
+
 - `.start` 和 `.end` - 根据布局方向变化
 - `.t`, `.top` - 等同于 `.n`
 - `.bot`, `.bottom` - 等同于 `.s`
@@ -163,6 +170,7 @@ oval "C" at 2cm below last box
 ```
 
 关键词:
+
 - `previous` / `last` - 上一个对象
 - `first` / `1st` - 第一个对象
 - `2nd`, `3rd`, `4th` ... - 序数引用
@@ -176,6 +184,7 @@ arrow from B1.e to C1.w
 ```
 
 标签规则:
+
 - 以大写字母开头
 - 后跟字母、数字或下划线
 - 以冒号结尾
@@ -203,6 +212,7 @@ arrow from B1.s \\
 ```
 
 **路径命令**:
+
 - `from` _位置_ - 起点
 - `to` _位置_ - 终点
 - `then to` _位置_ - 中间点
@@ -234,6 +244,7 @@ arrow "Label" above
 ### 文本属性
 
 **位置**:
+
 - `above` - 上方
 - `below` - 下方
 - `ljust` - 左对齐
@@ -241,6 +252,7 @@ arrow "Label" above
 - `center` - 居中 (默认)
 
 **样式**:
+
 - `bold` - 粗体
 - `italic` - 斜体
 - `mono` / `monospace` - 等宽字体
@@ -271,6 +283,7 @@ box "C"
 ```
 
 容器特性:
+
 - 独立坐标系统 (原点在 0,0)
 - 可作为整体定位
 - 支持嵌套
@@ -310,6 +323,7 @@ circle radius sqrt(2)*0.5cm
 ```
 
 **支持的函数**:
+
 - `abs(x)` - 绝对值
 - `cos(x)` - 余弦 (弧度)
 - `sin(x)` - 正弦 (弧度)
@@ -452,9 +466,9 @@ print(svg.decode('utf-8'))
 
 ```javascript
 // 使用 Pikchr WASM
-import pikchr from 'pikchr-wasm';
+import pikchr from "pikchr-wasm";
 
-const svg = pikchr('box; arrow; circle');
+const svg = pikchr("box; arrow; circle");
 document.body.innerHTML = svg;
 ```
 
@@ -567,18 +581,21 @@ arrow from B.s down 0.5 then left until even with A then down 0.2 "Response" abo
 ## 参考资源
 
 ### 官方文档
+
 - **主页**: https://pikchr.org
 - **用户手册**: https://pikchr.org/home/doc/trunk/doc/userman.md
 - **语法规范**: https://pikchr.org/home/doc/trunk/doc/grammar.md
 - **Fossil 集成**: https://fossil-scm.org/home/doc/tip/www/pikchr.md
 
 ### 学习资源
+
 - **Kernighan PIC**: https://pikchr.org/home/uv/pic.pdf
 - **DPIC 文档**: https://pikchr.org/home/uv/dpic-doc.pdf
 - **示例库**: https://pikchr.org/home/pikchrshow
 - **SQLite 语法图**: https://pikchr.org/home/doc/trunk/doc/sqlitesyntax.md
 
 ### 相关项目
+
 - **Fossil SCM**: https://fossil-scm.org (原生支持)
 - **SQLite**: https://sqlite.org (用于语法图)
 - **Kroki**: https://kroki.io (多图表工具集成)

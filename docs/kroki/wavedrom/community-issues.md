@@ -8,11 +8,13 @@
 ### 1. Vue 3 集成错误
 
 **问题描述**: 在 Vue 3.4.21 中使用 WaveDrom 3.5.0 时出现错误:
+
 ```
 Uncaught (in promise) TypeError: Cannot read properties of undefined
 ```
 
 **原因分析**:
+
 - WaveDrom 尝试访问未定义的 DOM 元素
 - Vue 3 的响应式系统导致时序问题
 - 生命周期钩子调用时机不当
@@ -25,32 +27,31 @@ Uncaught (in promise) TypeError: Cannot read properties of undefined
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick } from "vue";
 
-const waveContainer = ref(null)
+const waveContainer = ref(null);
 
 onMounted(async () => {
   // 等待 DOM 完全渲染
-  await nextTick()
+  await nextTick();
 
   // 动态导入 WaveDrom
-  const WaveDrom = await import('wavedrom')
+  const WaveDrom = await import("wavedrom");
 
   const source = {
-    signal: [
-      { name: "clk", wave: "p......" }
-    ]
-  }
+    signal: [{ name: "clk", wave: "p......" }],
+  };
 
   // 确保容器存在
   if (waveContainer.value) {
-    WaveDrom.renderWaveForm(0, source, waveContainer.value)
+    WaveDrom.renderWaveForm(0, source, waveContainer.value);
   }
-})
+});
 </script>
 ```
 
 **相关 Issues**:
+
 - [wavedrom/wavedrom#xxx](https://github.com/wavedrom/wavedrom/issues)
 - Vue 用户社区讨论
 
@@ -59,6 +60,7 @@ onMounted(async () => {
 **问题描述**: 当图表包含大量信号(>100)时,渲染变慢或浏览器卡死
 
 **典型场景**:
+
 - 总线信号展示(32位、64位)
 - 复杂协议时序
 - 长时间序列数据
@@ -66,6 +68,7 @@ onMounted(async () => {
 **解决方案**:
 
 **方案 1: 分段渲染**
+
 ```json
 // 将长波形拆分为多个较短的图表
 {
@@ -77,6 +80,7 @@ onMounted(async () => {
 ```
 
 **方案 2: 使用 hscale 优化**
+
 ```json
 {
   "signal": [...],
@@ -88,21 +92,23 @@ onMounted(async () => {
 ```
 
 **方案 3: 虚拟化加载**
+
 ```javascript
 // 懒加载不可见的波形段
 function renderVisibleWaves(scrollPosition) {
-  const visibleRange = calculateVisibleRange(scrollPosition)
+  const visibleRange = calculateVisibleRange(scrollPosition);
   const partialSource = {
-    signal: fullSource.signal.map(sig => ({
+    signal: fullSource.signal.map((sig) => ({
       ...sig,
-      wave: sig.wave.substring(visibleRange.start, visibleRange.end)
-    }))
-  }
-  WaveDrom.renderWaveForm(0, partialSource, canvas)
+      wave: sig.wave.substring(visibleRange.start, visibleRange.end),
+    })),
+  };
+  WaveDrom.renderWaveForm(0, partialSource, canvas);
 }
 ```
 
 **性能优化建议**:
+
 1. 限制单个图表的信号数量(<50)
 2. 避免过长的波形字符串(<200字符)
 3. 使用 `skin: "narrow"` 减少渲染开销
@@ -113,60 +119,64 @@ function renderVisibleWaves(scrollPosition) {
 **问题描述**: 在较大的 nomnoml 图表中无法使用文本搜索功能
 
 **重现步骤**:
+
 1. 创建包含 >100 个节点的图表
 2. 在浏览器中按 Ctrl+F 搜索
 3. 搜索无法高亮或定位元素
 
 **原因**:
+
 - SVG 文本元素的搜索支持有限
 - 浏览器对 SVG 内容的搜索实现不一致
 
 **解决方案**:
 
 **方案 1: 添加自定义搜索**
+
 ```javascript
 function searchInWaveDrom(searchTerm) {
   // 获取所有文本元素
-  const textElements = document.querySelectorAll('svg text')
+  const textElements = document.querySelectorAll("svg text");
 
-  textElements.forEach(el => {
+  textElements.forEach((el) => {
     if (el.textContent.includes(searchTerm)) {
       // 高亮匹配项
-      el.style.fill = 'red'
-      el.style.fontWeight = 'bold'
+      el.style.fill = "red";
+      el.style.fontWeight = "bold";
 
       // 滚动到视图
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
     } else {
       // 重置样式
-      el.style.fill = ''
-      el.style.fontWeight = ''
+      el.style.fill = "";
+      el.style.fontWeight = "";
     }
-  })
+  });
 }
 ```
 
 **方案 2: 使用数据属性**
+
 ```javascript
 // 渲染时添加数据属性
-WaveDrom.renderWaveForm = (function(original) {
-  return function(...args) {
-    const result = original.apply(this, args)
+WaveDrom.renderWaveForm = (function (original) {
+  return function (...args) {
+    const result = original.apply(this, args);
 
     // 为每个元素添加搜索标记
-    const texts = document.querySelectorAll('svg text')
-    texts.forEach(el => {
-      el.setAttribute('data-search', el.textContent.toLowerCase())
-    })
+    const texts = document.querySelectorAll("svg text");
+    texts.forEach((el) => {
+      el.setAttribute("data-search", el.textContent.toLowerCase());
+    });
 
-    return result
-  }
-})(WaveDrom.renderWaveForm)
+    return result;
+  };
+})(WaveDrom.renderWaveForm);
 
 // 搜索函数
 function search(term) {
-  const selector = `svg text[data-search*="${term.toLowerCase()}"]`
-  return document.querySelectorAll(selector)
+  const selector = `svg text[data-search*="${term.toLowerCase()}"]`;
+  return document.querySelectorAll(selector);
 }
 ```
 
@@ -175,6 +185,7 @@ function search(term) {
 **问题描述**: 在 TypeScript 项目中使用 WaveDrom 时缺少类型定义
 
 **错误信息**:
+
 ```
 Could not find a declaration file for module 'wavedrom'
 ```
@@ -182,56 +193,58 @@ Could not find a declaration file for module 'wavedrom'
 **解决方案**:
 
 **方案 1: 创建类型声明文件**
+
 ```typescript
 // wavedrom.d.ts
-declare module 'wavedrom' {
+declare module "wavedrom" {
   export interface WaveSignal {
-    name: string
-    wave: string
-    data?: string[]
-    node?: string
-    period?: number
-    phase?: number
+    name: string;
+    wave: string;
+    data?: string[];
+    node?: string;
+    period?: number;
+    phase?: number;
   }
 
   export interface WaveConfig {
-    hscale?: number
-    skin?: 'default' | 'narrow' | 'lowkey'
+    hscale?: number;
+    skin?: "default" | "narrow" | "lowkey";
   }
 
   export interface WaveSource {
-    signal: (WaveSignal | string[] | {})[]
-    config?: WaveConfig
+    signal: (WaveSignal | string[] | {})[];
+    config?: WaveConfig;
     head?: {
-      text?: string | any[]
-      tick?: number
-      tock?: number
-      every?: number
-    }
+      text?: string | any[];
+      tick?: number;
+      tock?: number;
+      every?: number;
+    };
     foot?: {
-      text?: string | any[]
-      tock?: number
-    }
-    edge?: string[]
+      text?: string | any[];
+      tock?: number;
+    };
+    edge?: string[];
   }
 
   export function renderWaveForm(
     index: number,
     source: WaveSource,
     target: HTMLElement | string
-  ): void
+  ): void;
 
-  export function renderSvg(source: WaveSource): string
+  export function renderSvg(source: WaveSource): string;
 
-  export function ProcessAll(): void
+  export function ProcessAll(): void;
 }
 ```
 
 **方案 2: 使用 any 类型(临时方案)**
+
 ```typescript
-declare module 'wavedrom' {
-  const WaveDrom: any
-  export = WaveDrom
+declare module "wavedrom" {
+  const WaveDrom: any;
+  export = WaveDrom;
 }
 ```
 
@@ -240,6 +253,7 @@ declare module 'wavedrom' {
 **问题描述**: 多个箭头在同一区域时相互重叠,难以区分
 
 **示例**:
+
 ```json
 {
   "signal": [
@@ -249,7 +263,7 @@ declare module 'wavedrom' {
   ],
   "edge": [
     "a->b setup",
-    "a->c hold",    // 重叠
+    "a->c hold", // 重叠
     "b->c delay"
   ]
 }
@@ -258,51 +272,48 @@ declare module 'wavedrom' {
 **解决方案**:
 
 **方案 1: 调整节点位置**
+
 ```json
 {
   "signal": [
     { "name": "A", "wave": "01..", "node": ".a.." },
     { "name": "B", "wave": "0.1.", "node": "..b." },
-    { "name": "C", "wave": "0..1", "node": "....c" },  // 延后节点位置
-    { "node": "...d" }  // 添加中间节点
+    { "name": "C", "wave": "0..1", "node": "....c" }, // 延后节点位置
+    { "node": "...d" } // 添加中间节点
   ],
-  "edge": [
-    "a->b setup",
-    "a->d hold",
-    "d->c",
-    "b->c delay"
-  ]
+  "edge": ["a->b setup", "a->d hold", "d->c", "b->c delay"]
 }
 ```
 
 **方案 2: 使用不同箭头类型**
+
 ```json
 {
   "edge": [
-    "a->b setup",     // 直线箭头
-    "a~>c hold",      // 曲线箭头(区分)
-    "b-|>c delay"     // 直角箭头(区分)
+    "a->b setup", // 直线箭头
+    "a~>c hold", // 曲线箭头(区分)
+    "b-|>c delay" // 直角箭头(区分)
   ]
 }
 ```
 
 **方案 3: 分组显示**
+
 ```json
 // 将相关信号分组,减少箭头交叉
 {
   "signal": [
-    ["Setup Group",
+    [
+      "Setup Group",
       { "name": "A", "wave": "01..", "node": ".a.." },
       { "name": "B", "wave": "0.1.", "node": "..b." }
     ],
     {},
-    ["Hold Group",
-      { "name": "C", "wave": "0..1", "node": "...c" }
-    ]
+    ["Hold Group", { "name": "C", "wave": "0..1", "node": "...c" }]
   ],
   "edge": [
     "a->b setup",
-    "a~>c hold"  // 跨组箭头更清晰
+    "a~>c hold" // 跨组箭头更清晰
   ]
 }
 ```
@@ -314,6 +325,7 @@ declare module 'wavedrom' {
 **问题**: 在 Markdown 中嵌入 WaveDrom 代码块不渲染
 
 **场景**:
+
 - GitBook
 - VuePress
 - Docsify
@@ -322,6 +334,7 @@ declare module 'wavedrom' {
 **解决方案**:
 
 **GitBook 插件**:
+
 ```json
 // book.json
 {
@@ -329,38 +342,43 @@ declare module 'wavedrom' {
 }
 ```
 
-```markdown
-```wavedrom
+`````markdown
+````wavedrom
 {
   signal: [
     { name: "clk", wave: "p...." }
   ]
 }
 ​```
-```
+````
+`````
+
+````
 
 **VuePress 配置**:
+
 ```javascript
 // .vuepress/config.js
 module.exports = {
   markdown: {
-    extendMarkdown: md => {
-      md.use(require('markdown-it-wavedrom'))
-    }
-  }
-}
+    extendMarkdown: (md) => {
+      md.use(require("markdown-it-wavedrom"));
+    },
+  },
+};
 ```
 
 **通用方案(自定义)**:
+
 ```javascript
 // 查找代码块并渲染
-document.querySelectorAll('pre code.language-wavedrom').forEach(block => {
-  const source = JSON.parse(block.textContent)
-  const container = document.createElement('div')
+document.querySelectorAll("pre code.language-wavedrom").forEach((block) => {
+  const source = JSON.parse(block.textContent);
+  const container = document.createElement("div");
 
-  block.parentElement.replaceWith(container)
-  WaveDrom.renderWaveForm(0, source, container)
-})
+  block.parentElement.replaceWith(container);
+  WaveDrom.renderWaveForm(0, source, container);
+});
 ```
 
 ### 7. React 组件封装
@@ -368,42 +386,44 @@ document.querySelectorAll('pre code.language-wavedrom').forEach(block => {
 **问题**: 在 React 中多次渲染导致内存泄漏
 
 **错误实现**:
+
 ```jsx
 // ❌ 错误 - 每次渲染都创建新实例
 function WaveForm({ source }) {
   useEffect(() => {
-    WaveDrom.renderWaveForm(0, source, 'wave-container')
-  })  // 缺少依赖数组
+    WaveDrom.renderWaveForm(0, source, "wave-container");
+  }); // 缺少依赖数组
 
-  return <div id="wave-container"></div>
+  return <div id="wave-container"></div>;
 }
 ```
 
 **正确实现**:
+
 ```jsx
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from "react";
 
 function WaveForm({ source }) {
-  const containerRef = useRef(null)
+  const containerRef = useRef(null);
 
   useEffect(() => {
     if (containerRef.current) {
       // 清空容器
-      containerRef.current.innerHTML = ''
+      containerRef.current.innerHTML = "";
 
       // 渲染新内容
-      WaveDrom.renderWaveForm(0, source, containerRef.current)
+      WaveDrom.renderWaveForm(0, source, containerRef.current);
     }
 
     // 清理函数
     return () => {
       if (containerRef.current) {
-        containerRef.current.innerHTML = ''
+        containerRef.current.innerHTML = "";
       }
-    }
-  }, [source])  // source 改变时重新渲染
+    };
+  }, [source]); // source 改变时重新渲染
 
-  return <div ref={containerRef}></div>
+  return <div ref={containerRef}></div>;
 }
 ```
 
@@ -412,6 +432,7 @@ function WaveForm({ source }) {
 **问题**: 在 Next.js/Nuxt.js 中服务端渲染失败
 
 **错误**:
+
 ```
 ReferenceError: document is not defined
 ```
@@ -421,6 +442,7 @@ ReferenceError: document is not defined
 **解决方案**:
 
 **Next.js**:
+
 ```jsx
 import dynamic from 'next/dynamic'
 
@@ -436,6 +458,7 @@ export default function Page() {
 ```
 
 **Nuxt.js**:
+
 ```vue
 <template>
   <client-only>
@@ -446,17 +469,18 @@ export default function Page() {
 <script>
 export default {
   components: {
-    WaveForm: () => import('~/components/WaveForm.vue')
-  }
-}
+    WaveForm: () => import("~/components/WaveForm.vue"),
+  },
+};
 </script>
 ```
 
 **通用方案**:
+
 ```javascript
 // 仅在客户端加载
-if (typeof window !== 'undefined') {
-  const WaveDrom = require('wavedrom')
+if (typeof window !== "undefined") {
+  const WaveDrom = require("wavedrom");
   // 使用 WaveDrom
 }
 ```
@@ -468,20 +492,22 @@ if (typeof window !== 'undefined') {
 **问题**: 页面 CSS 影响 WaveDrom 渲染
 
 **常见冲突**:
+
 ```css
 /* 全局样式影响 SVG */
 svg {
-  max-width: 100%;  /* 导致图表被压缩 */
+  max-width: 100%; /* 导致图表被压缩 */
 }
 
 text {
-  font-family: Arial;  /* 覆盖 WaveDrom 字体 */
+  font-family: Arial; /* 覆盖 WaveDrom 字体 */
 }
 ```
 
 **解决方案**:
 
 **方案 1: 使用命名空间**
+
 ```css
 /* 仅对 WaveDrom 容器应用样式 */
 .wavedrom-container svg {
@@ -489,11 +515,12 @@ text {
 }
 
 .wavedrom-container text {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 ```
 
 **方案 2: 使用 CSS 隔离**
+
 ```html
 <div style="all: initial;">
   <div id="wave-container"></div>
@@ -501,12 +528,13 @@ text {
 ```
 
 **方案 3: Shadow DOM**
-```javascript
-const shadow = document.getElementById('host').attachShadow({ mode: 'open' })
-const container = document.createElement('div')
-shadow.appendChild(container)
 
-WaveDrom.renderWaveForm(0, source, container)
+```javascript
+const shadow = document.getElementById("host").attachShadow({ mode: "open" });
+const container = document.createElement("div");
+shadow.appendChild(container);
+
+WaveDrom.renderWaveForm(0, source, container);
 ```
 
 ### 10. 深色模式适配
@@ -516,6 +544,7 @@ WaveDrom.renderWaveForm(0, source, container)
 **解决方案**:
 
 **方案 1: 使用皮肤**
+
 ```json
 {
   "signal": [...],
@@ -526,6 +555,7 @@ WaveDrom.renderWaveForm(0, source, container)
 ```
 
 **方案 2: CSS 过滤器**
+
 ```css
 @media (prefers-color-scheme: dark) {
   .wavedrom-container svg {
@@ -535,18 +565,19 @@ WaveDrom.renderWaveForm(0, source, container)
 ```
 
 **方案 3: 自定义主题**
+
 ```javascript
 // 动态修改 SVG 颜色
 function applyDarkMode(svgElement) {
-  svgElement.querySelectorAll('[fill="#000"]').forEach(el => {
-    el.setAttribute('fill', '#fff')
-  })
+  svgElement.querySelectorAll('[fill="#000"]').forEach((el) => {
+    el.setAttribute("fill", "#fff");
+  });
 
-  svgElement.querySelectorAll('[stroke="#000"]').forEach(el => {
-    el.setAttribute('stroke', '#fff')
-  })
+  svgElement.querySelectorAll('[stroke="#000"]').forEach((el) => {
+    el.setAttribute("stroke", "#fff");
+  });
 
-  svgElement.style.backgroundColor = '#1e1e1e'
+  svgElement.style.backgroundColor = "#1e1e1e";
 }
 ```
 
@@ -561,43 +592,46 @@ function applyDarkMode(svgElement) {
 **优化方案**:
 
 **方案 1: 使用 requestAnimationFrame**
+
 ```javascript
-let updateScheduled = false
+let updateScheduled = false;
 
 function updateWaveform(newData) {
   if (!updateScheduled) {
-    updateScheduled = true
+    updateScheduled = true;
 
     requestAnimationFrame(() => {
-      WaveDrom.renderWaveForm(0, newData, container)
-      updateScheduled = false
-    })
+      WaveDrom.renderWaveForm(0, newData, container);
+      updateScheduled = false;
+    });
   }
 }
 ```
 
 **方案 2: 增量更新**
+
 ```javascript
 // 只更新变化的部分
 function incrementalUpdate(newSignals) {
-  const svg = container.querySelector('svg')
+  const svg = container.querySelector("svg");
 
   newSignals.forEach((signal, index) => {
-    const textElement = svg.querySelector(`text[data-index="${index}"]`)
+    const textElement = svg.querySelector(`text[data-index="${index}"]`);
     if (textElement && textElement.textContent !== signal.name) {
-      textElement.textContent = signal.name
+      textElement.textContent = signal.name;
     }
-  })
+  });
 }
 ```
 
 **方案 3: 防抖动**
+
 ```javascript
-import debounce from 'lodash/debounce'
+import debounce from "lodash/debounce";
 
 const debouncedUpdate = debounce((data) => {
-  WaveDrom.renderWaveForm(0, data, container)
-}, 100)  // 100ms 防抖
+  WaveDrom.renderWaveForm(0, data, container);
+}, 100); // 100ms 防抖
 ```
 
 ### 12. 大数据量处理
@@ -607,12 +641,13 @@ const debouncedUpdate = debounce((data) => {
 **解决方案**:
 
 **数据抽样**:
+
 ```javascript
 function sampleData(data, maxPoints = 200) {
-  if (data.length <= maxPoints) return data
+  if (data.length <= maxPoints) return data;
 
-  const step = Math.floor(data.length / maxPoints)
-  return data.filter((_, index) => index % step === 0)
+  const step = Math.floor(data.length / maxPoints);
+  return data.filter((_, index) => index % step === 0);
 }
 
 const sampledSource = {
@@ -620,24 +655,25 @@ const sampledSource = {
     {
       name: "data",
       wave: "x" + "=".repeat(sampledData.length) + "x",
-      data: sampleData(largeDataset)
-    }
-  ]
-}
+      data: sampleData(largeDataset),
+    },
+  ],
+};
 ```
 
 **数据聚合**:
+
 ```javascript
 function aggregateData(data, windowSize = 10) {
-  const aggregated = []
+  const aggregated = [];
 
   for (let i = 0; i < data.length; i += windowSize) {
-    const window = data.slice(i, i + windowSize)
-    const avg = window.reduce((a, b) => a + b, 0) / window.length
-    aggregated.push(Math.round(avg))
+    const window = data.slice(i, i + windowSize);
+    const avg = window.reduce((a, b) => a + b, 0) / window.length;
+    aggregated.push(Math.round(avg));
   }
 
-  return aggregated
+  return aggregated;
 }
 ```
 
@@ -653,39 +689,43 @@ function aggregateData(data, windowSize = 10) {
 
 ```javascript
 function exportHighQualityPNG(source, scale = 2) {
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
 
   // 临时渲染获取尺寸
-  const tempDiv = document.createElement('div')
-  tempDiv.style.position = 'absolute'
-  tempDiv.style.left = '-9999px'
-  document.body.appendChild(tempDiv)
+  const tempDiv = document.createElement("div");
+  tempDiv.style.position = "absolute";
+  tempDiv.style.left = "-9999px";
+  document.body.appendChild(tempDiv);
 
-  WaveDrom.renderWaveForm(0, source, tempDiv)
-  const svg = tempDiv.querySelector('svg')
-  const bbox = svg.getBBox()
+  WaveDrom.renderWaveForm(0, source, tempDiv);
+  const svg = tempDiv.querySelector("svg");
+  const bbox = svg.getBBox();
 
   // 设置高分辨率
-  canvas.width = bbox.width * scale
-  canvas.height = bbox.height * scale
+  canvas.width = bbox.width * scale;
+  canvas.height = bbox.height * scale;
 
   // 缩放上下文
-  ctx.scale(scale, scale)
+  ctx.scale(scale, scale);
 
   // 重新渲染
-  WaveDrom.renderWaveForm(0, source, canvas)
+  WaveDrom.renderWaveForm(0, source, canvas);
 
   // 导出
-  canvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'waveform.png'
-    a.click()
-  }, 'image/png', 1.0)  // 最高质量
+  canvas.toBlob(
+    (blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "waveform.png";
+      a.click();
+    },
+    "image/png",
+    1.0
+  ); // 最高质量
 
-  document.body.removeChild(tempDiv)
+  document.body.removeChild(tempDiv);
 }
 ```
 
@@ -696,30 +736,32 @@ function exportHighQualityPNG(source, scale = 2) {
 **解决方案**:
 
 **方案 1: 嵌入字体**
+
 ```javascript
 function embedFonts(svgElement) {
-  const style = document.createElement('style')
+  const style = document.createElement("style");
   style.textContent = `
     @font-face {
       font-family: 'WaveDrom';
       src: url('data:font/woff2;base64,...');
     }
-  `
-  svgElement.insertBefore(style, svgElement.firstChild)
+  `;
+  svgElement.insertBefore(style, svgElement.firstChild);
 }
 ```
 
 **方案 2: 转换为路径**
+
 ```javascript
 // 使用库如 opentype.js 将文本转换为路径
 function textToPath(svgElement) {
-  const texts = svgElement.querySelectorAll('text')
+  const texts = svgElement.querySelectorAll("text");
 
-  texts.forEach(textEl => {
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+  texts.forEach((textEl) => {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     // 转换逻辑...
-    textEl.parentNode.replaceChild(path, textEl)
-  })
+    textEl.parentNode.replaceChild(path, textEl);
+  });
 }
 ```
 
@@ -787,7 +829,7 @@ function textToPath(svgElement) {
 3. **开发工具**:
    ```javascript
    // 启用调试模式
-   localStorage.setItem('wavedrom-debug', 'true')
+   localStorage.setItem("wavedrom-debug", "true");
    ```
 
 ### 社区资源
@@ -798,24 +840,24 @@ function textToPath(svgElement) {
 
 ### 常见问题快速索引
 
-| 问题 | 章节 |
-|-----|------|
-| Vue 集成 | §1 |
-| 性能优化 | §2 |
-| 文本搜索 | §3 |
-| TypeScript | §4 |
-| 箭头重叠 | §5 |
-| Markdown | §6 |
-| React 集成 | §7 |
-| SSR | §8 |
-| CSS 冲突 | §9 |
-| 深色模式 | §10 |
-| 动态更新 | §11 |
-| 大数据 | §12 |
-| PNG 导出 | §13 |
-| SVG 字体 | §14 |
-| IE 兼容 | §15 |
-| 移动端 | §16 |
+| 问题       | 章节 |
+| ---------- | ---- |
+| Vue 集成   | §1   |
+| 性能优化   | §2   |
+| 文本搜索   | §3   |
+| TypeScript | §4   |
+| 箭头重叠   | §5   |
+| Markdown   | §6   |
+| React 集成 | §7   |
+| SSR        | §8   |
+| CSS 冲突   | §9   |
+| 深色模式   | §10  |
+| 动态更新   | §11  |
+| 大数据     | §12  |
+| PNG 导出   | §13  |
+| SVG 字体   | §14  |
+| IE 兼容    | §15  |
+| 移动端     | §16  |
 
 ## 贡献指南
 
@@ -825,3 +867,4 @@ function textToPath(svgElement) {
 2. 提供完整的复现步骤和代码示例
 3. 附上浏览器版本和环境信息
 4. 欢迎提交 PR 完善文档
+````

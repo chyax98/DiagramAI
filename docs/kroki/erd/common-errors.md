@@ -5,6 +5,7 @@
 ### 1.1 全局指令位置错误
 
 **错误示例**:
+
 ```erd
 [Person]
 name
@@ -13,11 +14,13 @@ title {label: "My Diagram"}  # ❌ 错误: title 必须在最前面
 ```
 
 **错误信息**:
+
 ```
 Parse error: title directive must appear before any entities
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 全局指令在最前面
 title {label: "My Diagram"}
@@ -31,16 +34,19 @@ name
 ### 1.2 关系基数缺失
 
 **错误示例**:
+
 ```erd
 Person -- Address  # ❌ 缺少基数符号
 ```
 
 **错误信息**:
+
 ```
 Parse error: relationship must specify cardinality
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 明确指定基数
 Person *--1 Address
@@ -53,16 +59,19 @@ Student *--* Course
 ### 1.3 实体名称格式错误
 
 **错误示例**:
+
 ```erd
 [User Account]  # ❌ 包含空格但未使用引号
 ```
 
 **错误信息**:
+
 ```
 Parse error: unexpected token 'Account'
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 使用引号包裹
 [`User Account`]
@@ -75,17 +84,20 @@ Parse error: unexpected token 'Account'
 ### 1.4 格式化花括号位置错误
 
 **错误示例**:
+
 ```erd
 [Person]
 {bgcolor: "#fff"}  # ❌ 花括号不在同一行
 ```
 
 **错误信息**:
+
 ```
 Parse error: formatting options must start on same line as entity
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 花括号在同一行
 [Person] {bgcolor: "#fff"}
@@ -102,12 +114,14 @@ Parse error: formatting options must start on same line as entity
 ### 1.5 属性键值格式错误
 
 **错误示例**:
+
 ```erd
 [Person] {bgcolor=#fff}  # ❌ 缺少引号
 [Person] {bgcolor: #fff}  # ❌ 值缺少引号
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 值必须用双引号
 [Person] {bgcolor: "#fff"}
@@ -121,6 +135,7 @@ Parse error: formatting options must start on same line as entity
 ### 2.1 引用不存在的实体
 
 **错误示例**:
+
 ```erd
 [Person]
 name
@@ -129,11 +144,13 @@ Person *--1 Address  # ❌ Address 未定义
 ```
 
 **错误信息**:
+
 ```
 Error: entity 'Address' not found
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 先定义实体
 [Person]
@@ -150,11 +167,13 @@ Person *--1 Address
 ### 2.2 非法的基数组合
 
 **错误示例**:
+
 ```erd
 Person 2--3 Address  # ❌ 不支持数字基数
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 使用标准基数符号
 # ?: 0 或 1
@@ -170,11 +189,13 @@ Person 1--* Address
 ### 2.3 自引用关系语法错误
 
 **错误示例**:
+
 ```erd
 Employee ?--1 Employee  # ✓ 技术上正确，但可能语义不明
 ```
 
 **最佳实践**:
+
 ```erd
 # ✓ 更好: 添加标签说明
 Employee ?--1 Employee {label: "reports to"}
@@ -188,6 +209,7 @@ Employee *--1 Employee {label: "manages"}
 ### 3.1 颜色值格式错误
 
 **错误示例**:
+
 ```erd
 [Person] {bgcolor: #fff}      # ❌ 缺少引号
 [Person] {bgcolor: "fff"}     # ❌ 缺少 # 号
@@ -195,6 +217,7 @@ Employee *--1 Employee {label: "manages"}
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 使用十六进制
 [Person] {bgcolor: "#ffffff"}
@@ -210,11 +233,13 @@ Employee *--1 Employee {label: "manages"}
 ### 3.2 字体名称错误
 
 **错误示例**:
+
 ```erd
 [Person] {font: "Arial"}  # ❌ GraphViz 可能不支持
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 使用 GraphViz 标准字体
 [Person] {font: "Times-Roman"}
@@ -227,12 +252,14 @@ Employee *--1 Employee {label: "manages"}
 ### 3.3 尺寸单位错误
 
 **错误示例**:
+
 ```erd
 [Person] {size: 16}     # ❌ 缺少引号
 [Person] {size: "16px"} # ❌ 不支持 px 单位
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 字体大小为纯数字字符串
 [Person] {size: "16"}
@@ -246,6 +273,7 @@ Employee *--1 Employee {label: "manages"}
 ### 4.1 主键/外键符号错误
 
 **错误示例**:
+
 ```erd
 [Person]
 * person_id  # ❌ 空格分隔
@@ -253,6 +281,7 @@ Employee *--1 Employee {label: "manages"}
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确: 符号紧邻属性名
 [Person]
@@ -266,12 +295,14 @@ Employee *--1 Employee {label: "manages"}
 ### 4.2 属性标签格式错误
 
 **错误示例**:
+
 ```erd
 [Person]
 *person_id label: "varchar, not null"  # ❌ 缺少花括号
 ```
 
 **解决方案**:
+
 ```erd
 # ✓ 正确
 [Person]
@@ -285,11 +316,13 @@ Employee *--1 Employee {label: "manages"}
 ### 5.1 配置文件路径错误
 
 **错误示例**:
+
 ```bash
 erd -c ~/.erd.yml -i schema.er  # ❌ 扩展名应该是 .yaml
 ```
 
 **解决方案**:
+
 ```bash
 # ✓ 正确
 erd -c ~/.erd.yaml -i schema.er
@@ -303,11 +336,13 @@ erd -c ./myconfig.yaml -i schema.er
 ### 5.2 配置文件不存在
 
 **错误信息**:
+
 ```
 Error: config file not found: ~/.erd.yaml
 ```
 
 **解决方案**:
+
 ```bash
 # 生成默认配置文件
 erd -c > ~/.erd.yaml
@@ -323,11 +358,13 @@ erd -i schema.er -o output.pdf
 ### 6.1 GraphViz 未安装
 
 **错误信息**:
+
 ```
 Error: dot command not found
 ```
 
 **解决方案**:
+
 ```bash
 # macOS
 brew install graphviz
@@ -348,6 +385,7 @@ sudo dnf install graphviz
 **原因**: GraphViz 缺少 Pango 支持
 
 **解决方案**:
+
 ```bash
 # 重新安装带 Pango 的 GraphViz
 brew uninstall graphviz
@@ -366,16 +404,19 @@ dot -v | grep pango
 ### 7.1 不支持的输出格式
 
 **错误示例**:
+
 ```bash
 erd -i schema.er -f webp  # ❌ 不支持 webp
 ```
 
 **错误信息**:
+
 ```
 Error: unsupported format 'webp'
 ```
 
 **支持的格式**:
+
 ```bash
 # ✓ 矢量格式
 erd -f pdf
@@ -396,11 +437,13 @@ erd -f plain
 ### 7.2 文件扩展名推断错误
 
 **错误示例**:
+
 ```bash
 erd -i schema.er -o output.jpeg  # ❌ 应该是 .jpg
 ```
 
 **解决方案**:
+
 ```bash
 # ✓ 使用标准扩展名
 erd -i schema.er -o output.jpg
@@ -416,11 +459,13 @@ erd -i schema.er -o output.jpeg -f jpg
 ### 8.1 不支持的边类型
 
 **错误示例**:
+
 ```bash
 erd -e bezier  # ❌ 不支持
 ```
 
 **支持的边类型**:
+
 ```bash
 erd -e compound
 erd -e noedge
@@ -434,11 +479,13 @@ erd -e spline  # 默认
 ### 8.2 不支持的边样式
 
 **错误示例**:
+
 ```bash
 erd -p double  # ❌ 不支持
 ```
 
 **支持的边样式**:
+
 ```bash
 erd -p solid   # 实线
 erd -p dashed  # 虚线
@@ -452,11 +499,13 @@ erd -p dotted  # 点线
 ### 9.1 不支持的符号系统
 
 **错误示例**:
+
 ```bash
 erd -n crow  # ❌ 不支持鸦爪符号
 ```
 
 **支持的符号系统**:
+
 ```bash
 erd -n ie   # Information Engineering (默认)
 erd -n uml  # UML 符号
@@ -469,11 +518,13 @@ erd -n uml  # UML 符号
 ### 10.1 文件路径映射错误
 
 **错误示例**:
+
 ```bash
 docker run -i ghcr.io/burntsushi/erd:latest schema.er  # ❌ 无法读取文件
 ```
 
 **解决方案**:
+
 ```bash
 # ✓ 使用标准输入
 docker run -i ghcr.io/burntsushi/erd:latest < schema.er > output.pdf
@@ -487,13 +538,16 @@ docker run -i -v $(pwd):/data ghcr.io/burntsushi/erd:latest < /data/schema.er > 
 ## 调试技巧
 
 ### 1. 逐步构建
+
 从最简单的例子开始:
+
 ```erd
 [Person]
 name
 ```
 
 逐步添加复杂性:
+
 ```erd
 [Person]
 *person_id
@@ -506,6 +560,7 @@ Person *--1 Address
 ```
 
 ### 2. 使用 DOT 中间格式
+
 ```bash
 # 生成 DOT 文件查看中间结果
 erd -i schema.er -o schema.dot
@@ -515,6 +570,7 @@ dot -Tsvg schema.dot -o output.svg
 ```
 
 ### 3. 检查 GraphViz 版本
+
 ```bash
 dot -V
 ```
@@ -522,6 +578,7 @@ dot -V
 确保版本 >= 2.38
 
 ### 4. 查看详细错误
+
 ```bash
 # 重定向错误到文件
 erd -i schema.er 2> errors.log
@@ -531,6 +588,7 @@ erd -i schema.er --verbose
 ```
 
 ### 5. 验证配置文件
+
 ```bash
 # 导出当前默认配置
 erd -c > current-config.yaml
@@ -544,6 +602,7 @@ diff ~/.erd.yaml current-config.yaml
 **Q: 为什么我的图表中文字重叠?**
 
 A: 可能是字体大小设置不当，尝试调整:
+
 ```erd
 entity {size: "12"}  # 减小字体
 ```
@@ -551,6 +610,7 @@ entity {size: "12"}  # 减小字体
 **Q: 关系线为什么穿过实体?**
 
 A: 尝试不同的边类型:
+
 ```bash
 erd -e ortho  # 正交边
 erd -e spline # 曲线边

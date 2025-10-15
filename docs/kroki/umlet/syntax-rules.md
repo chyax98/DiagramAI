@@ -32,6 +32,7 @@ properties
 ```
 
 **结构说明**:
+
 - **第一行**: 类名（自动居中显示）
 - **`--`**: 分隔线（双横线）
 - **后续行**: 属性/方法（左对齐）
@@ -40,18 +41,21 @@ properties
 ### 2. 文本格式
 
 #### 斜体（抽象）
+
 ```
 /AbstractClass/      # 抽象类
 /abstractMethod()/   # 抽象方法
 ```
 
 #### 下划线（静态）
+
 ```
 _staticField_        # 静态字段
 _staticMethod()_     # 静态方法
 ```
 
 #### 可见性符号
+
 ```
 + public
 - private
@@ -76,6 +80,7 @@ bg=lightblue
 ```
 
 **渲染结果**:
+
 - 类名斜体（抽象类）
 - `-color` 私有属性
 - `_count_` 静态下划线
@@ -88,6 +93,7 @@ bg=lightblue
 ### 1. 关联关系
 
 **属性面板配置**:
+
 ```
 r1=RoleName1         # 第一端角色名
 r2=RoleName2         # 第二端角色名
@@ -126,6 +132,7 @@ lt=-
 ### All-in-One 时序图元素
 
 **基础语法**:
+
 ```
 _actorName~actorID_
 _objectName~objectID_
@@ -188,6 +195,7 @@ destroy s
 ### All-in-One 活动图元素
 
 **基础语法**:
+
 ```
 Activity 1
 --
@@ -203,6 +211,7 @@ TAB No: Activity 4
 ### 分支控制
 
 **使用 TAB 缩进**:
+
 ```
 Start
 --
@@ -245,6 +254,7 @@ fg=colorName         # 前景颜色（文本/边框）
 ```
 
 **预定义颜色**:
+
 ```
 red, green, blue, yellow
 orange, pink, purple, gray
@@ -252,6 +262,7 @@ white, black, cyan, magenta
 ```
 
 **HTML 颜色代码**:
+
 ```
 bg=#FF0000           # 红色
 bg=#00FF00           # 绿色
@@ -325,6 +336,7 @@ ClassName
 ### 1. 用例图
 
 **用例元素**:
+
 ```
 Use Case Name
 --
@@ -333,6 +345,7 @@ name: location
 ```
 
 **参与者元素**:
+
 ```
 <<actor>>
 Actor Name
@@ -341,6 +354,7 @@ Actor Name
 ### 2. 状态图
 
 **状态元素**:
+
 ```
 StateName
 --
@@ -350,6 +364,7 @@ exit / action3
 ```
 
 **转换**:
+
 ```
 event [guard] / action
 ```

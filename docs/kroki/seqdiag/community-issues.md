@@ -11,6 +11,7 @@
 ### Current State (2025)
 
 **Project**: Mature but limited active development
+
 - **Last Major Release**: v3.0.0 (December 2021)
 - **Status**: Maintained for compatibility
 - **Repository**: https://github.com/blockdiag/seqdiag
@@ -29,6 +30,7 @@
 **Discussion**: [OpenStack Mailing List (2023-07)](https://lists.openstack.org/pipermail/openstack-discuss/2023-July/034568.html)
 
 **Problem**:
+
 ```python
 # Error with Pillow 10+
 ImportError: cannot import name 'ANTIALIAS' from 'PIL.Image'
@@ -37,6 +39,7 @@ ImportError: cannot import name 'ANTIALIAS' from 'PIL.Image'
 **Background**: Pillow 10 removed deprecated constants
 
 **Workaround**:
+
 ```bash
 # Option 1: Pin Pillow version
 pip install "Pillow<10"
@@ -55,6 +58,7 @@ pip install blockdiag>=3.0.0
 **Source**: [Google Groups Discussion](https://groups.google.com/g/blockdiag-discuss/c/i1QCfuZL-Qo)
 
 **Problem**:
+
 ```dockerfile
 # .blockdiagrc not read when running in container
 FROM python:3.9
@@ -68,16 +72,19 @@ COPY .blockdiagrc /root/.blockdiagrc
 **Solutions**:
 
 **Option 1: Explicit font path**
+
 ```bash
 seqdiag -f /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf diagram.diag
 ```
 
 **Option 2: Environment variable**
+
 ```dockerfile
 ENV BLOCKDIAG_FONTPATH=/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf
 ```
 
 **Option 3: Install fonts in container**
+
 ```dockerfile
 RUN apt-get update && apt-get install -y fonts-dejavu-core
 ```
@@ -91,18 +98,21 @@ RUN apt-get update && apt-get install -y fonts-dejavu-core
 **Community Feedback**:
 
 **SeqDiag Advantages**:
+
 - Simpler, cleaner syntax
 - Automatic return arrows with `=>`
 - No need for explicit `return` statements
 - Better for quick diagrams
 
 **PlantUML Advantages**:
+
 - More features (alt/opt/loop blocks)
 - Better documentation
 - More active development
 - Richer formatting options
 
 **Example Comparison**:
+
 ```seqdiag
 // SeqDiag - Concise
 seqdiag {
@@ -134,6 +144,7 @@ B --> A: response
 **Community Solutions**:
 
 **Vim**:
+
 ```vim
 " ~/.vim/after/syntax/seqdiag.vim
 syn keyword seqdiagKeyword seqdiag
@@ -141,7 +152,7 @@ syn keyword seqdiagEdge -> <- --> <-- ->> <<- -->> <<--
 syn match seqdiagComment "//.*$"
 ```
 
-**VS Code**: Use "blockdiag" extension (supports all *diag tools)
+**VS Code**: Use "blockdiag" extension (supports all \*diag tools)
 
 **Sublime Text**: "Diagram" package
 
@@ -155,6 +166,7 @@ syn match seqdiagComment "//.*$"
 **Source**: [Stack Overflow](https://stackoverflow.com/questions/13136247/)
 
 **Python Example**:
+
 ```python
 from seqdiag import parser, builder, drawer
 
@@ -176,6 +188,7 @@ draw.save()
 ```
 
 **Alternative: Template-based**:
+
 ```python
 def generate_seqdiag(actors, interactions):
     template = "seqdiag {\n"
@@ -204,6 +217,7 @@ diagram = generate_seqdiag(actors, interactions)
 **Solutions by Tool**:
 
 **Sphinx**:
+
 ```rst
 .. seqdiag::
 
@@ -211,19 +225,26 @@ diagram = generate_seqdiag(actors, interactions)
      A -> B;
    }
 ```
+
 Requires: `pip install sphinxcontrib-seqdiag`
 
 **MkDocs (via Kroki)**:
-```markdown
-```kroki-seqdiag
+
+`````markdown
+````kroki-seqdiag
 seqdiag {
   A -> B;
 }
 ``` ` ` `
-```
+````
+`````
+
+````
+
 Requires: `kroki` or `kroki-server` plugin
 
 **Asciidoctor**:
+
 ```asciidoc
 [seqdiag]
 ----
@@ -232,6 +253,7 @@ seqdiag {
 }
 ----
 ```
+
 Requires: `asciidoctor-diagram` gem
 
 ---
@@ -243,6 +265,7 @@ Requires: `asciidoctor-diagram` gem
 **Issue**: Slow rendering for diagrams with 50+ actors
 
 **Community Reports**:
+
 - Rendering time increases exponentially
 - Memory usage high for complex diagrams
 - SVG output faster than PNG
@@ -273,6 +296,7 @@ seqdiag {
 **Issue**: High memory usage when generating PDF
 
 **Workaround**:
+
 ```bash
 # Generate SVG first, then convert
 seqdiag -Tsvg diagram.diag
@@ -288,16 +312,17 @@ inkscape diagram.svg --export-pdf=diagram.pdf
 **Common Issues**:
 
 **Issue 1: CORS Errors**
+
 ```javascript
 // ❌ Problem: Direct browser call
-fetch('https://kroki.io/seqdiag/svg/...')
-  .then(r => r.text())  // CORS blocked
+fetch("https://kroki.io/seqdiag/svg/...").then((r) => r.text()); // CORS blocked
 
 // ✅ Solution: Server-side proxy
-fetch('/api/kroki-proxy?type=seqdiag&diagram=...')
+fetch("/api/kroki-proxy?type=seqdiag&diagram=...");
 ```
 
 **Issue 2: Encoding Problems**
+
 ```python
 # ❌ Problem: Wrong encoding
 import base64
@@ -316,6 +341,7 @@ encoded = base64.urlsafe_b64encode(compressed).decode()
 **Question**: "How to validate SeqDiag in CI?"
 
 **GitHub Actions Example**:
+
 ```yaml
 name: Validate Diagrams
 on: [push, pull_request]
@@ -352,6 +378,7 @@ jobs:
 **Status**: Not supported natively
 
 **Workaround with Separators**:
+
 ```seqdiag
 seqdiag {
   A -> B [label = "request"];
@@ -374,6 +401,7 @@ seqdiag {
 **Request**: Longer descriptive names with shorter references
 
 **Workaround with Comments**:
+
 ```seqdiag
 seqdiag {
   // Define short names, document in comments
@@ -395,6 +423,7 @@ seqdiag {
 **Status**: Not supported
 
 **Workaround**: Use separators to indicate logical groups
+
 ```seqdiag
 seqdiag {
   === Client Layer ===
@@ -419,16 +448,17 @@ seqdiag {
 
 **Common Translations**:
 
-| PlantUML | SeqDiag |
-|----------|---------|
-| `A -> B: message` | `A -> B [label = "message"];` |
-| `A --> B` | `A --> B [label = "return"];` |
-| `activate A` | Not directly supported (use activation attr) |
-| `deactivate A` | Not directly supported |
-| `note left of A` | `[leftnote = "text"]` |
-| `note right of A` | `[rightnote = "text"]` |
+| PlantUML          | SeqDiag                                      |
+| ----------------- | -------------------------------------------- |
+| `A -> B: message` | `A -> B [label = "message"];`                |
+| `A --> B`         | `A --> B [label = "return"];`                |
+| `activate A`      | Not directly supported (use activation attr) |
+| `deactivate A`    | Not directly supported                       |
+| `note left of A`  | `[leftnote = "text"]`                        |
+| `note right of A` | `[rightnote = "text"]`                       |
 
 **Conversion Script**:
+
 ```python
 def plantuml_to_seqdiag(plantuml_code):
     """Basic PlantUML to SeqDiag converter"""
@@ -456,11 +486,13 @@ def plantuml_to_seqdiag(plantuml_code):
 ### 15. Version Migration (v2 → v3)
 
 **Breaking Changes in v3.0.0**:
+
 - Requires blockdiag >= 3.0
 - Pillow 10+ compatibility
 - Python 3.7+ required (dropped 2.7, 3.6)
 
 **Migration Steps**:
+
 ```bash
 # 1. Upgrade Python if needed
 python --version  # Should be 3.7+
@@ -493,6 +525,7 @@ seqdiag --list-fonts
 ### 17. Minimal Reproducible Example
 
 Community recommends this template for bug reports:
+
 ```seqdiag
 seqdiag {
   // Minimal diagram that shows the issue
@@ -516,6 +549,7 @@ seqdiag {
 5. **sdedit**: Java-based, GUI
 
 **When to Consider Alternatives**:
+
 - Need active development/support
 - Require advanced features (loops, alt blocks)
 - Want better IDE integration
@@ -526,6 +560,7 @@ seqdiag {
 ## Best Practices from Community
 
 ### 1. Diagram Organization
+
 ```seqdiag
 seqdiag {
   // Section 1: Configuration
@@ -547,12 +582,14 @@ seqdiag {
 ```
 
 ### 2. Naming Conventions
+
 - Use `snake_case` for multi-word actors
 - Prefix actors by layer: `ui_browser`, `api_gateway`, `db_postgres`
 - Use meaningful edge labels
 - Keep labels concise (< 30 chars)
 
 ### 3. Version Control
+
 ```bash
 # Store diagrams as source
 git add diagrams/*.diag
@@ -568,17 +605,20 @@ diagrams/*.svg
 ## Resources & Communities
 
 ### Official Resources
+
 - **Documentation**: http://blockdiag.com/en/seqdiag/
 - **GitHub**: https://github.com/blockdiag/seqdiag
 - **PyPI**: https://pypi.org/project/seqdiag/
 
 ### Community Support
+
 - **Stack Overflow**: [seqdiag tag](https://stackoverflow.com/questions/tagged/seqdiag)
 - **Google Groups**: [blockdiag-discuss](https://groups.google.com/g/blockdiag-discuss)
 - **GitHub Issues**: For bug reports
 - **Reddit**: r/programming, r/devops (occasional mentions)
 
 ### Related Projects
+
 - **blockdiag**: Block diagrams
 - **actdiag**: Activity diagrams
 - **nwdiag**: Network diagrams
@@ -589,17 +629,21 @@ diagrams/*.svg
 ## Future Outlook
 
 **Community Sentiment (2025)**:
+
 - **Pros**: Stable, simple, works well for basic needs
 - **Cons**: Limited active development, fewer features than alternatives
 - **Recommendation**: Good for existing projects, consider alternatives for new projects
 
 **Active Development Alternatives**:
+
 1. Mermaid (most popular)
 2. PlantUML (most features)
 3. D2 (modern, growing)
 
 **SeqDiag Best Use Cases**:
+
 - Legacy documentation migration
 - Simple sequence diagrams
 - When minimalism is preferred
 - Integration with BlockDiag ecosystem
+````

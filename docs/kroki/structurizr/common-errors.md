@@ -23,6 +23,7 @@ model {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 正确 - 按顺序定义
 model {
@@ -63,6 +64,7 @@ softwareSystem "System" {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 正确
 softwareSystem "System" {
@@ -87,6 +89,7 @@ softwareSystem My System
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 正确
 person "User Name"
@@ -119,6 +122,7 @@ model {
 ```
 
 **解决方案 1**: 使用唯一标识符
+
 ```structurizr
 model {
   system1 = softwareSystem "S1" {
@@ -131,6 +135,7 @@ model {
 ```
 
 **解决方案 2**: 使用分层标识符
+
 ```structurizr
 workspace {
   !identifiers hierarchical
@@ -171,6 +176,7 @@ model {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 正确 - 唯一名称
 model {
@@ -209,6 +215,7 @@ model {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 正确 - 不同描述
 model {
@@ -251,6 +258,7 @@ model {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 正确 - 注释独立成行
 model {
@@ -289,6 +297,7 @@ workspace {
 ```
 
 **解决方案**:
+
 ```structurizr
 workspace {
   !identifiers hierarchical
@@ -327,6 +336,7 @@ deploymentEnvironment "Production" {
 ```
 
 **解决方案**: 在模型层建立关系，而非部署实例层
+
 ```structurizr
 model {
   container1 -> system "Uses"  // 在模型层定义
@@ -364,6 +374,7 @@ workspace {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 软件系统作用域
 workspace {
@@ -413,6 +424,7 @@ views {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 显式指定稳定的键
 views {
@@ -444,6 +456,7 @@ views {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 包含元素及其关系
 views {
@@ -476,6 +489,7 @@ views {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 合理的间距
 views {
@@ -519,6 +533,7 @@ views {
 ```
 
 **解决方案**:
+
 ```structurizr
 model {
   db = container "Database" {
@@ -551,6 +566,7 @@ views {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 使用官方主题
 views {
@@ -579,6 +595,7 @@ workspace {
 ```
 
 **解决方案**:
+
 ```structurizr
 // ✅ 正确的相对路径
 workspace {
@@ -609,6 +626,7 @@ workspace {
 ```
 
 **解决方案**: 重新组织文件结构
+
 ```structurizr
 // workspace.dsl (主文件)
 workspace {
@@ -638,6 +656,7 @@ views {
 **原因**: 元素重命名或顺序变化导致内部 ID 变化
 
 **解决方案**:
+
 1. **保持元素定义顺序稳定**
 2. **避免频繁重命名元素**
 3. **使用版本控制** 跟踪 `workspace.json`
@@ -660,6 +679,7 @@ cp workspace.json.backup workspace.json
 **原因**: 浏览器缓存问题
 
 **解决方案**:
+
 1. **硬刷新浏览器**: Ctrl+Shift+R (Windows/Linux) 或 Cmd+Shift+R (Mac)
 2. **清除浏览器缓存**
 3. **检查浏览器控制台** 是否有错误信息
@@ -673,7 +693,9 @@ cp workspace.json.backup workspace.json
 **原因**: 反向代理配置不正确
 
 **解决方案**:
+
 1. **设置 `structurizr.url`**:
+
    ```properties
    # structurizr.properties
    structurizr.url=https://your-domain.com
@@ -696,6 +718,7 @@ cp workspace.json.backup workspace.json
 **原因**: 图表太复杂或 Kroki 服务响应慢
 
 **解决方案**:
+
 1. **简化图表**: 减少元素数量
 2. **拆分视图**: 创建多个小图表而非一个大图表
 3. **使用自托管 Kroki**: 而非公共服务
@@ -725,11 +748,13 @@ container system "BackgroundServices" {
 **原因**: Kroki 不完全支持 Structurizr 样式
 
 **限制**:
+
 - 有限的元素形状
 - 不支持主题
 - 有限的颜色/字体控制
 
 **解决方案**:
+
 1. **使用 Structurizr Lite/Cloud** 获得完整样式支持
 2. **导出为 PlantUML/Mermaid** 获得更好的 Kroki 支持
 3. **接受基本样式** 用于文档嵌入
@@ -743,6 +768,7 @@ container system "BackgroundServices" {
 **原因**: 图表代码太长，编码后超过 URI 限制
 
 **解决方案**:
+
 1. **使用 POST 请求** 而非 GET
 2. **简化图表**
 3. **增加 Kroki 的 `KROKI_MAX_URI_LENGTH`** (自托管)
@@ -759,12 +785,14 @@ docker run -e KROKI_MAX_URI_LENGTH=8192 yuzutech/kroki
 ### 24. DSL 验证
 
 **使用 Structurizr CLI 验证**:
+
 ```bash
 # 验证 DSL 语法
 structurizr-cli validate -workspace workspace.dsl
 ```
 
 **常见验证错误**:
+
 - 语法错误
 - 唯一性违规
 - 关系错误
@@ -810,6 +838,7 @@ model {
 ### 2. 最小化复现
 
 从最小 DSL 开始，逐步添加内容:
+
 ```structurizr
 workspace {
   model {
@@ -844,16 +873,16 @@ cat workspace.json | jq .
 
 ## 常见问题速查
 
-| 错误信息 | 可能原因 | 解决方案 |
-|---------|---------|---------|
-| `does not exist at line X` | 前向引用 | 按顺序定义元素 |
-| `identifier already in use` | 标识符冲突 | 使用唯一标识符或分层模式 |
-| `relationship not permitted` | 关系限制 | 检查元素类型和关系规则 |
-| `Loading workspace...` (卡住) | 浏览器缓存 | 硬刷新浏览器 |
-| 布局丢失 | 元素 ID 变化 | 保持元素顺序，使用稳定视图键 |
-| 样式未应用 | 标签不匹配 | 检查标签名称一致性 |
-| 414 URI Too Long | Kroki URI 限制 | 使用 POST 或简化图表 |
-| 文件未找到 | Include 路径错误 | 检查相对/绝对路径 |
+| 错误信息                      | 可能原因         | 解决方案                     |
+| ----------------------------- | ---------------- | ---------------------------- |
+| `does not exist at line X`    | 前向引用         | 按顺序定义元素               |
+| `identifier already in use`   | 标识符冲突       | 使用唯一标识符或分层模式     |
+| `relationship not permitted`  | 关系限制         | 检查元素类型和关系规则       |
+| `Loading workspace...` (卡住) | 浏览器缓存       | 硬刷新浏览器                 |
+| 布局丢失                      | 元素 ID 变化     | 保持元素顺序，使用稳定视图键 |
+| 样式未应用                    | 标签不匹配       | 检查标签名称一致性           |
+| 414 URI Too Long              | Kroki URI 限制   | 使用 POST 或简化图表         |
+| 文件未找到                    | Include 路径错误 | 检查相对/绝对路径            |
 
 ---
 

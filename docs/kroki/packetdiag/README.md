@@ -5,6 +5,7 @@ PacketDiag 是 BlockDiag 包家族的一部分，专门用于生成网络数据�
 ## 📚 文档列表
 
 ### 1. [官方文档](./official-docs.md)
+
 - 基本概念和语法
 - 核心功能介绍
 - TCP/IP 协议头部示例
@@ -12,6 +13,7 @@ PacketDiag 是 BlockDiag 包家族的一部分，专门用于生成网络数据�
 - 与 Kroki、Asciidoctor 集成
 
 ### 2. [语法规则详解](./syntax-rules.md)
+
 - 完整语法结构
 - 位范围定义规则
 - 字段属性详解
@@ -19,6 +21,7 @@ PacketDiag 是 BlockDiag 包家族的一部分，专门用于生成网络数据�
 - 语法检查清单
 
 ### 3. [常见错误及解决方案](./common-errors.md)
+
 - 语法错误处理
 - 位范围冲突解决
 - 属性配置问题
@@ -26,6 +29,7 @@ PacketDiag 是 BlockDiag 包家族的一部分，专门用于生成网络数据�
 - 调试技巧和工具
 
 ### 4. [社区问题与案例](./community-issues.md)
+
 - GitHub Issues 精选
 - Stack Overflow 热门问题
 - Reddit 讨论摘要
@@ -35,11 +39,13 @@ PacketDiag 是 BlockDiag 包家族的一部分，专门用于生成网络数据�
 ## 🚀 快速开始
 
 ### 安装
+
 ```bash
 pip install nwdiag
 ```
 
 ### 基础示例
+
 ```
 packetdiag {
   colwidth = 32
@@ -52,6 +58,7 @@ packetdiag {
 ```
 
 ### 生成图表
+
 ```bash
 # 生成 SVG
 packetdiag -T svg packet.diag -o packet.svg

@@ -7,6 +7,7 @@
 #### 错误 1.1: 缺少冒号分隔符
 
 **错误示例**:
+
 ```
 packetdiag {
   0-15 Source Port    // ❌ 缺少冒号
@@ -14,11 +15,13 @@ packetdiag {
 ```
 
 **错误信息**:
+
 ```
 SyntaxError: invalid syntax
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   0-15: Source Port   // ✅ 添加冒号
@@ -28,17 +31,20 @@ packetdiag {
 #### 错误 1.2: 括号不匹配
 
 **错误示例**:
+
 ```
 packetdiag {
   0-15: Field [rotate = 270    // ❌ 缺少右括号
 ```
 
 **错误信息**:
+
 ```
 ParseError: unmatched bracket
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   0-15: Field [rotate = 270]   // ✅ 补全括号
@@ -48,6 +54,7 @@ packetdiag {
 #### 错误 1.3: 缺少外层大括号
 
 **错误示例**:
+
 ```
 packetdiag
   colwidth = 32     // ❌ 缺少大括号
@@ -55,6 +62,7 @@ packetdiag
 ```
 
 **解决方案**:
+
 ```
 packetdiag {       // ✅ 添加大括号
   colwidth = 32
@@ -67,6 +75,7 @@ packetdiag {       // ✅ 添加大括号
 #### 错误 2.1: 位重叠
 
 **错误示例**:
+
 ```
 packetdiag {
   0-15: Field1
@@ -75,11 +84,13 @@ packetdiag {
 ```
 
 **错误信息**:
+
 ```
 ValueError: overlapping bit ranges
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   0-15: Field1
@@ -90,6 +101,7 @@ packetdiag {
 #### 错误 2.2: 起始位大于结束位
 
 **错误示例**:
+
 ```
 packetdiag {
   31-0: Field       // ❌ 31 > 0
@@ -97,11 +109,13 @@ packetdiag {
 ```
 
 **错误信息**:
+
 ```
 ValueError: start bit must be <= end bit
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   0-31: Field       // ✅ 正确顺序
@@ -111,6 +125,7 @@ packetdiag {
 #### 错误 2.3: 位编号为负数
 
 **错误示例**:
+
 ```
 packetdiag {
   -1-7: Field       // ❌ 负数位
@@ -118,6 +133,7 @@ packetdiag {
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   0-7: Field        // ✅ 从 0 开始
@@ -129,6 +145,7 @@ packetdiag {
 #### 错误 3.1: 无效的旋转角度
 
 **错误示例**:
+
 ```
 packetdiag {
   0: Flag [rotate = 45]    // ❌ 不支持 45 度
@@ -136,11 +153,13 @@ packetdiag {
 ```
 
 **错误信息**:
+
 ```
 ValueError: rotate must be 90, 180, or 270
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   0: Flag [rotate = 270]   // ✅ 使用支持的角度
@@ -150,6 +169,7 @@ packetdiag {
 #### 错误 3.2: colheight 非正整数
 
 **错误示例**:
+
 ```
 packetdiag {
   0-31: Data [colheight = 0]      // ❌ 0 无效
@@ -159,6 +179,7 @@ packetdiag {
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   0-31: Data [colheight = 1]      // ✅ 正整数
@@ -172,6 +193,7 @@ packetdiag {
 #### 错误 4.1: colwidth 值无效
 
 **错误示例**:
+
 ```
 packetdiag {
   colwidth = 20     // ❌ 不是 2 的幂次方
@@ -179,11 +201,13 @@ packetdiag {
 ```
 
 **错误信息**:
+
 ```
 ValueError: colwidth must be 8, 16, or 32
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   colwidth = 16     // ✅ 有效值：8, 16, 32
@@ -193,6 +217,7 @@ packetdiag {
 #### 错误 4.2: node_height 超出范围
 
 **错误示例**:
+
 ```
 packetdiag {
   node_height = 5       // ❌ 太小，文字不可读
@@ -201,6 +226,7 @@ packetdiag {
 ```
 
 **建议值**:
+
 ```
 packetdiag {
   node_height = 72      // ✅ 推荐值（40-100）
@@ -212,6 +238,7 @@ packetdiag {
 #### 错误 5.1: 位范围不连续
 
 **问题示例**:
+
 ```
 packetdiag {
   0-15: Field1
@@ -222,6 +249,7 @@ packetdiag {
 **说明**: 不是语法错误，但会导致图表有空白区域
 
 **改进方案**:
+
 ```
 packetdiag {
   0-15: Field1
@@ -233,6 +261,7 @@ packetdiag {
 #### 错误 5.2: 字段宽度不对齐
 
 **问题示例**:
+
 ```
 packetdiag {
   colwidth = 32
@@ -242,6 +271,7 @@ packetdiag {
 ```
 
 **改进方案**:
+
 ```
 packetdiag {
   colwidth = 32
@@ -255,6 +285,7 @@ packetdiag {
 #### 错误 6.1: 字段名过长
 
 **问题示例**:
+
 ```
 packetdiag {
   0-7: Very Long Field Name That Does Not Fit
@@ -262,6 +293,7 @@ packetdiag {
 ```
 
 **解决方案**:
+
 ```
 packetdiag {
   0-7: VL Field     // ✅ 缩写
@@ -273,6 +305,7 @@ packetdiag {
 #### 错误 6.2: 单比特字段未旋转
 
 **问题示例**:
+
 ```
 packetdiag {
   0: Flag1          // 文字可能无法显示
@@ -281,6 +314,7 @@ packetdiag {
 ```
 
 **改进方案**:
+
 ```
 packetdiag {
   0: Flag1 [rotate = 270]   // ✅ 垂直显示
@@ -355,6 +389,7 @@ for start, end, name in fields:
 ## 错误预防清单
 
 ### 编写前检查
+
 - [ ] 确定 colwidth（8/16/32）
 - [ ] 规划所有字段的位范围
 - [ ] 列出字段清单及位宽
@@ -362,6 +397,7 @@ for start, end, name in fields:
 - [ ] 确认是否需要旋转属性
 
 ### 编写时检查
+
 - [ ] 每个字段都有冒号
 - [ ] 位范围格式正确（start-end）
 - [ ] 起始位 ≤ 结束位
@@ -369,6 +405,7 @@ for start, end, name in fields:
 - [ ] 括号配对正确
 
 ### 编写后检查
+
 - [ ] 运行语法检查工具
 - [ ] 预览渲染结果
 - [ ] 验证字段对齐
@@ -378,38 +415,48 @@ for start, end, name in fields:
 ## 常见问题 FAQ
 
 ### Q1: 为什么我的图表显示不完整?
+
 **A**: 检查位范围是否超出 colwidth 的倍数范围，或者 node_height 设置过小。
 
 ### Q2: 如何处理可变长度字段?
+
 **A**: 使用 `colheight` 属性扩展字段高度：
+
 ```
 0-31: Variable Data [colheight = 3]
 ```
 
 ### Q3: 多个单比特标志如何排列?
+
 **A**: 使用 rotate 属性垂直显示：
+
 ```
 0: F1 [rotate = 270]
 1: F2 [rotate = 270]
 ```
 
 ### Q4: 如何表示保留/未使用字段?
+
 **A**: 使用明确命名：
+
 ```
 16-31: Reserved
 32-47: (Unused)
 ```
 
 ### Q5: 位编号必须连续吗?
+
 **A**: 不强制，但建议连续以避免视觉空白。
 
 ## 工具支持
 
 ### 在线验证工具
+
 - Kroki Live Editor: https://kroki.io/
 - BlockDiag Playground: http://interactive.blockdiag.com/
 
 ### 本地验证
+
 ```bash
 # 安装 nwdiag
 pip install nwdiag

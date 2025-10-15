@@ -5,6 +5,7 @@
 ### 1. 语法错误 (Syntax Error)
 
 #### 错误现象
+
 ```
 ERROR: Syntax error at line X
 ```
@@ -12,6 +13,7 @@ ERROR: Syntax error at line X
 #### 常见原因及解决方案
 
 ##### 原因 1: 缺少分号或逗号
+
 ```blockdiag
 // 错误
 blockdiag {
@@ -27,6 +29,7 @@ blockdiag {
 ```
 
 ##### 原因 2: 引号不匹配
+
 ```blockdiag
 // 错误
 A [label = "Text'];  // ❌ 双引号开始,单引号结束
@@ -37,6 +40,7 @@ A [label = 'Text'];  // ✅ 单引号也可以
 ```
 
 ##### 原因 3: 花括号不匹配
+
 ```blockdiag
 // 错误
 blockdiag {
@@ -54,6 +58,7 @@ blockdiag {
 ```
 
 ##### 原因 4: 特殊字符未转义
+
 ```blockdiag
 // 错误
 A [label = "Text with "quotes""];  // ❌ 未转义引号
@@ -66,6 +71,7 @@ A [label = 'Text with "quotes"'];   // ✅ 使用单引号
 ### 2. 未知属性警告 (Unknown attribute)
 
 #### 错误现象
+
 ```
 WARNING: Unknown attribute 'xyz' at line X
 ```
@@ -73,6 +79,7 @@ WARNING: Unknown attribute 'xyz' at line X
 #### 原因及解决方案
 
 ##### 原因 1: 属性名拼写错误
+
 ```blockdiag
 // 错误
 A [lable = "Text"];      // ❌ lable -> label
@@ -86,6 +93,7 @@ A [shape = "box"];       // ✅
 ```
 
 ##### 原因 2: 版本不支持的属性
+
 ```blockdiag
 // v0.8 及更早版本
 A [stacked];  // ❌ stacked 是 v0.8.2+ 特性
@@ -100,6 +108,7 @@ A [style = "dashed"];  // ✅ 使用旧版支持的属性
 ### 3. 节点未定义错误
 
 #### 错误现象
+
 ```
 ERROR: Node 'X' not found
 ```
@@ -127,6 +136,7 @@ blockdiag {
 ### 4. 字体相关错误
 
 #### 错误现象
+
 ```
 ERROR: Cannot find font
 WARNING: Font not found, using default
@@ -135,6 +145,7 @@ WARNING: Font not found, using default
 #### 解决方案
 
 ##### 方案 1: 命令行指定字体
+
 ```bash
 # Linux
 blockdiag --font=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf diagram.diag
@@ -147,13 +158,16 @@ blockdiag --font=C:\Windows\Fonts\arial.ttf diagram.diag
 ```
 
 ##### 方案 2: 配置文件
+
 创建 `~/.blockdiagrc`:
+
 ```ini
 [blockdiag]
 fontpath = /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
 ```
 
 ##### 方案 3: 安装字体
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get install fonts-dejavu
@@ -169,6 +183,7 @@ brew install font-dejavu
 ### 5. 中文/多语言显示问题
 
 #### 错误现象
+
 - 中文显示为方框 □□□
 - 乱码或问号 ???
 - 部分字符缺失
@@ -176,6 +191,7 @@ brew install font-dejavu
 #### 解决方案
 
 ##### 方案 1: 使用支持 Unicode 的字体
+
 ```bash
 # Linux (中文)
 blockdiag --font=/usr/share/fonts/truetype/wqy-microhei.ttc diagram.diag
@@ -188,6 +204,7 @@ blockdiag --font=C:\Windows\Fonts\msyh.ttc diagram.diag
 ```
 
 ##### 方案 2: 确保文件编码为 UTF-8
+
 ```bash
 # 检查文件编码
 file -i diagram.diag
@@ -200,6 +217,7 @@ dos2unix diagram.diag
 ```
 
 ##### 方案 3: 配置文件永久设置
+
 ```ini
 # ~/.blockdiagrc
 [blockdiag]
@@ -209,6 +227,7 @@ fontpath = /usr/share/fonts/truetype/wqy-microhei.ttc
 ### 6. 图像输出错误
 
 #### 错误: 无法生成 SVG
+
 ```
 ERROR: unknown format: SVG
 ```
@@ -216,6 +235,7 @@ ERROR: unknown format: SVG
 **原因**: SVG 支持需要额外依赖
 
 **解决方案**:
+
 ```bash
 pip install blockdiag[svg]
 # 或
@@ -223,6 +243,7 @@ pip install cairosvg
 ```
 
 #### 错误: 无法生成 PDF
+
 ```
 ERROR: unknown format: PDF
 ```
@@ -230,6 +251,7 @@ ERROR: unknown format: PDF
 **原因**: PDF 支持需要额外依赖
 
 **解决方案**:
+
 ```bash
 pip install "blockdiag[pdf]"
 # 或单独安装依赖
@@ -243,6 +265,7 @@ pip install reportlab
 **原因**: 默认尺寸过小
 
 **解决方案**:
+
 ```blockdiag
 blockdiag {
    // 增大节点尺寸
@@ -254,6 +277,7 @@ blockdiag {
 ```
 
 **或使用 SVG**:
+
 ```bash
 blockdiag -T svg diagram.diag
 ```
@@ -263,6 +287,7 @@ blockdiag -T svg diagram.diag
 **原因**: 标签文本过长
 
 **解决方案**:
+
 ```blockdiag
 // 方法 1: 增大节点宽度
 A [label = "Very Long Label", width = 200];
@@ -283,6 +308,7 @@ A [label = "Very Long Label", fontsize = 10];
 **原因**: 间距设置过小
 
 **解决方案**:
+
 ```blockdiag
 blockdiag {
    // 增大间距
@@ -298,6 +324,7 @@ blockdiag {
 **原因**: 复杂连接导致自动布局困难
 
 **解决方案**:
+
 ```blockdiag
 // 方法 1: 使用 folded 边
 blockdiag {
@@ -327,6 +354,7 @@ blockdiag {
 **原因**: 组内没有节点
 
 **解决方案**:
+
 ```blockdiag
 // 错误: 空组
 group empty_group {
@@ -344,6 +372,7 @@ group my_group {
 **原因**: 嵌套层级过深
 
 **解决方案**:
+
 ```blockdiag
 // 避免超过 3 层嵌套
 group level1 {
@@ -368,12 +397,14 @@ group level2 {
 ### 10. 渲染速度慢
 
 #### 症状
+
 - 生成大型图表耗时过长
 - Python 进程占用大量 CPU
 
 #### 解决方案
 
 ##### 方案 1: 拆分大图
+
 ```bash
 # 将 big_diagram.diag 拆分为多个文件
 # part1.diag, part2.diag, part3.diag
@@ -386,6 +417,7 @@ wait
 ```
 
 ##### 方案 2: 简化复杂度
+
 ```blockdiag
 // 避免: 过多节点和连接
 blockdiag {
@@ -408,6 +440,7 @@ blockdiag {
 ```
 
 ##### 方案 3: 使用缓存
+
 ```bash
 #!/bin/bash
 # 仅渲染修改过的文件
@@ -424,6 +457,7 @@ done
 ### 11. 内存占用过高
 
 #### 症状
+
 ```
 MemoryError: Unable to allocate array
 ```
@@ -431,6 +465,7 @@ MemoryError: Unable to allocate array
 #### 解决方案
 
 ##### 方案 1: 增加虚拟内存 (Linux)
+
 ```bash
 # 检查当前 swap
 free -h
@@ -443,6 +478,7 @@ sudo swapon /swapfile
 ```
 
 ##### 方案 2: 减小输出尺寸
+
 ```blockdiag
 blockdiag {
    // 减小节点尺寸
@@ -452,6 +488,7 @@ blockdiag {
 ```
 
 ##### 方案 3: 使用 SVG 而非 PNG
+
 ```bash
 # SVG 是矢量格式,内存占用更小
 blockdiag -T svg large_diagram.diag
@@ -462,11 +499,13 @@ blockdiag -T svg large_diagram.diag
 ### 12. Sphinx 集成问题
 
 #### 错误: sphinxcontrib.blockdiag 未找到
+
 ```
 Extension error: Could not import extension sphinxcontrib.blockdiag
 ```
 
 **解决方案**:
+
 ```bash
 pip install sphinxcontrib-blockdiag
 ```
@@ -476,6 +515,7 @@ pip install sphinxcontrib-blockdiag
 **原因**: 路径配置错误
 
 **解决方案**:
+
 ```python
 # conf.py
 blockdiag_fontpath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
@@ -501,6 +541,7 @@ blockdiag_tex_image_depth = 'PNG'
 **原因**: 复杂图表编码后 URL 超过限制
 
 **解决方案**:
+
 ```bash
 # 使用 POST 请求
 curl -X POST https://kroki.io/blockdiag/png \
@@ -514,6 +555,7 @@ curl -X POST https://kroki.io/blockdiag/png \
 **原因**: 特殊字符编码问题
 
 **解决方案**:
+
 ```python
 import zlib
 import base64
@@ -541,6 +583,7 @@ url = f"https://kroki.io/blockdiag/png/{encode_blockdiag(diagram)}"
 **原因**: 形状名称错误
 
 **解决方案**:
+
 ```blockdiag
 // 错误
 A [shape = "condition"];       // ❌ 缺少前缀
@@ -554,6 +597,7 @@ A [shape = "flowchart.condition"];  // ✅ 完整名称
 **原因**: 版本过旧
 
 **解决方案**:
+
 ```bash
 # 检查版本
 blockdiag --version
@@ -569,6 +613,7 @@ pip install --upgrade blockdiag
 **原因**: dir 属性设置错误
 
 **解决方案**:
+
 ```blockdiag
 // A -> B 默认从 A 指向 B
 
@@ -587,6 +632,7 @@ A -> B [dir = "none"];
 **原因**: 版本过旧或语法错误
 
 **解决方案**:
+
 ```blockdiag
 // 确保 v0.6.1+
 blockdiag {
@@ -607,6 +653,7 @@ blockdiag {
 **原因**: 类定义在使用之后
 
 **解决方案**:
+
 ```blockdiag
 // 错误
 blockdiag {
@@ -628,6 +675,7 @@ blockdiag {
 **说明**: 直接属性优先级高于类属性
 
 **解决方案**:
+
 ```blockdiag
 blockdiag {
    class mystyle [color = "blue"];
@@ -645,16 +693,19 @@ blockdiag {
 ### 通用调试流程
 
 1. **启用详细输出**
+
 ```bash
 blockdiag -v diagram.diag
 ```
 
 2. **启用调试模式**
+
 ```bash
 blockdiag --debug diagram.diag
 ```
 
 3. **逐步构建**
+
 ```blockdiag
 // 步骤 1: 最简图
 blockdiag { A -> B; }
@@ -671,6 +722,7 @@ blockdiag {
 ```
 
 4. **隔离问题**
+
 ```blockdiag
 blockdiag {
    A -> B;
@@ -680,6 +732,7 @@ blockdiag {
 ```
 
 5. **验证语法**
+
 ```bash
 # 使用 Python 解析验证
 python -c "from blockdiag import parser; parser.parse_file('diagram.diag')"
@@ -710,28 +763,31 @@ Expected ',' or ']'
 ```
 
 **分析**:
+
 - **位置**: 第 5 行
 - **问题**: 缺少逗号或右括号
 - **修复**: 在属性之间添加逗号
 
 ### 常见错误模式
 
-| 错误信息 | 原因 | 解决方案 |
-|---------|------|---------|
-| `Syntax error` | 语法错误 | 检查括号、引号、分号 |
-| `Unknown attribute` | 未知属性 | 检查拼写或版本 |
-| `Node not found` | 节点未定义 | 先定义再引用 |
-| `Cannot find font` | 字体缺失 | 安装或指定字体 |
-| `MemoryError` | 内存不足 | 简化图表或增加内存 |
+| 错误信息            | 原因       | 解决方案             |
+| ------------------- | ---------- | -------------------- |
+| `Syntax error`      | 语法错误   | 检查括号、引号、分号 |
+| `Unknown attribute` | 未知属性   | 检查拼写或版本       |
+| `Node not found`    | 节点未定义 | 先定义再引用         |
+| `Cannot find font`  | 字体缺失   | 安装或指定字体       |
+| `MemoryError`       | 内存不足   | 简化图表或增加内存   |
 
 ## 获取帮助
 
 ### 官方资源
+
 - 文档: http://blockdiag.com/en/blockdiag/
 - PyPI: https://pypi.org/project/blockdiag/
 - GitHub: https://github.com/blockdiag/blockdiag (镜像)
 
 ### 社区支持
+
 - Stack Overflow: tag `[blockdiag]`
 - Google Groups: blockdiag-discuss
 - Gitter Chat: blockdiag/blockdiag
@@ -739,6 +795,7 @@ Expected ',' or ']'
 ### 报告 Bug
 
 提供以下信息:
+
 1. blockdiag 版本: `blockdiag --version`
 2. Python 版本: `python --version`
 3. 操作系统和版本
@@ -747,7 +804,8 @@ Expected ',' or ']'
 6. 预期行为描述
 
 **示例 Bug 报告**:
-```
+
+````
 Title: Syntax error with nested groups
 
 Environment:
@@ -768,11 +826,14 @@ blockdiag {
       }
    }
 }
-```
+````
 
 Error:
 ERROR: Syntax error at line 5
 
 Expected:
 Should render without error
+
+```
+
 ```

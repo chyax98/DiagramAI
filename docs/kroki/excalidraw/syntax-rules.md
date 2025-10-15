@@ -8,6 +8,7 @@
 ## 🎯 元素类型
 
 ### 基础图形
+
 - `rectangle`: 矩形
 - `ellipse`: 椭圆
 - `diamond`: 菱形
@@ -18,6 +19,7 @@
 - `image`: 图片
 
 ### 特殊类型
+
 - `frame`: 框架 (分组容器)
 
 ---
@@ -25,6 +27,7 @@
 ## 📐 元素属性
 
 ### 必需属性
+
 ```js
 {
   type: "rectangle",       // 元素类型
@@ -36,6 +39,7 @@
 ```
 
 ### 可选属性
+
 ```js
 {
   id: "unique-id",         // 唯一ID (自动生成)
@@ -55,16 +59,19 @@
 ## 🎨 样式选项
 
 ### fillStyle
+
 - `"hachure"`: 交叉线填充 (默认)
 - `"cross-hatch"`: 十字交叉
 - `"solid"`: 实心填充
 
 ### strokeStyle
+
 - `"solid"`: 实线 (默认)
 - `"dashed"`: 虚线
 - `"dotted"`: 点线
 
 ### roughness
+
 - `0`: 完美线条
 - `1`: 轻微手绘 (默认)
 - `2`: 明显手绘
@@ -75,6 +82,7 @@
 ## 🔗 连接 (箭头/线)
 
 ### 基础箭头
+
 ```js
 {
   type: "arrow",
@@ -87,6 +95,7 @@
 ```
 
 ### 绑定连接
+
 ```js
 {
   type: "arrow",
@@ -102,6 +111,7 @@
 ```
 
 ### 标签
+
 ```js
 {
   type: "arrow",
@@ -131,6 +141,7 @@
 ```
 
 ### 字体选项
+
 - `1`: Virgil (默认手绘字体)
 - `2`: Helvetica
 - `3`: Cascadia (代码字体)
@@ -157,16 +168,18 @@
 ## 🔄 Mermaid 转换
 
 ### 支持的图表
+
 - ✅ Flowchart (流程图)
 - ❌ Sequence (作为图片)
 - ❌ Class (作为图片)
 - ❌ ER (作为图片)
 
 ### 转换流程
+
 ```js
-import { 
+import {
   parseMermaidToExcalidraw,
-  convertToExcalidrawElements 
+  convertToExcalidrawElements,
 } from "@excalidraw/mermaid-to-excalidraw";
 
 // 1. 解析 Mermaid
@@ -181,6 +194,7 @@ const elements = convertToExcalidrawElements(skeleton);
 ## 📋 元素骨架格式
 
 ### 简化定义
+
 ```js
 // 骨架格式 (简化)
 const skeleton = [
@@ -190,8 +204,8 @@ const skeleton = [
     y: 100,
     width: 200,
     height: 100,
-    label: { text: "Node 1" }
-  }
+    label: { text: "Node 1" },
+  },
 ];
 
 // 转换为完整元素

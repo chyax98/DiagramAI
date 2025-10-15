@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   CreateModelSchema,
@@ -24,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 interface AIModel {
   id: number;
   name: string;
-  provider: "openai" | "anthropic" | "gemini" | "openai-compatible";
+  provider: "openai-compatible" | "openai" | "gemini" | "anthropic";
   api_endpoint: string;
   api_key?: string; // 编辑时可能不返回完整密钥
   model_id: string;
@@ -44,7 +44,7 @@ const PROVIDER_OPTIONS = [
   { value: "gemini", label: "Google Gemini", color: "text-blue-600" },
   {
     value: "openai-compatible",
-    label: "OpenAI 兼容 (DeepSeek, SiliconFlow, Together AI, Groq 等)",
+    label: "OpenAI 兼容",
     color: "text-indigo-600",
   },
 ] as const;
@@ -56,10 +56,10 @@ const DEFAULT_API_ENDPOINTS: Record<string, string> = {
   "openai-compatible": "https://api.openai.com/v1", // 用户自定义
 };
 
+// eslint-disable-next-line max-lines-per-function -- 对话框组件包含完整的表单逻辑,拆分会降低可读性
 export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedProvider, setSelectedProvider] = useState<string>("openai");
 
   const isMountedRef = useRef(true);
 
@@ -70,6 +70,8 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
     handleSubmit,
     reset,
     setValue,
+    control,
+    watch,
     formState: { errors },
   } = useForm<CreateModelData | EditModelData>({
     resolver: zodResolver(isEditMode ? EditModelSchema : CreateModelSchema),
@@ -91,6 +93,9 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
           parameters: "",
         },
   });
+
+  // 监听表单中的 provider 值
+  const selectedProvider = watch("provider");
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -144,9 +149,8 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
     if (!isOpen) {
       reset();
       setError(null);
-      setSelectedProvider("openai");
     } else if (isEditMode && model) {
-      setSelectedProvider(model.provider);
+      // 编辑模式: 重置表单为模型数据
       reset({
         name: model.name,
         provider: model.provider,
@@ -156,7 +160,7 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
         parameters: model.parameters || "",
       });
     } else if (!isEditMode && isOpen) {
-      setSelectedProvider("openai");
+      // 新增模式: 重置为默认值
       reset({
         name: "",
         provider: "openai",
@@ -242,52 +246,54 @@ export function ModelDialog({ isOpen, onClose, onSuccess, model }: ModelDialogPr
               >
                 AI 服务商 <span className="text-red-500">*</span>
               </label>
-              <Select
-                value={selectedProvider}
-                onValueChange={(value) => {
-                  setSelectedProvider(value);
-                  setValue("provider", value as CreateModelData["provider"], {
-                    shouldValidate: true,
-                  });
-                }}
-              >
-                <SelectTrigger
-                  className={`w-full transition-colors ${errors.provider ? "border-red-500" : ""}`}
-                  aria-label="选择 AI 服务商"
-                >
-                  <SelectValue>
-                    {selectedProvider && (
-                      <div className="flex items-center gap-2.5">
-                        <ProviderIcon
-                          provider={selectedProvider}
-                          className={`w-5 h-5 shrink-0 ${PROVIDER_OPTIONS.find((p) => p.value === selectedProvider)?.color || "text-gray-600"}`}
-                        />
-                        <span className="font-medium">
-                          {PROVIDER_OPTIONS.find((p) => p.value === selectedProvider)?.label}
-                        </span>
-                      </div>
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
+              <Controller
+                name="provider"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      className={`w-full transition-colors ${errors.provider ? "border-red-500" : ""}`}
+                      aria-label="选择 AI 服务商"
+                    >
+                      <SelectValue>
+                        {field.value && (
+                          <div className="flex items-center gap-2.5">
+                            <ProviderIcon
+                              provider={field.value}
+                              className={`w-5 h-5 shrink-0 ${PROVIDER_OPTIONS.find((p) => p.value === field.value)?.color || "text-gray-600"}`}
+                            />
+                            <span className="font-medium">
+                              {PROVIDER_OPTIONS.find((p) => p.value === field.value)?.label}
+                            </span>
+                          </div>
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
 
-                <SelectContent>
-                  {PROVIDER_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value} className="cursor-pointer">
-                      <div className="flex items-center gap-3 py-0.5">
-                        <ProviderIcon
-                          provider={option.value}
-                          className={`w-6 h-6 shrink-0 ${option.color}`}
-                        />
-                        <div className="flex flex-col gap-0.5">
-                          <span className="font-medium text-sm leading-tight text-foreground">
-                            {option.label}
-                          </span>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    <SelectContent>
+                      {PROVIDER_OPTIONS.map((option) => (
+                        <SelectItem
+                          key={option.value}
+                          value={option.value}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3 py-0.5">
+                            <ProviderIcon
+                              provider={option.value}
+                              className={`w-6 h-6 shrink-0 ${option.color}`}
+                            />
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-medium text-sm leading-tight text-foreground">
+                                {option.label}
+                              </span>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {errors.provider && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                   {errors.provider.message}

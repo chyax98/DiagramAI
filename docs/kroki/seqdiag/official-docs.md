@@ -2,6 +2,7 @@
 
 > **Last Updated**: 2025-10-13
 > **Primary Sources**:
+>
 > - [BlockDiag Official Site](http://blockdiag.com/en/seqdiag/)
 > - [SeqDiag GitHub Repository](https://github.com/blockdiag/seqdiag)
 
@@ -202,11 +203,13 @@ easy_install seqdiag
 SeqDiag requires TrueType fonts for text rendering.
 
 **Option 1: Command-line**
+
 ```bash
 seqdiag -f /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf diagram.diag
 ```
 
 **Option 2: Configuration file** (`$HOME/.blockdiagrc`)
+
 ```ini
 [seqdiag]
 fontpath = /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf
@@ -235,16 +238,19 @@ seqdiag -o output.png diagram.diag
 ### Sphinx Integration
 
 Install the Sphinx extension:
+
 ```bash
 pip install sphinxcontrib-seqdiag
 ```
 
 Add to `conf.py`:
+
 ```python
 extensions = ['sphinxcontrib.seqdiag']
 ```
 
 Use in reStructuredText:
+
 ```rst
 .. seqdiag::
 
@@ -299,6 +305,7 @@ seqdiag {
 ## Advanced Features
 
 ### 1. Diagonal Edges
+
 ```seqdiag
 seqdiag {
   A -> B [diagonal, label = "async call"];
@@ -306,6 +313,7 @@ seqdiag {
 ```
 
 ### 2. Edge Colors
+
 ```seqdiag
 seqdiag {
   A -> B [label = "success", color = green];
@@ -315,6 +323,7 @@ seqdiag {
 ```
 
 ### 3. Multi-line Labels
+
 ```seqdiag
 seqdiag {
   A -> B [label = "Line 1\nLine 2\nLine 3"];
@@ -322,6 +331,7 @@ seqdiag {
 ```
 
 ### 4. Complex Notes
+
 ```seqdiag
 seqdiag {
   A -> B [note = "Multi-line\nnote with\ndetails"];
@@ -342,6 +352,7 @@ https://kroki.io/seqdiag/svg/<encoded_diagram>
 **Encoding**: Deflate + Base64URL encoding
 
 **Example URL Structure**:
+
 ```
 POST /seqdiag/svg
 Content-Type: text/plain

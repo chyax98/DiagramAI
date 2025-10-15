@@ -32,16 +32,16 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确
 {
-  "signal": [
-    { "name": "clk", "wave": "p..." }
-  ]
+  "signal": [{ "name": "clk", "wave": "p..." }]
 }
 ```
 
 **调试技巧**:
+
 1. 使用 JSON 验证器检查格式
 2. 确保所有键名使用双引号
 3. 检查尾随逗号
@@ -66,16 +66,16 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 包含必需字段
 {
-  "signal": [
-    { "name": "clk", "wave": "p..." }
-  ]
+  "signal": [{ "name": "clk", "wave": "p..." }]
 }
 ```
 
 **必需字段清单**:
+
 - 根对象必须有 `signal` 数组
 - 每个信号对象必须有 `name` 和 `wave`
 
@@ -102,6 +102,7 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 使用有效字符
 {
@@ -113,6 +114,7 @@
 ```
 
 **有效字符列表**:
+
 - 逻辑: `0`, `1`, `x`, `z`, `.`
 - 数据: `2-9`, `=`, `u`, `d`
 - 时钟: `p`, `P`, `n`, `N`, `h`, `l`, `H`, `L`
@@ -126,14 +128,15 @@
 // ⚠️ 不推荐 - 长度不一致
 {
   "signal": [
-    { "name": "A", "wave": "01.0" },     // 长度 4
-    { "name": "B", "wave": "0.1" },      // 长度 3
-    { "name": "C", "wave": "01.01.0" }   // 长度 7
+    { "name": "A", "wave": "01.0" }, // 长度 4
+    { "name": "B", "wave": "0.1" }, // 长度 3
+    { "name": "C", "wave": "01.01.0" } // 长度 7
   ]
 }
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 统一长度
 {
@@ -146,6 +149,7 @@
 ```
 
 **最佳实践**:
+
 - 所有信号的 wave 字符串应等长
 - 使用 `.` 填充较短的信号
 - 可以用变量统一管理长度
@@ -181,6 +185,7 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 数量匹配
 {
@@ -188,13 +193,14 @@
     {
       "name": "bus",
       "wave": "x===x",
-      "data": ["A", "B", "C"]       // 3个数据对应3个=
+      "data": ["A", "B", "C"] // 3个数据对应3个=
     }
   ]
 }
 ```
 
 **调试方法**:
+
 1. 计算 wave 中 `=` 的数量
 2. 确保 data 数组长度匹配
 3. 考虑使用数字字符 `2-9` 代替
@@ -226,13 +232,14 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 使用字符串
 {
   "signal": [
     {
       "wave": "x==x",
-      "data": ["A", "123"]          // 全部字符串
+      "data": ["A", "123"] // 全部字符串
     }
   ]
 }
@@ -247,16 +254,15 @@
 ```json
 // ❌ 错误 - 边缘引用了不存在的节点
 {
-  "signal": [
-    { "wave": "01..", "node": ".a.." }
-  ],
+  "signal": [{ "wave": "01..", "node": ".a.." }],
   "edge": [
-    "a->b"                          // 节点b未定义
+    "a->b" // 节点b未定义
   ]
 }
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 定义所有节点
 {
@@ -264,13 +270,12 @@
     { "wave": "01..", "node": ".a.." },
     { "wave": "0.1.", "node": "..b." }
   ],
-  "edge": [
-    "a->b"
-  ]
+  "edge": ["a->b"]
 }
 ```
 
 **检查清单**:
+
 - 确保 edge 中的所有节点都在 node 中定义
 - 节点名区分大小写
 - 节点位置要与波形对齐
@@ -285,19 +290,20 @@
   "signal": [
     {
       "name": "A",
-      "wave": "01.0",              // 长度4
-      "node": ".a.."               // 位置2
+      "wave": "01.0", // 长度4
+      "node": ".a.." // 位置2
     },
     {
       "name": "B",
-      "wave": "0.10",              // 长度4
-      "node": "..b"                // 长度3,位置不匹配
+      "wave": "0.10", // 长度4
+      "node": "..b" // 长度3,位置不匹配
     }
   ]
 }
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 节点字符串与波形等长
 {
@@ -305,12 +311,12 @@
     {
       "name": "A",
       "wave": "01.0",
-      "node": ".a.."               // 长度4,位置2
+      "node": ".a.." // 长度4,位置2
     },
     {
       "name": "B",
       "wave": "0.10",
-      "node": "..b."               // 长度4,位置3
+      "node": "..b." // 长度4,位置3
     }
   ]
 }
@@ -324,27 +330,29 @@
 // ❌ 错误 - 错误的箭头语法
 {
   "edge": [
-    "a=>b",                        // => 不是有效语法
-    "a<~b",                        // 顺序错误
-    "a--b"                         // 双横线无效
+    "a=>b", // => 不是有效语法
+    "a<~b", // 顺序错误
+    "a--b" // 双横线无效
   ]
 }
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 使用有效语法
 {
   "edge": [
-    "a->b",                        // 直线箭头
-    "a~>b",                        // 曲线箭头
-    "a<->b",                       // 双向箭头
-    "a-|b"                         // 直角线
+    "a->b", // 直线箭头
+    "a~>b", // 曲线箭头
+    "a<->b", // 双向箭头
+    "a-|b" // 直角线
   ]
 }
 ```
 
 **有效箭头类型**:
+
 - 直线: `-`, `->`, `<->`
 - 曲线: `~`, `~>`, `<~>`
 - 直角: `-|`, `-|>`, `<-|->`
@@ -374,6 +382,7 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确
 {
@@ -386,6 +395,7 @@
 ```
 
 **有效配置值**:
+
 - `hscale`: 正整数 (推荐 1-5)
 - `skin`: `"default"`, `"narrow"`, `"lowkey"`
 
@@ -418,6 +428,7 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确
 {
@@ -425,12 +436,12 @@
     {
       "name": "CK",
       "wave": "P.......",
-      "period": 2                  // 数字
+      "period": 2 // 数字
     },
     {
       "name": "CMD",
       "wave": "x.3x",
-      "phase": 0.5                 // 0-1之间
+      "phase": 0.5 // 0-1之间
     }
   ]
 }
@@ -463,6 +474,7 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 使用数组包裹分组
 {
@@ -511,12 +523,13 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 使用空对象
 {
   "signal": [
     { "name": "A", "wave": "01.." },
-    {},                            // 空对象创建间隔
+    {}, // 空对象创建间隔
     { "name": "B", "wave": "0.1." }
   ]
 }
@@ -533,25 +546,27 @@
 {
   "reg": [
     { "bits": 8, "name": "A" },
-    { "bits": 8, "name": "B" }     // 总共16位,不足32位
+    { "bits": 8, "name": "B" } // 总共16位,不足32位
   ]
 }
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 总位宽32位
 {
   "reg": [
     { "bits": 8, "name": "A" },
     { "bits": 8, "name": "B" },
-    { "bits": 16 }                 // 补足到32位
+    { "bits": 16 } // 补足到32位
   ],
   "config": { "lanes": 4 }
 }
 ```
 
 **注意事项**:
+
 - 默认寄存器宽度为32位
 - 使用 config.lanes 可以改变每行显示的位数
 - 总位宽应该是 lanes 的倍数
@@ -564,12 +579,13 @@
 // ❌ 错误 - type 值过大
 {
   "reg": [
-    { "bits": 8, "name": "A", "type": 10 }  // type 只支持 0-7
+    { "bits": 8, "name": "A", "type": 10 } // type 只支持 0-7
   ]
 }
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - type 在有效范围内
 {
@@ -610,20 +626,23 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确
 {
   "head": {
-    "text": ["tspan",
-      ["tspan", {"class": "h1"}, "Title"],
+    "text": [
+      "tspan",
+      ["tspan", { "class": "h1" }, "Title"],
       " - ",
-      ["tspan", {"class": "muted"}, "subtitle"]
+      ["tspan", { "class": "muted" }, "subtitle"]
     ]
   }
 }
 ```
 
 **JsonML 规则**:
+
 1. 第一个元素是标签名 (`"tspan"`)
 2. 第二个元素是属性对象 (可选)
 3. 后续元素是子内容
@@ -637,7 +656,7 @@
 {
   "signal": [
     {
-      "name": "<clock>",           // <> 会被当作HTML
+      "name": "<clock>", // <> 会被当作HTML
       "wave": "p...."
     }
   ]
@@ -645,6 +664,7 @@
 ```
 
 **解决方案**:
+
 ```json
 // ✅ 正确 - 使用 HTML 实体
 {
@@ -672,11 +692,13 @@
 ### 18. 图表不显示
 
 **可能原因**:
+
 1. JavaScript 未加载
 2. WaveDrom 库版本不兼容
 3. DOM 元素未正确初始化
 
 **检查步骤**:
+
 ```html
 <!-- 1. 确认库已加载 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/skins/default.js"></script>
@@ -691,8 +713,8 @@
 
 <!-- 3. 检查控制台错误 -->
 <script>
-  window.onerror = function(msg, url, line) {
-    console.error('Error: ' + msg + ' at ' + url + ':' + line);
+  window.onerror = function (msg, url, line) {
+    console.error("Error: " + msg + " at " + url + ":" + line);
   };
 </script>
 ```
@@ -702,11 +724,13 @@
 **错误**: 部分信号或箭头不显示
 
 **可能原因**:
+
 1. 容器宽度不足
 2. CSS 样式冲突
 3. SVG 渲染问题
 
 **解决方案**:
+
 ```css
 /* 确保容器足够大 */
 .wavedrom-container {
@@ -726,9 +750,10 @@
 **错误**: 无法导出 PNG
 
 **解决方案**:
+
 ```javascript
 // 使用正确的导出方法
-var canvas = document.getElementById('canvas');
+var canvas = document.getElementById("canvas");
 var source = { signal: [{ name: "clk", wave: "p...." }] };
 
 // 确保 canvas 足够大
@@ -739,7 +764,7 @@ canvas.height = 400;
 WaveDrom.renderWaveForm(0, source, canvas);
 
 // 导出
-canvas.toBlob(function(blob) {
+canvas.toBlob(function (blob) {
   // 处理 blob
 });
 ```
@@ -749,27 +774,30 @@ canvas.toBlob(function(blob) {
 ### 通用调试流程
 
 1. **验证 JSON 格式**
+
    ```javascript
    try {
      JSON.parse(sourceCode);
-   } catch(e) {
-     console.error('JSON Error:', e.message);
+   } catch (e) {
+     console.error("JSON Error:", e.message);
    }
    ```
 
 2. **检查必需字段**
+
    ```javascript
    const obj = JSON.parse(sourceCode);
    if (!obj.signal || !Array.isArray(obj.signal)) {
-     console.error('Missing or invalid signal array');
+     console.error("Missing or invalid signal array");
    }
    ```
 
 3. **验证波形字符**
+
    ```javascript
-   const validChars = '01xz.23456789=udpPnNhlHL|';
-   obj.signal.forEach(sig => {
-     const invalid = sig.wave.split('').filter(c => !validChars.includes(c));
+   const validChars = "01xz.23456789=udpPnNhlHL|";
+   obj.signal.forEach((sig) => {
+     const invalid = sig.wave.split("").filter((c) => !validChars.includes(c));
      if (invalid.length > 0) {
        console.error(`Invalid characters in ${sig.name}:`, invalid);
      }
@@ -786,16 +814,16 @@ canvas.toBlob(function(blob) {
 
 ## 错误速查表
 
-| 错误类型 | 常见症状 | 快速修复 |
-|---------|---------|---------|
+| 错误类型      | 常见症状   | 快速修复             |
+| ------------- | ---------- | -------------------- |
 | JSON 格式错误 | 完全不显示 | 检查引号、逗号、括号 |
-| 缺少字段 | 部分不显示 | 添加 name 和 wave |
-| 无效字符 | 波形异常 | 检查 wave 字符串 |
-| 数据不匹配 | 标签缺失 | 对齐 = 和 data 数量 |
-| 节点未定义 | 箭头不显示 | 检查 node 和 edge |
-| 配置错误 | 样式异常 | 验证 config 值 |
-| 分组错误 | 结构混乱 | 使用数组包裹 |
-| JsonML 错误 | 样式不生效 | 检查 tspan 格式 |
+| 缺少字段      | 部分不显示 | 添加 name 和 wave    |
+| 无效字符      | 波形异常   | 检查 wave 字符串     |
+| 数据不匹配    | 标签缺失   | 对齐 = 和 data 数量  |
+| 节点未定义    | 箭头不显示 | 检查 node 和 edge    |
+| 配置错误      | 样式异常   | 验证 config 值       |
+| 分组错误      | 结构混乱   | 使用数组包裹         |
+| JsonML 错误   | 样式不生效 | 检查 tspan 格式      |
 
 ## 参考资源
 

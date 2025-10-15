@@ -130,6 +130,7 @@ export {
   Layers as IconLayers,
   Box as IconBox,
 } from "lucide-react";
+// SVG 内联图标 (ProviderIcons.tsx)
 export {
   OpenAIIcon,
   AnthropicIcon,
@@ -137,10 +138,11 @@ export {
   DeepSeekIcon,
   GroqIcon,
   OpenAICompatibleIcon,
-  ProviderIcon,
+  ProviderIcon as ProviderSvgIcon,
   getProviderIcon,
 } from "./ProviderIcons";
 
+// SVG 内联图标 (DiagramIcons.tsx)
 export {
   MermaidIcon,
   PlantUMLIcon,
@@ -153,12 +155,29 @@ export {
   StateDiagramIcon,
   GanttChartIcon,
   MindMapIcon,
-  LanguageIcon,
-  DiagramTypeIcon,
+  LanguageIcon as LanguageSvgIcon,
+  DiagramTypeIcon as DiagramTypeSvgIcon,
   getLanguageIcon,
   getDiagramTypeIcon,
 } from "./DiagramIcons";
 
+// 新的通用图标组件 (推荐使用) - 基于 Next.js Image
+export { Icon, ProviderIcon, LanguageIcon, Logo, getProviderType, getLanguageType } from "./Icon";
+
+export type {
+  IconCategory,
+  ProviderType,
+  LanguageType,
+  DiagramTypeIcon,
+  AppIcon,
+  IconName,
+  IconProps,
+  ProviderIconProps,
+  LanguageIconProps,
+  LogoProps,
+} from "./Icon";
+
+// 向后兼容导出 (Image 版本)
 export {
   // Provider 图标 (Image 版本)
   OpenAIImageIcon,

@@ -15,7 +15,11 @@ import { ModelRepository } from "@/lib/repositories/ModelRepository";
 import { getAIProvider, validateProviderConfig } from "@/lib/ai/provider-factory";
 import { getRecommendPrompt } from "@/lib/constants/prompts/recommend";
 import { successResponse, errorResponse, ErrorCodes } from "@/lib/utils/api-response";
-import { LANGUAGE_DIAGRAM_TYPES, RENDER_LANGUAGES, type RenderLanguage } from "@/lib/constants/diagram-types";
+import {
+  LANGUAGE_DIAGRAM_TYPES,
+  RENDER_LANGUAGES,
+  type RenderLanguage,
+} from "@/lib/constants/diagram-types";
 import type { UserPublic } from "@/types/database";
 import type { RecommendationResult } from "@/types/recommendation";
 import { logger } from "@/lib/utils/logger";
@@ -122,7 +126,9 @@ export const POST = withAuth(async (request: NextRequest, user: UserPublic) => {
           }
           return {
             ...alt,
-            language: isValidRenderLanguage(lowerLanguage) ? lowerLanguage : ("mermaid" as RenderLanguage),
+            language: isValidRenderLanguage(lowerLanguage)
+              ? lowerLanguage
+              : ("mermaid" as RenderLanguage),
           };
         });
       }

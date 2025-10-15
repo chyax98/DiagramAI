@@ -42,9 +42,31 @@ async function _typewriterEffect(code: string, setCode: (code: string) => void):
   }
 }
 
+// ========== 类型定义 ==========
+
+/**
+ * useEditorActions Hook 返回类型
+ */
+export interface EditorActions {
+  /** 生成新图表 */
+  handleGenerate: (inputText: string) => Promise<void>;
+  /** 切换渲染语言 */
+  handleLanguageChange: (newLanguage: RenderLanguage) => Promise<void>;
+  /** 调整现有图表 */
+  handleAdjust: (adjustInput: string) => Promise<void>;
+  /** 修复渲染错误 */
+  handleFix: (renderError: string) => Promise<void>;
+  /** 保存图表到历史记录 */
+  handleSave: () => Promise<void>;
+  /** 导航到模型配置页面 */
+  handleNavigateModels: () => void;
+  /** 导航到历史记录页面 */
+  handleNavigateHistory: () => void;
+}
+
 // ========== Hook ==========
 
-export function useEditorActions() {
+export function useEditorActions(): EditorActions {
   const router = useRouter();
 
   const {

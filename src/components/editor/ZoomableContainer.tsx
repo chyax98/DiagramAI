@@ -3,15 +3,7 @@
 "use client";
 
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import {
-  ZoomIn,
-  ZoomOut,
-  Maximize,
-  RotateCcw,
-  Download,
-  Copy,
-  FileImage,
-} from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize, RotateCcw, Download, Copy, FileImage } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ExportActions } from "@/hooks/useExportActions";
 
@@ -85,7 +77,9 @@ export function ZoomableContainer({
                     variant="ghost"
                     size="sm"
                     onClick={exportActions.copyImage}
-                    disabled={!exportActions.hasSvgContent || exportActions.copyImageStatus === "loading"}
+                    disabled={
+                      !exportActions.hasSvgContent || exportActions.copyImageStatus === "loading"
+                    }
                     className="h-8 gap-1.5"
                     title={!exportActions.hasSvgContent ? "请先成功渲染图表" : "复制图片到剪贴板"}
                   >

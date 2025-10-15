@@ -24,48 +24,49 @@ pm2 --version
 module.exports = {
   apps: [
     {
-      name: 'diagramai',
-      script: 'npm',
-      args: 'start',
-      cwd: '/root/Diagram/DiagramAI',
+      name: "diagramai",
+      script: "npm",
+      args: "start",
+      cwd: "/root/Diagram/DiagramAI",
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',
+      max_memory_restart: "1G",
 
       // 环境变量
       env: {
-        NODE_ENV: 'production',
+        NODE_ENV: "production",
         PORT: 3000,
       },
 
       // 日志配置
-      error_file: '/root/Diagram/DiagramAI/logs/pm2-error.log',
-      out_file: '/root/Diagram/DiagramAI/logs/pm2-out.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: "/root/Diagram/DiagramAI/logs/pm2-error.log",
+      out_file: "/root/Diagram/DiagramAI/logs/pm2-out.log",
+      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
       merge_logs: true,
 
       // 进程管理优化
-      min_uptime: '10s',              // 最小运行时间，避免频繁重启
-      max_restarts: 10,               // 最大重启次数
-      restart_delay: 4000,            // 重启延迟 (毫秒)
+      min_uptime: "10s", // 最小运行时间，避免频繁重启
+      max_restarts: 10, // 最大重启次数
+      restart_delay: 4000, // 重启延迟 (毫秒)
 
       // 崩溃后自动重启
       exp_backoff_restart_delay: 100, // 指数退避重启延迟
 
       // 优雅关闭
-      kill_timeout: 5000,             // 强制关闭前等待时间
-      wait_ready: true,               // 等待应用 ready 信号
-      listen_timeout: 10000,          // 等待端口监听超时
+      kill_timeout: 5000, // 强制关闭前等待时间
+      wait_ready: true, // 等待应用 ready 信号
+      listen_timeout: 10000, // 等待端口监听超时
 
       // 时间相关
-      cron_restart: '0 4 * * *',      // 每天凌晨 4 点自动重启 (可选)
+      cron_restart: "0 4 * * *", // 每天凌晨 4 点自动重启 (可选)
     },
   ],
 };
 ```
 
 **配置说明**:
+
 - `name`: PM2 进程名称
 - `script`: 使用 `npm` 启动 (更稳定)
 - `args`: 启动参数 (`start` = 生产模式)
@@ -170,6 +171,7 @@ pm2 logs diagramai --lines 50
 ```
 
 **零停机更新** (cluster 模式):
+
 ```bash
 # 直接 reload (无需手动 stop)
 git pull && npm install && npm run build && pm2 reload diagramai
@@ -196,6 +198,7 @@ location / {
 ```
 
 **验证流程**:
+
 1. 本地端口测试: `curl http://localhost:3000`
 2. DNS 验证: `nslookup your-domain.com`
 3. HTTPS 访问: `https://your-domain.com`
@@ -221,6 +224,7 @@ ENABLE_FAILURE_LOGGING=true
 ```
 
 **安全提示**:
+
 - 生产环境 `JWT_SECRET` 必须使用强密钥
 - 不要将 `.env.local` 提交到 Git
 - `BCRYPT_SALT_ROUNDS` 建议设为 12

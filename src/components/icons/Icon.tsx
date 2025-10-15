@@ -103,6 +103,9 @@ export function Icon({ category, name, className = "", size = 20, alt }: IconPro
 /**
  * Provider 图标映射
  * 自动识别 provider 字符串并返回对应的 ProviderType
+ *
+ * @param provider - Provider 名称字符串
+ * @returns ProviderType - 标准化的 Provider 类型
  */
 export function getProviderType(provider: string): ProviderType {
   const providerLower = provider.toLowerCase();
@@ -178,6 +181,9 @@ const LANGUAGE_ALIASES: Record<string, LanguageType> = {
 
 /**
  * 语言图标映射函数
+ *
+ * @param language - 语言名称字符串
+ * @returns LanguageType - 标准化的语言类型
  */
 export function getLanguageType(language: string): LanguageType {
   const langLower = language.toLowerCase();

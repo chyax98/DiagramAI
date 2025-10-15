@@ -8,18 +8,25 @@
  */
 
 import { NextRequest } from "next/server";
-import { withAuth } from "@/lib/auth/middleware";
 import { generateText } from "ai";
+import { withAuth } from "@/lib/auth/middleware";
 import { getDatabaseInstance } from "@/lib/db/client";
 import { ModelRepository } from "@/lib/repositories/ModelRepository";
 import { getAIProvider, validateProviderConfig } from "@/lib/ai/provider-factory";
 import { getRecommendPrompt } from "@/lib/constants/prompts/recommend";
 import { successResponse, errorResponse, ErrorCodes } from "@/lib/utils/api-response";
-import { LANGUAGE_DIAGRAM_TYPES } from "@/lib/constants/diagram-types";
+import { LANGUAGE_DIAGRAM_TYPES, RENDER_LANGUAGES, type RenderLanguage } from "@/lib/constants/diagram-types";
 import type { UserPublic } from "@/types/database";
 import type { RecommendationResult } from "@/types/recommendation";
 import { logger } from "@/lib/utils/logger";
 import { MAX_INPUT_TEXT_LENGTH } from "@/lib/constants/env";
+
+/**
+ * 类型守卫: 验证字符串是否为有效的 RenderLanguage
+ */
+function isValidRenderLanguage(value: string): value is RenderLanguage {
+  return RENDER_LANGUAGES.some((lang) => lang.value === value);
+}
 export const POST = withAuth(async (request: NextRequest, user: UserPublic) => {
   try {
     const body = await request.json();
@@ -97,16 +104,27 @@ export const POST = withAuth(async (request: NextRequest, user: UserPublic) => {
 
       recommendation = JSON.parse(jsonMatch[0]);
 
-      // 容错处理: 将 renderLanguage 转换为小写 (AI 可能返回 "NwDiag" 而非 "nwdiag")
+      // 容错处理: 将 renderLanguage 转换为小写并验证 (AI 可能返回 "NwDiag" 而非 "nwdiag")
       if (recommendation.renderLanguage) {
-        recommendation.renderLanguage = recommendation.renderLanguage.toLowerCase() as any;
+        const lowerLanguage = recommendation.renderLanguage.toLowerCase();
+        if (!isValidRenderLanguage(lowerLanguage)) {
+          throw new Error(`不支持的渲染语言: ${recommendation.renderLanguage}`);
+        }
+        recommendation.renderLanguage = lowerLanguage;
       }
-      // 容错处理: alternatives 中的 language 也要转换
+      // 容错处理: alternatives 中的 language 也要转换并验证
       if (recommendation.alternatives) {
-        recommendation.alternatives = recommendation.alternatives.map((alt) => ({
-          ...alt,
-          language: alt.language.toLowerCase() as any,
-        }));
+        recommendation.alternatives = recommendation.alternatives.map((alt) => {
+          const lowerLanguage = alt.language.toLowerCase();
+          if (!isValidRenderLanguage(lowerLanguage)) {
+            logger.warn("[/api/recommend] 备选方案包含不支持的语言:", alt.language);
+            // 对备选方案,记录警告但不抛出错误
+          }
+          return {
+            ...alt,
+            language: isValidRenderLanguage(lowerLanguage) ? lowerLanguage : ("mermaid" as RenderLanguage),
+          };
+        });
       }
 
       // 验证必需字段

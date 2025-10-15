@@ -18,14 +18,22 @@ import type { UserPublic } from "@/types/database";
 import { logger } from "@/lib/utils/logger";
 
 export const POST = withAuth(async (request: NextRequest, user: UserPublic) => {
-  let body: any;
-  let hasSessionId = false;
-
   try {
-    body = await request.json();
-    hasSessionId = !!body.sessionId;
+    // 1. 解析 JSON (可能抛出 SyntaxError)
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch (jsonError) {
+      logger.error("[/api/chat] JSON 解析失败:", jsonError);
+      return errorResponse(
+        "请求体不是有效的 JSON 格式",
+        ErrorCodes.INVALID_REQUEST,
+        400,
+        jsonError instanceof Error ? jsonError.message : String(jsonError)
+      );
+    }
 
-    // 验证请求参数
+    // 2. 验证请求参数 (使用 Zod)
     const validation = ChatRequestSchema.safeParse(body);
     if (!validation.success) {
       return validationErrorResponse(validation.error);
@@ -33,7 +41,7 @@ export const POST = withAuth(async (request: NextRequest, user: UserPublic) => {
 
     const data = validation.data;
 
-    // 参数标准化
+    // 3. 构建服务层参数
     const params = {
       userId: user.id,
       userMessage: data.userMessage,
@@ -48,12 +56,13 @@ export const POST = withAuth(async (request: NextRequest, user: UserPublic) => {
     logger.info(`[/api/chat] 请求参数:`, {
       userId: user.id,
       hasSessionId: !!data.sessionId,
+      taskType: data.taskType,
       renderLanguage: data.renderLanguage,
       diagramType: data.diagramType,
       messageLength: data.userMessage.length,
     });
 
-    // 使用统一的 chat() 接口
+    // 4. 调用业务逻辑层
     const service = new DiagramGenerationService();
     const result = await service.chat(params);
 
@@ -63,6 +72,7 @@ export const POST = withAuth(async (request: NextRequest, user: UserPublic) => {
       codeLength: result.code.length,
     });
 
+    // 5. 返回成功响应
     return successResponse({
       code: result.code,
       sessionId: result.sessionId,
@@ -71,15 +81,11 @@ export const POST = withAuth(async (request: NextRequest, user: UserPublic) => {
   } catch (error) {
     logger.error("[/api/chat] 请求失败:", error);
 
-    // 根据 sessionId 判断是生成还是调整失败
-    const errorMessage = (error as Error).message || "未知错误";
-    const isGeneration = !hasSessionId;
+    // 提取错误信息
+    const errorMessage = error instanceof Error ? error.message : "未知错误";
 
-    return errorResponse(
-      isGeneration ? "生成失败" : "调整失败",
-      isGeneration ? ErrorCodes.GENERATION_FAILED : ErrorCodes.ADJUSTMENT_FAILED,
-      500,
-      errorMessage
-    );
+    // 统一返回业务错误 (HTTP 500)
+    // 不再区分"生成"和"调整"失败,因为任务类型已在 taskType 中明确
+    return errorResponse("图表处理失败", ErrorCodes.GENERATION_FAILED, 500, errorMessage);
   }
 });

@@ -89,11 +89,75 @@ rectangle "电商系统" {
 - 参与者通常定义在系统边界外部，通过关联线与内部用例连接
 - 示例：用户（外部）→ 登录系统（边界内）
 
-### 布局方向
+## 布局方向控制
+
+### 全局布局方向
 ```plantuml
-left to right direction  ' 水平布局（推荐）
-top to bottom direction  ' 垂直布局
+left to right direction   ' 从左到右 (推荐用于宽屏显示)
+top to bottom direction   ' 从上到下 (默认,适合纵向关系)
 ```
+
+### 使用场景
+
+**横向布局 (left to right)**:
+- 系统交互流程 (时间线效果)
+- 演员数量较多 (2-5 个)
+- 宽屏展示/打印需求
+
+```plantuml
+@startuml
+left to right direction
+
+actor 顾客
+actor 店员
+actor 经理
+
+rectangle 餐厅管理系统 {
+  usecase (点餐) as UC1
+  usecase (支付) as UC2
+  usecase (退款) as UC3
+}
+
+顾客 --> UC1
+顾客 --> UC2
+店员 --> UC1
+经理 --> UC3
+@enduml
+```
+
+**纵向布局 (top to bottom)**:
+- 层次分明的系统 (核心-外围)
+- 用例数量较多 (> 10 个)
+- 标准 UML 风格展示
+
+```plantuml
+@startuml
+top to bottom direction
+
+actor 管理员
+
+rectangle 内容管理系统 {
+  usecase (发布文章) as UC1
+  usecase (审核文章) as UC2
+  usecase (编辑文章) as UC3
+  usecase (删除文章) as UC4
+  usecase (查看统计) as UC5
+}
+
+管理员 --> UC1
+管理员 --> UC2
+管理员 --> UC3
+管理员 --> UC4
+管理员 --> UC5
+
+UC1 ..> UC2 : <<include>>
+@enduml
+```
+
+### 注意事项
+- 布局指令必须在所有元素定义之前
+- 一个图中只能有一个布局方向
+- 不影响演员和用例的关联逻辑
 
 ## 生成示例
 

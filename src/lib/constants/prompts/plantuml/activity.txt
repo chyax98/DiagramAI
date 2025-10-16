@@ -60,6 +60,35 @@ else (no)
 endif
 ```
 
+### 多分支选择 (switch-case)
+当有 3+ 个互斥条件时,优先使用 switch 替代 if-elseif 链。
+
+```plantuml
+@startuml
+start
+:用户选择操作;
+
+switch (操作类型?)
+case (新增)
+  :打开新增表单;
+case (编辑)
+  :加载现有数据;
+  :打开编辑表单;
+case (删除)
+  :弹出确认对话框;
+  if (确认删除?) then (yes)
+    :执行删除;
+  endif
+case (查看)
+  :显示详情页面;
+endswitch
+
+stop
+@enduml
+```
+
+**优势**: 比 if-elseif 链减少 30-40% 代码,视觉层次更清晰
+
 ### 循环
 ```plantuml
 ' repeat-while 循环
@@ -105,6 +134,58 @@ stop
 - 泳道名可以是角色、系统、部门等
 - 第一个泳道应在 `start` 之前定义
 - 后续通过再次声明泳道名切换责任主体
+
+### 分区 (Partition)
+用于逻辑分组,比泳道更轻量。适合按阶段、模块划分活动。
+
+```plantuml
+@startuml
+start
+partition "准备阶段" {
+  :加载配置;
+  :连接数据库;
+}
+partition "执行阶段" {
+  :读取数据;
+  :处理数据;
+  :写入结果;
+}
+partition "清理阶段" {
+  :关闭连接;
+  :生成报告;
+}
+stop
+@enduml
+```
+
+**partition vs 泳道**:
+- partition: 逻辑分组,不表示角色/系统
+- 泳道: 明确的责任主体 (用户、系统、服务)
+
+⚠️ 必须使用花括号 `{}`,不能用方括号 `[]`
+
+### 分离流程 (detach)
+用于表示异步任务,不等待结果即继续。
+
+```plantuml
+@startuml
+start
+:用户提交订单;
+fork
+  :发送确认邮件;
+  detach
+fork again
+  :记录日志;
+  detach
+end fork
+:返回订单号;
+stop
+@enduml
+```
+
+**语义**:
+- `detach` 表示流程在此终止,不合并
+- 适合表达"fire-and-forget"模式
 
 ### 注释
 ```plantuml

@@ -83,6 +83,73 @@ enum OrderStatus {
 }
 ```
 
+### 泛型类 (Generic Classes)
+```plantuml
+@startuml
+' 泛型类定义
+class Box<T> {
+  - content: T
+  + get(): T
+  + set(item: T): void
+}
+
+' 泛型类实例化
+class StringBox {
+}
+
+' 继承时指定类型参数
+Box <|-- StringBox : <String>
+
+note right of Box
+  泛型类支持类型参数
+  T 可以是任何类型
+end note
+
+note right of StringBox
+  继承时指定具体类型
+  StringBox = Box<String>
+end note
+@enduml
+```
+
+**泛型约束示例**：
+```plantuml
+@startuml
+' 泛型约束
+class Entity {
+  - id: Long
+  + getId(): Long
+}
+
+class Repository<T extends Entity> {
+  + findById(id: Long): T
+  + save(entity: T): void
+  + delete(id: Long): void
+}
+
+class User extends Entity {
+  - username: String
+}
+
+class UserRepository {
+}
+
+Entity <|-- User
+Repository <|-- UserRepository : <User>
+
+note right of Repository
+  T 必须继承自 Entity
+  确保类型安全
+end note
+@enduml
+```
+
+**泛型使用场景**：
+- 集合类：`List<T>`、`Map<K,V>`
+- 仓储模式：`Repository<T extends Entity>`
+- 响应包装：`Result<T>`、`Optional<T>`
+- 工厂模式：`Factory<T>`
+
 ### 关系类型
 ```plantuml
 ' 1. 继承 (Inheritance / Generalization)
@@ -499,3 +566,246 @@ abstract class AbstractClass {
 - [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
 
 **任何检查项不通过，立即修正后重新生成**
+
+## 大型类图优化策略
+
+### 触发条件
+当遇到以下情况时，必须应用优化策略：
+- 类数量 > 50 个
+- 继承层级 > 5 层
+- 关系数量 > 100 条
+- 单个类的属性/方法 > 20 个
+
+### 优化策略 1: 使用包 (Package) 分组
+```plantuml
+@startuml
+package "领域层 (Domain Layer)" {
+  class User {
+    - id: Long
+    - username: String
+  }
+
+  class Order {
+    - id: Long
+    - orderNumber: String
+  }
+
+  class Product {
+    - id: Long
+    - name: String
+  }
+}
+
+package "数据访问层 (Data Access Layer)" {
+  class UserRepository {
+    + findById(id: Long): User
+    + save(user: User): void
+  }
+
+  class OrderRepository {
+    + findById(id: Long): Order
+    + save(order: Order): void
+  }
+}
+
+package "服务层 (Service Layer)" {
+  class UserService {
+    + register(user: User): void
+    + login(username: String, password: String): boolean
+  }
+
+  class OrderService {
+    + createOrder(order: Order): void
+    + cancelOrder(orderId: Long): void
+  }
+}
+
+' 跨包关系
+UserService ..> UserRepository : uses
+OrderService ..> OrderRepository : uses
+@enduml
+```
+
+**包分组原则**：
+- 按层次分组：表示层、业务层、数据层
+- 按模块分组：用户模块、订单模块、支付模块
+- 按功能分组：核心功能、扩展功能、工具类
+- 每个包内类数量 ≤ 20 个
+
+### 优化策略 2: 分层拆分图表
+当系统过于复杂时，拆分为多个独立的类图：
+
+**图 1: 领域模型层**
+```plantuml
+@startuml Domain Model
+class User {
+  - id: Long
+  - username: String
+}
+
+class Order {
+  - id: Long
+  - orderNumber: String
+}
+
+User "1" --> "0..*" Order : places
+@enduml
+```
+
+**图 2: 数据访问层**
+```plantuml
+@startuml Data Access Layer
+interface IRepository<T> {
+  + findById(id: Long): T
+  + save(entity: T): void
+}
+
+class UserRepository implements IRepository {
+}
+
+class OrderRepository implements IRepository {
+}
+@enduml
+```
+
+**拆分建议**：
+- 按层次拆分：每层一个独立图表
+- 按模块拆分：每个业务模块一个图表
+- 每个子图 ≤ 20 个类
+- 使用注释说明跨图关系
+
+### 优化策略 3: 使用 hide/show 指令
+```plantuml
+@startuml
+' 隐藏策略
+hide empty members       ' 隐藏空的属性和方法区域
+hide circle             ' 隐藏类图的圆圈图标
+hide <<interface>>      ' 隐藏特定构造型的元素
+
+' 定义大量类
+class User
+class Order
+class Product
+class Payment
+class Shipping
+class Inventory
+class Category
+class Review
+
+' 只显示关注的类
+show User
+show Order
+show Product
+
+' 只显示这些类及其关系
+User --> Order
+Order --> Product
+
+note right of User
+  使用 hide/show 聚焦
+  关键类和关系
+end note
+@enduml
+```
+
+**hide/show 使用场景**：
+- `hide empty members` - 简化显示，去除空成员
+- `hide circle` - 去除类图图标，节省空间
+- `hide <<stereotype>>` - 隐藏特定类型的类
+- `show ClassName` - 只显示指定类及其直接关系
+
+### 优化策略 4: 简化类成员
+```plantuml
+@startuml
+' 完整版本（适合小图）
+class User {
+  - id: Long
+  - username: String
+  - password: String
+  - email: String
+  - phone: String
+  - address: String
+  - createTime: DateTime
+  - updateTime: DateTime
+  + login(): boolean
+  + logout(): void
+  + updateProfile(): void
+  + changePassword(): void
+  + resetPassword(): void
+}
+
+' 简化版本（适合大图）
+class User {
+  - id: Long
+  - username: String
+  - email: String
+  .. 其他 5 个字段 ..
+  + login(): boolean
+  + logout(): void
+  .. 其他 3 个方法 ..
+}
+@enduml
+```
+
+**简化原则**：
+- 只显示核心属性和方法（3-5 个）
+- 使用 `..` 分隔符表示省略的成员
+- 在注释中说明省略的内容
+- 保留对理解类职责最重要的成员
+
+### 优化策略 5: 控制关系密度
+```plantuml
+@startuml
+' 优化前：关系过多，难以阅读
+' A --> B
+' A --> C
+' A --> D
+' B --> C
+' B --> D
+' C --> D
+
+' 优化后：只显示关键关系
+class A
+class B
+class C
+
+A --> B : 主要依赖
+B --> C : 核心关系
+
+note bottom of A
+  省略了与 D 的次要关系
+  保持图表清晰
+end note
+@enduml
+```
+
+**关系优化原则**：
+- 优先显示继承和实现关系
+- 保留核心业务关系（组合、聚合）
+- 简化或隐藏辅助性的依赖关系
+- 使用注释说明省略的关系
+
+### 最佳实践总结
+
+**小型类图 (< 20 个类)**：
+- 完整显示所有类成员
+- 展示所有关系
+- 不需要特殊优化
+
+**中型类图 (20-50 个类)**：
+- 使用包分组
+- 简化非核心类的成员
+- 优化关系密度
+
+**大型类图 (> 50 个类)**：
+- 必须使用包分组或分层拆分
+- 使用 hide/show 聚焦关键元素
+- 大幅简化类成员显示
+- 只保留核心关系
+- 考虑拆分为多个独立图表
+
+**性能优化**：
+- 避免深层嵌套的包结构（≤ 3 层）
+- 控制单个图表的复杂度（≤ 50 个元素）
+- 使用 `hide empty members` 减少渲染负担
+- 合理使用注释代替详细成员列表

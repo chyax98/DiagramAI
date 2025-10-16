@@ -43,6 +43,17 @@ State1 --> State2 : 点击按钮
 State2 --> State1 : 取消
 ```
 
+### 转换守卫和动作
+```plantuml
+State1 --> State2 : event [guard] / action
+State1 --> State2 : 取款 [余额 > 金额] / 扣除余额
+State1 --> State2 : 登录 [验证成功] / 记录日志
+```
+
+**说明**:
+- `[guard]`: 方括号内是守卫条件,只有满足条件才能转换
+- `/ action`: 斜杠后是转换时执行的动作
+
 ### 复合状态
 ```plantuml
 state "复合状态" as CS {
@@ -377,6 +388,41 @@ state "并发" as C {
 ```
 
 **原因**：并发区域的分隔符必须是精确的两个横线 `--`，单横线 `-` 表示普通连接，三个或更多横线会导致语法错误。
+
+### 错误 8: 使用 package 分组
+❌ **错误写法**：
+```plantuml
+@startuml
+package "System" {
+  state Monitoring
+  state Deployed
+}
+@enduml
+```
+
+**错误信息**: `Syntax Error: package not allowed in state diagrams`
+
+**解决方案 1 - 使用 allowmixing**:
+```plantuml
+@startuml
+allowmixing
+package "System" {
+  state Monitoring
+}
+@enduml
+```
+
+**解决方案 2 - 使用复合状态**:
+```plantuml
+@startuml
+state "System" as System {
+  state Monitoring
+  state Deployed
+}
+@enduml
+```
+
+**原因**：状态图默认不支持 package,需要显式启用 allowmixing 或使用复合状态替代。
 
 ## 生成检查清单
 

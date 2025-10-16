@@ -20,21 +20,82 @@
    - 使用节点形状表达节点类型
    - 设计清晰的树形展开结构
 
+> **💡 提示**: 本章节为树形结构专用语法。
+>
+> 通用Graphviz特性请参考L2 common.txt:
+> - 布局引擎 (dot/sfdp) → L2"布局引擎"章节
+> - 间距控制 (ranksep/nodesep) → L2"布局控制高级属性"章节
+> - 注释语法 → L2"注释语法"章节
+> - Record节点详解 → L2"Record节点详细说明"章节
+> - 端口连接系统 → L2"端口连接系统"章节
+> - HTML Labels → L2"HTML-Like Labels"章节
+> - 常见错误 → L2"常见错误"章节
+
 ## 核心语法
 
-### 图声明
+### 树形布局必须使用 TB (Top-to-Bottom)
 ```dot
 digraph Tree {
-  // 树形布局必须从上到下
-  rankdir=TB;
+  rankdir=TB;  // 树形结构强制从上到下布局
 
-  // 默认样式
   node [shape=box, style="rounded,filled", fillcolor="#e3f2fd"];
   edge [color="#1976d2", arrowsize=0.8];
-
-  // 节点和层级关系...
 }
 ```
+
+**核心原则**: 树形结构必须使用 `rankdir=TB`,从上到下展开。
+
+## 布局引擎选择
+
+### 小规模树 (<100节点) - dot引擎
+```dot
+digraph Tree {
+  layout=dot;  // 默认引擎,层次清晰
+  A -> {B; C; D;};
+}
+```
+
+### 大规模树 (100-1000节点) - sfdp引擎
+```dot
+digraph LargeTree {
+  layout=sfdp;         // 力导向布局,适合大规模
+  overlap=false;       // 防止节点重叠
+  sep="+0.2";          // 节点间距增加20%
+  K=0.6;               // 弹簧力系数
+
+  // 1000个节点的组织架构
+}
+```
+
+**sfdp特点**:
+- 支持1000+节点
+- 自动防止重叠
+- 渲染速度快
+- 适合宽树形结构
+
+详细引擎对比参考L2"布局引擎"章节。
+
+## 边控制属性
+
+### splines - 边样式
+```dot
+digraph Tree {
+    graph [splines=ortho];  // 正交路由,适合树形图
+    CEO -> {CTO; CFO; COO;};
+}
+```
+
+**树形图推荐**: ortho(正交) > polyline(折线) > true(曲线)
+
+### weight - 强调主分支
+```dot
+digraph OrgChart {
+    CEO -> CTO [weight=5];      // 主要汇报线
+    CEO -> Advisor [weight=1];  // 顾问线
+}
+```
+
+详细参考L2"布局控制高级属性"章节。
 
 ### 树形结构专用节点
 ```dot
@@ -68,6 +129,52 @@ branch1 -> leaf2;
 // 控制兄弟节点顺序
 root -> {child1 child2 child3};  // 从左到右
 ```
+
+## 性能优化指南
+
+### 大规模组织架构 (500-1000节点)
+
+```dot
+digraph LargeOrg {
+    layout=sfdp;
+    overlap=false;
+    K=0.6;                  // 弹簧力系数
+    sep="+0.3";             // 节点间距+30%
+    splines=false;          // 禁用曲线
+
+    graph [
+        ranksep=0.4,
+        nodesep=0.3
+    ];
+
+    // 1000名员工的组织架构
+}
+```
+
+### 深度树优化 (>10层)
+
+```dot
+digraph DeepTree {
+    ranksep=0.3;            // 紧凑层级间距
+    node [
+        shape=box,
+        width=1.2,
+        height=0.5,
+        fontsize=10
+    ];
+
+    // 12层文件目录树
+}
+```
+
+### 性能基准
+
+| 节点数 | 层数 | 布局引擎 | 渲染时间 | 建议 |
+|--------|------|---------|---------|------|
+| <100 | <5 | dot | <1s | 默认配置 |
+| 100-500 | 5-8 | dot | 2-4s | 紧凑布局 |
+| 500-1000 | >8 | sfdp | 3-5s | 必须sfdp |
+| >1000 | 任意 | sfdp | >5s | 拆分或概要 |
 
 ## 生成示例
 
@@ -245,6 +352,151 @@ digraph DecisionTree {
 - 边标签标注决策条件(是/否)
 - 颜色深浅表达决策树深度
 - 叶节点显示置信度信息
+
+### 示例 4: 思维导图风格树
+
+**用户需求**:发散式思维导图展示
+
+**生成代码**:
+```dot
+digraph MindMap {
+    layout=twopi;  // 放射状布局
+    root="center";
+
+    center [label="项目管理", shape=ellipse, fillcolor=gold, style=filled];
+
+    node [shape=box, style="rounded,filled", fillcolor=lightblue];
+    planning [label="规划"];
+    execution [label="执行"];
+    monitoring [label="监控"];
+    closing [label="收尾"];
+
+    center -> {planning; execution; monitoring; closing;};
+
+    // 二级节点
+    node [fillcolor=lightgreen];
+    planning -> {scope; schedule; budget;};
+    execution -> {tasks; team; communication;};
+}
+```
+
+**关键点**:
+- twopi布局实现放射状思维导图
+- root指定中心节点
+- 层级颜色变化表达思维层次
+- 适合快速头脑风暴可视化
+
+### 示例5: 混合树形结构(技术栈依赖树)
+
+```dot
+digraph TechStack {
+    rankdir=TB;
+    node [shape=box, style="rounded,filled"];
+
+    // 前端层
+    Frontend [fillcolor=lightblue, label="Frontend\nReact"];
+    Router [fillcolor=lightblue, label="Router\nReact-Router"];
+    State [fillcolor=lightblue, label="State\nRedux"];
+
+    // 中间层
+    API [fillcolor=lightgreen, label="API\nAxios"];
+    WebSocket [fillcolor=lightgreen, label="WebSocket\nSocket.io"];
+
+    // 后端层
+    Backend [fillcolor=lightyellow, label="Backend\nNode.js"];
+    Express [fillcolor=lightyellow, label="Framework\nExpress"];
+
+    // 数据层
+    DB [fillcolor=lightpink, label="Database\nPostgreSQL"];
+    Cache [fillcolor=lightpink, label="Cache\nRedis"];
+
+    // 依赖关系
+    Frontend -> {Router; State; API; WebSocket;};
+    {API; WebSocket;} -> Backend;
+    Backend -> Express;
+    Express -> {DB; Cache;};
+
+    // 同层对齐
+    {rank=same; Frontend;}
+    {rank=same; Router; State; API; WebSocket;}
+    {rank=same; Backend; Express;}
+    {rank=same; DB; Cache;}
+}
+```
+
+### 示例5: 二叉搜索树(带值标注)
+
+```dot
+digraph BST {
+    node [shape=circle, style=filled, fillcolor=lightblue];
+
+    // 根节点
+    n50 [label="50"];
+
+    // 左子树
+    n30 [label="30"];
+    n20 [label="20"];
+    n40 [label="40"];
+
+    // 右子树
+    n70 [label="70"];
+    n60 [label="60"];
+    n80 [label="80"];
+
+    // 树结构
+    n50 -> n30;
+    n50 -> n70;
+    n30 -> n20;
+    n30 -> n40;
+    n70 -> n60;
+    n70 -> n80;
+
+    // 标注
+    edge [style=dashed, color=gray, constraint=false];
+    n20 -> n30 [label="<", dir=none];
+    n40 -> n30 [label=">", dir=none];
+}
+```
+
+### 示例6: 文件系统目录树
+
+```dot
+digraph FileSystem {
+    node [shape=folder, style=filled];
+
+    // 根目录
+    root [label="/", fillcolor=gold];
+
+    // 第一层
+    usr [label="usr", fillcolor=lightblue];
+    etc [label="etc", fillcolor=lightgreen];
+    var [label="var", fillcolor=lightpink];
+    home [label="home", fillcolor=lightyellow];
+
+    // 第二层
+    bin [label="bin", fillcolor=lightblue];
+    lib [label="lib", fillcolor=lightblue];
+    nginx [label="nginx", fillcolor=lightgreen];
+    log [label="log", fillcolor=lightpink];
+    www [label="www", fillcolor=lightpink];
+
+    // 文件节点
+    node [shape=note, fillcolor=white];
+    bash [label="bash"];
+    config [label="nginx.conf"];
+    access [label="access.log"];
+    error [label="error.log"];
+
+    // 树结构
+    root -> {usr; etc; var; home;};
+    usr -> {bin; lib;};
+    etc -> nginx;
+    var -> {log; www;};
+    bin -> bash;
+    nginx -> config;
+    log -> {access; error;};
+}
+```
 
 ## 常见错误
 

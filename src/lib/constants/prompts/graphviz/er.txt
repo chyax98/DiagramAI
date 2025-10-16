@@ -19,6 +19,16 @@
    - 使用边标签表达关系基数
    - 设计清晰的表结构展示
 
+> **💡 提示**: 本章节为ER图专用语法。
+>
+> 通用Graphviz特性请参考L2 common.txt:
+> - Record节点详解 (shape=record核心语法) → L2"Record节点详细说明"章节
+> - HTML Labels (专业表结构展示) → L2"HTML-Like Labels"章节
+> - 端口连接系统 (精确字段连接) → L2"端口连接系统"章节
+> - 注释语法 → L2"注释语法"章节
+> - 布局控制高级属性 → L2"布局控制高级属性"章节
+> - 常见错误 → L2"常见错误"章节
+
 ## 核心语法
 
 ### 图声明
@@ -185,6 +195,173 @@ digraph Advanced {
 
 ---
 
+### 示例 4: 完整电商订单系统 (HTML专业版)
+
+**用户需求**: 展示专业的电商核心表结构,包含复合主键、约束、索引
+
+**生成代码**:
+```dot
+digraph EcommerceER {
+  node [shape=plain];
+  rankdir=LR;
+
+  // 用户表
+  User [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+      <TR><TD BGCOLOR="#2C3E50" COLSPAN="3"><FONT COLOR="white"><B>User</B></FONT></TD></TR>
+      <TR>
+        <TD BGCOLOR="gold">PK</TD>
+        <TD PORT="uid" ALIGN="LEFT">userId</TD>
+        <TD ALIGN="LEFT">INT</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">username</TD>
+        <TD ALIGN="LEFT">VARCHAR(50) <FONT POINT-SIZE="9" COLOR="red">NOT NULL</FONT></TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="lightyellow">UK</TD>
+        <TD ALIGN="LEFT">email</TD>
+        <TD ALIGN="LEFT">VARCHAR(100) <FONT POINT-SIZE="9" COLOR="blue">UNIQUE</FONT></TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">createdAt</TD>
+        <TD ALIGN="LEFT">DATETIME</TD>
+      </TR>
+    </TABLE>
+  >];
+
+  // 订单表
+  Order [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+      <TR><TD BGCOLOR="#27AE60" COLSPAN="3"><FONT COLOR="white"><B>Order</B></FONT></TD></TR>
+      <TR>
+        <TD BGCOLOR="gold">PK</TD>
+        <TD PORT="oid" ALIGN="LEFT">orderId</TD>
+        <TD ALIGN="LEFT">INT</TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="lightgreen">FK</TD>
+        <TD PORT="ouid" ALIGN="LEFT">userId</TD>
+        <TD ALIGN="LEFT">INT</TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="lightyellow">IDX</TD>
+        <TD ALIGN="LEFT">orderNumber</TD>
+        <TD ALIGN="LEFT">VARCHAR(50)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">totalAmount</TD>
+        <TD ALIGN="LEFT">DECIMAL(10,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">status</TD>
+        <TD ALIGN="LEFT">ENUM <FONT POINT-SIZE="9" COLOR="green">DEFAULT 'pending'</FONT></TD>
+      </TR>
+    </TABLE>
+  >];
+
+  // 订单项表 (复合主键)
+  OrderItem [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+      <TR><TD BGCOLOR="#E74C3C" COLSPAN="3"><FONT COLOR="white"><B>OrderItem</B></FONT></TD></TR>
+      <TR>
+        <TD BGCOLOR="gold" ROWSPAN="2">PK</TD>
+        <TD PORT="ioid" ALIGN="LEFT">orderId</TD>
+        <TD ALIGN="LEFT">INT</TD>
+      </TR>
+      <TR>
+        <TD PORT="ipid" ALIGN="LEFT">productId</TD>
+        <TD ALIGN="LEFT">INT</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">quantity</TD>
+        <TD ALIGN="LEFT">INT <FONT POINT-SIZE="9" COLOR="orange">CHECK (&gt; 0)</FONT></TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">price</TD>
+        <TD ALIGN="LEFT">DECIMAL(10,2)</TD>
+      </TR>
+    </TABLE>
+  >];
+
+  // 产品表
+  Product [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+      <TR><TD BGCOLOR="#3498DB" COLSPAN="3"><FONT COLOR="white"><B>Product</B></FONT></TD></TR>
+      <TR>
+        <TD BGCOLOR="gold">PK</TD>
+        <TD PORT="pid" ALIGN="LEFT">productId</TD>
+        <TD ALIGN="LEFT">INT</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">productName</TD>
+        <TD ALIGN="LEFT">VARCHAR(200)</TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="lightyellow">IDX</TD>
+        <TD ALIGN="LEFT">sku</TD>
+        <TD ALIGN="LEFT">VARCHAR(50)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">price</TD>
+        <TD ALIGN="LEFT">DECIMAL(10,2)</TD>
+      </TR>
+    </TABLE>
+  >];
+
+  // 关系
+  User:uid -> Order:ouid [label="1..*"];
+  Order:oid -> OrderItem:ioid [label="1..*"];
+  Product:pid -> OrderItem:ipid [label="1..*"];
+}
+```
+
+**特点**:
+- 4张表完整电商核心
+- 复合主键: OrderItem (orderId, productId)
+- 外键关系: 3个FK
+- 索引: 2个单列索引 (orderNumber, sku),体现查询优化
+- 约束: NOT NULL, UNIQUE, CHECK, DEFAULT
+- 配色: 每个表不同颜色,易区分
+- HTML Labels: 专业表结构展示
+
+---
+
+### 高级特性: 弱实体集表示
+
+**用途**: 表达依赖于父实体存在的实体关系
+
+**示例**:
+```dot
+digraph WeakEntity {
+    node [shape=record];
+
+    Order [label="{Order | orderId (PK)}"];
+    OrderItem [label="{OrderItem | orderId (PK,FK)\lordItemId (PK)}"];
+
+    Order -> OrderItem [label="1..*", style=bold];
+}
+```
+
+**特点**:
+- OrderItem依赖Order存在(级联删除)
+- 复合主键: (orderId, orderItemId)
+- orderId既是主键也是外键
+- 粗线(style=bold)表示识别关系
+
+**应用场景**:
+- 订单-订单项
+- 课程-课程章节
+- 建筑-房间
+
 ## 常见错误
 
 ### 错误 1: 字段未使用 `\l` 左对齐
@@ -216,6 +393,211 @@ User -> Order [label="1:N"];
 ```
 
 **原因**: ER 图必须明确标注关系基数 (1:1, 1:N, M:N),否则无法理解表之间的关系。
+
+---
+
+## 复合主键表示
+
+### Record方式 (简洁)
+
+```dot
+digraph CompositePK {
+  node [shape=record];
+
+  OrderItem [label="{OrderItem|<pk1> orderId (PK)\l|<pk2> productId (PK)\l|quantity\l|price\l}"];
+
+  // 标注说明复合主键
+  note [shape=note, label="主键: (orderId, productId)"];
+  OrderItem -> note [style=dashed];
+}
+```
+
+### HTML方式 (专业)
+
+```dot
+digraph ProfessionalPK {
+  node [shape=plain];
+
+  OrderItem [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+      <TR><TD BGCOLOR="navy" COLSPAN="3"><FONT COLOR="white"><B>OrderItem</B></FONT></TD></TR>
+      <TR>
+        <TD BGCOLOR="gold" ROWSPAN="2">PK</TD>
+        <TD PORT="oid">orderId</TD>
+        <TD>INT</TD>
+      </TR>
+      <TR>
+        <TD PORT="pid">productId</TD>
+        <TD>INT</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD>quantity</TD>
+        <TD>INT NOT NULL</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD>price</TD>
+        <TD>DECIMAL(10,2)</TD>
+      </TR>
+    </TABLE>
+  >];
+}
+```
+
+**要点**: ROWSPAN=2 合并主键标记单元格
+
+---
+
+## 字段约束表示
+
+### 常见约束类型
+
+**NOT NULL**:
+```html
+<TD>name: VARCHAR(100) <FONT COLOR="red">NOT NULL</FONT></TD>
+```
+
+**UNIQUE**:
+```html
+<TD>email: VARCHAR(100) <FONT COLOR="blue">UNIQUE</FONT></TD>
+```
+
+**DEFAULT**:
+```html
+<TD>status: VARCHAR(20) <FONT COLOR="green">DEFAULT 'active'</FONT></TD>
+```
+
+**CHECK**:
+```html
+<TD>age: INT <FONT COLOR="orange">CHECK (age &gt;= 0)</FONT></TD>
+```
+
+### 完整示例
+
+```dot
+digraph Constraints {
+  node [shape=plain];
+
+  User [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+      <TR><TD BGCOLOR="navy" COLSPAN="2"><FONT COLOR="white"><B>User</B></FONT></TD></TR>
+      <TR>
+        <TD BGCOLOR="gold">PK</TD>
+        <TD>id: INT</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">name: VARCHAR(100) <FONT POINT-SIZE="9" COLOR="red">NOT NULL</FONT></TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="lightyellow">UK</TD>
+        <TD ALIGN="LEFT">email: VARCHAR(100) <FONT POINT-SIZE="9" COLOR="blue">UNIQUE</FONT></TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">status: VARCHAR(20) <FONT POINT-SIZE="9" COLOR="green">DEFAULT 'active'</FONT></TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD ALIGN="LEFT">age: INT <FONT POINT-SIZE="9" COLOR="orange">CHECK (&gt;= 18)</FONT></TD>
+      </TR>
+    </TABLE>
+  >];
+}
+```
+
+**注意**: HTML实体 `&gt;` 表示 `>` 符号
+
+---
+
+## Mrecord形状 (圆角Record)
+
+**用途**: 更柔和的视觉效果,适合现代UI风格
+
+**对比**:
+```dot
+digraph MrecordDemo {
+  node [shape=record];
+  Table1 [label="{User|id\l|name\l}"];
+
+  node [shape=Mrecord];
+  Table2 [label="{Order|orderId\l|total\l}"];
+
+  Table1 -> Table2 [label="圆角更柔和"];
+}
+```
+
+**语法**: 与record完全相同,仅形状参数不同
+
+---
+
+## 索引表示
+
+### 单列索引
+
+```html
+<TR>
+  <TD BGCOLOR="lightyellow">IDX</TD>
+  <TD>email: VARCHAR(100)</TD>
+</TR>
+```
+
+### 复合索引
+
+```html
+<TR>
+  <TD BGCOLOR="lightyellow" ROWSPAN="2">IDX</TD>
+  <TD>userId: INT</TD>
+</TR>
+<TR>
+  <TD>createTime: DATETIME</TD>
+</TR>
+```
+
+### 完整示例
+
+```dot
+digraph IndexDemo {
+  node [shape=plain];
+
+  Order [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+      <TR><TD BGCOLOR="navy" COLSPAN="3"><FONT COLOR="white"><B>Order</B></FONT></TD></TR>
+      <TR>
+        <TD BGCOLOR="gold">PK</TD>
+        <TD>orderId</TD>
+        <TD>INT</TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="lightgreen">FK</TD>
+        <TD>userId</TD>
+        <TD>INT</TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="lightyellow">IDX</TD>
+        <TD>orderNumber</TD>
+        <TD>VARCHAR(50)</TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="lightyellow" ROWSPAN="2">IDX</TD>
+        <TD>userId</TD>
+        <TD>INT</TD>
+      </TR>
+      <TR>
+        <TD>createTime</TD>
+        <TD>DATETIME</TD>
+      </TR>
+    </TABLE>
+  >];
+}
+```
+
+**颜色标准**:
+- PK: gold (金色)
+- FK: lightgreen (浅绿)
+- UK: lightyellow (浅黄)
+- IDX: lightyellow (浅黄)
 
 ---
 

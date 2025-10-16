@@ -20,6 +20,17 @@
    - 使用边界框区分不同系统或模块
    - 使用颜色和形状表达组件类型
 
+> **💡 提示**: 本章节为架构图专用语法。
+>
+> 通用Graphviz特性请参考L2 common.txt:
+> - 子图与Cluster (分组边界) → L2"子图与Cluster"章节
+> - Record节点详解 → L2"Record节点详细说明"章节
+> - HTML Labels (复杂组件展示) → L2"HTML-Like Labels"章节
+> - 端口连接系统 → L2"端口连接系统"章节
+> - 注释语法 → L2"注释语法"章节
+> - 布局控制高级属性 → L2"布局控制高级属性"章节
+> - 常见错误 → L2"常见错误"章节
+
 ## 核心语法
 
 ### 图声明
@@ -360,6 +371,126 @@ digraph CloudNative {
 - 外部服务使用虚线边框
 - 监控数据流使用虚线箭头
 - 颜色区分不同职责的组件
+
+### 示例 4: 微服务架构 (完整示例)
+
+**用户需求**:展示完整的微服务系统架构,包含服务注册、消息队列等
+
+**生成代码**:
+```dot
+digraph Microservices {
+    layout=neato;
+    overlap=false;
+
+    // API网关
+    node [shape=hexagon, fillcolor=gold, style=filled];
+    Gateway [label="API Gateway"];
+
+    // 核心服务
+    node [shape=box, style="rounded,filled", fillcolor=lightblue];
+    UserService [label="User Service"];
+    OrderService [label="Order Service"];
+    ProductService [label="Product Service"];
+    PaymentService [label="Payment Service"];
+
+    // 数据存储
+    node [shape=cylinder, fillcolor=lightpink];
+    UserDB [label="User DB"];
+    OrderDB [label="Order DB"];
+    ProductDB [label="Product DB"];
+
+    // 消息队列
+    node [shape=rectangle, fillcolor=yellow];
+    MQ [label="Message Queue\n(Kafka)"];
+
+    // 服务注册
+    node [shape=diamond, fillcolor=lightgreen];
+    Registry [label="Service Registry\n(Consul)"];
+
+    // 连接
+    Gateway -> {UserService; OrderService; ProductService; PaymentService;};
+    UserService -> UserDB;
+    OrderService -> OrderDB;
+    ProductService -> ProductDB;
+    OrderService -> MQ;
+    PaymentService -> MQ;
+    {UserService; OrderService; ProductService; PaymentService;} -> Registry [style=dashed];
+}
+```
+
+**关键点**:
+- neato布局适合微服务网状结构
+- API网关使用六边形突出网关角色
+- 消息队列用矩形区分同步/异步通信
+- 服务注册用虚线表示配置关系,非数据流
+- overlap=false防止节点重叠
+
+### 示例 5: Serverless架构
+
+**用户需求**:无服务器架构的简洁展示
+
+**生成代码**:
+```dot
+digraph Serverless {
+    rankdir=LR;
+
+    node [shape=cloud];
+    Client [label="Client"];
+
+    node [shape=box, style="rounded,filled", fillcolor=lightblue];
+    APIGateway [label="API Gateway"];
+
+    node [shape=hexagon, fillcolor=lightyellow];
+    Lambda1 [label="Lambda\nAuth"];
+    Lambda2 [label="Lambda\nProcess"];
+
+    node [shape=cylinder, fillcolor=lightpink];
+    DynamoDB [label="DynamoDB"];
+    S3 [label="S3 Storage"];
+
+    Client -> APIGateway -> {Lambda1; Lambda2;};
+    Lambda1 -> DynamoDB;
+    Lambda2 -> {DynamoDB; S3;};
+}
+```
+
+**关键点**:
+- Lambda用六边形表示函数即服务(FaaS)
+- 云服务用云形状标识托管服务
+- 水平布局适合函数触发链路
+- 按需弹性扩展的架构特点
+
+## 高级特性
+
+### constraint技巧 - 保持分层清晰
+
+**用途**: 在有跨层引用时,仍保持主流程分层不被打乱
+
+**语法**:
+```dot
+digraph ConstraintDemo {
+    rankdir=TB;
+
+    // 分层
+    {rank=same; A1; A2;}
+    {rank=same; B1; B2;}
+    {rank=same; C1; C2;}
+
+    // 主流程
+    A1 -> B1 -> C1;
+    A2 -> B2 -> C2;
+
+    // 跨层引用(不影响分层)
+    A1 -> C1 [constraint=false, style=dashed, color=red];
+}
+```
+
+**应用场景**:
+- 表示监控数据流(不影响业务流程层次)
+- 缓存/日志等辅助连接
+- 跨模块的弱依赖关系
+
+详细参考L2"布局控制高级属性"章节。
 
 ## 常见错误
 

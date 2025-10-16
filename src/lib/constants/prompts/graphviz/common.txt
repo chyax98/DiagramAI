@@ -479,3 +479,362 @@ digraph {
 3. **合理使用换行**：标签使用 `\n` 保持简洁
 4. **统一样式**：同类节点使用相同形状和颜色
 5. **测试布局引擎**：不同引擎适合不同场景
+
+## 注释语法
+
+Graphviz 支持三种注释方式:
+
+1. **C风格注释**:
+   - 单行: `// 这是注释`
+   - 多行: `/* 这是
+              多行注释 */`
+
+2. **C++风格注释**:
+   - 仅单行: `// 单行注释`
+
+3. **#号注释** (仅在某些上下文):
+   - 行首: `# 配置注释`
+
+**最佳实践**:
+- 复杂逻辑前添加注释说明业务含义
+- 避免过度注释显而易见的代码
+- 注释与代码保持同步更新
+
+示例:
+```dot
+digraph G {
+    // 用户认证模块
+    login [label="登录"];
+
+    /* 数据处理流程
+       包含验证和存储 */
+    process [label="处理"];
+}
+```
+
+## Record节点详细说明
+
+Record形状用于显示结构化数据(如类、表结构、接口定义)。
+
+### 基础语法
+
+**record形状** (水平布局):
+```dot
+node [shape=record];
+User [label="<f0> User | <f1> id: int | <f2> name: string"];
+```
+
+**Mrecord形状** (圆角矩形record):
+```dot
+node [shape=Mrecord];
+User [label="<f0> User | <f1> id: int | <f2> name: string"];
+```
+
+### 标签语法规则
+
+**字段分隔符**:
+- `|` 垂直分隔字段
+- `{...}` 创建嵌套结构
+
+**端口定义**:
+- `<port_name>` 定义可连接的端口
+
+**对齐控制**:
+- `\l` 左对齐 (left)
+- `\r` 右对齐 (right)
+- `\n` 居中 (默认)
+
+### 完整示例
+
+```dot
+digraph ClassDiagram {
+    node [shape=record];
+
+    // 类定义
+    User [label="{<head> User | <fields> - id: int\l- name: string\l- email: string\l | <methods> + login()\l+ logout()\l}"];
+
+    Order [label="{<head> Order | <fields> - orderId: int\l- userId: int\l- total: float\l}"];
+
+    // 通过端口连接
+    User:fields -> Order:fields [label="1..*"];
+}
+```
+
+### 端口连接系统
+
+**9个方位端口**:
+- `n` (north/上), `ne` (东北), `e` (east/右)
+- `se` (东南), `s` (south/下), `sw` (西南)
+- `w` (west/左), `nw` (西北), `c` (center/中)
+
+**精确连接语法**:
+```dot
+A:e -> B:w;           // A的右侧连到B的左侧
+A:field1:e -> B:s;    // A的field1端口右侧连到B的下方
+```
+
+**应用场景**:
+- ER图: 表结构展示
+- 类图: 类成员显示
+- 架构图: 组件详情
+- 接口文档: API结构
+
+## 端口连接系统
+
+端口系统用于精确控制边的连接点,实现专业级布局。
+
+### 基础端口
+
+**9个方位端口**:
+```
+    nw    n    ne
+      \   |   /
+    w --- c --- e
+      /   |   \
+    sw    s    se
+```
+
+**语法**:
+```dot
+A:n -> B:s;    // A的上方连到B的下方
+A:e -> B:w;    // A的右侧连到B的左侧
+```
+
+### Record节点端口
+
+**命名端口** (配合record使用):
+```dot
+node [shape=record];
+A [label="<f0> Header | <f1> Body | <f2> Footer"];
+B [label="<g0> Section1 | <g1> Section2"];
+
+A:f1 -> B:g0;  // Body连到Section1
+```
+
+**复合端口**:
+```dot
+A:f1:e -> B:g0:w;  // Body的右侧连到Section1的左侧
+```
+
+### 应用场景
+
+1. **ER图精确连接**:
+   - 表字段之间的外键关系
+   - 避免边穿透节点
+
+2. **架构图模块连接**:
+   - 服务之间的API调用
+   - 分层架构的层间连接
+
+3. **流程图分支优化**:
+   - 多分支从不同端口出发
+   - 减少边交叉
+
+**最佳实践**:
+- 长距离连接优先使用水平端口(e/w)
+- 垂直布局使用垂直端口(n/s)
+- Record节点必须使用命名端口
+
+## HTML-Like Labels
+
+HTML-like标签提供比record更强大的格式化能力,支持表格、字体、颜色等。
+
+### 基础语法
+
+**表格结构**:
+```dot
+A [label=<
+    <TABLE>
+        <TR><TD>Header</TD></TR>
+        <TR><TD>Content</TD></TR>
+    </TABLE>
+>];
+```
+
+**注意**: HTML标签使用 `<...>` 包裹,不需要引号。
+
+### 常用标签
+
+**表格标签**:
+- `<TABLE>` 表格容器
+- `<TR>` 表格行
+- `<TD>` 表格单元格 (可用PORT属性定义端口)
+
+**文本格式**:
+- `<B>粗体</B>`
+- `<I>斜体</I>`
+- `<U>下划线</U>`
+- `<FONT COLOR="red">红色文本</FONT>`
+- `<BR/>` 换行
+
+### 高级示例
+
+**ER图表结构**:
+```dot
+digraph ER {
+    User [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+            <TR><TD BGCOLOR="lightblue"><B>User</B></TD></TR>
+            <TR><TD PORT="id">id: INT PK</TD></TR>
+            <TR><TD PORT="name">name: VARCHAR(100)</TD></TR>
+            <TR><TD PORT="email">email: VARCHAR(100)</TD></TR>
+        </TABLE>
+    >];
+
+    Order [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+            <TR><TD BGCOLOR="lightgreen"><B>Order</B></TD></TR>
+            <TR><TD PORT="oid">orderId: INT PK</TD></TR>
+            <TR><TD PORT="uid">userId: INT FK</TD></TR>
+            <TR><TD>total: DECIMAL</TD></TR>
+        </TABLE>
+    >];
+
+    User:id -> Order:uid;
+}
+```
+
+**架构图组件状态**:
+```dot
+Service [label=<
+    <TABLE>
+        <TR><TD><B>API Gateway</B></TD></TR>
+        <TR><TD><FONT COLOR="green">● Running</FONT></TD></TR>
+        <TR><TD>Port: 8080</TD></TR>
+    </TABLE>
+>];
+```
+
+### 转义规则
+
+**特殊字符**:
+- `&lt;` 表示 `<`
+- `&gt;` 表示 `>`
+- `&amp;` 表示 `&`
+- `&quot;` 表示 `"`
+
+### 应用场景
+
+- ER图: 专业的表结构展示
+- 架构图: 服务状态和配置信息
+- 类图: 复杂的类成员格式化
+- 任何需要多行格式化文本的场景
+
+## 布局控制高级属性
+
+高级布局属性用于精确控制节点位置、边路径和整体布局质量。
+
+### constraint属性 (边约束)
+
+**用途**: 控制边是否影响节点的rank(层级)分配
+
+**语法**:
+```dot
+A -> B [constraint=false];  // 此边不影响A和B的层级关系
+```
+
+**应用场景**:
+- 流程图的回退边(避免循环影响布局)
+- 跨层级的参考连接
+- 保持主流程清晰的辅助连接
+
+**示例**:
+```dot
+digraph Flow {
+    rankdir=LR;
+    A -> B -> C -> D;      // 主流程
+    D -> A [constraint=false, style=dashed];  // 循环回退,不影响布局
+}
+```
+
+### rank属性 (同层对齐)
+
+**用途**: 强制多个节点处于同一水平层级
+
+**语法**:
+```dot
+{rank=same; A; B; C;}  // A、B、C在同一层
+```
+
+**应用场景**:
+- 流程图的并行步骤
+- 架构图的同层服务
+- 树形图的同级节点
+
+**示例**:
+```dot
+digraph Parallel {
+    start -> process1;
+    start -> process2;
+    start -> process3;
+
+    {rank=same; process1; process2; process3;}  // 并行步骤对齐
+
+    process1 -> end;
+    process2 -> end;
+    process3 -> end;
+}
+```
+
+### weight属性 (边权重)
+
+**用途**: 控制边的"重要性",影响边的路径选择
+
+**语法**:
+```dot
+A -> B [weight=5];   // 权重5,优先沿此路径布局
+A -> C [weight=1];   // 权重1,次要路径
+```
+
+**默认值**: 1
+**推荐值**: 主流程2-5, 次要流程0.5-1
+
+**应用场景**:
+- 强调主流程路径
+- 减少次要边对布局的影响
+- 优化复杂图的边交叉
+
+### ranksep属性 (层级间距)
+
+**用途**: 控制rank(层级)之间的垂直间距
+
+**语法**:
+```dot
+graph [ranksep=0.5];   // 层级间距0.5英寸
+graph [ranksep=0.5 equally];  // 均匀分布
+```
+
+**默认值**: 0.5
+**推荐值**: 紧凑0.3-0.5, 松散0.8-1.5
+
+### nodesep属性 (节点间距)
+
+**用途**: 控制同一rank内节点的水平间距
+
+**语法**:
+```dot
+graph [nodesep=0.5];   // 节点间距0.5英寸
+```
+
+**默认值**: 0.25
+**推荐值**: 紧凑0.2-0.3, 松散0.5-1.0
+
+### 性能优化组合
+
+**大规模图表优化**:
+```dot
+graph [
+    ranksep=0.3,      // 紧凑垂直间距
+    nodesep=0.2,      // 紧凑水平间距
+    splines=false     // 禁用曲线(提升性能)
+];
+```
+
+**质量优先**:
+```dot
+graph [
+    ranksep=0.8,      // 宽松垂直间距
+    nodesep=0.5,      // 宽松水平间距
+    splines=ortho     // 正交路由(美观)
+];
+```

@@ -23,19 +23,69 @@
 ## 核心语法
 
 ### 图表声明
+
+Mermaid 流程图支持两种声明方式：
+
+#### 方式1: graph 关键字（传统，兼容性最佳）
+
 ```mermaid
-graph TD    %% 从上到下（Top Down，推荐用于垂直流程）
-graph LR    %% 从左到右（Left to Right，推荐用于时间线）
+graph TD    %% 从上到下（Top Down）
+graph LR    %% 从左到右（Left to Right）
 graph BT    %% 从下到上（Bottom to Top）
 graph RL    %% 从右到左（Right to Left）
-
-flowchart TD    %% flowchart 是 graph 的新语法，功能更强大
 ```
 
-**选择建议**：
-- 垂直流程（如审批流程）→ `graph TD`
-- 时间线流程（如软件生命周期）→ `graph LR`
-- 一般推荐使用 `graph TD`
+**适用场景**: 简单流程图，需要兼容旧版 Mermaid (< v9.0)
+
+---
+
+#### 方式2: flowchart 关键字（新版，功能更强）
+
+```mermaid
+flowchart TD    %% 从上到下
+flowchart LR    %% 从左到右
+flowchart BT    %% 从下到上
+flowchart RL    %% 从右到左
+```
+
+**新增功能**:
+- ✅ 自动文本换行（长标签自动折行）
+- ✅ 更多节点类型（如梯形、六边形）
+- ✅ 更灵活的箭头样式
+
+---
+
+#### 选择建议
+
+| 场景 | 推荐 | 原因 |
+|------|------|------|
+| **简单流程图**（< 10 节点） | graph | 兼容性好，渲染速度快 |
+| **复杂流程图**（长文本、多节点） | **flowchart** | 支持自动换行，布局更好 |
+| **新项目**（Mermaid ≥ v9.0） | **flowchart** | 功能最全，向后兼容 |
+| **不确定** | **flowchart** | 默认推荐，除非有兼容性要求 |
+
+#### 方向选择
+
+| 流程类型 | 推荐方向 | 示例 |
+|---------|---------|-----|
+| 垂直流程（审批、算法） | TD (Top Down) | 用户注册→验证→成功 |
+| 时间线流程（生命周期） | LR (Left to Right) | 开发→测试→部署→运维 |
+| 特殊需求 | BT/RL | 按具体场景决定 |
+
+#### 最佳实践
+
+**优先使用 flowchart TD**（除非需要兼容旧版 Mermaid < v9.0）
+
+**示例对比**:
+```mermaid
+%% 使用 graph - 长文本会溢出
+graph TD
+    A[这是一个非常非常长的节点标签文本] --> B
+
+%% 使用 flowchart - 自动换行
+flowchart TD
+    A[这是一个非常非常长的节点标签文本] --> B
+```
 
 ### 节点类型
 ```mermaid
@@ -67,7 +117,7 @@ H[/梯形\]
 - 普通步骤：方形 `[]`
 - 判断分支：菱形 `{}`
 
-### 连接线类型
+### 箭头类型
 ```mermaid
 %% 1. 实线箭头（最常用）
 A --> B
@@ -296,27 +346,59 @@ graph TD
 **原因**：流程图应该清晰地表示步骤之间的顺序关系，避免跳跃式的连接导致流程混乱。
 
 ### 错误 6: 使用保留关键字作为节点 ID（常见且致命）
-**❌ 错误写法**：
-```mermaid
-graph TD
-    start[开始] --> process[处理]
-    process --> end[结束]    %% 错误：end 是保留关键字
+
+**Mermaid 全局保留关键字**（不能用作节点 ID）:
+```
+graph, subgraph, end, flowchart, direction,
+class, classDef, style, click, call, href, callback,
+title, section, note
 ```
 
-**✅ 正确写法**：
-```mermaid
-graph TD
-    start[开始] --> process[处理]
-    process --> finish[结束]    %% 使用 finish/done/complete 替代
+**Flowchart 特有保留关键字**:
+```
+end, subgraph, direction
 ```
 
-**原因**：`end` 是 Mermaid 的保留关键字（用于 subgraph 等语句块的结束），不能作为节点 ID 使用。
+**为什么会保留这些关键字？**
+- `end`: 子图结束标记
+- `subgraph`: 子图开始标记
+- `direction`: 流程方向控制（TB/TD/BT/RL/LR）
+- 其他关键字: Mermaid 语言级别的通用关键字
 
-**常见保留关键字（禁止用作节点 ID）**：
-- `end` - 最常见的错误，必须用 `finish`, `done`, `complete` 等替代
-- `graph`, `subgraph`, `flowchart` - 图表声明关键字
-- `class`, `classDef`, `style` - 样式关键字
-- `click`, `call`, `href` - 交互关键字
+---
+
+**❌ 错误示例**:
+```mermaid
+graph TD
+    end --> start  %% ❌ 'end' 是保留关键字
+    section[步骤] --> finish  %% ❌ 'section' 也是
+    style[样式] --> output  %% ❌ 'style' 也是
+```
+
+**✅ 正确写法**:
+```mermaid
+graph TD
+    finish[结束] --> start[开始]
+    step[步骤] --> finish
+    design[样式] --> output[输出]
+```
+
+**🔍 检测方法**:
+```javascript
+const reservedKeywords = [
+  'graph', 'subgraph', 'end', 'flowchart', 'direction',
+  'class', 'classDef', 'style', 'click', 'call',
+  'href', 'callback', 'title', 'section', 'note'
+];
+
+function检测NodeID(nodeId) {
+  if (reservedKeywords.includes(nodeId.toLowerCase())) {
+    throw new Error(`节点 ID "${nodeId}" 是保留关键字`);
+  }
+}
+```
+
+**⚠️ 特别注意**: `end` 是 **最高频错误**，因为很多人想用它表示"结束"节点。
 
 ### 错误 7: 特殊字符未转义
 **❌ 错误写法**：
@@ -341,7 +423,7 @@ graph TD
     subgraph 第一层
         subgraph 第二层
             subgraph 第三层
-                subgraph 第四层  %% ❌ 超过限制
+                subgraph 第四层  %% ❌ 超过建议限制
                     A --> B
                 end
             end
@@ -351,31 +433,111 @@ graph TD
 
 **✅ 正确写法**:
 ```mermaid
-graph TD
+flowchart TD
     subgraph 业务层
         subgraph 服务层
-            subgraph 数据层  %% ✅ 最多 3 层
+            subgraph 数据层  %% ✅ 最大深度3层，推荐范围
                 A --> B
             end
         end
     end
 ```
 
-**Kroki 编译错误信息**:
+### 嵌套深度建议
+
+**Mermaid 嵌套深度建议**: ≤ 3 层（Kroki 渲染引擎限制）
+
+**超过3层的影响**:
+- ⚠️ 渲染性能显著下降
+- ⚠️ 布局可能出现重叠或错位
+- ⚠️ 某些浏览器可能无法正确显示
+- ⚠️ SVG 输出文件过大
+
+**检测方法**: 计算 `subgraph` 的最大嵌套层数。
+
+**示例**:
+```mermaid
+flowchart TD
+    subgraph 层1[一级模块]
+        subgraph 层2[二级模块]
+            subgraph 层3[三级模块]
+                A[核心节点] --> B[处理节点]
+            end
+        end
+    end
 ```
-Error: Maximum subgraph nesting depth (3) exceeded
-Mermaid does not support more than 3 levels of subgraph nesting
+✅ **最大深度3层，推荐范围**
+
+**如果必须超过3层**: 考虑以下方案：
+1. 将复杂子图拆分为多个独立图表
+2. 使用外部链接连接多个图表
+3. 简化层级结构，合并中间层
+
+---
+
+### 子图嵌套深度实战示例
+
+**1 层嵌套（推荐用于逻辑分组）**:
+```mermaid
+flowchart TD
+    A[开始]
+    subgraph 业务层
+        B[验证] --> C[处理]
+    end
+    A --> B
+    C --> D[结束]
 ```
 
-**原因**: Mermaid 限制子图嵌套深度为 3 层，超过此限制会导致渲染失败。如需更深层级，考虑：
-1. **拆分为多个图表**: 将复杂的嵌套结构拆分为独立的图表
-2. **使用其他图表类型**: 考虑使用 C4 架构图或类图表示层次结构
-3. **简化结构**: 重新设计架构，减少嵌套层级
+**说明**: 单层嵌套用于简单的逻辑分组，渲染性能最佳，适合大多数场景
 
-**强制要求**:
-- ✅ **最多 3 层子图嵌套**
-- ✅ **超过限制时拆分图表**
-- ✅ **或使用其他图表类型**
+---
+
+**2 层嵌套（适用于模块化架构）**:
+```mermaid
+flowchart TD
+    A[请求]
+    subgraph 应用层
+        subgraph 服务层
+            B[用户服务] --> C[订单服务]
+        end
+    end
+    A --> B
+    C --> D[响应]
+```
+
+**说明**: 两层嵌套适合展示分层架构，保持良好的可读性和性能
+
+---
+
+**3 层嵌套（最大推荐深度）**:
+```mermaid
+flowchart TD
+    A[系统入口]
+    subgraph 前端层
+        subgraph 页面模块
+            subgraph 组件层
+                B[表单组件] --> C[验证组件]
+            end
+        end
+    end
+    A --> B
+    C --> D[提交]
+```
+
+**说明**: 三层嵌套是推荐的最大深度，超过此深度需谨慎使用
+
+---
+
+**⚠️ 超过3层（不推荐）**:
+- 渲染性能下降明显
+- 布局可能混乱或重叠
+- 建议拆分为多个独立图表
+
+**最佳实践**:
+- ✅ **1-2 层**: 最佳可读性，推荐日常使用
+- ⚠️ **3 层**: 可接受但需谨慎，确保必要性
+- ❌ **> 3 层**: 避免使用，考虑重构或拆分图表
+- 💡 **替代方案**: 使用多个简单图表代替一个复杂嵌套图表
 
 ## 生成检查清单
 

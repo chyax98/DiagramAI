@@ -1,310 +1,167 @@
+# Mermaid 语言通用规范 (L2)
 
-# Mermaid 语言通用规范
+> 本文档定义适用于所有 Mermaid 图表类型的通用规则。
+> 通用跨语言规则请参见 L1 universal.txt。
 
-## 强制规则（Mandatory Rules）
+---
 
-### ⚠️ 规则 1: 节点 ID 不能使用中文或保留关键字
-这是 Mermaid 最常见的致命错误！违反此规则会导致编译失败。
+## 🚨 Mermaid 强制规则（违反即编译失败）
 
-**错误示例**：
+### 规则1: 保留关键字冲突
+
+**全局保留关键字**（不能用作节点 ID）:
+```
+graph, subgraph, end, flowchart, direction,
+class, classDef, style, click, call, href, callback,
+title, section, note
+```
+
+**检测方法**: 在生成前扫描所有节点 ID，与保留关键字列表对比。
+
+**错误示例**:
 ```mermaid
 graph TD
-    开始 --> 结束    %% ❌ 编译失败！节点 ID 使用中文
-    start --> end[完成]  %% ❌ 编译失败！end 是保留关键字
+    end --> start  %% ❌ 'end' 是保留关键字
 ```
 
-**正确写法**：
+**正确写法**:
 ```mermaid
 graph TD
-    start[开始] --> finish[结束]  %% ✅ 正确
-    start --> done[完成]          %% ✅ 正确，避免使用 end
-```
-
-**Kroki 编译错误信息**：
-```
-Error: Syntax error in text, line 2: '开始' is not a valid node ID
-Error: 'end' is a reserved keyword and cannot be used as node ID
-Possible fix: Use 'finish', 'done', or 'complete' instead of 'end'
-```
-
-**强制要求**：
-- ✅ **必须使用**: 英文字母（A-Z, a-z）、数字（0-9）、下划线 `_`、连字符 `-`
-- ❌ **禁止使用**: 中文、空格
-- ❌ **保留关键字**（禁止用作节点 ID）:
-  - **图表结构**: `end` (最常见！), `graph`, `subgraph`, `flowchart`
-  - **样式相关**: `class`, `classDef`, `style`
-  - **交互相关**: `click`, `call`, `href`, `callback`
-  - **其他**: `direction`, `title`, `section`
-
-**检测方法**:
-```javascript
-const reservedWords = ['end', 'graph', 'subgraph', 'flowchart', 'class', 'classDef', 'style', 'click', 'call', 'href', 'callback', 'direction', 'title', 'section'];
-const nodeId = 'end';  // 待检测的节点 ID
-if (reservedWords.includes(nodeId)) {
-  throw new Error(`'${nodeId}' is a reserved keyword and cannot be used as node ID`);
-}
+    finish[结束] --> start[开始]
 ```
 
 ---
 
-### ⚠️ 规则 2: 特殊字符必须转义
-标签中包含 Mermaid 语法字符时，必须用双引号包裹，否则会导致解析错误。
+### 规则2: 特殊字符必须转义
 
-**错误示例**：
+**Mermaid 特殊字符**: `[ ] { } ( ) < > | " '`
+
+**转义方式**: 使用双引号 `"..."` 包裹含特殊字符的文本。
+
+**示例**:
 ```mermaid
 graph TD
-    A[用户[管理员]] --> B    %% ❌ 编译失败！[] 是节点语法
-    C[任务{重要}] --> D      %% ❌ 编译失败！{} 是菱形语法
-    E[HTTP://example.com] --> F  %% ❌ 编译失败！: 是分隔符
-```
-
-**正确写法**：
-```mermaid
-graph TD
-    A["用户[管理员]"] --> B  %% ✅ 正确
-    C["任务{重要}"] --> D    %% ✅ 正确
-    E["HTTP://example.com"] --> F  %% ✅ 正确
-```
-
-**Kroki 编译错误信息**：
-```
-Error: Parse error on line 2: Unexpected token '['
-Error: Expecting 'NODE_LABEL', got '{'
-Error: Syntax error: Unexpected ':' in node label
-```
-
-**必须转义的字符**：
-- `[` `]` - 节点形状语法
-- `{` `}` - 菱形节点语法
-- `(` `)` - 圆角节点语法
-- `#` - 样式语法
-- `:` - 分隔符
-- `|` - 子图语法
-
-**转义方法**: 使用双引号 `"..."` 包裹整个标签
-
----
-
-### ⚠️ 规则 3: 箭头语法必须匹配图表类型
-不同图表类型有不同的箭头语法，使用错误会导致编译失败。
-
-**错误示例**：
-```mermaid
-graph TD
-    A -> B    %% ❌ 编译失败！flowchart 使用双箭头
-```
-
-**正确写法**：
-```mermaid
-graph TD
-    A --> B   %% ✅ 正确：flowchart 使用双箭头
-```
-
-**Kroki 编译错误信息**：
-```
-Error: Syntax error in graph: '->' is not valid, use '-->' instead
-Error: Invalid arrow syntax for flowchart diagram type
-```
-
-**各图表类型的箭头语法**：
-- **Flowchart**: `-->`、`-.->` (虚线), `==>` (粗箭头)
-- **Sequence**: `->>` (实线箭头)、`-->>` (虚线箭头), `-x` (异步), `-)` (返回)
-- **State**: `-->`
-- **Class**: `--|>` (继承)、`..|>` (实现)、`*--` (组合)、`o--` (聚合)、`-->` (关联)、`..>` (依赖)、`--` (链接)
-
----
-
-### ⚠️ 规则 4: Kroki 特定限制 - 空消息在最后一行（序列图）
-**这是 Sequence Diagram 在 Kroki 中最高频的渲染失败原因！**
-
-**错误示例**：
-```mermaid
-sequenceDiagram
-    Alice->>Bob: Hello
-    Bob-->>Alice:    %% ❌ 致命错误！空消息在最后一行
-```
-
-**正确写法**：
-```mermaid
-sequenceDiagram
-    Alice->>Bob: Hello
-    Bob-->>Alice: (无消息)    %% ✅ 添加占位文本
-```
-
-或
-
-```mermaid
-sequenceDiagram
-    Alice->>Bob: Hello
-    Bob-->>Alice:        %% ✅ 空消息不在最后
-    Alice->>Bob: Bye
-```
-
-**Kroki 编译错误信息**：
-```
-Empty message in mermaid sequence diagram not working
-Kroki throws error when empty message is the last line
-Error: unexpected end of input after empty message
-```
-
-**强制要求**：
-- ✅ **空消息不能在最后一行**
-- ✅ **使用占位文本** (如: `(无消息)`, `(空)`, `...`)
-- ✅ **或将空消息移到中间位置**
-- ✅ **或添加后续消息/Note**
-
-**根本原因**：Kroki 在处理 Mermaid 代码时会执行 `trim()` 操作，导致最后一行的空消息被完全删除，引发解析器错误 "unexpected end of input"。
-
-**检测方法**：
-```javascript
-const lines = code.split('\n');
-const lastLine = lines[lines.length - 1].trim();
-if (lastLine.match(/^[A-Za-z]+->+[A-Za-z]+:\s*$/)) {
-  throw new Error('Empty message on last line will cause Kroki rendering failure');
-}
+    A["用户输入 (必需)"] --> B["{data: value}"]
+    B --> C["结果 > 100"]
 ```
 
 ---
 
-## 语法要求
+### 规则3: 注释语法
 
-### 基础语法
-- **注释**: 使用 `%%` 开头的单行注释
-  ```
-  %% 这是一个注释
-  ```
-
-- **分隔符**: 指令之间使用换行分隔，不需要分号
-
-- **字符串**: 节点文本支持中文，但避免使用特殊字符 `[]` `{}` `()`
-
-## 命名规范
-
-### 节点 ID 命名
-- ✅ **必须使用**：英文字母（A-Z, a-z）或数字（0-9）
-- ✅ **可以使用**：下划线 `_` 和连字符 `-`
-- ❌ **禁止使用**：中文、空格、特殊符号
-
-**示例**：
-```
-✅ 正确: A, start, node1, user_login, api-call
-❌ 错误: 开始, user login, @api, node#1
-```
-
-### 节点标签
-- 使用中文描述，清晰表达节点含义
-- 避免过长文本，建议 ≤ 15 个汉字
-- 特殊字符需要用引号包裹: `"包含 [] 的文本"`
-
-## 样式系统
-
-### 通用样式语法
+**Mermaid 使用 `%%` 作为单行注释**:
 ```mermaid
-%% 单个节点样式
-style nodeId fill:#f9f,stroke:#333,stroke-width:2px
-
-%% 样式类（可复用）
-classDef className fill:#f96,stroke:#333
-class node1,node2 className
+%% 这是一个注释
+graph TD
+    A --> B  %% 行尾注释
 ```
 
-### 常用样式属性
-- `fill`: 填充颜色 (如: #f9f, #bbf, lightblue)
-- `stroke`: 边框颜色
-- `stroke-width`: 边框宽度
-- `color`: 文字颜色
+**注意**: 无块注释，多行需每行加 `%%`。
 
-## 常见错误
+---
 
-### 错误 1: 节点 ID 使用中文或保留关键字（对应强制规则 1）
-**❌ 错误**:
+### 规则4: 箭头语法必须匹配图表类型
+
+**通用原则**: 不同图表类型有专用箭头语法，禁止混用。
+
+**示例**:
+- Flowchart: `-->`, `-.->`, `==>`, `---`
+- Sequence: `->>`, `-->>`, `-x`, `-)`
+- Class: `--|>`, `..|>`, `*--`, `o--`
+- State: `-->`, `-->`
+
+**详见**: 各 L3 文件中的完整箭头列表。
+
+---
+
+## ⚠️ Kroki 引擎特定限制
+
+某些图表类型在 Kroki 渲染引擎下有特定限制：
+
+- **Sequence Diagram**: 空消息不能在最后一行（详见 `mermaid/sequence.txt`）
+- **其他限制**: 详见各图表类型的 L3 文件
+
+**注意**: 这些限制仅存在于 Kroki 引擎，不是 Mermaid 语言本身的限制。
+
+---
+
+## 📝 Mermaid 语法共性
+
+### 分隔符
+- **换行即分隔**: Mermaid 不需要分号（`;`）结尾
+- **空白行**: 可用于逻辑分组，不影响渲染
+
+### 字符串处理
+- **中文标签**: 支持，但节点 ID 必须英文（见 L1）
+- **引号**: 文本中的特殊字符需用 `"..."` 包裹
+- **换行**: 标签内使用 `<br/>` 实现多行
+
+### 节点 ID 规范（Mermaid 特定）
+- ✅ 允许: 字母、数字、`_`、`-`（见 L1 通用规范）
+- ❌ 禁止: 保留关键字（见规则1）
+
+### 大小写敏感
+
+**Mermaid 严格区分大小写**: `Alice` ≠ `alice`
+
+适用于：节点 ID、参与者名称、类名等所有标识符。
+
+**示例**: 在 Sequence Diagram 中，`Alice` 和 `alice` 会被视为两个不同的参与者。
+
+---
+
+## 🎨 Mermaid 通用特性
+
+### 子图 (Subgraph)
+
+多种 Mermaid 图表支持子图，用于逻辑分组。
+
+**语法**:
 ```mermaid
 graph TD
-    开始 --> 结束                %% 错误：节点 ID 使用中文
-    start --> end[完成]         %% 错误：end 是保留关键字
+    subgraph 子图标题
+        A --> B
+    end
 ```
 
-**✅ 正确**:
-```mermaid
-graph TD
-    start[开始] --> finish[结束]  %% 正确：ID 用英文，中文作为标签
-    start --> done[完成]          %% 正确：避免使用 end
-```
+**支持子图的图表**: flowchart, gantt, state 等。
 
-**原因**:
-- 节点 ID 必须是英文，中文作为标签放在 `[]` 中
-- `end` 是保留关键字，建议使用 `finish`、`done`、`complete` 替代
-- 其他保留关键字包括：`graph`, `subgraph`, `class`, `style`, `click` 等
+**详见**: 各 L3 文件中的子图嵌套深度限制。
 
-### 错误 2: 特殊字符未转义（对应强制规则 2）
-**❌ 错误**:
-```mermaid
-graph TD
-    A[用户[管理员]] --> B       %% 错误：[] 未转义
-    C[任务{重要}] --> D         %% 错误：{} 未转义
-```
+---
 
-**✅ 正确**:
-```mermaid
-graph TD
-    A["用户[管理员]"] --> B     %% 正确：使用引号包裹
-    C["任务{重要}"] --> D       %% 正确：使用引号包裹
-```
+### 样式定义
 
-**原因**: 标签中包含 `[]` `{}` `()` `:` `#` `|` 等特殊字符时，整个标签需要用双引号包裹
+**Mermaid 支持两种样式方式**:
+1. **内联样式** (`style` 关键字)
+2. **样式类** (`classDef` + `class`)
 
-### 错误 3: 箭头语法错误（对应强制规则 3）
-**❌ 错误**:
-```mermaid
-graph TD
-    A -> B    %% 错误：单箭头语法错误
-```
-
-**✅ 正确**:
-```mermaid
-graph TD
-    A --> B   %% 正确：flowchart 使用双箭头
-```
-
-**原因**:
-- Mermaid flowchart 使用 `-->` 表示箭头，不是 `->`
-- 不同图表类型有不同的箭头语法，必须按图表类型使用正确的箭头
-
-### 错误 4: 缺少节点声明
-**❌ 错误**:
-```mermaid
-graph TD
-    A --> B --> C
-    B --> D[决策]    %% B 只在箭头中出现，没有明确样式
-```
-
-**✅ 正确**:
-```mermaid
-graph TD
-    A[开始] --> B{判断}
-    B --> C[路径1]
-    B --> D[路径2]
-```
-
-**原因**: 虽然可以隐式声明节点，但明确声明节点类型（如判断节点用 `{}`）更清晰
-
-### 错误 5: 语法顺序混乱
-**❌ 错误**:
+**示例**:
 ```mermaid
 graph TD
     A --> B
-    style A fill:#f9f
-    A --> C    %% 在样式后又添加连接
+    style A fill:#f9f,stroke:#333
+    classDef success fill:#afa
+    class B success
 ```
 
-**✅ 建议**:
-```mermaid
-graph TD
-    A[节点A] --> B[节点B]
-    A --> C[节点C]
+**详见**: 各 L3 文件中的图表特定样式规则。
 
-    %% 所有节点和连接定义完后，再统一设置样式
-    style A fill:#f9f
-```
+---
 
-**原因**: 保持代码结构清晰，先定义结构，后设置样式
+## 🔍 生成时检查清单（Mermaid 通用）
+
+生成 Mermaid 图表代码后，执行以下通用检查：
+
+1. ✅ **保留关键字检查**: 节点 ID 不在保留关键字列表中
+2. ✅ **特殊字符检查**: 所有含特殊字符的文本已用 `"..."` 包裹
+3. ✅ **注释格式**: 所有注释以 `%%` 开头
+4. ✅ **箭头语法**: 使用了该图表类型的正确箭头
+5. ✅ **代码完整性**: 无占位符、无省略（见 L1）
+
+**图表特定检查**: 见各 L3 文件末尾的详细清单。
+
+---
+
+**L2 文档版本**: v2.0 (重构版)
+**最后更新**: 2025-10-16

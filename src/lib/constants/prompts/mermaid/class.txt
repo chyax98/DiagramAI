@@ -326,7 +326,69 @@ classDiagram
 
 ## 常见错误
 
-### 错误 1: 类名和关系箭头方向混淆
+### 错误 1: 使用保留关键字作为类名
+
+**Mermaid 全局保留关键字**（不能用作类名）:
+```
+class, classDef, style, namespace, direction,
+link, click, callback
+```
+
+**Class Diagram 特有保留关键字**:
+```
+class, namespace, direction, link, click, callback
+```
+
+**为什么保留这些关键字？**
+- `class`: 类定义关键字
+- `namespace`: 命名空间定义
+- `direction`: 图表方向控制
+- `link`/`click`: 交互功能关键字
+
+---
+
+**❌ 错误示例**:
+```mermaid
+classDiagram
+    class class {  %% ❌ 'class' 是保留关键字
+      +method()
+    }
+    class namespace {  %% ❌ 'namespace' 也是
+      +field
+    }
+```
+
+**✅ 正确写法**:
+```mermaid
+classDiagram
+    class MyClass {
+      +method()
+    }
+    class MyNamespace {
+      +field
+    }
+```
+
+**🔍 检测方法**:
+```javascript
+const reservedKeywords = [
+  'class', 'classDef', 'style', 'namespace',
+  'direction', 'link', 'click', 'callback'
+];
+
+function检测类名(className) {
+  if (reservedKeywords.includes(className.toLowerCase())) {
+    throw new Error(`类名 "${className}" 是保留关键字`);
+  }
+}
+```
+
+**💡 最佳实践**:
+- 类名使用大写驼峰（如 `UserService`, `DataRepository`）
+- 避免使用常见设计模式名称作为完整类名（如 `Factory`, `Builder`）
+- 如有必要，添加前缀（如 `MyFactory`, `AppBuilder`）
+
+### 错误 2: 类名和关系箭头方向混淆
 **❌ 错误写法**：
 ```mermaid
 classDiagram
@@ -401,6 +463,99 @@ classDiagram
 ```
 
 **原因**：Mermaid 使用 `~T~` 表示泛型，而非 `<T>`。
+
+---
+
+### 泛型参数详细语法
+
+**基础泛型**:
+```mermaid
+classDiagram
+    class List~T~ {
+        +add(T item)
+        +get(int index) T
+    }
+```
+
+**说明**: 使用 `~T~` 表示泛型参数
+
+---
+
+**多个泛型参数**:
+```mermaid
+classDiagram
+    class Map~K, V~ {
+        +put(K key, V value)
+        +get(K key) V
+    }
+```
+
+**说明**: 多个泛型参数用逗号分隔
+
+---
+
+**泛型约束**:
+```mermaid
+classDiagram
+    class Repository~T extends Entity~ {
+        +save(T entity)
+        +findById(int id) T
+    }
+    class Entity {
+        <<interface>>
+        +getId() int
+    }
+    Repository~T~ ..> Entity
+```
+
+**说明**: `T extends Entity` 表示泛型约束
+
+---
+
+**泛型在关系中的使用**:
+```mermaid
+classDiagram
+    class List~T~
+    class ArrayList~E~
+    ArrayList~E~ --|> List~T~: 实现
+
+    class User
+    class UserList
+    UserList --|> List~User~: 使用User作为泛型
+```
+
+---
+
+**实际应用示例**:
+```mermaid
+classDiagram
+    class Repository~T~ {
+        <<interface>>
+        +findAll() List~T~
+        +findById(ID id) T
+        +save(T entity) T
+        +delete(T entity)
+    }
+
+    class UserRepository {
+        +findByUsername(String username) User
+    }
+
+    class User {
+        -id: Long
+        -username: String
+    }
+
+    UserRepository --|> Repository~User~: 实现
+    UserRepository ..> User: 使用
+```
+
+**最佳实践**:
+- ✅ 泛型参数使用大写字母（T, E, K, V）
+- ✅ 在方法签名中明确泛型类型
+- ✅ 使用泛型约束表达类型限制
+- ⚠️ 避免过深的泛型嵌套（如 `List~Map~K, List~V~~~`）
+
 
 ### 错误 5: 多重性格式错误
 **❌ 错误写法**：

@@ -181,22 +181,6 @@ Arrow binding failed: Target element not found
 
 ---
 
-## 格式要求
-
-### JSON 结构
-Excalidraw 使用标准 JSON 格式，必须包含以下顶层属性：
-
-```json
-{
-  "type": "excalidraw",
-  "version": 2,
-  "source": "https://excalidraw.com",
-  "elements": [],
-  "appState": {},
-  "files": {}
-}
-```
-
 ## 核心元素类型
 
 ### 基本形状
@@ -211,6 +195,11 @@ Excalidraw 使用标准 JSON 格式，必须包含以下顶层属性：
 ### 文本
 - `text` - 独立文本元素
 - `label` - 形状内的标签（嵌套在形状的 `label` 属性中）
+
+### 高级元素
+- `freedraw` - 自由绘制:手绘曲线
+- `image` - 图片:嵌入图像
+- `frame` - 框架:分组容器,组织多个元素
 
 ## 必需属性
 
@@ -243,20 +232,11 @@ Excalidraw 使用标准 JSON 格式，必须包含以下顶层属性：
 ## 命名规范
 
 ### 元素 ID
-- 使用有意义的英文 ID：`login-button`、`user-icon`
-- 或使用类型-序号：`rect-1`、`arrow-2`
-- 必须唯一，用于箭头绑定
-
-### ❌ 避免做法
-- 过长的名称（超过 15 个字符）
-  - ❌ 错误: `id="very-long-element-name-that-is-hard-to-read"`
-  - ✅ 正确: `id="user-icon"`
-- 无意义的 ID（如：`a`, `b`, `c`）
-  - ❌ 错误: `id="a"`
-  - ✅ 正确: `id="login-button"`
-- ID 重复
-  - ❌ 错误: 多个元素使用相同的 ID
-  - ✅ 正确: 每个元素使用唯一的 ID
+- **命名规范**: 遵循L1通用命名规则(英文、数字、下划线、连字符)
+- **推荐格式**:
+  - 有意义的英文ID: `login-button`, `user-icon`
+  - 类型-序号: `rect-1`, `arrow-2`
+- **用途**: ID必须唯一,用于箭头绑定
 
 ### 颜色规范
 推荐使用现代、清晰的颜色：
@@ -271,33 +251,6 @@ Excalidraw 使用标准 JSON 格式，必须包含以下顶层属性：
 - `#2f9e44` (绿) - 用于成功状态、后端服务
 - `#5f3dc4` (紫) - 用于网关、代理、中间件
 
-## 常见错误
-
-### 错误 1: 缺少顶层必需属性（最常见的致命错误！）
-❌ 错误：缺少 `type`、`version` 等
-✅ 正确：始终包含完整的 JSON 结构
-
-**原因**：Excalidraw 严格要求所有顶层属性，否则会导致编译错误：
-```
-Error: Invalid Excalidraw JSON: Missing required property 'type'
-```
-
-### 错误 2: 元素缺少位置或尺寸
-❌ 错误：只有 `type`，没有 `x`、`y`、`width`、`height`
-✅ 正确：所有形状必须有完整的位置和尺寸信息
-
-### 错误 3: 元素 ID 重复
-❌ 错误：多个元素使用相同的 `id`
-✅ 正确：确保每个元素的 ID 唯一
-
-### 错误 4: 箭头绑定到不存在的 ID
-❌ 错误：`"start": {"id": "nonexistent"}`
-✅ 正确：确保绑定的 ID 对应已存在的元素
-
-### 错误 5: JSON 格式错误
-❌ 错误：缺少逗号、引号不匹配、尾随逗号
-✅ 正确：生成严格有效的 JSON，使用 JSON 验证器检查
-
 ## 布局最佳实践
 
 - 元素间距：至少 50px
@@ -305,10 +258,10 @@ Error: Invalid Excalidraw JSON: Missing required property 'type'
 - 标准形状高度：50-150px
 - 字体大小：16-20px（正文），28-36px（标题）
 - 箭头起点/终点：精确绑定到元素 ID
-- **元素数量限制**:建议单个图表不超过 30 个手绘元素
-  - **可读性原因**:过多元素会导致画布混乱,难以理解
-  - **性能考虑**:手绘风格渲染计算量大,过多元素会降低性能
-  - **最佳实践**:如需展示复杂系统,拆分为多个子图,每个图聚焦一个模块
+- **元素数量建议**:
+  - **最佳可读性**: 30-50个元素
+  - **性能上限**: 100个元素(Kroki限制)
+  - **最佳实践**: 如需展示复杂系统,拆分为多个子图
 
 ## 手绘风格控制
 
@@ -316,6 +269,7 @@ Error: Invalid Excalidraw JSON: Missing required property 'type'
 - `0` - 精确线条（适合线框图 wireframe）
 - `1` - 标准手绘（推荐用于通用图表 diagram）
 - `2` - 强烈手绘（适合手绘草图 sketch）
+- `3` - 极强手绘（适合艺术化草图）
 
 ### 字体风格选择
 
@@ -325,19 +279,19 @@ Error: Invalid Excalidraw JSON: Missing required property 'type'
 - `1` - 手绘风格字体（Virgil）- 推荐用于草图和创意图表
 - `2` - 正常字体（Helvetica）- 推荐用于正式文档和专业图表
 - `3` - 代码字体（Cascadia）- 推荐用于技术架构图和代码流程
+- `4` - 漫画字体（Comic Shanns）- 推荐用于轻松活泼的图表
 
 **搭配建议**:
 - 手绘风格 (`roughness: 1-2`) + 手绘字体 (`fontFamily: 1`)
 - 精确线条 (`roughness: 0`) + 正常字体 (`fontFamily: 2`)
 - 技术图表 (`roughness: 0`) + 代码字体 (`fontFamily: 3`)
 
-## Kroki 兼容性要求
+## Kroki 特定限制
 
-Excalidraw 图表通过 Kroki 渲染时，有以下特殊要求：
+Excalidraw 图表通过 Kroki 渲染时的特殊要求:
 
-1. **字段验证严格**: 所有必需字段必须提供（`type`, `id`, `x`, `y`, `width`, `height`）
-2. **JSON 格式要求**: 必须是有效的 JSON 格式，不允许尾随逗号
-3. **性能限制**:
-   - 单个图表元素数量建议不超过 100 个
-   - 避免使用过大的尺寸（width/height > 5000）
-4. **错误提示**: Kroki 会返回 HTTP 400 错误和详细的错误信息
+1. **元素数量**: 建议不超过100个元素(性能上限)
+2. **尺寸限制**: 避免使用过大的尺寸(width/height > 5000)
+3. **错误提示**: Kroki会返回HTTP 400错误和详细的错误信息
+
+**注意**: JSON格式和必需属性的验证规则见上方强制规则部分。

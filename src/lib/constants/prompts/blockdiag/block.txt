@@ -8,6 +8,36 @@
 - 系统模块关系图
 - 快速原型设计
 
+## 块状图特点
+
+### 核心优势
+1. **结构清晰**: 矩形块 + 箭头直观展示系统模块关系
+2. **易于维护**: 简洁语法,代码可读性高
+3. **灵活布局**: 支持横向/纵向布局,适应不同展示需求
+4. **丰富样式**: 14种形状 + class 系统支持复杂样式
+
+### 适用场景排序 (优先级从高到低)
+1. **系统架构图**: 展示模块、组件、服务之间的依赖关系
+2. **流程图**: 业务流程、决策树 (配合 `diamond` 形状)
+3. **网络拓扑**: 服务器、网络设备连接关系 (配合 `cloud`, `actor` 形状)
+4. **组织结构**: 部门、团队层级关系 (配合 `group` 分组)
+5. **状态机**: 状态转换图 (配合 `circle`, `ellipse` 形状)
+
+## 与 common.txt 的关系
+
+**common.txt (L2)**: 定义 BlockDiag 通用语法规则
+- 节点定义、连接语法、样式属性
+- 分组、class 系统、图表级属性
+
+**block.txt (L3)**: 专注块状图特定最佳实践
+- 形状选择建议 (流程图用 `roundedbox`, 架构图用 `box`)
+- 布局优化技巧 (何时用 `portrait`, 何时用 `landscape`)
+- 典型场景模板 (系统架构、决策树、网络拓扑)
+
+**使用建议**:
+- 简单图表: 仅参考 common.txt 基础语法
+- 复杂图表: 结合 block.txt 最佳实践,使用 class 系统和高级布局
+
 ## 核心语法
 
 ### 基础块状流程图
@@ -247,6 +277,77 @@ blockdiag {
 ```
 
 **原因**：判断节点应该使用 `shape = "diamond"` 并标注分支条件。
+
+## 典型场景模板
+
+### 场景 1: 决策树 (Decision Tree)
+**特点**: 使用 `diamond` 表示决策点,分支边带标签
+
+```blockdiag
+blockdiag {
+  default_shape = roundedbox;
+  edge_layout = flowchart;
+
+  开始 [shape = beginpoint];
+  输入数据 [label = "用户输入"];
+  验证 [shape = diamond, label = "数据有效?"];
+  处理 [label = "业务处理"];
+  检查 [shape = diamond, label = "需要审批?"];
+  审批 [label = "人工审批"];
+  保存 [label = "保存结果"];
+  通知 [label = "发送通知"];
+  结束 [shape = endpoint];
+
+  开始 -> 输入数据 -> 验证;
+  验证 -> 处理 [label = "是", color = green];
+  验证 -> 输入数据 [label = "否", color = red, style = dashed];
+  处理 -> 检查;
+  检查 -> 审批 [label = "是"];
+  检查 -> 保存 [label = "否"];
+  审批 -> 保存;
+  保存 -> 通知 -> 结束;
+}
+```
+
+### 场景 2: 分层系统架构
+**特点**: 使用 `group` + `orientation = portrait` 表达层级关系
+
+```blockdiag
+blockdiag {
+  orientation = portrait;
+  default_shape = roundedbox;
+
+  class frontend [color = blue, background = "#E3F2FD"];
+  class backend [color = green, background = "#E8F5E9"];
+  class data [color = red, background = "#FFEBEE"];
+
+  group 前端层 [color = blue] {
+    orientation = landscape;
+    Web [class = "frontend"];
+    Mobile [class = "frontend"];
+  }
+
+  group 业务层 [color = green] {
+    orientation = landscape;
+    API网关 [class = "backend"];
+    认证服务 [class = "backend"];
+    业务服务 [class = "backend"];
+  }
+
+  group 数据层 [color = red] {
+    orientation = landscape;
+    主库 [class = "data", stacked];
+    缓存 [class = "data", shape = ellipse];
+  }
+
+  Web -> API网关;
+  Mobile -> API网关;
+  API网关 -> 认证服务;
+  API网关 -> 业务服务;
+  业务服务 -> 主库;
+  业务服务 -> 缓存;
+}
+```
 
 ## 生成检查清单
 

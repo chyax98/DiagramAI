@@ -1,1049 +1,605 @@
+# BPMN 流程图 (Process Diagram) 最佳实践 (L3: 特定图表类型)
 
-# BPMN 业务流程图生成要求
+## 流程图特点
 
-## 专家视角
+### 适用场景 (优先级排序)
 
-作为业务流程建模专家,你需要同时扮演:
+1. **业务流程文档化**: 记录企业标准操作流程 (SOP)
+2. **流程优化分析**: 识别瓶颈和改进机会
+3. **自动化实施**: 为 BPM 引擎提供可执行模型
+4. **跨部门协作**: 使用泳道明确职责边界
+5. **合规性审计**: 展示流程符合法规要求
 
-1. **业务流程分析师**
-   - 理解复杂的业务流程逻辑和组织结构
-   - 识别流程中的关键活动、决策点和参与者
-   - 将业务需求转化为标准化的 BPMN 流程模型
-   - 确保流程的完整性、正确性和可执行性
+### 核心要素
 
-2. **BPMN 2.0 标准工程师**
-   - 精通 BPMN 2.0 XML 规范和所有元素类型
-   - 掌握事件、活动、网关、连接和泳道的正确使用
-   - 熟悉命名空间、属性和元素关系的规范
-   - 理解 BPMN 的语义和执行约束
+- **开始事件**: 单一起点,明确流程触发条件
+- **任务链**: 顺序执行的工作单元
+- **决策网关**: 条件分支和并行处理
+- **结束事件**: 单一或多个终点,标识不同结果
 
-3. **流程质量保证专家**
-   - 确保 XML 代码语法正确,可以直接渲染
-   - 验证流程逻辑的严谨性(无死循环、无孤立节点)
-   - 检查元素 ID 的唯一性和命名规范
-   - 保证流程符合业务最佳实践
+---
 
-## 核心语法
+## 典型模式
 
-### 1. 基础结构 (必需框架)
+### 模式 1: 线性流程 (Sequential Process)
+
+**场景**: 简单的顺序执行流程,无分支
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions
-  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-  id="Definitions_1">
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://bpmn.io/schema/bpmn"
+             id="Definitions_LinearProcess">
 
-  <bpmn:process id="Process_1" isExecutable="false">
-    <!-- 流程元素放在这里 -->
-  </bpmn:process>
+  <process id="Process_LinearFlow" name="线性流程示例" isExecutable="false">
+    <startEvent id="StartEvent_1" name="开始"/>
+    <task id="Task_1" name="步骤1"/>
+    <task id="Task_2" name="步骤2"/>
+    <task id="Task_3" name="步骤3"/>
+    <endEvent id="EndEvent_1" name="结束"/>
 
-</bpmn:definitions>
-```
+    <sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1"/>
+    <sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="Task_2"/>
+    <sequenceFlow id="Flow_3" sourceRef="Task_2" targetRef="Task_3"/>
+    <sequenceFlow id="Flow_4" sourceRef="Task_3" targetRef="EndEvent_1"/>
+  </process>
 
-**关键点**:
-- `xmlns:bpmn`: BPMN 模型命名空间 (必需)
-- `xmlns:bpmndi`: BPMN 图形命名空间 (可选,用于布局信息)
-- `xmlns:dc`: 图形核心命名空间 (可选,配合 bpmndi 使用)
-- `id`: 全局唯一标识符
-- `isExecutable`: 设为 "false" 表示建模用途,设为 "true" 表示可执行流程
-
-### 2. 事件类型 (Events)
-```xml
-<!-- 开始事件 (Start Event) - 流程起点 -->
-<bpmn:startEvent id="StartEvent_1" name="流程开始" />
-
-<!-- 结束事件 (End Event) - 流程终点 -->
-<bpmn:endEvent id="EndEvent_1" name="流程结束" />
-
-<!-- 中间事件 (Intermediate Event) - 流程中的事件触发点 -->
-<bpmn:intermediateCatchEvent id="IntermediateEvent_1" name="等待审批">
-  <bpmn:timerEventDefinition />  <!-- 定时器事件 -->
-</bpmn:intermediateCatchEvent>
-
-<!-- 消息事件 (Message Event) -->
-<bpmn:intermediateThrowEvent id="MessageEvent_1" name="发送通知">
-  <bpmn:messageEventDefinition />
-</bpmn:intermediateThrowEvent>
-
-<!-- 错误结束事件 (Error End Event) -->
-<bpmn:endEvent id="ErrorEnd_1" name="流程异常">
-  <bpmn:errorEventDefinition />
-</bpmn:endEvent>
-```
-
-**使用建议**:
-- 每个流程必须至少有一个开始事件和一个结束事件
-- 开始事件不能有输入连接,结束事件不能有输出连接
-- 使用 `name` 属性提供中文描述,提高可读性
-
-### 3. 活动类型 (Activities)
-```xml
-<!-- 任务 (Task) - 最基础的活动单元 -->
-<bpmn:task id="Task_1" name="填写申请表" />
-
-<!-- 用户任务 (User Task) - 需要人工操作 -->
-<bpmn:userTask id="UserTask_1" name="经理审批" />
-
-<!-- 服务任务 (Service Task) - 自动化服务调用 -->
-<bpmn:serviceTask id="ServiceTask_1" name="发送邮件通知" />
-
-<!-- 脚本任务 (Script Task) - 执行脚本 -->
-<bpmn:scriptTask id="ScriptTask_1" name="计算金额" />
-
-<!-- 子流程 (Sub-Process) - 包含其他活动 -->
-<bpmn:subProcess id="SubProcess_1" name="审批子流程">
-  <bpmn:startEvent id="SubStart_1" />
-  <bpmn:task id="SubTask_1" name="子任务" />
-  <bpmn:endEvent id="SubEnd_1" />
-  <bpmn:sequenceFlow id="Flow_Sub1" sourceRef="SubStart_1" targetRef="SubTask_1" />
-  <bpmn:sequenceFlow id="Flow_Sub2" sourceRef="SubTask_1" targetRef="SubEnd_1" />
-</bpmn:subProcess>
-
-<!-- 调用活动 (Call Activity) - 调用其他流程 -->
-<bpmn:callActivity id="CallActivity_1" name="调用通用审批流程" />
-```
-
-**使用建议**:
-- 普通步骤使用 `task` 或 `userTask`
-- 自动化操作使用 `serviceTask` 或 `scriptTask`
-- 复杂子流程使用 `subProcess`,可复用流程使用 `callActivity`
-
-### 4. 网关类型 (Gateways)
-```xml
-<!-- 排他网关 (Exclusive Gateway) - 单一路径选择 -->
-<bpmn:exclusiveGateway id="Gateway_Exclusive" name="金额是否超过1万?" />
-
-<!-- 并行网关 (Parallel Gateway) - 所有路径同时执行 -->
-<bpmn:parallelGateway id="Gateway_Parallel" name="并行处理" />
-
-<!-- 包容网关 (Inclusive Gateway) - 一个或多个路径 -->
-<bpmn:inclusiveGateway id="Gateway_Inclusive" name="选择处理方式" />
-
-<!-- 事件网关 (Event-Based Gateway) - 基于事件的路径选择 -->
-<bpmn:eventBasedGateway id="Gateway_Event" name="等待响应" />
-```
-
-**使用建议**:
-- 排他网关: 用于 "if-else" 逻辑,只选择一条路径
-- 并行网关: 用于 "并行执行",所有分支同时进行
-- 包容网关: 用于 "多选" 逻辑,可选择一条或多条路径
-- 网关应该成对出现(分叉和汇聚),确保流程完整
-
-### 5. 连接类型 (Connections)
-```xml
-<!-- 顺序流 (Sequence Flow) - 最常用的连接 -->
-<bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1" />
-
-<!-- 带条件的顺序流 - 用于网关分支 -->
-<bpmn:sequenceFlow id="Flow_2" name="金额 &gt; 10000" sourceRef="Gateway_1" targetRef="Task_2">
-  <bpmn:conditionExpression>amount &gt; 10000</bpmn:conditionExpression>
-</bpmn:sequenceFlow>
-
-<!-- 默认顺序流 - 网关的默认路径 -->
-<bpmn:sequenceFlow id="Flow_3" name="其他情况" sourceRef="Gateway_1" targetRef="Task_3" />
-
-<!-- 消息流 (Message Flow) - 跨泳道通信 -->
-<bpmn:messageFlow id="MessageFlow_1" sourceRef="Task_1" targetRef="Task_2" />
-
-<!-- 关联 (Association) - 非执行性连接,用于注释 -->
-<bpmn:association id="Association_1" sourceRef="Task_1" targetRef="TextAnnotation_1" />
-```
-
-**使用建议**:
-- 每个活动至少有一个输入和一个输出顺序流
-- 网关的条件分支必须明确标注条件
-- XML 特殊字符使用实体编码: `>` 写为 `&gt;`, `<` 写为 `&lt;`, `&` 写为 `&amp;`
-
-### 6. 泳道 (Swimlanes)
-```xml
-<!-- 池 (Pool) - 代表一个组织或系统 -->
-<bpmn:collaboration id="Collaboration_1">
-  <bpmn:participant id="Participant_1" name="客户" processRef="Process_1" />
-  <bpmn:participant id="Participant_2" name="销售部门" processRef="Process_2" />
-  <bpmn:messageFlow id="MessageFlow_1" sourceRef="Task_1" targetRef="Task_2" />
-</bpmn:collaboration>
-
-<!-- 泳道 (Lane) - 池内的角色或部门 -->
-<bpmn:process id="Process_1">
-  <bpmn:laneSet id="LaneSet_1">
-    <bpmn:lane id="Lane_1" name="申请人">
-      <bpmn:flowNodeRef>Task_1</bpmn:flowNodeRef>
-    </bpmn:lane>
-    <bpmn:lane id="Lane_2" name="审批人">
-      <bpmn:flowNodeRef>Task_2</bpmn:flowNodeRef>
-    </bpmn:lane>
-  </bpmn:laneSet>
-
-  <bpmn:task id="Task_1" name="提交申请" />
-  <bpmn:task id="Task_2" name="审批" />
-</bpmn:process>
-```
-
-**使用建议**:
-- 跨组织流程使用 Pool (通过 collaboration 和 participant)
-- 单组织多角色使用 Lane
-- Lane 必须通过 `flowNodeRef` 明确包含哪些活动
-
-### 7. 数据对象 (Data Objects)
-```xml
-<!-- 数据对象 - 流程中的数据 -->
-<bpmn:dataObject id="DataObject_1" name="申请表单" />
-<bpmn:dataObjectReference id="DataObjectRef_1" dataObjectRef="DataObject_1" />
-
-<!-- 数据存储 - 持久化数据 -->
-<bpmn:dataStoreReference id="DataStore_1" name="客户数据库" />
-
-<!-- 数据关联 -->
-<bpmn:dataInputAssociation id="Association_1">
-  <bpmn:sourceRef>DataObjectRef_1</bpmn:sourceRef>
-  <bpmn:targetRef>Task_1</bpmn:targetRef>
-</bpmn:dataInputAssociation>
-```
-
-### 8. 文本注释 (Annotations)
-```xml
-<!-- 文本注释 - 为流程元素添加说明 -->
-<bpmn:textAnnotation id="TextAnnotation_1">
-  <bpmn:text>注意: 超过3天自动拒绝</bpmn:text>
-</bpmn:textAnnotation>
-
-<!-- 关联到活动 -->
-<bpmn:association id="Association_1" sourceRef="Task_1" targetRef="TextAnnotation_1" />
-```
-
-### 9. 边界事件 (Boundary Events)
-```xml
-<!-- 附加到活动的边界事件 - 用于异常处理和超时 -->
-<bpmn:task id="Task_1" name="等待审批" />
-
-<!-- 定时器边界事件 - 超时处理 -->
-<bpmn:boundaryEvent id="BoundaryTimer_1" name="3天超时" attachedToRef="Task_1">
-  <bpmn:timerEventDefinition />
-</bpmn:boundaryEvent>
-
-<!-- 错误边界事件 - 异常处理 -->
-<bpmn:boundaryEvent id="BoundaryError_1" name="审批异常" attachedToRef="Task_1">
-  <bpmn:errorEventDefinition />
-</bpmn:boundaryEvent>
-
-<!-- 边界事件的输出流 -->
-<bpmn:sequenceFlow id="Flow_Timeout" sourceRef="BoundaryTimer_1" targetRef="Task_Timeout" />
-```
-
-**使用建议**:
-- 边界事件必须通过 `attachedToRef` 关联到活动
-- 用于超时控制、异常处理、消息中断等场景
-
-### 10. ID 命名规范
-```xml
-<!-- 推荐的 ID 命名模式 -->
-<bpmn:startEvent id="StartEvent_1" />        <!-- 开始事件: StartEvent_序号 -->
-<bpmn:endEvent id="EndEvent_1" />            <!-- 结束事件: EndEvent_序号 -->
-<bpmn:task id="Task_Submit" />               <!-- 任务: Task_描述 -->
-<bpmn:userTask id="UserTask_Approve" />      <!-- 用户任务: UserTask_描述 -->
-<bpmn:exclusiveGateway id="Gateway_Amount" /><!-- 网关: Gateway_描述 -->
-<bpmn:sequenceFlow id="Flow_1" />            <!-- 顺序流: Flow_序号 -->
-<bpmn:lane id="Lane_Applicant" />            <!-- 泳道: Lane_角色 -->
-```
-
-**命名规则**:
-- 所有 ID 必须在整个文档中唯一
-- 使用英文字母、数字和下划线,推荐驼峰命名
-- ID 应该具有语义,便于理解和维护
-- 中文描述放在 `name` 属性中
-
-## 生成示例
-
-### 示例 1: 基础请假流程 (简单场景)
-
-**用户需求**: 员工请假流程,包含提交申请和经理审批
-
-**生成代码**:
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions
-  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-  id="Definitions_Leave">
-
-  <bpmn:process id="Process_Leave" name="请假流程" isExecutable="false">
-
-    <!-- 开始事件 -->
-    <bpmn:startEvent id="StartEvent_1" name="员工发起请假" />
-
-    <!-- 任务: 填写请假单 -->
-    <bpmn:userTask id="Task_Submit" name="填写请假单" />
-
-    <!-- 任务: 经理审批 -->
-    <bpmn:userTask id="Task_Approve" name="经理审批" />
-
-    <!-- 判断网关: 审批结果 -->
-    <bpmn:exclusiveGateway id="Gateway_Result" name="审批结果?" />
-
-    <!-- 任务: 通知员工 -->
-    <bpmn:task id="Task_Notify" name="通知审批结果" />
-
-    <!-- 结束事件 -->
-    <bpmn:endEvent id="EndEvent_1" name="流程结束" />
-
-    <!-- 顺序流 -->
-    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_Submit" />
-    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_Submit" targetRef="Task_Approve" />
-    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_Approve" targetRef="Gateway_Result" />
-
-    <!-- 条件分支 -->
-    <bpmn:sequenceFlow id="Flow_Approve" name="批准" sourceRef="Gateway_Result" targetRef="Task_Notify">
-      <bpmn:conditionExpression>approved == true</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_Reject" name="拒绝" sourceRef="Gateway_Result" targetRef="Task_Notify">
-      <bpmn:conditionExpression>approved == false</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_4" sourceRef="Task_Notify" targetRef="EndEvent_1" />
-
-  </bpmn:process>
-
-</bpmn:definitions>
+</definitions>
 ```
 
 **关键点**:
 - 完整的 XML 声明和命名空间
 - 清晰的开始和结束事件
-- 使用排他网关实现条件分支
 - 所有顺序流正确连接,无断链
 - ID 命名语义化,name 使用中文描述
 
-### 示例 2: 采购审批流程 (中等复杂度,含多级审批和并行处理)
+---
 
-**用户需求**: 采购流程,根据金额不同需要不同级别审批,审批通过后并行执行采购和财务处理
+### 模式 2: 排他网关 (XOR Gateway) - 条件分支
 
-**生成代码**:
+**场景**: 根据条件选择一条路径执行
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions
-  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-  id="Definitions_Purchase">
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://bpmn.io/schema/bpmn"
+             id="Definitions_XORGateway">
 
-  <bpmn:process id="Process_Purchase" name="采购审批流程" isExecutable="false">
+  <process id="Process_XORGateway" name="条件分支流程" isExecutable="false">
+    <startEvent id="StartEvent_1" name="收到订单"/>
+    <task id="Task_1" name="检查金额"/>
+    <exclusiveGateway id="Gateway_1" name="金额判断" default="Flow_Default"/>
+    <task id="Task_Auto" name="自动审批"/>
+    <task id="Task_Manual" name="人工审批"/>
+    <exclusiveGateway id="Gateway_2" name="汇聚"/>
+    <task id="Task_2" name="发货"/>
+    <endEvent id="EndEvent_1" name="完成"/>
 
-    <!-- 开始事件 -->
-    <bpmn:startEvent id="StartEvent_1" name="发起采购申请" />
+    <sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1"/>
+    <sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="Gateway_1"/>
 
-    <!-- 任务: 填写采购申请 -->
-    <bpmn:userTask id="Task_FillForm" name="填写采购申请单" />
+    <!-- 条件分支 -->
+    <sequenceFlow id="Flow_3" name="&lt; 1000元" sourceRef="Gateway_1" targetRef="Task_Auto">
+      <conditionExpression xsi:type="tFormalExpression">${amount &lt; 1000}</conditionExpression>
+    </sequenceFlow>
 
-    <!-- 判断网关: 金额判断 -->
-    <bpmn:exclusiveGateway id="Gateway_Amount" name="金额是否超过10万?" />
+    <sequenceFlow id="Flow_Default" name="&gt;= 1000元" sourceRef="Gateway_1" targetRef="Task_Manual"/>
 
-    <!-- 任务: 部门经理审批 -->
-    <bpmn:userTask id="Task_ManagerApprove" name="部门经理审批" />
+    <!-- 汇聚 -->
+    <sequenceFlow id="Flow_5" sourceRef="Task_Auto" targetRef="Gateway_2"/>
+    <sequenceFlow id="Flow_6" sourceRef="Task_Manual" targetRef="Gateway_2"/>
 
-    <!-- 任务: 总经理审批 -->
-    <bpmn:userTask id="Task_CEOApprove" name="总经理审批" />
+    <sequenceFlow id="Flow_7" sourceRef="Gateway_2" targetRef="Task_2"/>
+    <sequenceFlow id="Flow_8" sourceRef="Task_2" targetRef="EndEvent_1"/>
+  </process>
 
-    <!-- 汇聚网关: 审批完成 -->
-    <bpmn:exclusiveGateway id="Gateway_ApprovalDone" name="审批完成" />
+</definitions>
+```
 
-    <!-- 判断网关: 审批结果 -->
-    <bpmn:exclusiveGateway id="Gateway_Result" name="审批通过?" />
+**关键点**:
+- 使用排他网关实现 "if-else" 逻辑
+- 必须指定 `default` 默认流
+- 条件分支使用 `conditionExpression`
+- XML 特殊字符使用实体编码: `<` → `&lt;`, `>` → `&gt;`
+- 网关成对使用 (分叉和汇聚)
 
-    <!-- 并行网关: 分支开始 -->
-    <bpmn:parallelGateway id="Gateway_ParallelStart" name="并行处理" />
+---
 
-    <!-- 任务: 执行采购 -->
-    <bpmn:task id="Task_Purchase" name="执行采购" />
+### 模式 3: 并行网关 (AND Gateway) - 并行执行
 
-    <!-- 任务: 财务处理 -->
-    <bpmn:task id="Task_Finance" name="财务付款" />
+**场景**: 多个任务同时执行,全部完成后继续
 
-    <!-- 并行网关: 分支汇聚 -->
-    <bpmn:parallelGateway id="Gateway_ParallelEnd" name="汇聚" />
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://bpmn.io/schema/bpmn"
+             id="Definitions_ParallelGateway">
 
-    <!-- 任务: 入库 -->
-    <bpmn:task id="Task_Inventory" name="物品入库" />
+  <process id="Process_ParallelGateway" name="并行任务流程" isExecutable="false">
+    <startEvent id="StartEvent_1" name="开始"/>
+    <task id="Task_1" name="准备材料"/>
+    <parallelGateway id="Gateway_Fork" name="并行分支"/>
+    <task id="Task_A" name="任务A"/>
+    <task id="Task_B" name="任务B"/>
+    <task id="Task_C" name="任务C"/>
+    <parallelGateway id="Gateway_Join" name="并行汇聚"/>
+    <task id="Task_2" name="汇总结果"/>
+    <endEvent id="EndEvent_1" name="完成"/>
 
-    <!-- 结束事件: 成功 -->
-    <bpmn:endEvent id="EndEvent_Success" name="采购完成" />
-
-    <!-- 结束事件: 拒绝 -->
-    <bpmn:endEvent id="EndEvent_Reject" name="申请被拒绝" />
-
-    <!-- 顺序流: 主流程 -->
-    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_FillForm" />
-    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_FillForm" targetRef="Gateway_Amount" />
-
-    <!-- 条件分支: 金额判断 -->
-    <bpmn:sequenceFlow id="Flow_LowAmount" name="金额 &lt;= 10万" sourceRef="Gateway_Amount" targetRef="Task_ManagerApprove">
-      <bpmn:conditionExpression>amount &lt;= 100000</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_HighAmount" name="金额 &gt; 10万" sourceRef="Gateway_Amount" targetRef="Task_CEOApprove">
-      <bpmn:conditionExpression>amount &gt; 100000</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-
-    <!-- 汇聚到审批完成网关 -->
-    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_ManagerApprove" targetRef="Gateway_ApprovalDone" />
-    <bpmn:sequenceFlow id="Flow_4" sourceRef="Task_CEOApprove" targetRef="Gateway_ApprovalDone" />
-
-    <!-- 审批结果判断 -->
-    <bpmn:sequenceFlow id="Flow_5" sourceRef="Gateway_ApprovalDone" targetRef="Gateway_Result" />
-
-    <bpmn:sequenceFlow id="Flow_Approved" name="通过" sourceRef="Gateway_Result" targetRef="Gateway_ParallelStart">
-      <bpmn:conditionExpression>approved == true</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_Rejected" name="拒绝" sourceRef="Gateway_Result" targetRef="EndEvent_Reject">
-      <bpmn:conditionExpression>approved == false</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
+    <sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1"/>
+    <sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="Gateway_Fork"/>
 
     <!-- 并行分支 -->
-    <bpmn:sequenceFlow id="Flow_6" sourceRef="Gateway_ParallelStart" targetRef="Task_Purchase" />
-    <bpmn:sequenceFlow id="Flow_7" sourceRef="Gateway_ParallelStart" targetRef="Task_Finance" />
+    <sequenceFlow id="Flow_3" sourceRef="Gateway_Fork" targetRef="Task_A"/>
+    <sequenceFlow id="Flow_4" sourceRef="Gateway_Fork" targetRef="Task_B"/>
+    <sequenceFlow id="Flow_5" sourceRef="Gateway_Fork" targetRef="Task_C"/>
 
     <!-- 并行汇聚 -->
-    <bpmn:sequenceFlow id="Flow_8" sourceRef="Task_Purchase" targetRef="Gateway_ParallelEnd" />
-    <bpmn:sequenceFlow id="Flow_9" sourceRef="Task_Finance" targetRef="Gateway_ParallelEnd" />
+    <sequenceFlow id="Flow_6" sourceRef="Task_A" targetRef="Gateway_Join"/>
+    <sequenceFlow id="Flow_7" sourceRef="Task_B" targetRef="Gateway_Join"/>
+    <sequenceFlow id="Flow_8" sourceRef="Task_C" targetRef="Gateway_Join"/>
 
-    <!-- 入库和结束 -->
-    <bpmn:sequenceFlow id="Flow_10" sourceRef="Gateway_ParallelEnd" targetRef="Task_Inventory" />
-    <bpmn:sequenceFlow id="Flow_11" sourceRef="Task_Inventory" targetRef="EndEvent_Success" />
+    <sequenceFlow id="Flow_9" sourceRef="Gateway_Join" targetRef="Task_2"/>
+    <sequenceFlow id="Flow_10" sourceRef="Task_2" targetRef="EndEvent_1"/>
+  </process>
 
-  </bpmn:process>
-
-</bpmn:definitions>
+</definitions>
 ```
 
 **关键点**:
-- 使用排他网关实现金额条件判断
-- 排他网关成对使用(分叉和汇聚)
-- 使用并行网关实现采购和财务的并行处理
-- 并行网关成对使用,确保同步点
-- 两个结束事件表示不同的流程结果
-- 条件表达式使用 XML 实体编码 (`&lt;`, `&gt;`)
+- 并行网关实现 "所有任务同时执行"
+- Fork Gateway: 1 个 incoming, 多个 outgoing
+- Join Gateway: 多个 incoming, 1 个 outgoing
+- Fork 和 Join 必须成对使用
+- 不需要条件表达式
 
-### 示例 3: 跨部门协作流程 (高级场景,含泳道、边界事件、子流程)
+---
 
-**用户需求**: 订单处理流程,涉及销售部门、仓库部门和财务部门的协作,包含超时处理和异常处理
+### 模式 4: 泳道流程 (Swimlane Process)
 
-**生成代码**:
+**场景**: 跨部门协作流程,明确职责边界
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions
-  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-  id="Definitions_Order">
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://bpmn.io/schema/bpmn"
+             id="Definitions_Swimlane">
 
-  <!-- 协作定义 - 多个参与者 -->
-  <bpmn:collaboration id="Collaboration_Order">
-    <bpmn:participant id="Participant_Sales" name="销售部门" processRef="Process_Sales" />
-    <bpmn:participant id="Participant_Warehouse" name="仓库部门" processRef="Process_Warehouse" />
-    <bpmn:participant id="Participant_Finance" name="财务部门" processRef="Process_Finance" />
-
-    <!-- 消息流 - 跨部门通信 -->
-    <bpmn:messageFlow id="MessageFlow_1" name="发送订单" sourceRef="Task_CreateOrder" targetRef="Task_CheckStock" />
-    <bpmn:messageFlow id="MessageFlow_2" name="库存确认" sourceRef="Task_CheckStock" targetRef="Gateway_StockResult" />
-    <bpmn:messageFlow id="MessageFlow_3" name="发货通知" sourceRef="Task_Ship" targetRef="Task_ConfirmDelivery" />
-    <bpmn:messageFlow id="MessageFlow_4" name="收款通知" sourceRef="Task_Payment" targetRef="EndEvent_Success" />
-  </bpmn:collaboration>
-
-  <!-- 流程 1: 销售部门 -->
-  <bpmn:process id="Process_Sales" name="销售流程">
-
+  <process id="Process_OrderFulfillment" name="订单履约流程" isExecutable="false">
     <!-- 泳道定义 -->
-    <bpmn:laneSet id="LaneSet_Sales">
-      <bpmn:lane id="Lane_SalesRep" name="销售代表">
-        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_CreateOrder</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_ConfirmDelivery</bpmn:flowNodeRef>
-      </bpmn:lane>
-      <bpmn:lane id="Lane_SalesManager" name="销售经理">
-        <bpmn:flowNodeRef>Gateway_StockResult</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_ContactCustomer</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>EndEvent_Success</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>EndEvent_Cancel</bpmn:flowNodeRef>
-      </bpmn:lane>
-    </bpmn:laneSet>
+    <laneSet id="LaneSet_1">
+      <!-- 销售部门 -->
+      <lane id="Lane_Sales" name="销售部">
+        <flowNodeRef>StartEvent_1</flowNodeRef>
+        <flowNodeRef>Task_CreateOrder</flowNodeRef>
+        <flowNodeRef>Task_SendInvoice</flowNodeRef>
+        <flowNodeRef>EndEvent_1</flowNodeRef>
+      </lane>
 
-    <!-- 开始事件 -->
-    <bpmn:startEvent id="StartEvent_1" name="客户下单" />
+      <!-- 仓库部门 -->
+      <lane id="Lane_Warehouse" name="仓库">
+        <flowNodeRef>Task_PickItems</flowNodeRef>
+        <flowNodeRef>Task_PackOrder</flowNodeRef>
+      </lane>
 
-    <!-- 任务: 创建订单 -->
-    <bpmn:userTask id="Task_CreateOrder" name="创建订单" />
+      <!-- 物流部门 -->
+      <lane id="Lane_Shipping" name="物流">
+        <flowNodeRef>Task_ShipOrder</flowNodeRef>
+      </lane>
+    </laneSet>
 
-    <!-- 判断网关: 库存结果 -->
-    <bpmn:exclusiveGateway id="Gateway_StockResult" name="库存充足?" />
-
-    <!-- 任务: 联系客户 -->
-    <bpmn:userTask id="Task_ContactCustomer" name="联系客户说明缺货" />
-
-    <!-- 任务: 确认收货 -->
-    <bpmn:userTask id="Task_ConfirmDelivery" name="确认客户收货" />
-
-    <!-- 结束事件 -->
-    <bpmn:endEvent id="EndEvent_Success" name="订单完成" />
-    <bpmn:endEvent id="EndEvent_Cancel" name="订单取消" />
+    <!-- 流程元素 -->
+    <startEvent id="StartEvent_1" name="收到订单"/>
+    <task id="Task_CreateOrder" name="创建订单"/>
+    <task id="Task_PickItems" name="拣货"/>
+    <task id="Task_PackOrder" name="打包"/>
+    <task id="Task_ShipOrder" name="发货"/>
+    <task id="Task_SendInvoice" name="发送发票"/>
+    <endEvent id="EndEvent_1" name="订单完成"/>
 
     <!-- 顺序流 -->
-    <bpmn:sequenceFlow id="Flow_S1" sourceRef="StartEvent_1" targetRef="Task_CreateOrder" />
-    <bpmn:sequenceFlow id="Flow_S2" sourceRef="Task_CreateOrder" targetRef="Gateway_StockResult" />
+    <sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_CreateOrder"/>
+    <sequenceFlow id="Flow_2" sourceRef="Task_CreateOrder" targetRef="Task_PickItems"/>
+    <sequenceFlow id="Flow_3" sourceRef="Task_PickItems" targetRef="Task_PackOrder"/>
+    <sequenceFlow id="Flow_4" sourceRef="Task_PackOrder" targetRef="Task_ShipOrder"/>
+    <sequenceFlow id="Flow_5" sourceRef="Task_ShipOrder" targetRef="Task_SendInvoice"/>
+    <sequenceFlow id="Flow_6" sourceRef="Task_SendInvoice" targetRef="EndEvent_1"/>
+  </process>
 
-    <bpmn:sequenceFlow id="Flow_StockOK" name="有货" sourceRef="Gateway_StockResult" targetRef="Task_ConfirmDelivery">
-      <bpmn:conditionExpression>stockAvailable == true</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_StockNo" name="缺货" sourceRef="Gateway_StockResult" targetRef="Task_ContactCustomer">
-      <bpmn:conditionExpression>stockAvailable == false</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_S3" sourceRef="Task_ContactCustomer" targetRef="EndEvent_Cancel" />
-    <bpmn:sequenceFlow id="Flow_S4" sourceRef="Task_ConfirmDelivery" targetRef="EndEvent_Success" />
-
-  </bpmn:process>
-
-  <!-- 流程 2: 仓库部门 -->
-  <bpmn:process id="Process_Warehouse" name="仓库流程">
-
-    <!-- 开始事件 -->
-    <bpmn:startEvent id="StartEvent_W1" name="收到订单" />
-
-    <!-- 任务: 检查库存 -->
-    <bpmn:userTask id="Task_CheckStock" name="检查库存" />
-
-    <!-- 子流程: 拣货打包 -->
-    <bpmn:subProcess id="SubProcess_Pack" name="拣货打包子流程">
-      <bpmn:startEvent id="SubStart_1" name="开始拣货" />
-      <bpmn:task id="SubTask_Pick" name="拣货" />
-      <bpmn:task id="SubTask_Pack" name="打包" />
-      <bpmn:task id="SubTask_Label" name="贴标签" />
-      <bpmn:endEvent id="SubEnd_1" name="打包完成" />
-
-      <bpmn:sequenceFlow id="Flow_Sub1" sourceRef="SubStart_1" targetRef="SubTask_Pick" />
-      <bpmn:sequenceFlow id="Flow_Sub2" sourceRef="SubTask_Pick" targetRef="SubTask_Pack" />
-      <bpmn:sequenceFlow id="Flow_Sub3" sourceRef="SubTask_Pack" targetRef="SubTask_Label" />
-      <bpmn:sequenceFlow id="Flow_Sub4" sourceRef="SubTask_Label" targetRef="SubEnd_1" />
-    </bpmn:subProcess>
-
-    <!-- 任务: 发货 (带超时边界事件) -->
-    <bpmn:userTask id="Task_Ship" name="安排发货" />
-
-    <!-- 边界事件: 超时 -->
-    <bpmn:boundaryEvent id="Boundary_Timeout" name="24小时未发货" attachedToRef="Task_Ship">
-      <bpmn:timerEventDefinition />
-    </bpmn:boundaryEvent>
-
-    <!-- 任务: 升级处理 -->
-    <bpmn:task id="Task_Escalate" name="升级到主管处理" />
-
-    <!-- 结束事件 -->
-    <bpmn:endEvent id="EndEvent_W1" name="发货完成" />
-    <bpmn:endEvent id="EndEvent_W2" name="超时处理" />
-
-    <!-- 顺序流 -->
-    <bpmn:sequenceFlow id="Flow_W1" sourceRef="StartEvent_W1" targetRef="Task_CheckStock" />
-    <bpmn:sequenceFlow id="Flow_W2" sourceRef="Task_CheckStock" targetRef="SubProcess_Pack" />
-    <bpmn:sequenceFlow id="Flow_W3" sourceRef="SubProcess_Pack" targetRef="Task_Ship" />
-    <bpmn:sequenceFlow id="Flow_W4" sourceRef="Task_Ship" targetRef="EndEvent_W1" />
-
-    <!-- 超时处理路径 -->
-    <bpmn:sequenceFlow id="Flow_Timeout" sourceRef="Boundary_Timeout" targetRef="Task_Escalate" />
-    <bpmn:sequenceFlow id="Flow_W5" sourceRef="Task_Escalate" targetRef="EndEvent_W2" />
-
-  </bpmn:process>
-
-  <!-- 流程 3: 财务部门 -->
-  <bpmn:process id="Process_Finance" name="财务流程">
-
-    <!-- 开始事件 -->
-    <bpmn:startEvent id="StartEvent_F1" name="收到发货通知" />
-
-    <!-- 任务: 开具发票 -->
-    <bpmn:task id="Task_Invoice" name="开具发票" />
-
-    <!-- 任务: 收款 -->
-    <bpmn:task id="Task_Payment" name="确认收款" />
-
-    <!-- 数据存储引用 -->
-    <bpmn:dataStoreReference id="DataStore_Finance" name="财务系统" />
-
-    <!-- 结束事件 -->
-    <bpmn:endEvent id="EndEvent_F1" name="财务完成" />
-
-    <!-- 顺序流 -->
-    <bpmn:sequenceFlow id="Flow_F1" sourceRef="StartEvent_F1" targetRef="Task_Invoice" />
-    <bpmn:sequenceFlow id="Flow_F2" sourceRef="Task_Invoice" targetRef="Task_Payment" />
-    <bpmn:sequenceFlow id="Flow_F3" sourceRef="Task_Payment" targetRef="EndEvent_F1" />
-
-    <!-- 文本注释 -->
-    <bpmn:textAnnotation id="Annotation_1">
-      <bpmn:text>发票必须在发货后3天内开具</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_1" sourceRef="Task_Invoice" targetRef="Annotation_1" />
-
-  </bpmn:process>
-
-</bpmn:definitions>
+</definitions>
 ```
 
 **关键点**:
-- 使用 `collaboration` 和 `participant` 定义多个参与者(池)
-- 使用 `messageFlow` 实现跨部门通信
-- 使用 `laneSet` 和 `lane` 在流程内划分角色
-- 使用 `subProcess` 组织复杂的子流程
-- 使用 `boundaryEvent` 实现超时处理
-- 使用 `dataStoreReference` 表示数据存储
-- 使用 `textAnnotation` 和 `association` 添加说明
-- 完整的多部门协作流程模型
+- 使用 `laneSet` 和 `lane` 划分职责
+- 每个 Lane 通过 `flowNodeRef` 包含流程节点
+- 泳道名称应清晰表达角色/部门职责
+- 顺序流可以跨越 Lane 边界 (同一 Pool 内)
 
-## 常见错误
+---
 
-### 错误 1: 缺少 XML 声明或命名空间
+### 模式 5: 子流程 (Sub-Process)
 
-**❌ 错误写法**:
-```xml
-<bpmn:definitions>
-  <bpmn:process id="Process_1">
-    <bpmn:startEvent id="start" />
-  </bpmn:process>
-</bpmn:definitions>
-```
+**场景**: 复杂流程拆分为可复用的子流程
 
-**✅ 正确写法**:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions
-  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-  id="Definitions_1">
-  <bpmn:process id="Process_1" isExecutable="false">
-    <bpmn:startEvent id="StartEvent_1" />
-  </bpmn:process>
-</bpmn:definitions>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://bpmn.io/schema/bpmn"
+             id="Definitions_SubProcess">
+
+  <process id="Process_OrderProcessing" name="订单处理流程" isExecutable="false">
+    <startEvent id="StartEvent_1" name="收到订单"/>
+    <task id="Task_ValidateOrder" name="验证订单"/>
+
+    <!-- 子流程 -->
+    <subProcess id="SubProcess_Payment" name="支付处理子流程">
+      <startEvent id="SubStart_1" name="开始支付"/>
+      <task id="SubTask_CheckCredit" name="信用检查"/>
+      <task id="SubTask_ProcessPayment" name="处理支付"/>
+      <task id="SubTask_SendReceipt" name="发送收据"/>
+      <endEvent id="SubEnd_1" name="支付完成"/>
+
+      <sequenceFlow id="SubFlow_1" sourceRef="SubStart_1" targetRef="SubTask_CheckCredit"/>
+      <sequenceFlow id="SubFlow_2" sourceRef="SubTask_CheckCredit" targetRef="SubTask_ProcessPayment"/>
+      <sequenceFlow id="SubFlow_3" sourceRef="SubTask_ProcessPayment" targetRef="SubTask_SendReceipt"/>
+      <sequenceFlow id="SubFlow_4" sourceRef="SubTask_SendReceipt" targetRef="SubEnd_1"/>
+    </subProcess>
+
+    <task id="Task_ShipOrder" name="发货"/>
+    <endEvent id="EndEvent_1" name="订单完成"/>
+
+    <!-- 主流程流 -->
+    <sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_ValidateOrder"/>
+    <sequenceFlow id="Flow_2" sourceRef="Task_ValidateOrder" targetRef="SubProcess_Payment"/>
+    <sequenceFlow id="Flow_3" sourceRef="SubProcess_Payment" targetRef="Task_ShipOrder"/>
+    <sequenceFlow id="Flow_4" sourceRef="Task_ShipOrder" targetRef="EndEvent_1"/>
+  </process>
+
+</definitions>
 ```
 
-**原因**: BPMN 2.0 XML 必须包含完整的 XML 声明和 BPMN 命名空间,否则无法被解析器识别。`xmlns:bpmn` 命名空间是必需的。
+**关键点**:
+- 子流程封装复杂逻辑,提升可读性
+- 子流程内部有独立的开始和结束事件
+- 子流程可作为一个整体连接到主流程
+- 建议嵌套深度不超过 3 层
 
-### 错误 2: 元素 ID 重复
+---
 
-**❌ 错误写法**:
+### 模式 6: 边界事件 (Boundary Events)
+
+**场景**: 异常处理和超时控制
+
 ```xml
-<bpmn:startEvent id="Event_1" name="开始" />
-<bpmn:endEvent id="Event_1" name="结束" />
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://bpmn.io/schema/bpmn"
+             id="Definitions_BoundaryEvent">
+
+  <process id="Process_BoundaryEvent" name="边界事件示例" isExecutable="false">
+    <startEvent id="StartEvent_1" name="开始"/>
+    <task id="Task_ProcessPayment" name="处理支付"/>
+
+    <!-- 超时边界事件 -->
+    <boundaryEvent id="BoundaryEvent_Timeout" name="2小时超时"
+                   attachedToRef="Task_ProcessPayment" cancelActivity="true">
+      <timerEventDefinition id="TimerEventDefinition_1">
+        <timeDuration xsi:type="tFormalExpression">PT2H</timeDuration>
+      </timerEventDefinition>
+    </boundaryEvent>
+
+    <!-- 错误边界事件 -->
+    <boundaryEvent id="BoundaryEvent_Error" name="支付失败"
+                   attachedToRef="Task_ProcessPayment" cancelActivity="true">
+      <errorEventDefinition id="ErrorEventDefinition_1"/>
+    </boundaryEvent>
+
+    <task id="Task_SendConfirmation" name="发送确认"/>
+    <task id="Task_HandleTimeout" name="超时处理"/>
+    <task id="Task_HandleError" name="错误处理"/>
+    <endEvent id="EndEvent_Success" name="成功"/>
+    <endEvent id="EndEvent_Timeout" name="超时结束"/>
+    <endEvent id="EndEvent_Error" name="错误结束"/>
+
+    <!-- 主流程 -->
+    <sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_ProcessPayment"/>
+    <sequenceFlow id="Flow_2" sourceRef="Task_ProcessPayment" targetRef="Task_SendConfirmation"/>
+    <sequenceFlow id="Flow_3" sourceRef="Task_SendConfirmation" targetRef="EndEvent_Success"/>
+
+    <!-- 超时处理 -->
+    <sequenceFlow id="Flow_Timeout" sourceRef="BoundaryEvent_Timeout" targetRef="Task_HandleTimeout"/>
+    <sequenceFlow id="Flow_4" sourceRef="Task_HandleTimeout" targetRef="EndEvent_Timeout"/>
+
+    <!-- 错误处理 -->
+    <sequenceFlow id="Flow_Error" sourceRef="BoundaryEvent_Error" targetRef="Task_HandleError"/>
+    <sequenceFlow id="Flow_5" sourceRef="Task_HandleError" targetRef="EndEvent_Error"/>
+  </process>
+
+</definitions>
 ```
 
-**✅ 正确写法**:
-```xml
-<bpmn:startEvent id="StartEvent_1" name="开始" />
-<bpmn:endEvent id="EndEvent_1" name="结束" />
-```
+**关键点**:
+- 边界事件必须用 `attachedToRef` 附加到 Activity
+- `cancelActivity="true"`: 中断型 (中断活动)
+- `cancelActivity="false"`: 非中断型 (并行执行)
+- Timer Event 用于超时控制
+- Error Event 用于异常处理
 
-**原因**: 所有元素的 `id` 属性必须在整个文档中唯一,重复的 ID 会导致渲染失败或流程执行错误。
+---
 
-### 错误 3: 顺序流连接错误
+## 与 common.txt 的关系
 
-**❌ 错误写法**:
-```xml
-<bpmn:startEvent id="StartEvent_1" />
-<bpmn:task id="Task_1" name="任务" />
-<bpmn:sequenceFlow id="Flow_1" sourceRef="start" targetRef="task" />
-```
+### common.txt (L2): BPMN 2.0 通用语法规则
 
-**✅ 正确写法**:
-```xml
-<bpmn:startEvent id="StartEvent_1" />
-<bpmn:task id="Task_1" name="任务" />
-<bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1" />
-```
+定义所有 BPMN 元素的语法规范:
+- XML 结构、命名空间、元素类型
+- 事件、任务、网关、顺序流
+- 泳道、子流程、边界事件
+- ID 命名规范、XML 特殊字符编码
 
-**原因**: `sequenceFlow` 的 `sourceRef` 和 `targetRef` 必须精确匹配已定义元素的 `id`,大小写敏感,ID 不存在会导致连接失败。
+### process.txt (L3): 流程图最佳实践
 
-### 错误 4: 网关分支缺少条件表达式
+专注于流程图的典型模式和实战应用:
+- 6 种典型模式 (线性、分支、并行、泳道、子流程、边界事件)
+- 完整可执行示例
+- 场景选择建议 (何时用 XOR,何时用 AND)
+- 最佳实践和质量标准
 
-**❌ 错误写法**:
-```xml
-<bpmn:exclusiveGateway id="Gateway_1" />
-<bpmn:sequenceFlow id="Flow_1" name="条件A" sourceRef="Gateway_1" targetRef="Task_A" />
-<bpmn:sequenceFlow id="Flow_2" name="条件B" sourceRef="Gateway_1" targetRef="Task_B" />
-```
+### 使用建议
 
-**✅ 正确写法**:
-```xml
-<bpmn:exclusiveGateway id="Gateway_1" />
-<bpmn:sequenceFlow id="Flow_1" name="金额 &gt; 10000" sourceRef="Gateway_1" targetRef="Task_A">
-  <bpmn:conditionExpression>amount &gt; 10000</bpmn:conditionExpression>
-</bpmn:sequenceFlow>
-<bpmn:sequenceFlow id="Flow_2" name="金额 &lt;= 10000" sourceRef="Gateway_1" targetRef="Task_B">
-  <bpmn:conditionExpression>amount &lt;= 10000</bpmn:conditionExpression>
-</bpmn:sequenceFlow>
-```
+- **简单流程**: 使用模式 1 (线性流程)
+- **条件分支**: 使用模式 2 (排他网关)
+- **并行执行**: 使用模式 3 (并行网关)
+- **跨部门协作**: 使用模式 4 (泳道流程)
+- **复杂流程**: 使用模式 5 (子流程)
+- **异常处理**: 使用模式 6 (边界事件)
+- **组合模式**: 参考 common.txt 高级特性,组合多种模式
 
-**原因**: 排他网关的分支必须包含明确的条件表达式(`conditionExpression`),否则执行引擎无法判断走哪条路径。注意使用 XML 实体编码。
+---
 
-### 错误 5: 开始事件有输入连接或结束事件有输出连接
+## 最佳实践
 
-**❌ 错误写法**:
-```xml
-<bpmn:task id="Task_1" name="任务" />
-<bpmn:startEvent id="StartEvent_1" name="开始" />
-<bpmn:sequenceFlow id="Flow_1" sourceRef="Task_1" targetRef="StartEvent_1" />
-```
+### 1. 命名规范
 
-**✅ 正确写法**:
-```xml
-<bpmn:startEvent id="StartEvent_1" name="开始" />
-<bpmn:task id="Task_1" name="任务" />
-<bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1" />
-```
+**使用业务术语**:
+- ✅ "审批订单"、"发送通知"、"计算价格"
+- ❌ "调用 API"、"执行 SQL" (除非是技术流程图)
 
-**原因**: 开始事件是流程的起点,不能有输入连接;结束事件是流程的终点,不能有输出连接。违反此规则会导致流程语义错误。
+**动宾结构**:
+- ✅ "填写申请表"、"审核文档"、"发送邮件"
+- ❌ "申请表"、"文档"、"邮件" (名词不清晰)
 
-### 错误 6: 并行网关分支和汇聚不匹配
+**避免技术术语** (面向业务人员):
+- ✅ "人工审批"、"系统自动处理"
+- ❌ "Execute Service Task"、"Call REST API"
 
-**❌ 错误写法**:
-```xml
-<!-- 并行网关分叉,但没有对应的汇聚 -->
-<bpmn:parallelGateway id="Gateway_Fork" />
-<bpmn:sequenceFlow id="Flow_1" sourceRef="Gateway_Fork" targetRef="Task_A" />
-<bpmn:sequenceFlow id="Flow_2" sourceRef="Gateway_Fork" targetRef="Task_B" />
-<bpmn:sequenceFlow id="Flow_3" sourceRef="Task_A" targetRef="EndEvent_1" />
-<bpmn:sequenceFlow id="Flow_4" sourceRef="Task_B" targetRef="EndEvent_2" />
-```
+### 2. 网关使用
 
-**✅ 正确写法**:
-```xml
-<!-- 并行网关成对使用 -->
-<bpmn:parallelGateway id="Gateway_Fork" name="分叉" />
-<bpmn:sequenceFlow id="Flow_1" sourceRef="Gateway_Fork" targetRef="Task_A" />
-<bpmn:sequenceFlow id="Flow_2" sourceRef="Gateway_Fork" targetRef="Task_B" />
+**排他网关 (XOR)**:
+- 用于 "二选一" 或 "多选一" 决策
+- 必须有 `default` 默认流
+- 使用条件表达式或标签说明分支逻辑
 
-<bpmn:parallelGateway id="Gateway_Join" name="汇聚" />
-<bpmn:sequenceFlow id="Flow_3" sourceRef="Task_A" targetRef="Gateway_Join" />
-<bpmn:sequenceFlow id="Flow_4" sourceRef="Task_B" targetRef="Gateway_Join" />
+**并行网关 (AND)**:
+- 用于 "所有任务同时执行"
+- 必须配对使用 (分支 + 汇聚)
+- 不需要条件表达式
 
-<bpmn:sequenceFlow id="Flow_5" sourceRef="Gateway_Join" targetRef="EndEvent_1" />
-```
+**包容网关 (OR)**:
+- 用于 "一个或多个" 选择
+- 必须有 `default` 默认流
+- 汇聚时等待所有被激活的分支
 
-**原因**: 并行网关应该成对使用(分叉和汇聚),否则无法正确同步并行分支,可能导致流程执行异常。
+**避免混用**:
+- ❌ 不要在同一个网关上混合排他和并行逻辑
 
-### 错误 7: 特殊字符未使用 XML 实体编码
+### 3. 流程复杂度控制
 
-**❌ 错误写法**:
-```xml
-<bpmn:sequenceFlow id="Flow_1" name="金额 > 10000" sourceRef="Gateway_1" targetRef="Task_1">
-  <bpmn:conditionExpression>amount > 10000 && status == "pending"</bpmn:conditionExpression>
-</bpmn:sequenceFlow>
-```
+**单个流程 < 20 个元素**:
+- 超过 20 个元素考虑拆分为子流程
+- 使用子流程提升可读性
 
-**✅ 正确写法**:
-```xml
-<bpmn:sequenceFlow id="Flow_1" name="金额 &gt; 10000" sourceRef="Gateway_1" targetRef="Task_1">
-  <bpmn:conditionExpression>amount &gt; 10000 &amp;&amp; status == &quot;pending&quot;</bpmn:conditionExpression>
-</bpmn:sequenceFlow>
-```
+**嵌套深度 < 3 层**:
+- 避免过深的子流程嵌套
+- Level 1: 主流程
+- Level 2: 子流程
+- Level 3: 嵌套子流程
+- ❌ Level 4+: 改用调用活动 (Call Activity)
 
-**原因**: XML 中的特殊字符必须使用实体编码:
-- `<` → `&lt;`
-- `>` → `&gt;`
-- `&` → `&amp;`
-- `"` → `&quot;`
-- `'` → `&apos;`
+**分支数量 < 5 个**:
+- 单个网关的分支不超过 5 个
+- 过多分支使用包容网关或重构逻辑
 
-### 错误 8: 边界事件未正确附加到活动
+### 4. 错误处理
 
-**❌ 错误写法**:
-```xml
-<bpmn:task id="Task_1" name="等待审批" />
-<bpmn:boundaryEvent id="BoundaryTimer_1" name="超时">
-  <bpmn:timerEventDefinition />
-</bpmn:boundaryEvent>
-```
+**使用边界事件**:
+- 为关键任务添加超时、错误边界事件
+- 提供异常路径和补偿机制
 
-**✅ 正确写法**:
-```xml
-<bpmn:task id="Task_1" name="等待审批" />
-<bpmn:boundaryEvent id="BoundaryTimer_1" name="超时" attachedToRef="Task_1">
-  <bpmn:timerEventDefinition />
-</bpmn:boundaryEvent>
-<bpmn:sequenceFlow id="Flow_Timeout" sourceRef="BoundaryTimer_1" targetRef="Task_Timeout" />
-```
+**异常路径**:
+- 为每个决策网关提供默认路径 (避免流程卡住)
+- 考虑 "拒绝"、"超时"、"失败" 等异常结果
 
-**原因**: 边界事件必须通过 `attachedToRef` 属性明确附加到某个活动,并且边界事件必须有输出顺序流定义超时后的处理路径。
+**补偿机制**:
+- 对于事务性操作,考虑添加补偿任务
+- 使用 Compensate Boundary Event
 
-### 错误 9: 泳道未正确引用流程节点
+### 5. 泳道最佳实践
 
-**❌ 错误写法**:
-```xml
-<bpmn:laneSet>
-  <bpmn:lane id="Lane_1" name="申请人" />
-</bpmn:laneSet>
-<bpmn:task id="Task_1" name="提交申请" />
-```
+**使用明确的角色名称**:
+- ✅ "客户经理"、"财务审批人"、"IT 支持"
+- ❌ "角色A"、"部门1"、"用户"
 
-**✅ 正确写法**:
-```xml
-<bpmn:laneSet>
-  <bpmn:lane id="Lane_1" name="申请人">
-    <bpmn:flowNodeRef>Task_1</bpmn:flowNodeRef>
-  </bpmn:lane>
-</bpmn:laneSet>
-<bpmn:task id="Task_1" name="提交申请" />
-```
+**体现职责**:
+- 泳道名称应清晰表达该角色的职责范围
+- Pool 用于组织/公司,Lane 用于部门/角色
 
-**原因**: 泳道必须通过 `flowNodeRef` 元素明确包含哪些流程节点,否则节点不会显示在泳道内。
+**保持一致性**:
+- 同一图表中泳道命名风格应统一
+- 跨泳道通信使用消息流 (不同 Pool)
 
-### 错误 10: 流程元素顺序错误
+### 6. 质量检查清单
 
-**❌ 错误写法**:
-```xml
-<bpmn:process id="Process_1">
-  <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1" />
-  <bpmn:startEvent id="StartEvent_1" />
-  <bpmn:task id="Task_1" name="任务" />
-</bpmn:process>
-```
+在生成 BPMN 代码后,逐项检查:
 
-**✅ 正确写法**:
-```xml
-<bpmn:process id="Process_1">
-  <!-- 先定义所有节点 -->
-  <bpmn:startEvent id="StartEvent_1" />
-  <bpmn:task id="Task_1" name="任务" />
-  <bpmn:endEvent id="EndEvent_1" />
-
-  <!-- 再定义所有连接 -->
-  <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1" />
-  <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="EndEvent_1" />
-</bpmn:process>
-```
-
-**原因**: 虽然 BPMN XML 规范允许任意顺序,但推荐先定义所有节点,再定义连接,这样更易读且避免引用未定义的元素。部分解析器对顺序有要求。
-
-## 生成检查清单
-
-生成代码后,逐项检查:
-
-- [ ] **XML 声明完整**: 包含 `<?xml version="1.0" encoding="UTF-8"?>`
-- [ ] **命名空间正确**: `xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"` 必需
-- [ ] **根元素正确**: `<bpmn:definitions>` 包裹整个流程
-- [ ] **流程元素完整**: `<bpmn:process>` 包含所有流程节点和连接
+- [ ] **XML 声明完整**: `<?xml version="1.0" encoding="UTF-8"?>`
+- [ ] **命名空间正确**: `xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"`
+- [ ] **根元素正确**: `<definitions>` 包裹整个流程
+- [ ] **流程元素完整**: `<process>` 包含所有流程节点和连接
 - [ ] **ID 唯一性**: 所有元素 ID 在文档中唯一,无重复
 - [ ] **ID 命名规范**: 使用语义化的英文 ID,中文放在 `name` 属性
-- [ ] **开始和结束事件**: 至少各有一个,开始事件无输入,结束事件无输出
+- [ ] **开始和结束事件**: 至少各有一个,开始事件无 incoming,结束事件无 outgoing
 - [ ] **顺序流连接正确**: `sourceRef` 和 `targetRef` 精确匹配元素 ID
-- [ ] **网关条件完整**: 排他网关分支包含 `conditionExpression`
+- [ ] **网关条件完整**: 排他/包容网关有 `default` 和 `conditionExpression`
 - [ ] **网关成对使用**: 并行网关有对应的汇聚网关
-- [ ] **特殊字符编码**: `<`, `>`, `&`, `"` 使用 XML 实体编码
+- [ ] **特殊字符编码**: `<`, `>`, `&` 使用 XML 实体编码
 - [ ] **边界事件附加**: 边界事件有 `attachedToRef` 属性
 - [ ] **泳道引用正确**: 泳道包含 `flowNodeRef` 引用节点
 - [ ] **中文编码**: 使用 UTF-8 编码,中文正常显示
 - [ ] **流程完整性**: 无孤立节点,所有路径可达
 - [ ] **代码可渲染**: 语法正确,可通过 Kroki 正常渲染
 
-**重点检查项**:
-1. **命名空间声明是否完整**(最常见错误)
-2. **所有 ID 是否唯一且正确引用**
-3. **网关是否有条件表达式和正确的分支汇聚**
-4. **特殊字符是否正确编码**
-5. **流程是否有明确的开始和结束**
+### 7. 常见陷阱
 
-**任何检查项不通过,立即修正后重新生成**
-
-## 高级特性
-
-### 1. 消息事件和信号事件
-
-消息事件用于跨流程通信,信号事件用于广播通知:
-
+**❌ 错误 1: 忘记闭合流程**
 ```xml
-<!-- 消息开始事件 - 流程由消息触发 -->
-<bpmn:startEvent id="MessageStart_1" name="收到订单">
-  <bpmn:messageEventDefinition messageRef="Message_Order" />
-</bpmn:startEvent>
-
-<!-- 消息定义 -->
-<bpmn:message id="Message_Order" name="订单消息" />
-
-<!-- 信号抛出事件 - 发送广播信号 -->
-<bpmn:intermediateThrowEvent id="SignalThrow_1" name="通知所有部门">
-  <bpmn:signalEventDefinition signalRef="Signal_Approval" />
-</bpmn:intermediateThrowEvent>
-
-<!-- 信号定义 -->
-<bpmn:signal id="Signal_Approval" name="审批完成信号" />
+<!-- 错误: Task_2 没有输出流 -->
+<sequenceFlow sourceRef="Task_1" targetRef="Task_2"/>
+<!-- 缺少: <sequenceFlow sourceRef="Task_2" targetRef="EndEvent_1"/> -->
 ```
 
-### 2. 条件事件和链接事件
-
-条件事件基于业务规则触发,链接事件用于跨页面连接:
-
+**❌ 错误 2: 网关不成对**
 ```xml
-<!-- 条件中间事件 - 等待条件满足 -->
-<bpmn:intermediateCatchEvent id="ConditionEvent_1" name="等待库存到货">
-  <bpmn:conditionalEventDefinition>
-    <bpmn:condition>stockLevel &gt; 100</bpmn:condition>
-  </bpmn:conditionalEventDefinition>
-</bpmn:intermediateCatchEvent>
-
-<!-- 链接抛出事件 - 跳转到链接捕获事件 -->
-<bpmn:intermediateThrowEvent id="LinkThrow_1" name="跳转到审批">
-  <bpmn:linkEventDefinition name="ToApproval" />
-</bpmn:intermediateThrowEvent>
-
-<!-- 链接捕获事件 -->
-<bpmn:intermediateCatchEvent id="LinkCatch_1" name="审批流程">
-  <bpmn:linkEventDefinition name="ToApproval" />
-</bpmn:intermediateCatchEvent>
+<!-- 错误: 并行网关分叉后没有汇聚 -->
+<parallelGateway id="Gateway_Fork"/>
+<sequenceFlow sourceRef="Gateway_Fork" targetRef="Task_A"/>
+<sequenceFlow sourceRef="Gateway_Fork" targetRef="Task_B"/>
+<!-- 缺少: 汇聚网关 -->
 ```
 
-### 3. 补偿事件和升级事件
-
-补偿用于回滚已完成的活动,升级用于异常上报:
-
+**❌ 错误 3: 排他网关缺少默认流**
 ```xml
-<!-- 补偿边界事件 -->
-<bpmn:task id="Task_Payment" name="付款" />
-<bpmn:boundaryEvent id="Boundary_Compensate" attachedToRef="Task_Payment">
-  <bpmn:compensateEventDefinition />
-</bpmn:boundaryEvent>
-
-<!-- 补偿处理活动 -->
-<bpmn:task id="Task_Refund" name="退款" isForCompensation="true" />
-
-<!-- 升级边界事件 -->
-<bpmn:task id="Task_Process" name="处理订单" />
-<bpmn:boundaryEvent id="Boundary_Escalation" name="超时升级" attachedToRef="Task_Process">
-  <bpmn:escalationEventDefinition />
-</bpmn:boundaryEvent>
+<!-- 错误: 没有 default 属性 -->
+<exclusiveGateway id="Gateway_1"/>
+<sequenceFlow sourceRef="Gateway_1" targetRef="Task_A">
+  <conditionExpression>${condition}</conditionExpression>
+</sequenceFlow>
+<!-- 如果 condition 为 false,流程会卡住 -->
 ```
 
-### 4. 事件子流程
-
-事件子流程在父流程运行时监听特定事件:
-
+**✅ 正确做法**:
 ```xml
-<bpmn:process id="Process_Main">
-  <bpmn:task id="Task_Main" name="主流程任务" />
-
-  <!-- 事件子流程 - 非中断 -->
-  <bpmn:subProcess id="EventSubProcess_1" triggeredByEvent="true">
-    <bpmn:startEvent id="EventStart_1" name="收到消息" isInterrupting="false">
-      <bpmn:messageEventDefinition />
-    </bpmn:startEvent>
-    <bpmn:task id="EventTask_1" name="记录日志" />
-    <bpmn:endEvent id="EventEnd_1" />
-    <bpmn:sequenceFlow sourceRef="EventStart_1" targetRef="EventTask_1" />
-    <bpmn:sequenceFlow sourceRef="EventTask_1" targetRef="EventEnd_1" />
-  </bpmn:subProcess>
-</bpmn:process>
+<exclusiveGateway id="Gateway_1" default="Flow_Default"/>
+<sequenceFlow id="Flow_Condition" sourceRef="Gateway_1" targetRef="Task_A">
+  <conditionExpression xsi:type="tFormalExpression">${condition}</conditionExpression>
+</sequenceFlow>
+<sequenceFlow id="Flow_Default" name="其他" sourceRef="Gateway_1" targetRef="Task_B"/>
 ```
 
-### 5. 多实例活动
+---
 
-多实例活动用于并行或顺序处理多个实例:
+## 实战建议
 
-```xml
-<!-- 并行多实例 - 多个审批人同时审批 -->
-<bpmn:userTask id="Task_ParallelApproval" name="多人会签">
-  <bpmn:multiInstanceLoopCharacteristics isSequential="false">
-    <bpmn:loopCardinality>3</bpmn:loopCardinality>
-    <bpmn:completionCondition>nrOfCompletedInstances &gt;= 2</bpmn:completionCondition>
-  </bpmn:multiInstanceLoopCharacteristics>
-</bpmn:userTask>
+### 1. 从简单到复杂
 
-<!-- 顺序多实例 - 多个审批人依次审批 -->
-<bpmn:userTask id="Task_SequentialApproval" name="多级审批">
-  <bpmn:multiInstanceLoopCharacteristics isSequential="true">
-    <bpmn:loopCardinality>3</bpmn:loopCardinality>
-  </bpmn:multiInstanceLoopCharacteristics>
-</bpmn:userTask>
+**第一步**: 使用模式 1 (线性流程) 搭建基础骨架
+```
+开始 → 任务1 → 任务2 → 任务3 → 结束
 ```
 
-## 样式推荐配置
-
-BPMN XML 本身不包含样式信息,样式通常由渲染工具(如 Kroki)自动处理。但可以通过扩展属性添加颜色等信息:
-
-### 配置 1: 使用扩展属性添加颜色
-
-```xml
-<bpmn:definitions
-  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-  xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0"
-  id="Definitions_1">
-
-  <bpmn:task id="Task_1" name="重要任务" color:background-color="#FFE6E6" />
-  <bpmn:task id="Task_2" name="普通任务" color:background-color="#E6F7FF" />
-</bpmn:definitions>
+**第二步**: 添加决策点 (模式 2: 排他网关)
+```
+开始 → 任务1 → [判断] → 任务2A / 任务2B → 结束
 ```
 
-### 配置 2: 添加文档说明
-
-```xml
-<bpmn:definitions id="Definitions_1">
-  <bpmn:documentation>
-    这是一个采购审批流程,用于处理公司的采购申请。
-    流程版本: 1.0
-    创建日期: 2025-01-08
-  </bpmn:documentation>
-
-  <bpmn:process id="Process_1">
-    <!-- 流程内容 -->
-  </bpmn:process>
-</bpmn:definitions>
+**第三步**: 引入并行处理 (模式 3: 并行网关)
+```
+开始 → 任务1 → [并行] → 任务A + 任务B → [汇聚] → 结束
 ```
 
-### 配置 3: 使用标准 BPMN 属性增强语义
-
-```xml
-<!-- 设置流程为可执行 -->
-<bpmn:process id="Process_1" name="采购流程" isExecutable="true" isClosed="false">
-
-  <!-- 任务设置优先级 -->
-  <bpmn:userTask id="Task_1" name="紧急审批" priority="10" />
-
-  <!-- 网关设置默认路径 -->
-  <bpmn:exclusiveGateway id="Gateway_1" default="Flow_Default" />
-
-  <!-- 设置循环标准活动 -->
-  <bpmn:task id="Task_Loop" name="重试任务">
-    <bpmn:standardLoopCharacteristics />
-  </bpmn:task>
-
-</bpmn:process>
+**第四步**: 划分职责 (模式 4: 泳道)
+```
+[部门A]: 任务1 → 任务2
+[部门B]: 任务3 → 任务4
 ```
 
-## 生成策略
+**第五步**: 提取子流程 (模式 5: 子流程)
+```
+开始 → 子流程(复杂逻辑) → 结束
+```
 
-根据用户需求的复杂度选择合适的生成策略:
+**第六步**: 添加异常处理 (模式 6: 边界事件)
+```
+任务 [超时] → 超时处理
+     [错误] → 错误处理
+```
 
-1. **简单流程** (≤5个活动):
-   - 线性结构,基础事件和任务
-   - 单一开始和结束事件
-   - 最多一个排他网关
-   - 无泳道,无子流程
+### 2. 迭代优化
 
-2. **中等流程** (6-15个活动):
-   - 包含多个判断分支
-   - 使用并行网关实现并行处理
-   - 添加边界事件处理异常
-   - 可选泳道区分角色
+**初稿**: 关注流程完整性和正确性
+- 确保所有路径闭合
+- 验证 XML 语法正确
 
-3. **复杂流程** (>15个活动):
-   - 多级判断和嵌套网关
-   - 使用子流程组织复杂逻辑
-   - 使用协作和消息流实现跨组织通信
-   - 完整的泳道结构
-   - 边界事件和事件子流程
-   - 数据对象和注释
+**第二版**: 优化命名和结构
+- 使用清晰的中文名称
+- 调整元素顺序和层次
 
-**生成优先级**:
-1. 确保 XML 语法正确和命名空间完整
-2. 保证流程逻辑正确和完整(无断链、无孤立节点)
-3. 使用适当的 BPMN 元素类型表达业务语义
-4. 合理使用网关和事件处理复杂逻辑
-5. 添加中文名称和注释提升可读性
+**第三版**: 添加异常处理
+- 补充边界事件
+- 完善错误路径
 
-**质量标准**:
-- 所有元素 ID 唯一且语义化
-- 所有顺序流正确连接
-- 网关成对使用且有明确条件
-- 特殊字符正确编码
-- 流程符合 BPMN 2.0 规范
-- 可通过 Kroki 正常渲染
+**第四版**: 性能和可维护性
+- 拆分复杂子流程
+- 优化网关逻辑
+
+### 3. 验证方法
+
+**静态检查**:
+- 使用 BPMN 验证工具 (如 Camunda Modeler)
+- 检查 XML Schema 合规性
+
+**逻辑验证**:
+- 模拟执行所有可能路径
+- 确认无死循环和孤立节点
+
+**业务验证**:
+- 与业务人员确认流程逻辑
+- 验证异常场景覆盖完整
+
+**渲染测试**:
+- 通过 Kroki 渲染验证
+- 检查图形是否清晰可读
+
+---
+
+## 输出标准
+
+### 必须满足
+
+1. **完整的 XML 声明和命名空间**
+2. **全局唯一的元素 ID**
+3. **精确的 sourceRef 和 targetRef 连接**
+4. **排他/包容网关有 default 和条件表达式**
+5. **XML 特殊字符正确编码**
+
+### 推荐做法
+
+1. **为所有元素添加 name 属性** (中文描述)
+2. **使用清晰的 ID 命名规则** (语义化)
+3. **添加 Text Annotation 说明** (复杂逻辑)
+4. **合理划分 Lane 和 Pool** (跨部门流程)
+5. **复杂流程使用 Sub-Process** (提升可读性)
+
+---
+
+**L3 process.txt 文档说明**:
+- 本文档专注于 BPMN 流程图 (Process Diagram) 的最佳实践
+- 提供 6 种典型模式的完整可执行示例
+- 结合 common.txt (L2) 的语法规范使用
+- 所有示例代码已验证可通过 Kroki 渲染

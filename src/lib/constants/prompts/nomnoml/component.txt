@@ -3,22 +3,15 @@
 
 ## 专家视角
 
-作为组件图专家，你需要同时扮演：
+作为组件图专家，你专注于：
 
 1. **系统架构设计师**
    - 识别系统的核心组件及其职责
    - 确定组件之间的接口和依赖关系
-   - 理解组件的部署和集成方式
 
 2. **Nomnoml 组件图工程师**
-   - 精通组件图专用的分类器类型（socket、lollipop 等）
+   - 精通组件接口表示（socket、lollipop）
    - 熟练使用嵌套结构表示组件包含关系
-   - 掌握组件接口的表示方法
-
-3. **代码质量审查员**
-   - 确保组件图语法正确，可以直接渲染
-   - 验证组件依赖关系的准确性
-   - 检查图表的层次清晰和可读性
 
 ## 核心语法
 
@@ -75,40 +68,37 @@
 
 ## 生成示例
 
-### 示例 1: 基础组件图 - Web 应用三层架构
+### 示例 1: 基础组件图 - 组件依赖和接口
 
-**用户需求**：Web 应用的前端、后端、数据库组件关系
+**用户需求**：展示服务组件之间的依赖关系和接口
 
 **生成代码**：
 ```nomnoml
 #direction: down
 #spacing: 40
 
-[<frame> Web Application|
-  [Frontend|
-    [React UI]
-    [Redux Store]
-  ]
-  
-  [Backend API|
-    [Express Server]
-    [REST Controller]
-  ]
-  
-  [<database> PostgreSQL]
-  
-  [React UI] --> [Redux Store]
-  [Redux Store] --> [REST Controller]
-  [REST Controller] --> [Express Server]
-  [Express Server] --> [PostgreSQL]
+[User Service|
+  [User Controller]
+  [User Repository]
 ]
+[User Service] - [<lollipop> IUserService]
+
+[Order Service|
+  [Order Controller]
+  [Order Logic]
+]
+
+[Order Service] --> [<socket> IUserService]
+
+[User Service] --> [<database> User DB]
+[Order Service] --> [<database> Order DB]
 ```
 
 **关键点**：
-- 使用 `<frame>` 包裹整个系统
-- 使用嵌套结构表示组件包含关系
+- 使用 `<lollipop>` 表示组件提供的接口
+- 使用 `<socket>` 表示组件需要的接口
+- 组件内部嵌套子组件表示包含关系
 - `<database>` 标签表示数据库组件
-- 依赖关系使用 `-->`
 
 ### 示例 2: 中等复杂度 - 微服务架构
 
@@ -212,13 +202,18 @@
 
 ### 错误 1: 组件和类混淆
 
+**判断标准**：
+- ❌ **不允许**：展示类的内部实现细节（private 属性/方法、详细的属性类型）
+- ✅ **允许**：展示技术栈信息（React、Express）和公共接口
+
 **❌ 错误写法**：在组件图中定义详细的类属性
 ```nomnoml
 [UserService|
-  username: String;
-  password: String
+  - username: String;
+  - password: String
 |
-  login(): boolean
+  - validatePassword(): boolean;
+  + login(): boolean
 ]
 ```
 
@@ -231,24 +226,9 @@
 [UserService] - [<lollipop> IUserService]
 ```
 
-**原因**：组件图关注物理组件及其依赖，不是类的内部实现细节。
+**原因**：组件图关注物理组件及其依赖，不是类的内部实现细节。允许展示组件使用的技术栈（如 React UI、Express Server），但不展示私有属性和方法。
 
-### 错误 2: 接口表示不规范
-
-**❌ 错误写法**：
-```nomnoml
-[Service] -> [Interface]
-```
-
-**✅ 正确写法**：
-```nomnoml
-[Service] - [<lollipop> Interface]
-[Client] --> [<socket> Interface]
-```
-
-**原因**：使用 `<lollipop>` 表示提供的接口，`<socket>` 表示需要的接口。
-
-### 错误 3: 依赖方向不明确
+### 错误 2: 依赖方向不明确
 
 **❌ 错误写法**：
 ```nomnoml
@@ -262,7 +242,7 @@
 
 **原因**：使用箭头明确依赖方向，避免歧义。
 
-### 错误 4: 嵌套层级过深
+### 错误 3: 嵌套层级过深
 
 **❌ 错误写法**：
 ```nomnoml
@@ -288,7 +268,7 @@
 
 **原因**：避免嵌套层级过深，保持 2-3 层即可，提高可读性。
 
-### 错误 5: 数据库组件标签缺失
+### 错误 4: 数据库组件标签缺失
 
 **❌ 错误写法**：
 ```nomnoml
@@ -302,7 +282,7 @@
 
 **原因**：使用 `<database>` 标签明确标识数据库组件。
 
-### 错误 6: Package 和 Frame 混用
+### 错误 5: Package 和 Frame 混用
 
 **❌ 错误写法**：混淆 package 和 frame 的使用
 ```nomnoml
@@ -328,13 +308,8 @@
 
 生成代码后，逐项检查：
 
-- [ ] **组件定义清晰**：每个组件职责明确，名称规范
-- [ ] **依赖方向正确**：使用 `-->` 明确依赖方向
 - [ ] **接口表示规范**：使用 `<lollipop>` 和 `<socket>` 表示接口
+- [ ] **依赖方向正确**：使用 `-->` 明确依赖方向
 - [ ] **嵌套结构合理**：层级不超过 3 层，结构清晰
-- [ ] **数据库标签正确**：使用 `<database>` 标签
-- [ ] **Package 和 Frame 使用得当**：区分系统边界和逻辑分组
-- [ ] **布局方向合理**：使用 `#direction` 控制
-- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
 
 **任何检查项不通过，立即修正后重新生成**

@@ -138,6 +138,39 @@ actdiag {
 }
 ```
 
+### Activity 属性
+activity 支持以下属性自定义其外观和行为:
+
+- **shape**: 活动形状
+  - `box` (默认): 标准矩形
+  - `roundedbox`: 圆角矩形
+  - `dots`: 虚线矩形 (表示可选/占位活动)
+  - `note`: 便签形状 (用于注释活动)
+- **color**: 边框颜色 (支持颜色名或 #RRGGBB)
+- **background**: 填充颜色 (支持颜色名或 #RRGGBB)
+- **label**: 自定义显示标签 (默认使用活动名称)
+- **numbered**: 自动编号 (默认 false,启用后在活动旁显示序号)
+- **textcolor**: 文本颜色
+- **fontsize**: 字体大小 (整数,单位像素)
+- **width**: 活动宽度 (整数,单位像素)
+- **height**: 活动高度 (整数,单位像素)
+
+**完整示例**:
+```actdiag
+actdiag {
+  A [shape = roundedbox, color = blue, background = "#E0F0FF"];
+  B [shape = note, label = "审批", numbered = true];
+  C [shape = dots, color = gray];
+
+  A -> B -> C;
+}
+```
+
+**常见模式**:
+- 可选步骤: `[shape = dots, color = gray]`
+- 关键步骤: `[color = red, background = "#FFEEEE"]`
+- 注释说明: `[shape = note]`
+
 ### 2. 泳道定义
 ```
 actdiag {
@@ -155,6 +188,84 @@ actdiag {
 }
 ```
 
+### lane 关键字
+在 ActDiag 中,`lane` 用于将活动分组到不同的泳道 (Swimlane),表示不同的参与者或系统:
+
+**语法**:
+```actdiag
+actdiag {
+  lane 泳道名称 {
+    活动A;
+    活动B;
+  }
+
+  活动A -> 活动B;
+}
+```
+
+**泳道必要性**:
+- 当流程涉及 **多个参与者或系统** 时,**必须使用泳道** 明确职责划分
+- 单一参与者的简单流程可以省略泳道
+
+**示例**: 跨部门审批流程
+```actdiag
+actdiag {
+  lane 员工 {
+    提交申请 -> 等待审批;
+  }
+
+  lane 经理 {
+    审核申请 -> 批准;
+  }
+
+  lane 财务 {
+    发放款项;
+  }
+
+  提交申请 -> 审核申请 -> 发放款项;
+}
+```
+
+**泳道属性**:
+- **color**: 泳道边框颜色
+  ```actdiag
+  lane 部门A [color = blue] {
+    活动1;
+  }
+  ```
+- **textcolor**: 泳道标题文本颜色
+- **background**: 泳道背景颜色 (半透明填充)
+  ```actdiag
+  lane 关键部门 [background = "#FFEEEE", color = red] {
+    关键活动;
+  }
+  ```
+
+**泳道颜色最佳实践**:
+
+1. **按职责区分颜色**:
+```actdiag
+actdiag {
+  lane 用户侧 [color = green, background = "#E8F5E9"] {
+    用户操作;
+  }
+  lane 系统侧 [color = blue, background = "#E3F2FD"] {
+    系统处理;
+  }
+  lane 异常处理 [color = red, background = "#FFEBEE"] {
+    错误恢复;
+  }
+}
+```
+
+2. **保持配色一致性**: 在同一项目中,相同角色使用相同颜色
+3. **避免高饱和度颜色**: 使用浅色背景 (如 `#E0F0FF`) 保证文字可读性
+
+**最佳实践**:
+1. 泳道名称使用角色/部门而非个人姓名
+2. 泳道数量建议 2-5 个 (过多会导致图表难以阅读)
+3. 跨泳道的箭头表示交接点
+
 **语法要点**：
 - `lane` 定义泳道（代表不同角色或系统）
 - `label` 定义泳道标签
@@ -166,9 +277,113 @@ actdiag {
 - 第一个定义的泳道显示在最上方
 - 建议按业务流程的自然顺序定义泳道（如：用户 → 系统 → 数据库）
 
-### 并行活动表示
+### 命名规则
+**严格限制**:
+- ❌ **禁止使用连字符 (-)**: Activity 名称不能包含 `-` 字符
+- ❌ **禁止使用中文**: Activity 名称仅支持 ASCII 字符
+- ✅ **推荐使用**: 下划线 `_` 分隔多单词名称
 
-**说明**: ActDiag 不直接支持并行活动语法（如 UML 的 fork/join），但可以通过**时间对齐**模拟并行：
+**示例**:
+```actdiag
+actdiag {
+  // ❌ 错误: 使用了连字符
+  // login-process -> verify-user;
+
+  // ✅ 正确: 使用下划线
+  login_process -> verify_user;
+
+  // ✅ 正确: 驼峰命名
+  loginProcess -> verifyUser;
+}
+```
+
+**特殊情况**:
+- 如果必须显示带连字符的文本,使用 `label` 属性:
+  ```actdiag
+  login_proc [label = "login-process"];
+  ```
+
+### 注释语法
+ActDiag 支持两种注释方式:
+
+- **单行注释**: `//`
+  ```actdiag
+  actdiag {
+    // 这是单行注释
+    A -> B;  // 行尾注释
+  }
+  ```
+
+- **多行注释**: `/* ... */`
+  ```actdiag
+  actdiag {
+    /*
+     * 多行注释块
+     * 用于详细说明
+     */
+    A -> B;
+  }
+  ```
+
+**最佳实践**:
+- 在复杂流程前添加注释说明业务逻辑
+- 使用注释暂时禁用某些活动 (用于调试)
+
+### 流向符号
+ActDiag 使用简洁的符号表示活动之间的顺序关系:
+
+- `->`: 标准流向箭头 (从左到右或从上到下)
+  ```actdiag
+  A -> B -> C;  // A 执行完毕后执行 B,B 完毕后执行 C
+  ```
+
+- **多分支流向**: 使用逗号分隔多个目标
+  ```actdiag
+  A -> B, C, D;  // A 完成后,B、C、D 并行开始
+  ```
+
+- **汇聚流向**: 多个来源指向同一目标
+  ```actdiag
+  A -> D;
+  B -> D;
+  C -> D;  // A、B、C 都完成后才能执行 D
+  ```
+
+**注意**: ActDiag 的箭头是 **逻辑顺序**,不是数据流。箭头方向由 `orientation` 控制 (默认从左到右)。
+
+### 并行活动 (Concurrent Activities)
+ActDiag 的并行关系通过 **共同前驱** 和 **共同后继** 隐式定义:
+
+**模式 1: Fork (分叉)** - 一个活动完成后,多个活动同时开始
+```actdiag
+actdiag {
+  任务准备 -> 任务A, 任务B, 任务C;  // Fork: 任务A、B、C 并行执行
+}
+```
+
+**模式 2: Join (汇聚)** - 多个活动完成后,才能开始下一个活动
+```actdiag
+actdiag {
+  任务A -> 汇总;
+  任务B -> 汇总;
+  任务C -> 汇总;  // Join: 等待 A、B、C 全部完成
+}
+```
+
+**模式 3: Fork-Join 组合**
+```actdiag
+actdiag {
+  开始 -> 并行任务1, 并行任务2, 并行任务3;
+  并行任务1 -> 汇总;
+  并行任务2 -> 汇总;
+  并行任务3 -> 汇总;
+  汇总 -> 结束;
+}
+```
+
+**注意**: ActDiag **没有显式的 fork/join 节点**,并行关系通过箭头拓扑结构体现。
+
+**使用泳道模拟并行**: 通过时间对齐模拟并行
 
 ```
 actdiag {
@@ -197,6 +412,118 @@ actdiag {
   A -> B -> C;
 }
 ```
+
+### 4. Layout 控制
+ActDiag 支持以下全局属性控制图表布局:
+
+**基础布局属性**:
+- **orientation**: 布局方向
+  - `landscape` (默认): 横向布局,活动从左到右排列
+  - `portrait`: 纵向布局,活动从上到下排列
+- **default_shape**: 默认活动形状 (box, roundedbox, dots, note)
+- **default_fontsize**: 默认字体大小 (整数,单位像素)
+
+**示例**:
+```actdiag
+actdiag {
+  orientation = portrait;
+  default_shape = roundedbox;
+  default_fontsize = 14;
+
+  A -> B -> C;
+}
+```
+
+### 布局优化技巧
+**orientation 的影响**:
+- `portrait` (纵向): Activity 从上到下排列,适合垂直流程
+- `landscape` (横向,默认): Activity 从左到右排列,适合时间线流程
+
+**span_height / span_width**:
+- 控制 Activity 之间的间距 (单位:像素)
+- 默认值: `span_height = 40`, `span_width = 120`
+- 增大值可以为复杂图表腾出空间
+
+**edge_length**:
+- 控制箭头长度 (单位:像素)
+- 默认值: 通常为 `120`
+- 适用于调整整体图表紧凑度
+
+**完整布局示例**:
+```actdiag
+actdiag {
+  orientation = portrait;
+  span_height = 60;
+  default_shape = roundedbox;
+  default_fontsize = 14;
+
+  // 活动定义...
+}
+```
+
+## 高级特性
+
+### group 分组
+`group` 用于将多个活动进行逻辑分组,表示流程的不同阶段或步骤:
+
+**语法**:
+```actdiag
+actdiag {
+  group 阶段名称 {
+    活动A;
+    活动B;
+  }
+
+  活动A -> 活动B;
+}
+```
+
+**示例**: 软件开发流程
+```actdiag
+actdiag {
+  group 开发阶段 {
+    需求分析 -> 设计;
+  }
+
+  group 测试阶段 {
+    单元测试 -> 集成测试;
+  }
+
+  设计 -> 单元测试;
+}
+```
+
+### group 与 lane 的交互
+`group` 和 `lane` 可以组合使用,表达更复杂的组织结构:
+
+**场景**: 大型项目中,多个团队 (lane) 协作,每个团队内部有子阶段 (group)
+
+```actdiag
+actdiag {
+  lane 前端团队 {
+    group 开发阶段 {
+      UI设计 -> 组件开发;
+    }
+    group 测试阶段 {
+      单元测试 -> 集成测试;
+    }
+  }
+
+  lane 后端团队 {
+    group 开发阶段 {
+      API设计 -> API实现;
+    }
+    group 测试阶段 {
+      接口测试;
+    }
+  }
+
+  // 跨团队依赖
+  API实现 -> 组件开发;
+}
+```
+
+**限制**: 目前 ActDiag **不支持** group 嵌套 lane (group 内部不能定义 lane)。
 
 ## 生成检查清单
 

@@ -66,3 +66,343 @@ workspace {
 - 使用标签对组件分类
 - 体现分层架构的依赖关系（Controller → Service → Repository）
 - 适合开发团队内部设计和代码审查
+
+## 多容器组件视图对比
+
+当系统有多个容器时,可以为不同容器创建独立的组件视图:
+
+```
+workspace {
+    model {
+        system = softwareSystem "电商系统" {
+            # 前端容器
+            webApp = container "Web 应用" "SPA" "React" {
+                homeComponent = component "首页组件" "商品展示" "React Component"
+                cartComponent = component "购物车组件" "购物车管理" "React Component"
+                checkoutComponent = component "结算组件" "订单结算" "React Component"
+                
+                homeComponent -> cartComponent "添加商品"
+                cartComponent -> checkoutComponent "结算"
+            }
+
+            # 后端容器
+            apiApp = container "API 应用" "后端服务" "Spring Boot" {
+                productController = component "商品控制器" "商品 API" "Spring MVC Controller"
+                orderController = component "订单控制器" "订单 API" "Spring MVC Controller"
+                
+                productService = component "商品服务" "商品业务" "Spring Service"
+                orderService = component "订单服务" "订单业务" "Spring Service"
+                
+                productRepository = component "商品仓储" "商品数据" "Spring Data JPA"
+                orderRepository = component "订单仓储" "订单数据" "Spring Data JPA"
+                
+                productController -> productService "调用"
+                orderController -> orderService "调用"
+                productService -> productRepository "访问"
+                orderService -> orderRepository "访问"
+            }
+
+            database = container "数据库" "持久化" "PostgreSQL"
+            
+            # 跨容器关系
+            webApp -> apiApp "API 调用" "HTTPS"
+            apiApp -> database "读写" "JDBC"
+        }
+    }
+
+    views {
+        # 前端组件视图
+        component webApp "frontend-components" "前端组件结构" {
+            include *
+            autolayout lr
+        }
+
+        # 后端组件视图
+        component apiApp "backend-components" "后端组件结构" {
+            include *
+            autolayout tb
+        }
+
+        # 对比: 容器级别视图(不显示组件)
+        container system "containers" "容器架构" {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+**说明**:
+- Component 视图只聚焦一个容器内部
+- 不同容器有不同的组件结构
+- 前端组件(React Component)和后端组件(MVC)组织方式不同
+
+## 复杂依赖关系示例
+
+展示组件间的多种依赖模式:
+
+```
+workspace {
+    model {
+        system = softwareSystem "内容管理系统" {
+            cmsApp = container "CMS 应用" "内容管理" "Spring Boot" {
+                # 表现层
+                contentController = component "内容控制器" "内容 CRUD" "Spring MVC Controller" {
+                    tags "Controller"
+                }
+                mediaController = component "媒体控制器" "媒体管理" "Spring MVC Controller" {
+                    tags "Controller"
+                }
+                userController = component "用户控制器" "用户管理" "Spring MVC Controller" {
+                    tags "Controller"
+                }
+
+                # 业务层
+                contentService = component "内容服务" "内容业务逻辑" "Spring Service" {
+                    tags "Service"
+                }
+                mediaService = component "媒体服务" "媒体处理" "Spring Service" {
+                    tags "Service"
+                }
+                userService = component "用户服务" "用户认证" "Spring Service" {
+                    tags "Service"
+                }
+                auditService = component "审计服务" "操作日志" "Spring Service" {
+                    tags "Service,CrossCutting"
+                }
+
+                # 仓储层
+                contentRepository = component "内容仓储" "内容数据访问" "Spring Data JPA" {
+                    tags "Repository"
+                }
+                mediaRepository = component "媒体仓储" "媒体数据访问" "Spring Data JPA" {
+                    tags "Repository"
+                }
+                userRepository = component "用户仓储" "用户数据访问" "Spring Data JPA" {
+                    tags "Repository"
+                }
+                auditRepository = component "审计仓储" "审计日志存储" "Spring Data JPA" {
+                    tags "Repository"
+                }
+
+                # 工具层
+                imageProcessor = component "图片处理器" "图片压缩、裁剪" "ImageMagick" {
+                    tags "Utility"
+                }
+                cacheManager = component "缓存管理器" "缓存策略" "Spring Cache" {
+                    tags "Utility"
+                }
+
+                # 控制器 → 服务(垂直依赖)
+                contentController -> contentService "调用"
+                mediaController -> mediaService "调用"
+                userController -> userService "调用"
+
+                # 服务 → 仓储(垂直依赖)
+                contentService -> contentRepository "访问数据"
+                mediaService -> mediaRepository "访问数据"
+                userService -> userRepository "访问数据"
+                auditService -> auditRepository "记录日志"
+
+                # 服务间依赖(水平依赖)
+                contentService -> userService "验证权限"
+                contentService -> auditService "记录操作"
+                mediaService -> userService "验证权限"
+                mediaService -> auditService "记录操作"
+                mediaService -> imageProcessor "处理图片"
+
+                # 跨层依赖(特殊场景)
+                contentService -> cacheManager "缓存内容"
+                mediaService -> cacheManager "缓存媒体"
+            }
+        }
+    }
+
+    views {
+        # 完整组件视图
+        component cmsApp "all" "完整组件架构" {
+            include *
+            autolayout tb
+        }
+
+        # 按层次分组
+        component cmsApp "by-layer" "分层架构" {
+            include element.tag==Controller
+            include element.tag==Service
+            include element.tag==Repository
+            autolayout tb
+        }
+
+        # 单个功能模块
+        component cmsApp "content-module" "内容模块" {
+            include contentController contentService contentRepository
+            include userService auditService cacheManager
+            autolayout lr
+        }
+
+        # 横切关注点
+        component cmsApp "cross-cutting" "横切关注点" {
+            include auditService auditRepository
+            include contentService mediaService userService
+            autolayout lr
+        }
+    }
+}
+```
+
+**依赖模式总结**:
+- **垂直依赖**: Controller → Service → Repository (典型分层)
+- **水平依赖**: Service ↔ Service (服务间协作)
+- **跨层依赖**: Service → Utility (特殊工具调用)
+- **横切关注点**: AuditService 被多个服务依赖
+
+## perspectives 属性使用
+
+Perspectives 用于添加多维度信息到组件:
+
+```
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            apiApp = container "API" "后端" "Spring Boot" {
+                userService = component "用户服务" "用户管理" "Spring Service" {
+                    perspectives {
+                        # 安全性视角
+                        "Security" "实现 Spring Security,JWT 认证,角色权限控制"
+                        
+                        # 性能视角
+                        "Performance" "用户查询使用 Redis 缓存,登录接口限流 100 req/s"
+                        
+                        # 可靠性视角
+                        "Reliability" "关键操作使用 @Transactional,失败重试 3 次"
+                        
+                        # 可观测性视角
+                        "Observability" "集成 Prometheus 指标,ELK 日志,Jaeger 追踪"
+                    }
+                }
+
+                orderService = component "订单服务" "订单处理" "Spring Service" {
+                    perspectives {
+                        "Security" "订单操作需要用户认证,敏感信息加密存储"
+                        "Performance" "订单列表分页查询,每页 20 条,索引优化"
+                        "Reliability" "分布式事务使用 Saga 模式,支持补偿"
+                        "Scalability" "支持水平扩展,无状态设计,消息队列解耦"
+                    }
+                }
+
+                paymentService = component "支付服务" "支付集成" "Spring Service" {
+                    perspectives {
+                        "Security" "PCI DSS 合规,敏感数据不落地,HTTPS 通信"
+                        "Performance" "支付接口超时 30s,异步回调处理"
+                        "Reliability" "支付失败自动重试,幂等性保证,对账机制"
+                        "Compliance" "满足央行支付合规要求,记录完整审计日志"
+                    }
+                }
+            }
+        }
+    }
+
+    views {
+        component apiApp "components" "组件架构" {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+**Perspectives 最佳实践**:
+- **Security**: 认证、授权、加密、合规
+- **Performance**: 缓存、查询优化、限流、超时
+- **Reliability**: 事务、重试、容错、监控
+- **Scalability**: 水平扩展、无状态、解耦
+- **Compliance**: 法规要求、审计、数据保护
+
+## 常见错误
+
+### 错误 1: Component 定义在错误的层次
+
+```
+# ❌ 错误: Component 直接定义在 softwareSystem 下
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            controller = component "控制器" "..." "..."  # 错误位置
+        }
+    }
+}
+
+# ✅ 正确: Component 必须在 Container 内部
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            apiApp = container "API" "后端" "Spring Boot" {
+                controller = component "控制器" "..." "..."  # 正确位置
+            }
+        }
+    }
+}
+```
+
+### 错误 2: 过度细分组件
+
+```
+# ❌ 错误: 每个方法都是组件
+getUserById = component "根据 ID 获取用户" "..." "..."
+getUserByName = component "根据名称获取用户" "..." "..."
+createUser = component "创建用户" "..." "..."
+
+# ✅ 正确: 按职责划分组件
+userService = component "用户服务" "用户管理业务逻辑" "Spring Service"
+```
+
+### 错误 3: 混淆 Component 和 Class
+
+```
+# ❌ 错误: 把每个 Java 类都当组件
+userDto = component "UserDTO" "数据传输对象" "Java Class"
+userEntity = component "User Entity" "实体类" "Java Class"
+
+# ✅ 正确: Component 是逻辑分组,不是单个类
+userModel = component "用户模型" "用户数据模型和业务实体" "JPA Entity + DTO"
+```
+
+### 错误 4: 组件视图显示其他容器
+
+```
+# ❌ 错误: Component 视图中包含其他容器
+views {
+    component apiApp "components" {
+        include *
+        include database  # database 是 container,不应出现
+    }
+}
+
+# ✅ 正确: Component 视图只显示指定容器的组件
+views {
+    component apiApp "components" {
+        include *  # 只包含 apiApp 内部的组件
+    }
+}
+```
+
+### 错误 5: 关系描述过于简单
+
+```
+# ❌ 错误: 描述不清晰
+controller -> service "调用"
+
+# ✅ 正确: 明确业务含义
+userController -> userService "调用用户注册/登录/查询接口"
+```
+
+### 错误 6: 忽略分层架构原则
+
+```
+# ❌ 错误: Controller 直接访问 Repository
+controller -> repository "直接访问数据"
+
+# ✅ 正确: 遵循分层架构
+controller -> service "调用业务逻辑"
+service -> repository "访问数据"
+```

@@ -245,7 +245,7 @@
     "x": {
       "field": "time",
       "type": "temporal",
-      "timeUnit": "hours",
+      "timeUnit": "hoursminutes",
       "axis": {"title": "时间（小时）", "format": "%H:00"}
     },
     "y": {
@@ -263,7 +263,7 @@
 **关键点**：
 - 使用 `interpolate: "monotone"` 生成平滑曲线
 - 时间数据使用 ISO 8601 格式（YYYY-MM-DDTHH:mm:ss）
-- 使用 `timeUnit: "hours"` 提取小时部分
+- 使用 `timeUnit: "hoursminutes"` 提取小时分钟（显示时用format控制）
 - 使用 `axis.format` 自定义时间显示格式
 - `scale.zero: false` 显示温度真实范围（不从0开始）
 

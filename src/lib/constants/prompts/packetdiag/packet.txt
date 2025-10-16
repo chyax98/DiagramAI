@@ -5,20 +5,6 @@
 
 网络数据包图用于展示协议头字段布局，适用于TCP、UDP、IP等协议头部结构展示。
 
-## 核心语法
-
-### 基础数据包定义
-```
-packetdiag {
-  colwidth = 32
-  node_height = 72
-
-  0-15: Source Port
-  16-31: Destination Port
-  32-63: Sequence Number
-}
-```
-
 ## 生成示例
 
 ### 示例 1: TCP协议头（简单场景）
@@ -87,43 +73,6 @@ packetdiag {
 - TTL（红色）- 生存时间
 - Protocol（蓝色）- 上层协议
 - IP地址（黄色）- 源和目的地址
-
-## 常见错误
-
-### 错误 1: 位范围重叠
-**❌ 错误写法**：
-```
-packetdiag {
-  colwidth = 32
-  0-15: Field 1
-  10-25: Field 2  // 重叠
-}
-```
-
-**✅ 正确写法**：
-```
-packetdiag {
-  colwidth = 32
-  0-15: Field 1
-  16-31: Field 2
-}
-```
-
-### 错误 2: 缺少列宽定义
-**❌ 错误写法**：
-```
-packetdiag {
-  0-15: Source Port
-}
-```
-
-**✅ 正确写法**：
-```
-packetdiag {
-  colwidth = 32
-  0-15: Source Port
-}
-```
 
 ## 生成检查清单
 

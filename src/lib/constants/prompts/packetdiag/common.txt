@@ -28,7 +28,7 @@ Syntax Error: Missing diagram declaration
 ---
 
 ### ⚠️ 规则 2: 必须定义 colwidth（编译失败）
-PacketDiag 必须在开头定义 `colwidth` 属性，指定每行的位宽（通常是 32 或 64）。缺少 `colwidth` 会导致编译失败。
+PacketDiag 必须在开头定义 `colwidth` 属性，指定每行的位宽（必须是 8、16 或 32）。缺少 `colwidth` 会导致编译失败。
 
 **错误示例**：
 ```
@@ -75,6 +75,58 @@ packetdiag {
 
 **违反后果**：
 字段显示异常或编译错误。
+
+---
+
+### ⚠️ 规则 5: 位编号从 0 开始（编译失败）
+字段位编号必须从 0 开始,如 `0-15`、`16-31`,而非从 1 开始。
+
+**错误示例**：
+```
+packetdiag {
+  colwidth = 32;
+  1-16: Source Port;  // ❌ 错误的起始位
+}
+```
+
+**正确写法**：
+```
+packetdiag {
+  colwidth = 32;
+  0-15: Source Port;  // ✅ 正确
+}
+```
+
+**违反后果**：
+```
+Syntax Error: Invalid bit range
+```
+
+---
+
+### ⚠️ 规则 6: 起始位必须小于或等于结束位（编译失败）
+位范围格式必须是 `起始位-结束位`,其中起始位 ≤ 结束位,如 `0-15`、`16-31`。
+
+**错误示例**：
+```
+packetdiag {
+  colwidth = 32;
+  15-0: Source Port;  // ❌ 起始位大于结束位
+}
+```
+
+**正确写法**：
+```
+packetdiag {
+  colwidth = 32;
+  0-15: Source Port;  // ✅ 正确
+}
+```
+
+**违反后果**：
+```
+Syntax Error: Invalid bit range (start > end)
+```
 
 ---
 
@@ -145,6 +197,11 @@ packetdiag {
   16-31: Field2 [color = "#FFE0E0"];
 }
 ```
+
+**字段属性**:
+- `color`: 字段背景颜色,使用十六进制颜色代码(如 `#FFE0E0`)
+- `rotate`: 字段标签旋转角度(0-360),用于空间受限的场景(如 `rotate = 270`)
+- `colheight`: 字段高度,用于强调重要字段(如 `colheight = 2`)
 
 **字段宽度单位说明**：
 - 字段位范围（如 `0-15`）以**比特（bit）**为单位

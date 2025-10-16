@@ -57,3 +57,352 @@ workspace {
 - 可以基于 Software System 或 Container 创建动态视图
 - 布局方向：lr（左右）适合时间线，tb（上下）适合层次调用
 - 适合业务分析师、开发团队、测试团队理解业务流程
+
+## 基于 component 的动态视图
+
+Dynamic 视图可以基于 Container 或 Component 级别:
+
+### Container 级别动态视图
+
+```
+workspace {
+    model {
+        user = person "用户"
+        
+        system = softwareSystem "系统" {
+            webApp = container "Web 应用" "前端" "React"
+            apiGateway = container "API 网关" "路由" "Kong"
+            orderService = container "订单服务" "订单" "Java"
+            database = container "数据库" "存储" "PostgreSQL"
+        }
+
+        # 静态关系
+        user -> webApp "使用"
+        webApp -> apiGateway "调用"
+        apiGateway -> orderService "路由"
+        orderService -> database "读写"
+    }
+
+    views {
+        dynamic system "create-order" "创建订单流程" {
+            user -> webApp "1. 点击下单按钮"
+            webApp -> apiGateway "2. POST /api/orders"
+            apiGateway -> orderService "3. 路由到订单服务"
+            orderService -> database "4. 插入订单记录"
+            orderService -> apiGateway "5. 返回订单号"
+            apiGateway -> webApp "6. 返回响应"
+            webApp -> user "7. 显示订单详情"
+            autolayout lr
+        }
+    }
+}
+```
+
+### Component 级别动态视图
+
+```
+workspace {
+    model {
+        system = softwareSystem "电商系统" {
+            apiApp = container "API 应用" "后端服务" "Spring Boot" {
+                # 组件
+                orderController = component "订单控制器" "订单 API" "Spring MVC Controller"
+                orderService = component "订单服务" "订单业务" "Spring Service"
+                orderRepository = component "订单仓储" "订单数据" "Spring Data JPA"
+                paymentClient = component "支付客户端" "支付集成" "HTTP Client"
+
+                # 静态关系
+                orderController -> orderService "调用"
+                orderService -> orderRepository "访问"
+                orderService -> paymentClient "调用"
+            }
+
+            database = container "数据库" "数据存储" "PostgreSQL"
+            apiApp -> database "读写" "JDBC"
+        }
+
+        paymentGateway = softwareSystem "支付网关" {
+            tags "External"
+        }
+    }
+
+    views {
+        # 组件级别动态视图
+        dynamic apiApp "payment-flow" "支付流程(组件级)" {
+            orderController -> orderService "1. 调用 processPayment()"
+            orderService -> paymentClient "2. 调用支付接口"
+            paymentClient -> paymentGateway "3. POST /api/payment"
+            paymentGateway -> paymentClient "4. 返回支付结果"
+            paymentClient -> orderService "5. 返回支付状态"
+            orderService -> orderRepository "6. 更新订单状态"
+            orderRepository -> database "7. UPDATE orders"
+            orderRepository -> orderService "8. 返回更新结果"
+            orderService -> orderController "9. 返回处理结果"
+            autolayout lr
+        }
+    }
+}
+```
+
+**区别**:
+- **Container 级别**: `dynamic system "key"`
+- **Component 级别**: `dynamic container "key"`
+
+## 异常流程示例
+
+展示正常流程和异常流程:
+
+```
+workspace {
+    model {
+        user = person "用户"
+
+        system = softwareSystem "支付系统" {
+            webApp = container "Web 应用" "前端" "React"
+            apiGateway = container "API 网关" "统一入口" "Kong"
+            orderService = container "订单服务" "订单处理" "Java"
+            paymentService = container "支付服务" "支付集成" "Java"
+            database = container "数据库" "数据存储" "MySQL"
+            messageQueue = container "消息队列" "异步通信" "RabbitMQ"
+        }
+
+        paymentGateway = softwareSystem "支付网关" {
+            tags "External"
+        }
+
+        # 静态关系
+        user -> webApp "使用"
+        webApp -> apiGateway "调用"
+        apiGateway -> orderService "订单"
+        apiGateway -> paymentService "支付"
+        orderService -> database "读写"
+        paymentService -> database "读写"
+        paymentService -> paymentGateway "调用"
+        orderService -> messageQueue "发布"
+        paymentService -> messageQueue "发布"
+    }
+
+    views {
+        # 正常流程
+        dynamic system "payment-success" "支付成功流程" {
+            user -> webApp "1. 确认支付"
+            webApp -> apiGateway "2. POST /api/payment/create"
+            apiGateway -> paymentService "3. 创建支付订单"
+            paymentService -> database "4. 保存支付记录(状态:待支付)"
+            paymentService -> paymentGateway "5. 调用支付接口"
+            paymentGateway -> paymentService "6. 返回支付成功"
+            paymentService -> database "7. 更新支付状态(已支付)"
+            paymentService -> messageQueue "8. 发布支付成功事件"
+            messageQueue -> orderService "9. 订阅事件"
+            orderService -> database "10. 更新订单状态"
+            paymentService -> apiGateway "11. 返回支付结果"
+            apiGateway -> webApp "12. 返回响应"
+            webApp -> user "13. 显示支付成功"
+            autolayout lr
+        }
+
+        # 异常流程: 支付失败
+        dynamic system "payment-failed" "支付失败流程" {
+            user -> webApp "1. 确认支付"
+            webApp -> apiGateway "2. POST /api/payment/create"
+            apiGateway -> paymentService "3. 创建支付订单"
+            paymentService -> database "4. 保存支付记录(状态:待支付)"
+            paymentService -> paymentGateway "5. 调用支付接口"
+            paymentGateway -> paymentService "6. 返回支付失败(余额不足)"
+            paymentService -> database "7. 更新支付状态(失败)"
+            paymentService -> messageQueue "8. 发布支付失败事件"
+            paymentService -> apiGateway "9. 返回失败原因"
+            apiGateway -> webApp "10. 返回错误响应"
+            webApp -> user "11. 显示错误提示:余额不足"
+            autolayout lr
+        }
+
+        # 异常流程: 超时重试
+        dynamic system "payment-timeout" "支付超时重试" {
+            user -> webApp "1. 确认支付"
+            webApp -> apiGateway "2. POST /api/payment/create"
+            apiGateway -> paymentService "3. 创建支付订单"
+            paymentService -> database "4. 保存支付记录(状态:待支付)"
+            paymentService -> paymentGateway "5. 调用支付接口(第1次)"
+            paymentGateway -> paymentService "6. 超时无响应(30s)"
+            paymentService -> paymentGateway "7. 重试调用(第2次)"
+            paymentGateway -> paymentService "8. 返回支付成功"
+            paymentService -> database "9. 更新支付状态(已支付)"
+            paymentService -> messageQueue "10. 发布支付成功事件"
+            paymentService -> apiGateway "11. 返回支付结果"
+            apiGateway -> webApp "12. 返回响应"
+            webApp -> user "13. 显示支付成功"
+            autolayout lr
+        }
+    }
+}
+```
+
+**异常场景覆盖**:
+- 业务异常(余额不足、库存不足)
+- 技术异常(超时、网络错误)
+- 重试机制(指数退避、最大重试次数)
+- 补偿流程(退款、回滚)
+
+## 返回值表示方法
+
+在动态视图中明确表示返回值:
+
+### 方法 1: 描述中包含返回值
+
+```
+dynamic system "flow" {
+    serviceA -> serviceB "1. 调用 getUser(123)"
+    serviceB -> database "2. SELECT * FROM users WHERE id=123"
+    database -> serviceB "3. 返回 User{id:123, name:'张三'}"
+    serviceB -> serviceA "4. 返回 User 对象"
+    autolayout lr
+}
+```
+
+### 方法 2: 使用箭头方向表示
+
+```
+dynamic system "flow" {
+    # 请求方向: →
+    client -> server "1. POST /api/login {username, password}"
+    
+    # 响应方向: ← (隐式,通过序号体现)
+    server -> client "2. 返回 {token, userId}"
+    
+    # 继续请求
+    client -> server "3. GET /api/profile (Bearer token)"
+    server -> client "4. 返回 {name, email, avatar}"
+    
+    autolayout lr
+}
+```
+
+### 方法 3: 完整 HTTP 请求/响应
+
+```
+dynamic system "api-flow" "API 调用完整流程" {
+    client -> apiGateway "1. POST /api/orders HTTP/1.1\nContent-Type: application/json\n{productId:1, quantity:2}"
+    
+    apiGateway -> orderService "2. 转发请求"
+    
+    orderService -> database "3. INSERT INTO orders ..."
+    database -> orderService "4. 返回 orderId: 12345"
+    
+    orderService -> apiGateway "5. HTTP 201 Created\n{orderId:12345, status:'pending'}"
+    
+    apiGateway -> client "6. 返回响应"
+    
+    autolayout lr
+}
+```
+
+## 常见错误
+
+### 错误 1: 忘记步骤编号
+
+```
+# ❌ 错误: 缺少步骤编号
+dynamic system "flow" {
+    user -> webApp "点击按钮"
+    webApp -> apiApp "调用接口"
+    apiApp -> database "查询数据"
+}
+
+# ✅ 正确: 必须包含编号
+dynamic system "flow" {
+    user -> webApp "1. 点击按钮"
+    webApp -> apiApp "2. 调用接口"
+    apiApp -> database "3. 查询数据"
+}
+```
+
+### 错误 2: 步骤编号不连续
+
+```
+# ❌ 错误: 编号跳跃
+dynamic system "flow" {
+    user -> webApp "1. 操作"
+    webApp -> apiApp "3. 调用"  # 跳过了 2
+    apiApp -> database "5. 查询"  # 跳过了 4
+}
+
+# ✅ 正确: 连续编号
+dynamic system "flow" {
+    user -> webApp "1. 操作"
+    webApp -> apiApp "2. 调用"
+    apiApp -> database "3. 查询"
+}
+```
+
+### 错误 3: 关系方向错误
+
+```
+# ❌ 错误: 响应方向与请求相同
+client -> server "1. 请求数据"
+client -> server "2. 返回数据"  # 错误:应该是 server -> client
+
+# ✅ 正确: 响应方向相反
+client -> server "1. 请求数据"
+server -> client "2. 返回数据"
+```
+
+### 错误 4: Dynamic 视图使用错误的元素类型
+
+```
+# ❌ 错误: Container 级别视图使用 Component
+dynamic system "flow" {
+    orderController -> orderService "1. 调用"  # 错误: 这些是 component
+}
+
+# ✅ 正确: Container 级别使用 Container
+dynamic system "flow" {
+    apiApp -> database "1. 查询"  # 正确: 这些是 container
+}
+
+# ✅ 或者: 使用 Component 级别视图
+dynamic apiApp "flow" {
+    orderController -> orderService "1. 调用"  # 正确: component 级别
+}
+```
+
+### 错误 5: 描述过于简单
+
+```
+# ❌ 错误: 描述不清晰
+user -> system "1. 操作"
+system -> database "2. 查询"
+
+# ✅ 正确: 描述具体操作
+user -> system "1. 点击'提交订单'按钮"
+system -> database "2. 查询商品库存(productId=123)"
+```
+
+### 错误 6: 混合正常和异常流程
+
+```
+# ❌ 错误: 在一个视图中混合成功和失败
+dynamic system "flow" {
+    client -> server "1. 请求"
+    server -> database "2. 查询"
+    database -> server "3. 成功返回"
+    server -> client "4. 返回 200"
+    database -> server "5. 查询失败"  # 混乱:回到步骤 3 的失败分支
+    server -> client "6. 返回 500"
+}
+
+# ✅ 正确: 分别创建成功和失败视图
+dynamic system "success-flow" {
+    client -> server "1. 请求"
+    server -> database "2. 查询"
+    database -> server "3. 返回数据"
+    server -> client "4. 返回 200"
+}
+
+dynamic system "error-flow" {
+    client -> server "1. 请求"
+    server -> database "2. 查询"
+    database -> server "3. 查询失败"
+    server -> client "4. 返回 500"
+}
+```

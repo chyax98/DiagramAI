@@ -61,11 +61,12 @@ relationship {color: "#333333", size: "14"}
 - 不能使用: ASCII 控制字符 (回车、换行等)
 
 **实体命名规范**:
-- ✅ **使用小写字母和下划线**: `user`, `order_item`, `product_category`
-- ✅ **单数形式**: `person` (not `persons`), `order` (not `orders`)
+- ✅ **大写开头，单数形式**: `Person`, `User_Account`, `Product_Category`
+- ✅ **可使用下划线**: `User_Account`, `Order_Item` (多词实体)
 - ✅ **清晰描述**: 命名应明确表达实体含义
-- ❌ **避免驼峰命名**: 不推荐 `OrderItem`, 使用 `order_item` 代替
-- ❌ **避免缩写**: 使用 `customer` 而非 `cust`, 除非是行业标准缩写
+- ✅ **包含空格需引号**: `` [`Birth Place`] ``, `['User Account']`, `["Product Info"]`
+- ❌ **避免复数**: `Person` (not `Persons`), `Order` (not `Orders`)
+- ❌ **避免缩写**: 使用 `Customer` 而非 `Cust`, 除非是行业标准缩写
 
 **属性命名规范**:
 - ✅ **使用小写字母和下划线**: `user_id`, `created_at`, `full_name`
@@ -124,24 +125,6 @@ Student *--* Course
 # 自引用 (员工有经理)
 Employee ?--1 Employee {label: "manages"}
 ```
-
-### 关系标签命名最佳实践
-
-**使用动词短语**:
-- ✅ `{label: "owns"}` - 清晰的所有权关系
-- ✅ `{label: "belongs to"}` - 明确的从属关系
-- ✅ `{label: "manages"}` - 描述管理关系
-- ✅ `{label: "created by"}` - 被动语态表达创建关系
-
-**避免模糊命名**:
-- ❌ `{label: "has"}` - 过于宽泛
-- ❌ `{label: "related"}` - 无实际意义
-- ❌ `{label: "link"}` - 不够具体
-
-**命名原则**:
-- 从实体A的视角描述关系（如：User owns Account）
-- 使用主动语态或被动语态清晰表达关系方向
-- 保持标签简洁（1-3 个单词）
 
 ### 5. 格式化选项
 
@@ -264,9 +247,9 @@ Entity1 *--1 Entity2
 ```
 
 ### 命名约定
-- **实体名**: 大写开头, 单数形式 (Person, not Persons)
-- **属性名**: 小写下划线 (user_id, not userId)
-- **关系标签**: 使用动词 (owns, belongs to, manages)
+- **实体名**: 大写开头, 单数形式 (Person, not Persons; User_Account)
+- **属性名**: 小写下划线 (user_id, not userId; created_at)
+- **关系标签**: 动词短语描述关系 (owns, belongs to, manages, created by)
 
 ### 格式化建议
 - **主实体**: 显眼背景色 (如 `#d0e0d0`)

@@ -1,4 +1,13 @@
-/** 图标索引 - Lucide图标+Provider图标+Diagram图标+Image图标 */
+/**
+ * 图标系统索引
+ *
+ * 包含:
+ * 1. Lucide Icons - 第三方图标库
+ * 2. Icon 组件 - 基于 public/icons 的统一图标组件
+ */
+
+// ========== Lucide Icons ==========
+
 export {
   Menu as IconMenu,
   X as IconClose,
@@ -130,38 +139,9 @@ export {
   Layers as IconLayers,
   Box as IconBox,
 } from "lucide-react";
-// SVG 内联图标 (ProviderIcons.tsx)
-export {
-  OpenAIIcon,
-  AnthropicIcon,
-  GoogleIcon,
-  DeepSeekIcon,
-  GroqIcon,
-  OpenAICompatibleIcon,
-  ProviderIcon as ProviderSvgIcon,
-  getProviderIcon,
-} from "./ProviderIcons";
 
-// SVG 内联图标 (DiagramIcons.tsx)
-export {
-  MermaidIcon,
-  PlantUMLIcon,
-  D2Icon,
-  GraphvizIcon,
-  FlowchartIcon,
-  SequenceDiagramIcon,
-  ClassDiagramIcon,
-  ERDiagramIcon,
-  StateDiagramIcon,
-  GanttChartIcon,
-  MindMapIcon,
-  LanguageIcon as LanguageSvgIcon,
-  DiagramTypeIcon as DiagramTypeSvgIcon,
-  getLanguageIcon,
-  getDiagramTypeIcon,
-} from "./DiagramIcons";
+// ========== 统一图标组件 (基于 public/icons) ==========
 
-// 新的通用图标组件 (推荐使用) - 基于 Next.js Image
 export { Icon, ProviderIcon, LanguageIcon, Logo, getProviderType, getLanguageType } from "./Icon";
 
 export type {
@@ -176,44 +156,3 @@ export type {
   LanguageIconProps,
   LogoProps,
 } from "./Icon";
-
-// 向后兼容导出 (Image 版本)
-export {
-  // Provider 图标 (Image 版本)
-  OpenAIImageIcon,
-  AnthropicImageIcon,
-  GoogleImageIcon,
-  DeepSeekImageIcon,
-  GroqImageIcon,
-  OpenAICompatibleImageIcon,
-  ProviderImageIcon,
-  getProviderImageIcon,
-  // 渲染语言图标 (Image 版本) - 全部 23 种语言
-  MermaidImageIcon,
-  PlantUMLImageIcon,
-  D2ImageIcon,
-  GraphvizImageIcon,
-  WaveDromImageIcon,
-  NomnomlImageIcon,
-  ExcalidrawImageIcon,
-  C4PlantUMLImageIcon,
-  VegaLiteImageIcon,
-  DBMLImageIcon,
-  BPMNImageIcon,
-  DitaaImageIcon,
-  NwDiagImageIcon,
-  BlockDiagImageIcon,
-  ActDiagImageIcon,
-  PacketDiagImageIcon,
-  RackDiagImageIcon,
-  SeqDiagImageIcon,
-  StructurizrImageIcon,
-  ErdImageIcon,
-  PikchrImageIcon,
-  SvgBobImageIcon,
-  UmletImageIcon,
-  // 工具函数和组件
-  LanguageImageIcon,
-  getLanguageImageIcon,
-  DiagramAILogo,
-} from "./ImageIcons";

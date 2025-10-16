@@ -4,7 +4,7 @@
 
 import type { RenderLanguage } from "@/types/database";
 import { getRenderLanguages } from "@/lib/constants/diagram-types";
-import { LanguageImageIcon } from "@/components/icons";
+import { LanguageIcon } from "@/components/icons";
 import {
   Select,
   SelectContent,
@@ -36,7 +36,7 @@ export function RenderLanguageSelector({
         <SelectValue>
           {selectedOption && (
             <div className="flex items-center gap-2.5">
-              <LanguageImageIcon language={selectedOption.value} size={20} className="shrink-0" />
+              <LanguageIcon language={selectedOption.value} size={20} className="shrink-0" />
               <span className="font-medium">{selectedOption.label}</span>
             </div>
           )}
@@ -47,7 +47,7 @@ export function RenderLanguageSelector({
         {LANGUAGE_OPTIONS.map((option) => (
           <SelectItem key={option.value} value={option.value} className="cursor-pointer">
             <div className="flex items-center gap-3 py-0.5">
-              <LanguageImageIcon language={option.value} size={24} className="shrink-0" />
+              <LanguageIcon language={option.value} size={24} className="shrink-0" />
               <div className="flex flex-col gap-0.5">
                 <span className="font-medium text-sm leading-tight text-foreground">
                   {option.label}

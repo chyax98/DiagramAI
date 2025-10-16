@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { RegisterForm } from "@/components/auth/RegisterForm";
-import { DiagramAILogo } from "@/components/icons";
+import { Logo } from "@/components/icons";
 
 export default function RegisterPage() {
   return (
@@ -9,7 +9,7 @@ export default function RegisterPage() {
         {/* Logo 和标题 */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <DiagramAILogo size={80} className="drop-shadow-md" />
+            <Logo size={80} className="drop-shadow-md" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">创建账户</h1>
           <p className="mt-2 text-sm sm:text-base text-slate-600">

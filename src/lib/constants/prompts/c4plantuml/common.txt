@@ -188,19 +188,70 @@ System_Boundary(alias, "边界名称") {
 }
 ```
 
+**⚠️ 边界嵌套规则**:
+- `Enterprise_Boundary` 可包含: System, System_Boundary
+- `System_Boundary` 可包含: Container, ContainerDb, ContainerQueue
+- `Container_Boundary` 可包含: Component, ComponentDb, ComponentQueue
+- 不允许同类边界嵌套 (如 System_Boundary 内不能再嵌套 System_Boundary)
+- 如需通用分组,使用 `Boundary(alias, "标签")` (无类型限制)
+
+**示例 - 企业级边界嵌套**:
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+Enterprise_Boundary(enterprise, "企业边界") {
+    System_Boundary(system1, "系统A") {
+        Container(web1, "Web应用", "React")
+        ContainerDb(db1, "数据库", "PostgreSQL")
+    }
+
+    System_Boundary(system2, "系统B") {
+        Container(api2, "API服务", "Node.js")
+    }
+}
+@enduml
+```
+
 #### 容器（Container）
 ```plantuml
 Container(alias, "容器名称", "技术栈", "容器描述")
-ContainerDb(alias, "数据库名称", "数据库类型", "数据描述")
 Container_Boundary(alias, "边界名称") {
     ' 内部组件...
 }
 ```
 
+**容器专用变体**:
+```plantuml
+ContainerDb(alias, "数据库名称", "数据库类型", "数据描述")
+ContainerQueue(alias, "队列名称", "队列技术", "队列描述")
+```
+
+**说明**: 使用专用宏会自动应用对应的数据库或队列图标,增强视觉识别度。
+
+**示例**:
+```plantuml
+ContainerDb(userDb, "用户数据库", "PostgreSQL", "存储用户信息")
+ContainerQueue(msgQueue, "消息队列", "RabbitMQ", "异步任务处理")
+```
+
 #### 组件（Component）
 ```plantuml
 Component(alias, "组件名称", "技术栈", "组件描述")
+```
+
+**组件专用变体**:
+```plantuml
 ComponentDb(alias, "数据组件", "技术", "数据访问描述")
+ComponentQueue(alias, "消息组件", "技术", "消息处理描述")
+```
+
+**说明**: 使用专用宏会自动应用对应的数据库或队列图标,增强视觉识别度。
+
+**示例**:
+```plantuml
+ComponentDb(userRepo, "用户仓储", "JPA/Hibernate", "用户数据访问层")
+ComponentQueue(eventHandler, "事件处理器", "Spring AMQP", "处理异步事件")
 ```
 
 ### 关系定义
@@ -214,10 +265,42 @@ Rel_Back(from, to, "反向关系", "技术")
 #### 方向关系
 ```plantuml
 Rel_U(from, to, "向上", "技术")    ' Upward
-Rel_D(from, to, "向下", "技术")    ' Downward  
+Rel_D(from, to, "向下", "技术")    ' Downward
 Rel_L(from, to, "向左", "技术")    ' Left
 Rel_R(from, to, "向右", "技术")    ' Right
 ```
+
+#### 带序号关系（动态图专用）
+
+```plantuml
+RelIndex(1, from, to, "描述")
+RelIndex(2, from, to, "描述", "技术")
+```
+
+**使用场景**: C4 动态图 (Dynamic Diagram),用于展示时序交互流程,序号表示执行顺序。
+
+**示例**:
+```plantuml
+@startuml
+!include <C4/C4_Dynamic>
+
+title 登录流程动态图
+
+Person(user, "用户")
+Container(web, "Web应用", "React")
+Container(api, "API服务", "Node.js")
+ContainerDb(db, "数据库", "PostgreSQL")
+
+RelIndex(1, user, web, "输入账号密码")
+RelIndex(2, web, api, "POST /login", "HTTPS/JSON")
+RelIndex(3, api, db, "验证凭证", "SQL")
+RelIndex(4, db, api, "返回用户信息")
+RelIndex(5, api, web, "返回JWT令牌", "JSON")
+RelIndex(6, web, user, "跳转到首页")
+@enduml
+```
+
+**注意**: `RelIndex` 仅在 `!include <C4/C4_Dynamic>` 图表中可用,普通图表请使用 `Rel` 系列。
 
 ### 布局和样式
 
@@ -227,6 +310,40 @@ LAYOUT_TOP_DOWN()           ' 从上到下（默认方向）
 LAYOUT_LEFT_RIGHT()         ' 从左到右
 LAYOUT_LANDSCAPE()          ' 横向布局
 LAYOUT_WITH_LEGEND()        ' 推荐：自动布局 + 底部图例
+```
+
+#### 精确布局控制
+
+当自动布局不满足需求时,可使用以下宏进行精确控制：
+
+```plantuml
+' 元素位置控制
+Lay_U(from, to)   ' from 在 to 上方
+Lay_D(from, to)   ' from 在 to 下方
+Lay_L(from, to)   ' from 在 to 左侧
+Lay_R(from, to)   ' from 在 to 右侧
+
+' 距离控制
+Lay_Distance(from, to, 2)  ' 设置距离为 2 个单位
+```
+
+**使用场景**: 当自动布局不满足需求时,用于精确控制元素位置和间距。
+
+**示例**:
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+Container(web, "Web应用", "React")
+Container(api, "API", "Node.js")
+Container(db, "数据库", "PostgreSQL")
+
+' 强制 web 在 api 左侧
+Lay_L(web, api)
+' 强制 db 在 api 下方,距离 2 单位
+Lay_D(api, db)
+Lay_Distance(api, db, 2)
+@enduml
 ```
 
 #### 显示图例
@@ -247,6 +364,230 @@ HIDE_LEGEND()               ' 不显示图例
 ```
 
 **最佳实践**: 使用 `LAYOUT_WITH_LEGEND()` 或 `SHOW_FLOATING_LEGEND()` 以获得更紧凑的布局。
+
+### 样式定制
+
+C4-PlantUML 支持通过主题和 skinparam 定制图表样式。
+
+#### 预定义主题
+
+C4-PlantUML 提供多种官方主题:
+
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+' 应用主题（在元素定义之前）
+!theme C4_blue        ' 蓝色主题（默认）
+!theme C4_brown       ' 棕色主题
+!theme C4_green       ' 绿色主题
+!theme C4_gray        ' 灰色主题
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "用户")
+Container(web, "Web应用", "React")
+@enduml
+```
+
+**注意**: 主题必须在 `!include` 之后、元素定义之前应用。
+
+#### 自定义颜色
+
+通过 `skinparam` 定制元素颜色:
+
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+' 全局背景色
+skinparam backgroundColor #FEFEFE
+
+' 边界颜色
+skinparam rectangleBorderColor #2E4057
+skinparam rectangleBackgroundColor #F0F4F7
+
+' 关系箭头
+skinparam arrowColor #666666
+
+Person(user, "用户")
+System(app, "系统")
+@enduml
+```
+
+#### 自定义字体
+
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+' 设置全局字体
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+
+' 设置标题字体
+skinparam titleFontSize 20
+skinparam titleFontStyle bold
+
+title 系统架构图
+@enduml
+```
+
+#### 元素级样式定制
+
+使用 C4-PlantUML 宏定制特定元素颜色:
+
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+' 使用带颜色参数的宏
+AddElementTag("critical", $bgColor="#FF6B6B", $borderColor="#C92A2A")
+AddElementTag("external", $bgColor="#E3F2FD", $borderColor="#1976D2")
+
+Person(user, "用户")
+Container(web, "Web应用", "React", $tags="critical")
+System_Ext(payment, "支付系统", $tags="external")
+@enduml
+```
+
+**常用标签参数**:
+- `$bgColor`: 背景色
+- `$borderColor`: 边框色
+- `$fontColor`: 字体颜色
+
+#### 关系样式定制
+
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+' 定义关系标签
+AddRelTag("async", $lineColor="#FFA500", $lineStyle="DashedLine")
+AddRelTag("sync", $lineColor="#2E7D32", $lineStyle="BoldLine")
+
+Person(user, "用户")
+Container(web, "Web应用", "React")
+Container(queue, "消息队列", "RabbitMQ")
+
+Rel(user, web, "访问", "HTTPS", $tags="sync")
+Rel(web, queue, "发送消息", "AMQP", $tags="async")
+@enduml
+```
+
+**关系样式参数**:
+- `$lineColor`: 线条颜色
+- `$lineStyle`: 线条样式 (SolidLine, DashedLine, DottedLine, BoldLine)
+- `$textColor`: 标签文字颜色
+
+### Sprite 图标支持
+
+C4-PlantUML 支持为元素添加图标,增强视觉表达。
+
+#### 使用 PlantUML 标准库图标
+
+PlantUML 提供丰富的图标库 (AWS, Azure, GCP, Kubernetes 等):
+
+```plantuml
+@startuml
+!include <C4/C4_Container>
+!include <aws/ApplicationServices/AmazonAPIGateway/AmazonAPIGateway>
+!include <kubernetes/k8s-sprites-unlabeled-25pct>
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "用户")
+Container(api, "API网关", "AWS API Gateway", $sprite="AmazonAPIGateway")
+Container(k8s, "K8s集群", "Kubernetes", $sprite="k8s")
+
+Rel(user, api, "访问")
+Rel(api, k8s, "路由")
+@enduml
+```
+
+**常用图标库**:
+- AWS: `!include <aws/...>`
+- Azure: `!include <azure/...>`
+- GCP: `!include <gcp/...>`
+- Kubernetes: `!include <kubernetes/...>`
+- Material Design: `!include <material/...>`
+
+#### 自定义 Sprite 图标
+
+创建自定义单色 Sprite:
+
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+' 定义自定义 sprite (16x16)
+sprite $customIcon [16x16/16] {
+0000000000000000
+0001111111111000
+0010000000001000
+0010000110001000
+0010001001001000
+0010000110001000
+0010000000001000
+0001111111111000
+0000000000000000
+}
+
+Container(app, "自定义应用", "技术栈", $sprite="customIcon")
+@enduml
+```
+
+#### 使用图标 URL
+
+直接使用在线图标:
+
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master
+
+!includeurl ICONURL/devicons/react.puml
+!includeurl ICONURL/devicons/nodejs.puml
+
+Container(web, "前端应用", "React", $sprite="react")
+Container(api, "后端服务", "Node.js", $sprite="nodejs")
+@enduml
+```
+
+**图标资源库**:
+- PlantUML Icon Font Sprites: https://github.com/tupadr3/plantuml-icon-font-sprites
+- Font Awesome: DevIcons, FontAwesome, Material Design Icons
+
+#### 最佳实践
+
+**图标使用原则**:
+- 仅为关键技术组件添加图标
+- 避免过度使用导致视觉混乱
+- 图标应与技术栈相匹配
+- 优先使用标准库图标 (无需外部依赖)
+
+**示例 - 合理使用图标**:
+```plantuml
+@startuml
+!include <C4/C4_Container>
+!include <aws/Storage/AmazonS3/AmazonS3>
+!include <aws/Database/AmazonRDS/AmazonRDS>
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "用户")
+Container(web, "Web应用", "React")
+Container(api, "API服务", "Node.js")
+ContainerDb(db, "数据库", "PostgreSQL", $sprite="AmazonRDS")
+ContainerDb(storage, "对象存储", "S3", $sprite="AmazonS3")
+
+Rel(user, web, "访问")
+Rel(web, api, "调用")
+Rel(api, db, "读写")
+Rel(api, storage, "上传/下载")
+@enduml
+```
 
 ## 命名规范
 
@@ -402,6 +743,97 @@ Container(web, "Web应用", "React, TypeScript", "前端应用")
 ```
 
 **原因**：C4 模型的 Container 和 Component 层必须包含技术栈信息，这是其核心价值。
+
+### 错误 5: 边界嵌套违规
+❌ **错误写法 - 同类边界嵌套**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+System_Boundary(outer, "外层系统") {
+    System_Boundary(inner, "内层系统") {  ' 错误：System_Boundary 不能嵌套
+        Container(web, "Web应用", "React")
+    }
+}
+@enduml
+```
+
+❌ **错误写法 - 跨层嵌套**：
+```plantuml
+@startuml
+!include <C4/C4_Component>
+
+Container_Boundary(container, "容器") {
+    System(sys, "系统")  ' 错误：Container_Boundary 不能包含 System
+}
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+' 使用 Enterprise_Boundary 包含多个系统
+Enterprise_Boundary(enterprise, "企业边界") {
+    System_Boundary(system1, "系统A") {
+        Container(web1, "Web应用", "React")
+    }
+
+    System_Boundary(system2, "系统B") {
+        Container(api2, "API服务", "Node.js")
+    }
+}
+@enduml
+```
+
+**原因**：C4-PlantUML 严格限制边界嵌套规则,防止层次混乱。
+
+### 错误 6: 图表类型与 include 不匹配
+❌ **错误写法 - 图表类型错误**：
+```plantuml
+@startuml
+!include <C4/C4_Context>  ' Context 库
+
+' 使用了 Component 元素,但 include 是 Context
+Component(ctrl, "控制器", "Spring MVC")
+@enduml
+```
+
+❌ **错误写法 - 动态图未使用 Dynamic 库**：
+```plantuml
+@startuml
+!include <C4/C4_Container>  ' 错误：应使用 C4_Dynamic
+
+RelIndex(1, user, web, "访问")  ' RelIndex 需要 Dynamic 库
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+!include <C4/C4_Dynamic>  ' 正确：使用 Dynamic 库
+
+title 登录流程动态图
+
+Person(user, "用户")
+Container(web, "Web应用", "React")
+
+RelIndex(1, user, web, "输入账号密码")
+RelIndex(2, web, user, "显示首页")
+@enduml
+```
+
+**原因**：不同 C4 图表类型需要对应的库文件,否则会导致元素或宏无法识别。
+
+**图表类型与 include 对应关系**:
+| 图表类型 | 必需 include | 可用元素 |
+|---------|-------------|---------|
+| Context 图 | `<C4/C4_Context>` | Person, System, System_Ext, System_Boundary |
+| Container 图 | `<C4/C4_Container>` | Person, System, Container, ContainerDb, ContainerQueue, System_Boundary, Container_Boundary |
+| Component 图 | `<C4/C4_Component>` | Container, Component, ComponentDb, ComponentQueue, Container_Boundary |
+| Dynamic 图 | `<C4/C4_Dynamic>` | Person, System, Container, Component + RelIndex |
+| Deployment 图 | `<C4/C4_Deployment>` | Deployment_Node, Container, ContainerDb, ContainerQueue |
 
 ---
 

@@ -26,9 +26,32 @@
 
 C4 时序图使用标准 PlantUML 时序图语法，结合 C4 注释：
 
+### C4 Dynamic 图 vs 标准时序图
+
+**标准时序图** (本文档主要内容):
+- 使用 `!include <C4/C4_Container>` + PlantUML 时序图语法
+- 适用于复杂的交互流程，支持分组、条件、循环
+
+**C4 Dynamic 图** (简化版时序图):
+- 使用 `!include <C4/C4_Dynamic>`
+- 提供 `Rel_*()` 宏，支持自动编号关系
+- 适用于简单的顺序交互，强调步骤编号
+- 示例:
+  ```plantuml
+  @startuml
+  !include <C4/C4_Dynamic>
+  Rel(web, api, "POST /orders")
+  Rel(api, db, "INSERT order")
+  Rel(db, api, "order_id")
+  @enduml
+  ```
+
+### 标准时序图示例
+
 ```plantuml
 @startuml
 !include <C4/C4_Container>
+SHOW_PERSON_OUTLINE()  ' 可选，显示人形轮廓
 
 title C4 Sequence - 用户下单流程
 
@@ -450,7 +473,7 @@ participant A
 
 生成代码后，逐项检查：
 
-- [ ] **包含 C4 库引用**：使用 `!include C4_Container.puml`
+- [ ] **包含 C4 库引用**：使用 `!include <C4/C4_Container>`
 - [ ] **有清晰标题**：使用 `title C4 Sequence - ...`
 - [ ] **C4 标注完整**：参与者标注 `<<Container>>` 等
 - [ ] **消息方向正确**：请求用 `->`，响应用 `-->`

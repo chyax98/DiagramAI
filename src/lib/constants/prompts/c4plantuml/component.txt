@@ -40,11 +40,38 @@ title 组件图 - 订单服务
 ### 元素类型
 
 #### 容器边界
+
+**Container_Boundary (容器边界)**
 ```plantuml
 Container_Boundary(alias, "容器名称") {
     ' 内部组件...
     Component(ctrl, "控制器", "Spring MVC", "处理HTTP请求")
     ComponentDb(cache, "缓存", "Redis Client", "本地缓存客户端")
+}
+```
+
+**使用场景**: 用于定义容器的逻辑边界,将相关组件分组到同一个容器中。
+
+**Component_Boundary (组件边界)**
+```plantuml
+Component_Boundary(alias, "边界标签") {
+    Component(comp1, "组件1", "技术")
+    Component(comp2, "组件2", "技术")
+}
+```
+
+**使用场景**: 用于在 Component 图中对相关组件进行逻辑分组,增强组织结构清晰度。
+
+**嵌套示例**:
+```plantuml
+Container_Boundary(app, "应用服务") {
+    Component_Boundary(api, "API 层") {
+        Component(rest, "REST API", "Express")
+        Component(graphql, "GraphQL API", "Apollo")
+    }
+    Component_Boundary(business, "业务层") {
+        Component(service, "Business Service", "TypeScript")
+    }
 }
 ```
 
@@ -281,7 +308,7 @@ Container_Boundary(app, "应用服务") {
 - 这是导致 C4-PlantUML 历史 60% 生成失败的根本原因
 - 早期 AI 模型经常生成空 `!include` 占位符
 
-### 错误 2: 使用错误的 include
+### 错误 2: 使用了 Container 库而非 Component 库
 ❌ **错误写法**：
 ```plantuml
 @startuml

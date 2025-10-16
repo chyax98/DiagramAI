@@ -60,6 +60,24 @@ System_Ext(alias, "外部系统", "第三方系统描述")
 - `System`: 当前正在设计的目标系统（通常只有一个）
 - `System_Ext`: 外部系统、第三方服务、遗留系统
 
+#### 系统边界（System_Boundary）
+```plantuml
+System_Boundary(alias, "边界标签") {
+    System(sys1, "系统1", "描述")
+    System(sys2, "系统2", "描述")
+}
+```
+
+**使用场景**：用于在 Context 图中对相关系统进行逻辑分组。
+
+**示例**：
+```plantuml
+System_Boundary(backend, "后端系统群") {
+    System(api, "API 系统", "提供 RESTful API")
+    System(auth, "认证系统", "处理用户认证")
+}
+```
+
 ### 关系定义
 
 ```plantuml
@@ -152,7 +170,7 @@ SHOW_LEGEND()
 - 关系标注包含业务描述和技术协议
 - 使用 `LAYOUT_TOP_DOWN()` 控制布局
 
-### 示例 3: 微服务平台（高级场景）
+### 示例 3: 微服务平台（高级场景 - 带企业边界）
 
 **用户需求**：微服务电商平台，包含用户、管理员、核心系统、监控系统、数据分析平台
 
@@ -166,7 +184,9 @@ title 系统上下文图 - 微服务电商平台
 Person(user, "用户", "在线购物用户")
 Person(admin, "管理员", "平台运营人员")
 
-System(platform, "电商微服务平台", "包含订单、商品、用户、支付等微服务集群")
+Enterprise_Boundary(eb, "电商企业边界") {
+    System(platform, "电商微服务平台", "包含订单、商品、用户、支付等微服务集群")
+}
 
 System_Ext(payment, "支付网关", "聚合支付服务")
 System_Ext(sms, "短信服务", "第三方短信通知")
@@ -186,6 +206,7 @@ SHOW_LEGEND()
 
 **关键点**：
 - 目标系统可以是微服务集群的整体抽象
+- 使用 `Enterprise_Boundary` 明确标识企业边界（可选）
 - 包含多种外部系统（支付、监控、分析）
 - 关系描述包含详细的通信方式
 - 多个内部用户类型（用户、管理员）

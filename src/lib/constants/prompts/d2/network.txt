@@ -79,6 +79,55 @@ A -> B: {
 }
 ```
 
+### 网络设备配色规范
+
+遵循行业标准配色方案,提高图表可读性:
+
+```d2
+%% 安全设备 - 红色系
+防火墙: {
+  style.fill: "#ffcdd2"
+  style.stroke: "#d32f2f"
+  style.stroke-width: 2
+}
+
+%% 路由设备 - 黄色系
+路由器: {
+  style.fill: "#fff9c4"
+}
+
+%% 交换设备 - 绿色系
+交换机: {
+  style.fill: "#c8e6c9"
+}
+
+%% 服务器 - 蓝色系
+服务器: {
+  style.fill: "#bbdefb"
+}
+
+%% 数据库 - 橙色系
+数据库: {
+  style.fill: "#ffccbc"
+}
+
+%% 云服务 - 紫色系
+云服务: {
+  style.fill: "#d1c4e9"
+}
+
+%% 用户/客户端 - 浅蓝色系
+用户: {
+  style.fill: "#e3f2fd"
+}
+```
+
+**配色原则**:
+- **一致性**: 同类设备使用相同色系
+- **对比度**: 确保安全边界清晰可见
+- **柔和性**: 使用柔和色调,避免纯色
+- **语义化**: 红色表示安全,绿色表示正常通信
+
 ## 生成示例
 
 ### 示例 1: 基础企业网络（简单场景）
@@ -295,6 +344,171 @@ VPN网关 <-> 公有云.云防火墙: "加密连接" {
 - 云资源使用紫色系配色区分
 - 包含用户视角展示访问路径
 
+## 高级网络概念
+
+### VPN 和隧道连接
+```d2
+本地网络.VPN网关 <-> 远程网络.VPN网关: "IPSec隧道" {
+  style.stroke-dash: 3
+  style.stroke-width: 2
+  style.stroke: "#4caf50"
+}
+
+%% 隧道特征:
+%% - 使用虚线表示加密连接
+%% - 加粗线条强调专用通道
+%% - 绿色表示安全连接
+```
+
+### 子网划分和 CIDR
+```d2
+内网: {
+  Web子网_192_168_1_0_24: {
+    Web服务器1: { shape: rectangle }
+    Web服务器2: { shape: rectangle }
+  }
+
+  应用子网_192_168_2_0_24: {
+    应用服务器1: { shape: rectangle }
+    应用服务器2: { shape: rectangle }
+  }
+
+  数据子网_192_168_3_0_24: {
+    数据库主节点: { shape: cylinder }
+    数据库从节点: { shape: cylinder }
+  }
+}
+
+%% 子网命名规范:
+%% - 使用下划线替代点号 (D2 语法限制)
+%% - 包含 CIDR 表示法 (如 /24)
+%% - 容器名清晰表达网段范围
+```
+
+### 负载均衡和高可用
+```d2
+用户 -> 负载均衡器: "请求分发"
+
+负载均衡器: {
+  shape: hexagon
+  style.fill: "#fff9c4"
+  style.stroke-width: 2
+}
+
+Web集群: {
+  Web1: {
+    shape: rectangle
+    style.fill: "#c8e6c9"
+  }
+  Web2: {
+    shape: rectangle
+    style.fill: "#c8e6c9"
+  }
+  Web3: {
+    shape: rectangle
+    style.fill: "#c8e6c9"
+  }
+}
+
+负载均衡器 -> Web集群.Web1: "轮询"
+负载均衡器 -> Web集群.Web2: "轮询"
+负载均衡器 -> Web集群.Web3: "轮询"
+
+%% 高可用特征:
+%% - 使用 hexagon 表示负载均衡器
+%% - 多个后端节点同色表示等价性
+%% - 连接标签说明分发策略
+```
+
+### DNS 服务器
+```d2
+用户 -> DNS服务器: "域名解析请求"
+
+DNS服务器: {
+  shape: rectangle
+  style.fill: "#fff9c4"
+  style.stroke-width: 2
+}
+
+DNS服务器 -> 权威DNS: "递归查询" {
+  style.stroke-dash: 3
+}
+
+权威DNS: {
+  shape: cloud
+  style.fill: "#e1f5fe"
+}
+
+DNS服务器 -> 用户: "IP地址响应"
+
+%% DNS 特征:
+%% - 使用黄色系突出关键基础设施
+%% - 递归查询使用虚线
+%% - 权威DNS用云形表示外部服务
+```
+
+### 网络安全策略
+```d2
+互联网: {
+  shape: cloud
+  style.fill: "#e1f5fe"
+}
+
+外部防火墙: {
+  shape: rectangle
+  style.fill: "#ffcdd2"
+  style.stroke: "#d32f2f"
+  style.stroke-width: 3
+  label: "外部防火墙\n(DDoS防护)"
+}
+
+WAF: {
+  shape: rectangle
+  style.fill: "#ffcdd2"
+  style.stroke: "#d32f2f"
+  style.stroke-width: 2
+  label: "WAF\n(Web应用防火墙)"
+}
+
+IDS_IPS: {
+  shape: rectangle
+  style.fill: "#ffcdd2"
+  style.stroke: "#d32f2f"
+  style.stroke-width: 2
+  label: "IDS/IPS\n(入侵检测/防御)"
+}
+
+内部防火墙: {
+  shape: rectangle
+  style.fill: "#ffcdd2"
+  style.stroke: "#d32f2f"
+  style.stroke-width: 2
+  label: "内部防火墙\n(东西流量控制)"
+}
+
+DMZ: {
+  Web服务器: { shape: rectangle }
+}
+
+内网: {
+  应用服务器: { shape: rectangle }
+  数据库: { shape: cylinder }
+}
+
+互联网 -> 外部防火墙: "外网流量"
+外部防火墙 -> WAF: "过滤后流量"
+WAF -> IDS_IPS: "合法请求"
+IDS_IPS -> DMZ.Web服务器: "检测后流量"
+DMZ.Web服务器 -> 内部防火墙: "内部请求"
+内部防火墙 -> 内网.应用服务器: "授权访问"
+
+%% 多层安全防御:
+%% - 外部防火墙: 第一道防线 (DDoS)
+%% - WAF: 应用层防护 (SQL注入, XSS)
+%% - IDS/IPS: 入侵检测和防御
+%% - 内部防火墙: 东西向流量控制
+```
+
 ## 常见错误
 
 ### 错误 1: 安全设备不突出
@@ -386,17 +600,32 @@ A -> B: "HTTP/HTTPS"
 
 **原因**：VPN 等加密连接应该使用虚线样式区分。
 
-## 生成检查清单
+## 网络图验证检查清单
 
 生成代码后，逐项检查：
 
+### 基础结构检查 (P0 - 必须通过)
 - [ ] **网络区域清晰**：使用容器划分 DMZ、内网等区域
-- [ ] **安全设备突出**：防火墙使用红色系和加粗边框
 - [ ] **设备形状合适**：路由器用 `hexagon`，服务器用 `rectangle`，数据库用 `cylinder`
-- [ ] **流量方向正确**：内网不直接连接互联网，需通过防火墙
-- [ ] **连接标签清晰**：标注协议或流量类型
-- [ ] **加密连接区分**：VPN 等使用虚线样式
-- [ ] **集群表示准确**：服务器集群使用 `style.multiple: true`
+- [ ] **配色规范遵守**：安全设备红色系，路由黄色系，交换绿色系，服务器蓝色系
 - [ ] **代码可渲染**：语法正确，可直接通过 Kroki 渲染
 
-**任何检查项不通过，立即修正后重新生成**
+### 安全检查 (P0 - 必须通过)
+- [ ] **安全设备突出**：防火墙使用红色系和加粗边框 (`stroke-width: 2` 或更高)
+- [ ] **流量方向正确**：内网不直接连接互联网，需通过防火墙
+- [ ] **安全边界明确**：DMZ 与内网有明确的隔离和访问控制
+- [ ] **加密连接区分**：VPN/隧道使用虚线样式 (`stroke-dash: 3`)
+
+### 网络细节检查 (P1 - 建议通过)
+- [ ] **连接标签清晰**：标注协议或流量类型 (HTTP/HTTPS, SSH, VPN等)
+- [ ] **集群表示准确**：服务器集群使用 `style.multiple: true`
+- [ ] **高可用架构**：主备链路、负载均衡等体现冗余设计
+- [ ] **子网划分合理**：相关服务器分组到同一子网容器
+
+### 高级概念检查 (P1 - 建议通过)
+- [ ] **VPN隧道正确**：加密连接用虚线加粗 (`stroke-dash: 3`, `stroke-width: 2`)
+- [ ] **负载均衡器标识**：使用 `hexagon` 形状并加粗边框
+- [ ] **DNS服务器突出**：使用黄色系并加粗边框
+- [ ] **多层安全防御**：外部防火墙 → WAF → IDS/IPS → 内部防火墙
+
+**任何 P0 检查项不通过，立即修正后重新生成**

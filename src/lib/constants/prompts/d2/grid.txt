@@ -21,6 +21,10 @@
 
 **质量承诺**：生成结构清晰、布局合理、可完美渲染的 D2 网格图表代码。
 
+> **样式规则**: 详见 L2 common.txt
+> **ID命名规范**: 详见 L1 universal.txt
+> **路径引用语法**: 详见 L2 common.txt
+
 ## 核心语法与布局控制
 
 ### 1. 网格容器声明
@@ -171,6 +175,9 @@ company: {
 - 每层嵌套应有明确的语义（如：公司 → 部门 → 团队）
 
 ### 7. 网格内元素样式
+
+> **详细样式配置**: 详见 L2 common.txt
+
 ```d2
 team: {
   grid-columns: 4
@@ -179,11 +186,11 @@ team: {
   leader: {
     label: "团队负责人"
     style: {
-      fill: "#4CAF50"        # 背景颜色
-      stroke: "#2E7D32"      # 边框颜色
-      stroke-width: 2        # 边框宽度
-      font-size: 16          # 字体大小
-      bold: true             # 粗体
+      fill: "#4CAF50"
+      stroke: "#2E7D32"
+      stroke-width: 2
+      font-size: 16
+      bold: true
     }
   }
 
@@ -205,13 +212,12 @@ team: {
 dashboard: {
   label: "系统监控面板"
 
-  # 容器本身的样式
   style: {
-    fill: "#F5F5F5"          # 容器背景
-    stroke: "#9E9E9E"        # 容器边框
+    fill: "#F5F5F5"
+    stroke: "#9E9E9E"
     stroke-width: 2
-    border-radius: 8         # 圆角
-    shadow: true             # 阴影
+    border-radius: 8
+    shadow: true
   }
 
   grid-columns: 3

@@ -98,6 +98,47 @@ Department -> Employee: "aggregation" {
 Teacher -> Student: "teaches"
 ```
 
+### 接口与抽象类区分
+
+#### 接口 (Interface)
+```d2
+Drawable: {
+  shape: class
+  +draw(): void
+  +setColor(color: Color): void
+}
+
+# 接口特点:
+# - 通常只包含公共方法声明 (+)
+# - 不包含字段和实现
+# - 命名可使用 I 前缀或 able 后缀 (IDrawable, Runnable)
+```
+
+#### 抽象类 (Abstract Class)
+```d2
+Shape: {
+  shape: class
+  #x: int
+  #y: int
+  +moveTo(x: int, y: int): void
+  +draw(): void  # 抽象方法
+  +calculateArea(): double  # 抽象方法
+}
+
+# 抽象类特点:
+# - 可以包含字段 (通常为 protected)
+# - 可以包含具体实现的方法
+# - 可以包含抽象方法 (子类必须实现)
+# - 不能直接实例化
+```
+
+#### 区分规则
+- **接口**: 纯粹的行为契约,只有方法签名
+- **抽象类**: 部分实现的基类,可有字段和部分方法实现
+- **使用场景**:
+  - 多个不相关的类需要相同行为 → 接口
+  - 多个相关的类共享代码和字段 → 抽象类
+
 #### 依赖 (Dependency)
 ```d2
 # 使用关系
@@ -560,54 +601,46 @@ Animal: {
 
 **原因**: 方法必须包含括号 `()`,即使没有参数。
 
-## 生成检查清单
+## 类图验证检查清单
 
 生成代码后,逐项检查:
 
+### 基础语法检查 (P0 - 必须通过)
 - [ ] **所有类都声明 class**: 每个类都使用 `shape: class`
 - [ ] **访问修饰符完整**: 所有成员都标注 +, -, #, ~ 修饰符
 - [ ] **方法包含返回类型**: 所有方法都有返回类型 (包括 void)
 - [ ] **方法包含括号**: 所有方法都有 `()` 即使无参数
-- [ ] **继承关系方向正确**: 子类 -> 父类
-- [ ] **实现接口使用虚线**: implements 关系使用 `stroke-dash`
-- [ ] **组合使用钻石箭头**: composition 使用 `diamond` 箭头头
-- [ ] **关系标签清晰**: 每个关系都有描述性标签
 - [ ] **代码可渲染**: 语法正确,可以直接通过 Kroki 渲染
 
-**任何检查项不通过,立即修正后重新生成**
+### 类关系检查 (P0 - 必须通过)
+- [ ] **继承关系方向正确**: 子类 -> 父类
+- [ ] **实现接口使用虚线**: implements 关系使用 `stroke-dash: 3`
+- [ ] **组合使用钻石箭头**: composition 使用 `source-arrowhead: diamond`
+- [ ] **聚合使用虚线钻石**: aggregation 使用 `diamond` + `stroke-dash: 3`
+- [ ] **依赖使用虚线**: dependency 使用 `stroke-dash: 5`
+- [ ] **关系标签清晰**: 每个关系都有描述性标签
+
+### 设计质量检查 (P1 - 建议通过)
+- [ ] **接口与抽象类区分清晰**: 接口只有方法,抽象类可有字段
+- [ ] **访问级别合理**: private 内部,protected 子类,public 外部
+- [ ] **命名规范一致**: 类名 PascalCase,方法/字段 camelCase
+- [ ] **遵循 SOLID 原则**: 单一职责,开闭原则,里氏替换等
+- [ ] **数组类型正确**: 使用 `Type[]` 表示数组
+
+### 泛型处理检查 (P0 - 必须通过)
+- [ ] **无泛型语法**: 不使用 `<T>`, `<K, V>` 等泛型符号
+- [ ] **类型具体化**: 使用 `Object` 或具体类型替代泛型参数
+
+**任何 P0 检查项不通过,立即修正后重新生成**
 
 ## 泛型支持说明
 
-**重要限制**：D2 通过 Kroki 渲染时**不支持泛型语法**。
+**重要限制**：D2 通过 Kroki 渲染时**不支持泛型语法**。详见 L2 通用规范的"泛型处理指引"章节。
 
-**❌ 不支持的写法**：
-```d2
-List: {
-  shape: class
-  +add(item: T): void        // ❌ 泛型参数 T 不支持
-  +get(index: int): T
-}
-
-Map<K, V>: {                 // ❌ 类名中的泛型不支持
-  shape: class
-}
-```
-
-**✅ 替代方案**：
-```d2
-List: {
-  shape: class
-  +add(item: Object): void   // ✅ 使用 Object 或具体类型
-  +get(index: int): Object
-}
-
-StringMap: {                 // ✅ 使用具体类型名称
-  shape: class
-  +put(key: string, value: string): void
-}
-```
-
-**建议**：如需展示泛型设计，在类注释中说明泛型类型。
+**快速参考**：
+- ❌ 不支持: `List<T>`, `Map<K, V>`, 类型参数 `T`
+- ✅ 替代: 使用 `Object` 或具体类型名称 (如 `StringMap`)
+- 💡 建议: 在类注释中说明泛型设计意图
 
 ## 最佳实践
 

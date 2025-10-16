@@ -297,6 +297,295 @@ direction: down
 - 使用 `direction: down` 从上到下展示请求流
 - 连接标签清晰说明数据流向
 
+## 高级架构模式
+
+### 事件驱动架构
+```d2
+direction: right
+
+用户: {
+  shape: person
+  style.fill: "#e3f2fd"
+}
+
+系统: {
+  API网关: {
+    shape: hexagon
+    style.fill: "#fff9c4"
+  }
+
+  事件总线: {
+    shape: rectangle
+    style.fill: "#ffe0b2"
+    style.stroke-width: 2
+    label: "事件总线\n(Kafka/RabbitMQ)"
+  }
+
+  服务: {
+    订单服务: {
+      shape: rectangle
+      style.fill: "#c8e6c9"
+    }
+    库存服务: {
+      shape: rectangle
+      style.fill: "#c8e6c9"
+    }
+    通知服务: {
+      shape: rectangle
+      style.fill: "#c8e6c9"
+    }
+  }
+
+  存储: {
+    订单DB: {
+      shape: cylinder
+      style.fill: "#ffccbc"
+    }
+    库存DB: {
+      shape: cylinder
+      style.fill: "#ffccbc"
+    }
+  }
+}
+
+用户 -> 系统.API网关: "下单请求"
+系统.API网关 -> 系统.服务.订单服务: "同步调用"
+系统.服务.订单服务 -> 系统.存储.订单DB: "保存订单"
+系统.服务.订单服务 -> 系统.事件总线: "发布: OrderCreated" {
+  style.stroke-dash: 3
+}
+系统.事件总线 -> 系统.服务.库存服务: "订阅" {
+  style.stroke-dash: 3
+}
+系统.事件总线 -> 系统.服务.通知服务: "订阅" {
+  style.stroke-dash: 3
+}
+系统.服务.库存服务 -> 系统.存储.库存DB: "扣减库存"
+
+%% 事件驱动特征:
+%% - 事件总线使用橙色系突出消息中间件
+%% - 异步消息使用虚线表示
+%% - 服务间解耦,通过事件通信
+```
+
+### 无服务器架构 (Serverless)
+```d2
+direction: right
+
+用户: {
+  shape: person
+  style.fill: "#e3f2fd"
+}
+
+云平台: {
+  API网关: {
+    shape: hexagon
+    style.fill: "#fff9c4"
+    label: "API网关\n(AWS API Gateway)"
+  }
+
+  函数计算: {
+    认证函数: {
+      shape: rectangle
+      style.fill: "#d1c4e9"
+      style.stroke-dash: 3
+      label: "Lambda\n(认证)"
+    }
+    业务函数: {
+      shape: rectangle
+      style.fill: "#d1c4e9"
+      style.stroke-dash: 3
+      label: "Lambda\n(业务处理)"
+    }
+    数据函数: {
+      shape: rectangle
+      style.fill: "#d1c4e9"
+      style.stroke-dash: 3
+      label: "Lambda\n(数据处理)"
+    }
+  }
+
+  托管服务: {
+    对象存储: {
+      shape: cylinder
+      style.fill: "#e1bee7"
+      label: "S3\n(对象存储)"
+    }
+    NoSQL数据库: {
+      shape: cylinder
+      style.fill: "#e1bee7"
+      label: "DynamoDB"
+    }
+  }
+}
+
+用户 -> 云平台.API网关: "HTTPS请求"
+云平台.API网关 -> 云平台.函数计算.认证函数: "触发"
+云平台.函数计算.认证函数 -> 云平台.函数计算.业务函数: "调用"
+云平台.函数计算.业务函数 -> 云平台.托管服务.NoSQL数据库: "读写"
+云平台.函数计算.数据函数 -> 云平台.托管服务.对象存储: "上传"
+
+%% 无服务器特征:
+%% - 函数使用虚线边框表示临时计算资源
+%% - 紫色系表示云托管服务
+%% - 按需触发,无需管理服务器
+```
+
+### 混合云/多云架构
+```d2
+direction: right
+
+本地数据中心: {
+  核心业务: {
+    shape: rectangle
+    style.fill: "#c8e6c9"
+    style.multiple: true
+    label: "核心业务\n(本地部署)"
+  }
+  主数据库: {
+    shape: cylinder
+    style.fill: "#ffccbc"
+    label: "主数据库\n(本地)"
+  }
+}
+
+云平台A: {
+  label: "AWS"
+  Web服务: {
+    shape: rectangle
+    style.fill: "#d1c4e9"
+    style.multiple: true
+  }
+  缓存: {
+    shape: cylinder
+    style.fill: "#e1bee7"
+    label: "ElastiCache"
+  }
+}
+
+云平台B: {
+  label: "阿里云"
+  数据分析: {
+    shape: rectangle
+    style.fill: "#b2dfdb"
+    style.multiple: true
+  }
+  数据仓库: {
+    shape: cylinder
+    style.fill: "#b2ebf2"
+    label: "MaxCompute"
+  }
+}
+
+混合云管理平台: {
+  shape: hexagon
+  style.fill: "#fff9c4"
+  style.stroke-width: 2
+  label: "混合云管理\n(统一监控/编排)"
+}
+
+混合云管理平台 -> 本地数据中心.核心业务: "管理"
+混合云管理平台 -> 云平台A.Web服务: "管理"
+混合云管理平台 -> 云平台B.数据分析: "管理"
+
+本地数据中心.核心业务 -> 本地数据中心.主数据库: "读写"
+云平台A.Web服务 -> 云平台A.缓存: "缓存"
+云平台A.Web服务 -> 本地数据中心.核心业务: "跨云调用" {
+  style.stroke-dash: 3
+}
+云平台B.数据分析 -> 云平台B.数据仓库: "存储"
+云平台B.数据分析 -> 本地数据中心.主数据库: "数据同步" {
+  style.stroke-dash: 3
+}
+
+%% 混合云特征:
+%% - 本地数据中心使用传统配色
+%% - 不同云平台使用不同色系区分
+%% - 跨云连接使用虚线表示
+%% - 统一管理平台使用六边形
+```
+
+### 分布式缓存分层
+```d2
+direction: right
+
+客户端: {
+  shape: person
+  style.fill: "#e3f2fd"
+}
+
+系统: {
+  API网关: {
+    shape: hexagon
+    style.fill: "#fff9c4"
+  }
+
+  应用服务: {
+    shape: rectangle
+    style.fill: "#c8e6c9"
+    style.multiple: true
+  }
+
+  缓存层: {
+    L1_本地缓存: {
+      shape: rectangle
+      style.fill: "#ffe0b2"
+      label: "L1 本地缓存\n(内存/Caffeine)"
+    }
+    L2_分布式缓存: {
+      shape: rectangle
+      style.fill: "#ffcc80"
+      label: "L2 分布式缓存\n(Redis)"
+    }
+  }
+
+  数据层: {
+    读写分离: {
+      主库: {
+        shape: cylinder
+        style.fill: "#ef5350"
+        label: "主库\n(写)"
+      }
+      从库1: {
+        shape: cylinder
+        style.fill: "#66bb6a"
+        label: "从库1\n(读)"
+      }
+      从库2: {
+        shape: cylinder
+        style.fill: "#66bb6a"
+        label: "从库2\n(读)"
+      }
+    }
+  }
+}
+
+客户端 -> 系统.API网关: "请求"
+系统.API网关 -> 系统.应用服务: "路由"
+系统.应用服务 -> 系统.缓存层.L1_本地缓存: "1. 查询L1" {
+  style.stroke: "#ff9800"
+}
+系统.应用服务 -> 系统.缓存层.L2_分布式缓存: "2. L1 Miss → 查询L2" {
+  style.stroke: "#ff9800"
+}
+系统.应用服务 -> 系统.数据层.读写分离.从库1: "3. L2 Miss → 查询DB" {
+  style.stroke: "#ff9800"
+}
+系统.数据层.读写分离.主库 -> 系统.数据层.读写分离.从库1: "主从同步" {
+  style.stroke-dash: 3
+}
+系统.数据层.读写分离.主库 -> 系统.数据层.读写分离.从库2: "主从同步" {
+  style.stroke-dash: 3
+}
+
+%% 缓存分层特征:
+%% - L1 本地缓存使用浅橙色
+%% - L2 分布式缓存使用深橙色
+%% - 主库使用红色,从库使用绿色
+%% - 查询路径用橙色连线强调
+%% - 主从同步用虚线表示异步复制
+```
+
 ## 常见错误
 
 ### 错误 1: 分层不清晰
@@ -394,17 +683,39 @@ A -> B -> C
 
 **原因**：完整的架构图应该包含系统的使用者和外部依赖。
 
-## 生成检查清单
+## 架构图验证检查清单
 
 生成代码后，逐项检查：
 
+### 基础结构检查 (P0 - 必须通过)
 - [ ] **分层清晰**：使用容器对组件分层（前端/应用/数据）
 - [ ] **形状合适**：数据库用 `cylinder`，用户用 `person`，网关用 `hexagon`
-- [ ] **布局方向明确**：设置 `direction` 符合数据流向
-- [ ] **配色统一**：同层组件使用相同色系
-- [ ] **连接标签清晰**：关键连接标注协议或数据类型
-- [ ] **包含外部实体**：显示用户、外部服务等
+- [ ] **布局方向明确**：设置 `direction` 符合数据流向 (right/down)
 - [ ] **嵌套层级合理**：不超过 3 层嵌套
 - [ ] **代码可渲染**：语法正确，可直接通过 Kroki 渲染
 
-**任何检查项不通过，立即修正后重新生成**
+### 配色与视觉检查 (P0 - 必须通过)
+- [ ] **配色统一**：同层组件使用相同色系
+- [ ] **配色柔和**：使用柔和色调（如 `#c8e6c9`），避免纯色（如 `#00ff00`）
+- [ ] **关键组件突出**：网关、负载均衡器等使用加粗边框 (`stroke-width: 2`)
+- [ ] **外部服务区分**：云服务使用 `cloud` 形状和紫色系
+
+### 架构细节检查 (P1 - 建议通过)
+- [ ] **连接标签清晰**：关键连接标注协议或数据类型（HTTP/REST、gRPC、消息队列）
+- [ ] **包含外部实体**：显示用户、外部服务等系统边界
+- [ ] **多实例表示**：集群使用 `style.multiple: true`
+- [ ] **异步通信区分**：消息队列等异步连接使用虚线 (`stroke-dash: 3`)
+
+### 高级架构模式检查 (P1 - 建议通过)
+- [ ] **事件驱动**: 事件总线使用橙色系,异步消息用虚线
+- [ ] **无服务器**: 函数使用虚线边框,托管服务用紫色系
+- [ ] **混合云**: 不同云平台使用不同色系,跨云连接用虚线
+- [ ] **缓存分层**: L1/L2 缓存使用不同橙色深度,主从库用红绿色区分
+
+### 通用设计原则检查 (P1 - 建议通过)
+- [ ] **可扩展性**: 体现水平扩展能力（多实例、负载均衡）
+- [ ] **高可用性**: 显示冗余设计（主备、集群）
+- [ ] **安全性**: 体现安全边界（防火墙、认证、隔离）
+- [ ] **可观测性**: 可选显示监控、日志等运维组件
+
+**任何 P0 检查项不通过，立即修正后重新生成**

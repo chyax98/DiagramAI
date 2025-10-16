@@ -33,22 +33,3 @@ export interface DiagramValidationResult {
   errors?: string[];
   warnings?: string[];
 }
-
-export interface MermaidRenderOptions {
-  theme?: "default" | "forest" | "dark" | "neutral" | "base";
-  logLevel?: "debug" | "info" | "warn" | "error" | "fatal";
-  secureMode?: boolean;
-}
-
-export interface PlantUMLRenderOptions {
-  format?: "svg" | "png";
-  serverUrl?: string;
-  retries?: number;
-}
-
-export interface DiagramExportOptions {
-  format: "svg" | "png" | "pdf";
-  filename?: string;
-  quality?: number;
-  scale?: number;
-}

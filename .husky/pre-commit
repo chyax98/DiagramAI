@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 运行代码质量检查
+echo "🔍 运行代码质量检查..."
+
+# 格式检查
+echo "1️⃣ 检查代码格式..."
+npm run format:check || {
+  echo "❌ 代码格式不符合规范,请运行 'npm run format' 修复"
+  exit 1
+}
+
+# ESLint 检查
+echo "2️⃣ 运行 ESLint..."
+npm run lint || {
+  echo "❌ ESLint 检查失败"
+  exit 1
+}
+
+# TypeScript 类型检查
+echo "3️⃣ TypeScript 类型检查..."
+npm run type-check || {
+  echo "❌ TypeScript 类型检查失败"
+  exit 1
+}
+
+echo "✅ 所有检查通过,准备提交"

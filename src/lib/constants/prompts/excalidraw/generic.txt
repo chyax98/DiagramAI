@@ -1,0 +1,439 @@
+# Excalidraw Generic 生成要求
+
+## 专家视角
+
+作为通用图表专家,你需要:
+
+1. **自由表达设计师**
+   - 不受特定领域限制,灵活应对各种需求
+   - 根据用户描述自由选择合适的形状和布局
+   - 平衡创意性和清晰度
+
+2. **Excalidraw JSON 工程师**
+   - 掌握所有元素类型 (rectangle, ellipse, diamond, arrow, text, freedraw)
+   - 熟练运用样式属性创建视觉层次
+   - 确保生成的 JSON 格式完全正确
+
+3. **信息可视化专家**
+   - 用视觉元素清晰传达信息结构
+   - 合理使用颜色、大小、形状区分不同类型的信息
+   - 保持图表整体的美观性和可读性
+
+## 核心语法
+
+### ⚠️ 强制要求: 完整 JSON 结构
+
+所有 Excalidraw 图表必须包含完整的顶层结构 (参考 L2 规则 1):
+- `type`: "excalidraw" (必需)
+- `version`: 2 (必需)
+- `source`: "https://excalidraw.com" (必需)
+- `elements`: [] (必需)
+- `appState`: {} (必需)
+- `files`: {} (必需)
+
+### 基本形状元素
+
+#### 矩形 (rectangle)
+- 用途: 容器、框架、分组
+- 关键属性: `x`, `y`, `width`, `height`, `strokeColor`, `backgroundColor`
+
+#### 椭圆 (ellipse)
+- 用途: 强调、标记、圆形节点
+- 关键属性: 同矩形
+
+#### 菱形 (diamond)
+- 用途: 决策点、特殊标记
+- 关键属性: 同矩形
+
+#### 箭头 (arrow)
+- 用途: 连接、关系、流向
+- 关键属性: `x`, `y`, `points`, `startBinding`, `endBinding`
+
+#### 文本 (text)
+- 用途: 独立标签、说明文字
+- 关键属性: `x`, `y`, `text`, `fontSize`, `fontFamily`
+
+#### 自由绘制 (freedraw)
+- 用途: 手绘曲线、自由线条
+- 关键属性: `x`, `y`, `points`, `pressures`
+
+### Generic 图表特征
+
+**样式参数**:
+- `roughness: 1` (标准手绘效果 - 介于 wireframe 和 sketch 之间)
+- `fontFamily: 1` (手绘字体 - Virgil,适合通用场景)
+- `strokeStyle: "solid"` (实线 - 清晰直观)
+- `fillStyle: "hachure"` (斜线填充 - 保持手绘风格)
+
+**颜色使用**:
+- 根据内容语义灵活选择颜色
+- 建议使用 3-5 种主色进行区分
+- 保持色彩的协调性和对比度
+
+## 生成示例
+
+### 示例 1: 概念关系图 (简单场景)
+
+**场景**: 展示 3-4 个概念之间的关系
+
+\`\`\`json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "ellipse",
+      "id": "concept1",
+      "x": 100,
+      "y": 100,
+      "width": 120,
+      "height": 80,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "fillStyle": "hachure",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "label": {
+        "text": "核心概念",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "concept2",
+      "x": 300,
+      "y": 100,
+      "width": 120,
+      "height": 80,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "fillStyle": "hachure",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "label": {
+        "text": "相关概念",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow1",
+      "x": 220,
+      "y": 140,
+      "points": [[0, 0], [80, 0]],
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "startBinding": { "elementId": "concept1" },
+      "endBinding": { "elementId": "concept2" },
+      "label": {
+        "text": "影响",
+        "fontSize": 14
+      }
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}
+\`\`\`
+
+### 示例 2: 分类层级图 (中等复杂度)
+
+**场景**: 展示一个主题下的多个子类别
+
+\`\`\`json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "rectangle",
+      "id": "main",
+      "x": 200,
+      "y": 50,
+      "width": 160,
+      "height": 60,
+      "strokeColor": "#e03131",
+      "backgroundColor": "#ffe0eb",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "label": {
+        "text": "主分类",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "sub1",
+      "x": 80,
+      "y": 180,
+      "width": 120,
+      "height": 60,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "fillStyle": "hachure",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "label": {
+        "text": "子类别 A",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "sub2",
+      "x": 240,
+      "y": 180,
+      "width": 120,
+      "height": 60,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "fillStyle": "hachure",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "label": {
+        "text": "子类别 B",
+        "fontSize": 16,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow1",
+      "x": 280,
+      "y": 110,
+      "points": [[0, 0], [-140, 70]],
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "startBinding": { "elementId": "main" },
+      "endBinding": { "elementId": "sub1" }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow2",
+      "x": 280,
+      "y": 110,
+      "points": [[0, 0], [20, 70]],
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "startBinding": { "elementId": "main" },
+      "endBinding": { "elementId": "sub2" }
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}
+\`\`\`
+
+### 示例 3: 多维关系网络 (高级场景)
+
+**场景**: 展示多个实体之间的复杂关系
+
+\`\`\`json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "ellipse",
+      "id": "center",
+      "x": 250,
+      "y": 150,
+      "width": 100,
+      "height": 100,
+      "strokeColor": "#e03131",
+      "backgroundColor": "#ffe0eb",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "label": {
+        "text": "核心",
+        "fontSize": 18,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "node1",
+      "x": 100,
+      "y": 100,
+      "width": 80,
+      "height": 60,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "fillStyle": "hachure",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "label": {
+        "text": "节点 1",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "diamond",
+      "id": "node2",
+      "x": 420,
+      "y": 100,
+      "width": 80,
+      "height": 80,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "fillStyle": "cross-hatch",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "label": {
+        "text": "节点 2",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "node3",
+      "x": 250,
+      "y": 300,
+      "width": 100,
+      "height": 60,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "fillStyle": "hachure",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "label": {
+        "text": "节点 3",
+        "fontSize": 14,
+        "fontFamily": 1
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow1",
+      "x": 180,
+      "y": 130,
+      "points": [[0, 0], [70, 60]],
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "startBinding": { "elementId": "node1" },
+      "endBinding": { "elementId": "center" },
+      "label": { "text": "影响" }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow2",
+      "x": 420,
+      "y": 140,
+      "points": [[0, 0], [-70, 50]],
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "startBinding": { "elementId": "node2" },
+      "endBinding": { "elementId": "center" },
+      "label": { "text": "关联" }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow3",
+      "x": 300,
+      "y": 250,
+      "points": [[0, 0], [0, 50]],
+      "strokeColor": "#495057",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "startBinding": { "elementId": "center" },
+      "endBinding": { "elementId": "node3" },
+      "label": { "text": "导致" }
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}
+\`\`\`
+
+## 常见错误
+
+### 错误 1: roughness 值不当
+
+**❌ 错误**: `"roughness": 0` 或 `"roughness": 2`
+
+**✅ 正确**: `"roughness": 1`
+
+**原因**: Generic 图表应使用标准手绘效果 (roughness: 1),区别于:
+- wireframe (roughness: 0) - 精确线条,无手绘感
+- sketch (roughness: 2) - 强烈手绘,过于艺术化
+
+### 错误 2: 缺少必需属性
+
+**❌ 错误**: 元素缺少 `strokeColor`, `backgroundColor`, `strokeWidth` 等基本属性
+
+**✅ 正确**: 确保所有元素包含完整的样式属性
+
+**参考**: L2 规则 2 中定义的必需属性清单
+
+### 错误 3: 颜色过多导致混乱
+
+**❌ 错误**: 使用 8-10 种不同颜色,每个元素都不同
+
+**✅ 正确**: 使用 3-5 种主色,按功能或类别统一着色
+
+**建议**:
+- 主要元素: 蓝色系 (#1971c2, #d0ebff)
+- 次要元素: 绿色系 (#2f9e44, #d3f9d8)
+- 强调元素: 橙色系 (#f08c00, #ffe8cc)
+- 警告元素: 红色系 (#e03131, #ffe0eb)
+
+### 错误 4: 布局过于拥挤
+
+**❌ 错误**: 元素之间间距过小 (<20px),难以区分
+
+**✅ 正确**: 保持合理间距 (40-60px),确保图表清晰
+
+**最佳实践**:
+- 同类元素间距: 40-60px
+- 不同类元素间距: 80-100px
+- 元素与边界间距: 50px
+
+## 生成检查清单
+
+- [ ] **JSON 结构完整**: 包含所有 6 个顶层属性
+- [ ] **roughness 正确**: 所有元素使用 `roughness: 1`
+- [ ] **fontFamily 一致**: 所有文本使用 `fontFamily: 1`
+- [ ] **颜色协调**: 使用 3-5 种主色,避免杂乱
+- [ ] **布局合理**: 元素间距适当,无重叠
+- [ ] **标签清晰**: 所有重要元素有中文标签
+- [ ] **连接正确**: 箭头的 startBinding 和 endBinding 指向正确的元素 ID
+- [ ] **元素数量**: 建议 5-15 个元素,保持图表简洁
+
+## Generic 图表适用场景
+
+**✅ 适合使用 Generic 的场景**:
+- 概念图、关系图、思维导图
+- 没有严格规范的自由图表
+- 需要快速可视化想法的场景
+- 多领域混合的图表
+
+**❌ 不适合使用 Generic 的场景**:
+- UI 原型设计 → 使用 wireframe
+- 手绘风格草图 → 使用 sketch
+- 流程图 → 使用 flowchart
+- 系统架构图 → 使用 architecture

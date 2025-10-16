@@ -5,6 +5,7 @@
 
 import { mkdir, appendFile } from "fs/promises";
 import { join } from "path";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * 失败日志条目接口
@@ -87,8 +88,8 @@ export class FailureLogService {
       const logLine = JSON.stringify(entry) + "\n";
       await appendFile(logFile, logLine, "utf-8");
     } catch (error) {
-      // 日志记录失败不应影响主流程，仅输出错误到控制台
-      console.error("[FailureLogService] Failed to log render failure:", error);
+      // 日志记录失败不应影响主流程，使用 logger 记录错误
+      logger.error("[FailureLogService] Failed to log render failure:", error);
     }
   }
 

@@ -63,7 +63,10 @@ export interface UpdateAIModelParams {
   parameters?: string;
 }
 
-// todo 参数需要判断ai provider是否真的支持
+/**
+ * AI 模型参数配置
+ * 注意: 不同 Provider 支持的参数可能不同,使用时需注意兼容性
+ */
 export interface AIModelParameters {
   temperature?: number; // 0.0 ~ 2.0
   max_tokens?: number; // 最大生成 token 数

@@ -16,6 +16,7 @@ import {
   RENDER_LANGUAGES,
   LANGUAGE_DIAGRAM_TYPES,
 } from "@/lib/constants/diagram-types";
+import { logger } from "@/lib/utils/logger";
 
 interface DiagramStateData {
   code: string;
@@ -188,7 +189,7 @@ export const useDiagramStore = create<DiagramState>()(
 
               if (!isValidType) {
                 // 如果推荐的类型不合法,使用默认类型
-                console.warn(
+                logger.warn(
                   `[applyRecommendation] 推荐的图表类型不合法: ${renderLanguage} + ${diagramType}, 使用默认类型`
                 );
                 return {

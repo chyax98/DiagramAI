@@ -37,7 +37,7 @@ export interface ChatParams {
   modelId: number;
   renderLanguage: RenderLanguage;
   sessionId?: number; // 初始没有生成 session Id
-  diagramType?: string; // todo 必填 除非是自己选
+  diagramType?: string; // 可选: AI 可以自动推断图表类型
   taskType?: TaskType; // ⭐ 任务类型（由前端按钮决定）
   renderError?: string | null; // 渲染错误信息（用于失败日志记录）
 }
@@ -211,7 +211,8 @@ export class DiagramGenerationService {
       maxRetries: AI_MAX_RETRIES,
     });
 
-    const code = cleanCode(generatedCode, params.renderLanguage); //  todo ai 生成结果如果不是 code，是否需要清理
+    // 清理 AI 生成的代码 (移除 markdown 代码块标记等)
+    const code = cleanCode(generatedCode, params.renderLanguage);
 
     // 存储时使用原始消息（不包含任务标记）
     const sessionData: ChatSessionData = {

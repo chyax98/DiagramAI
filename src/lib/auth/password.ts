@@ -91,7 +91,6 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
  *
  * validatePasswordStrength("abcd1234");
  * // 返回: { valid: true }
- * todo 不设置密码校验
  */
 export function validatePasswordStrength(password: string): {
   valid: boolean;

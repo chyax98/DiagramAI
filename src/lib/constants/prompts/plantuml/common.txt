@@ -1,0 +1,367 @@
+
+# PlantUML 语言规范
+
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 所有图表必须使用 @startuml 和 @enduml 包裹
+这是 PlantUML 最基本的强制规则！缺少会导致渲染失败。
+
+⚠️ **大小写敏感**:
+- 关键字必须全小写: `@startuml` (正确) vs `@startUML` (错误)
+- 标识符区分大小写: `Alice` ≠ `alice`
+
+**错误示例**：
+```plantuml
+Alice -> Bob: Hello
+```
+
+**编译错误信息**：
+```
+Error: Syntax error at line 1: Unexpected content outside @startuml block
+```
+
+**正确写法**：
+```plantuml
+@startuml
+Alice -> Bob: Hello
+@enduml
+```
+
+### ⚠️ 规则 2: 特殊字符必须用双引号包裹
+方括号 []、花括号 {}、圆括号 () 在 PlantUML 中有特殊含义，在标签中使用时必须用双引号包裹。
+
+**错误示例**：
+```plantuml
+@startuml
+Alice -> Bob: Hello [World]
+@enduml
+```
+
+**编译错误信息**：
+```
+Error: Syntax error at line 2: Unexpected token '['
+```
+
+**正确写法**：
+```plantuml
+@startuml
+Alice -> Bob: "Hello [World]"
+@enduml
+```
+
+### ⚠️ 规则 3: 手写风格必须使用 !option 指令（Kroki 兼容性）
+**重要**: 旧语法 `skinparam handwritten true` 在 Kroki 环境下已废弃，必须使用新语法。
+
+**错误示例**：
+```plantuml
+@startuml
+skinparam handwritten true
+Alice -> Bob: Hello
+@enduml
+```
+
+**Kroki 错误信息**：
+```
+Warning: 'skinparam handwritten' is deprecated, use '!option handwritten' instead
+```
+
+**正确写法**：
+```plantuml
+@startuml
+!option handwritten false
+Alice -> Bob: Hello
+@enduml
+```
+
+## 核心语法
+
+PlantUML 是一种基于文本描述的 UML 图表语言，支持多种图表类型。
+
+## 时序图箭头语法
+
+PlantUML 支持多种箭头样式表达不同的消息语义。
+
+### 基础箭头方向
+- `->` : 左到右实线箭头 (同步调用)
+- `<-` : 右到左实线箭头 (返回)
+- `<->` : 双向箭头
+- `->>` : 左到右实线开放箭头 (异步消息)
+- `<<-` : 右到左实线开放箭头
+
+### 虚线箭头 (返回/响应)
+- `-->` : 左到右虚线箭头 (同步返回)
+- `<--` : 右到左虚线箭头
+- `-->>` : 左到右虚线开放箭头 (异步响应)
+
+### 箭头修饰符
+- `->x` : 丢失的消息 (网络故障/超时)
+- `->o` : 末尾圆圈箭头
+- `o<-` : 开始圆圈箭头
+- `-\` : 上半箭头
+- `//-` : 下半箭头
+
+### 箭头颜色
+```plantuml
+A -[#red]> B : 错误消息
+A -[#00AA00]> C : 成功消息
+A -[#blue]> D : 信息消息
+```
+
+**使用场景**:
+- 实线箭头 (`->`) : HTTP 请求、方法调用
+- 虚线箭头 (`-->`) : HTTP 响应、返回值
+- 开放箭头 (`->>`) : 异步消息、不等待响应
+- 丢失箭头 (`->x`) : 展示错误场景
+
+## 时序图参与者类型
+
+### 参与者类型定义
+- `participant` : 默认矩形框
+- `actor` : 人形图标 (用户、外部角色)
+- `boundary` : 边界圆形 (系统边界、接口)
+- `control` : 控制器 (业务逻辑、服务)
+- `entity` : 实体 (数据对象)
+- `database` : 数据库图标
+- `collections` : 集合
+- `queue` : 消息队列
+
+### 语法示例
+```plantuml
+actor User
+boundary WebUI
+control API
+entity Order
+database MySQL
+queue Kafka
+```
+
+**选择建议**:
+- 用户/外部系统 → `actor`
+- 前端界面 → `boundary`
+- 业务服务 → `control`
+- 数据库 → `database`
+- 消息队列 → `queue`
+
+## 类图关系符号
+
+### 继承和实现
+- `<|--` : 继承/泛化 (实心三角形,extends)
+- `<|..` : 实现接口 (空心三角形 + 虚线,implements)
+
+### 关联关系
+- `*--` : 组合 (实心菱形,强拥有,生命周期绑定)
+- `o--` : 聚合 (空心菱形,弱拥有,独立生命周期)
+- `-->` : 关联 (普通箭头)
+- `--` : 关联 (无方向)
+
+### 依赖关系
+- `..>` : 依赖 (虚线箭头,临时使用)
+- `..` : 依赖 (虚线,无方向)
+
+### 可见性修饰符
+- `+` : public (公开)
+- `-` : private (私有)
+- `#` : protected (受保护)
+- `~` : package (包内可见)
+
+### 示例
+```plantuml
+class Animal {
+  -id: int
+  #name: String
+  +getName(): String
+}
+
+class Dog {
+  +bark(): void
+}
+
+Animal <|-- Dog        ' 继承
+Dog --> Food : eats    ' 关联
+Dog ..> Vet : visits   ' 依赖
+```
+
+## 活动图语法
+
+### 基本结构
+```plantuml
+start
+:活动1;
+:活动2;
+stop
+```
+
+### 条件分支
+```plantuml
+if (条件?) then (yes)
+  :分支1;
+else (no)
+  :分支2;
+endif
+```
+
+### 多分支
+```plantuml
+if (条件1?) then (yes)
+  :分支1;
+elseif (条件2?) then (yes)
+  :分支2;
+else
+  :默认分支;
+endif
+```
+
+### 循环
+```plantuml
+repeat
+  :重复执行的活动;
+repeat while (继续?) is (yes)
+->no;
+```
+
+### 并行处理
+```plantuml
+fork
+  :并行任务1;
+fork again
+  :并行任务2;
+fork again
+  :并行任务3;
+end fork
+```
+
+**注意**: 每个活动描述必须以分号 `;` 结束
+
+### 通用规则
+
+1. **图表声明**
+   - 所有图表必须以 `@startuml` 开始
+   - 所有图表必须以 `@enduml` 结束
+
+2. **注释语法**
+   - 单行注释：使用 `'` 开头
+   - 多行注释：使用 `/' ... '/` 包裹
+
+3. **元素命名**
+   - **元素 ID**: 使用英文字母、数字、下划线
+   - **标签/描述**: 使用双引号包裹，可包含中文和特殊字符
+   - **别名**: 使用 `as` 关键字定义简短别名
+
+## 样式系统
+
+### skinparam 样式定制
+
+PlantUML 使用 `skinparam` 命令定制图表外观：
+
+```plantuml
+@startuml
+!option handwritten false
+
+skinparam backgroundColor #EEEBDC
+skinparam sequenceParticipantBackgroundColor #87CEEB
+skinparam sequenceArrowColor #333333
+@enduml
+```
+
+### 内联样式
+
+可以直接为元素添加颜色：
+
+```plantuml
+@startuml
+Alice -> Bob #red : 红色箭头
+Alice -> Bob #blue;line.bold : 蓝色粗线箭头
+@enduml
+```
+
+## 渲染注意事项
+
+1. **Kroki 兼容性**
+   - Kroki 对语法错误零容忍，必须确保语法完全正确
+   - 特殊字符（如 []、{}、()）在标签中必须用双引号包裹
+   - **手写风格**: 必须使用 `!option handwritten true/false`，不能使用 `skinparam handwritten`
+
+2. **避免实验性语法**
+   - 使用稳定的、广泛支持的语法
+   - 避免使用过新的实验性特性
+   - 不要使用已废弃的语法（如 `skinparam handwritten`）
+
+3. **方向控制**
+   - 使用 `left to right direction` 设置水平布局
+   - 使用 `top to bottom direction` 设置垂直布局（默认）
+
+---
+
+## Kroki 渲染限制
+
+⚠️ **重要**: Kroki 使用的 PlantUML 渲染引擎与本地 PlantUML 有以下差异，违反限制会导致渲染失败！
+
+### 预处理器 (Preprocessor)
+
+PlantUML 支持强大的预处理器功能,但 **Kroki 环境不支持**。
+
+#### 变量定义
+```plantuml
+!define MY_COLOR #lightblue
+participant A MY_COLOR
+```
+
+#### 文件包含
+```plantuml
+!include common.puml
+```
+
+#### 宏定义
+```plantuml
+!procedure $success($msg)
+  :$msg; #lightgreen
+!endprocedure
+```
+
+#### 条件编译
+```plantuml
+!if %getenv("ENV") == "prod"
+  !define SHOW_DEBUG false
+!else
+  !define SHOW_DEBUG true
+!endif
+```
+
+⚠️ **Kroki 限制**:
+- Kroki 不支持预处理器指令 (`!define`, `!include`, `!if`, `!procedure`)
+- 如需使用,请在本地 PlantUML 环境运行
+- 建议展开宏/变量后再提交到 Kroki
+
+### 其他关键限制
+
+**性能限制** (超大图表渲染超时):
+- 类图: ≤ 50 个类
+- 时序图: ≤ 30 个参与者 × 100 条消息
+- 嵌套深度: ≤ 4 层
+
+**不支持的功能**:
+- 外部文件引用 (`!include`)
+- 网络图片/精灵图
+- 部分高级主题 (`!theme mars`)
+- SVG 动画效果
+
+---
+
+## Kroki 兼容性检查清单
+
+生成 PlantUML 代码后,逐项检查:
+
+- [ ] **无预处理器**: 不使用 `!define`, `!include`, `!if` 等指令
+- [ ] **无外部引用**: 不使用 `!include` 引入外部文件
+- [ ] **复杂度适中**: 元素数量在建议范围内 (类 ≤ 50, 消息 ≤ 100)
+- [ ] **无网络资源**: 不引用网络图片或外部精灵图
+- [ ] **使用基础主题**: 避免使用高级自定义主题
+- [ ] **样式简洁**: 使用内联样式而非复杂的 CSS
+- [ ] **嵌套合理**: 包/组件嵌套 ≤ 4 层
+- [ ] **代码自包含**: 所有定义都在单个文件中
+
+**任何检查项不通过，立即修正后重新生成**
+
+---
+
+**提示**: 如果用户明确要求使用 Kroki 不支持的特性 (如 `!include`),应明确告知限制并提供替代方案。

@@ -1,0 +1,446 @@
+# Container (容器图) - C4 Level 2
+
+生成系统内部的技术架构和运行时容器。
+
+## 关键特点
+
+- **技术视图**: 展示技术栈和容器间通信
+- **Container 定义**: 独立运行/部署的单元（Web应用、API、数据库、消息队列等）
+- **技术栈**: 明确每个容器的技术实现（第三个参数）
+- **通信协议**: 关系中说明技术细节（HTTPS、gRPC、JDBC等）
+
+## 输出结构
+
+```
+workspace {
+    model {
+        user = person "用户"
+
+        system = softwareSystem "系统" {
+            # 前端容器
+            webApp = container "Web 应用" "前端界面" "React" {
+                tags "WebApp"
+            }
+
+            # 后端容器
+            apiApp = container "API 应用" "后端服务" "Spring Boot" {
+                tags "Backend"
+            }
+
+            # 数据容器
+            database = container "数据库" "数据存储" "PostgreSQL" {
+                tags "Database"
+            }
+
+            # 缓存容器
+            cache = container "缓存" "性能优化" "Redis" {
+                tags "Cache"
+            }
+        }
+
+        # 关系（包含技术细节）
+        user -> webApp "访问"
+        webApp -> apiApp "调用 API" "HTTPS/REST"
+        apiApp -> database "读写数据" "JDBC"
+        apiApp -> cache "缓存数据" "Redis Protocol"
+    }
+
+    views {
+        container system "containers" "容器架构" {
+            include *
+            autolayout tb
+        }
+    }
+}
+```
+
+## 注意事项
+
+- Container 的第三个参数是技术栈（必填）
+- 使用标签分类容器（WebApp, Backend, Database）
+- 关系要说明通信协议和技术
+- 适合开发团队和架构师理解技术方案
+
+## infrastructureNode 说明
+
+除了应用容器,系统中还包含基础设施节点:
+
+```
+workspace {
+    model {
+        system = softwareSystem "电商系统" {
+            webApp = container "Web 应用" "前端" "React"
+            apiApp = container "API 应用" "后端" "Spring Boot"
+            database = container "数据库" "持久化" "PostgreSQL"
+            
+            # 基础设施节点
+            loadBalancer = infrastructureNode "负载均衡器" "流量分发" "Nginx" {
+                tags "Infrastructure"
+            }
+            cdn = infrastructureNode "CDN" "静态资源加速" "CloudFlare" {
+                tags "Infrastructure"
+            }
+        }
+
+        # 关系
+        user -> loadBalancer "HTTPS 访问"
+        loadBalancer -> webApp "转发"
+        webApp -> cdn "加载静态资源"
+        webApp -> apiApp "API 调用"
+        apiApp -> database "读写"
+    }
+}
+```
+
+**特点**:
+- 不运行业务代码
+- 提供基础设施能力(负载均衡、CDN、网关)
+- 使用 infrastructureNode 而非 container
+
+## 微服务架构完整示例
+
+展示现代微服务架构的容器组织:
+
+```
+workspace {
+    model {
+        # 用户
+        user = person "客户"
+        admin = person "运营人员"
+
+        # 主系统
+        ecommerce = softwareSystem "电商平台" {
+            # 前端容器
+            webApp = container "Web 应用" "SPA 前端" "React + TypeScript" {
+                tags "Frontend"
+            }
+            mobileApp = container "移动应用" "原生应用" "React Native" {
+                tags "Frontend"
+            }
+            adminPanel = container "管理后台" "后台管理界面" "Vue 3" {
+                tags "Frontend"
+            }
+
+            # API 网关
+            apiGateway = container "API 网关" "路由、认证、限流" "Kong" {
+                tags "Gateway"
+            }
+
+            # 微服务容器
+            userService = container "用户服务" "用户管理、认证" "Go + gRPC" {
+                tags "Microservice"
+            }
+            productService = container "商品服务" "商品管理" "Java + Spring Boot" {
+                tags "Microservice"
+            }
+            orderService = container "订单服务" "订单处理" "Node.js + Express" {
+                tags "Microservice"
+            }
+            paymentService = container "支付服务" "支付集成" "Java + Spring Boot" {
+                tags "Microservice"
+            }
+
+            # 数据容器
+            userDB = container "用户数据库" "用户数据" "PostgreSQL" {
+                tags "Database"
+            }
+            productDB = container "商品数据库" "商品数据" "MongoDB" {
+                tags "Database"
+            }
+            orderDB = container "订单数据库" "订单数据" "MySQL" {
+                tags "Database"
+            }
+
+            # 消息中间件
+            messageQueue = container "消息队列" "异步通信" "RabbitMQ" {
+                tags "MessageBus"
+            }
+
+            # 缓存
+            redis = container "缓存" "性能优化" "Redis" {
+                tags "Cache"
+            }
+
+            # 监控
+            monitoring = container "监控系统" "日志、指标、追踪" "ELK + Prometheus" {
+                tags "Monitoring"
+            }
+        }
+
+        # 外部系统
+        paymentGateway = softwareSystem "支付网关" {
+            tags "External"
+        }
+
+        # 用户交互
+        user -> webApp "浏览、下单"
+        user -> mobileApp "移动端下单"
+        admin -> adminPanel "管理系统"
+
+        # 前端 → 网关
+        webApp -> apiGateway "HTTPS/REST"
+        mobileApp -> apiGateway "HTTPS/REST"
+        adminPanel -> apiGateway "HTTPS/REST"
+
+        # 网关 → 微服务
+        apiGateway -> userService "用户认证" "gRPC"
+        apiGateway -> productService "查询商品" "HTTP/REST"
+        apiGateway -> orderService "创建订单" "HTTP/REST"
+        apiGateway -> paymentService "支付处理" "HTTP/REST"
+
+        # 微服务 → 数据库
+        userService -> userDB "读写用户数据" "JDBC"
+        productService -> productDB "读写商品数据" "MongoDB Driver"
+        orderService -> orderDB "读写订单数据" "MySQL"
+
+        # 微服务 → 缓存
+        userService -> redis "缓存会话" "Redis Protocol"
+        productService -> redis "缓存商品" "Redis Protocol"
+
+        # 微服务 → 消息队列
+        orderService -> messageQueue "发布订单事件" "AMQP"
+        paymentService -> messageQueue "订阅订单事件" "AMQP"
+
+        # 微服务 → 外部系统
+        paymentService -> paymentGateway "调用支付" "HTTPS/REST"
+
+        # 所有容器 → 监控
+        apiGateway -> monitoring "发送日志/指标" "HTTP"
+        userService -> monitoring "发送日志/指标" "HTTP"
+        productService -> monitoring "发送日志/指标" "HTTP"
+        orderService -> monitoring "发送日志/指标" "HTTP"
+        paymentService -> monitoring "发送日志/指标" "HTTP"
+    }
+
+    views {
+        # 视图 1: 完整容器架构
+        container ecommerce "full" "完整容器架构" {
+            include *
+            autolayout tb
+        }
+
+        # 视图 2: 前端容器
+        container ecommerce "frontend" "前端架构" {
+            include user admin webApp mobileApp adminPanel apiGateway
+            autolayout tb
+        }
+
+        # 视图 3: 后端微服务
+        container ecommerce "backend" "后端微服务" {
+            include apiGateway userService productService orderService paymentService
+            include userDB productDB orderDB redis messageQueue
+            autolayout lr
+        }
+
+        # 视图 4: 数据层
+        container ecommerce "data" "数据层架构" {
+            include userService productService orderService
+            include userDB productDB orderDB redis messageQueue
+            autolayout tb
+        }
+
+        # 视图 5: 订单流程
+        container ecommerce "order-flow" "订单处理流程" {
+            include webApp apiGateway orderService paymentService
+            include orderDB messageQueue paymentGateway
+            autolayout lr
+        }
+    }
+}
+```
+
+## 多种 Container 形状说明
+
+不同类型的容器有不同的视觉表示建议:
+
+### 应用容器
+
+```
+webApp = container "Web 应用" "单页应用" "React" {
+    tags "WebApp"
+}
+mobileApp = container "移动应用" "原生应用" "Swift" {
+    tags "Mobile"
+}
+apiServer = container "API 服务器" "REST API" "Spring Boot" {
+    tags "API"
+}
+```
+
+### 数据容器
+
+```
+relationalDB = container "关系数据库" "事务数据" "PostgreSQL" {
+    tags "Database,Relational"
+}
+documentDB = container "文档数据库" "非结构化数据" "MongoDB" {
+    tags "Database,NoSQL"
+}
+searchEngine = container "搜索引擎" "全文搜索" "Elasticsearch" {
+    tags "Database,Search"
+}
+```
+
+### 中间件容器
+
+```
+messageQueue = container "消息队列" "异步通信" "Kafka" {
+    tags "MessageBus"
+}
+cache = container "缓存" "性能优化" "Redis" {
+    tags "Cache"
+}
+serviceRegistry = container "服务注册中心" "服务发现" "Consul" {
+    tags "Registry"
+}
+```
+
+### 基础设施容器
+
+```
+loadBalancer = infrastructureNode "负载均衡器" "流量分发" "Nginx" {
+    tags "Infrastructure,LoadBalancer"
+}
+apiGateway = container "API 网关" "统一入口" "Kong" {
+    tags "Gateway"
+}
+cdn = infrastructureNode "CDN" "静态资源" "CloudFlare" {
+    tags "Infrastructure,CDN"
+}
+```
+
+### 完整标签系统
+
+```
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            # 前端
+            spa = container "SPA" "..." "..." {
+                tags "Frontend,WebApp"
+            }
+
+            # 后端
+            api = container "API" "..." "..." {
+                tags "Backend,API,Java"
+            }
+
+            # 数据
+            db = container "数据库" "..." "..." {
+                tags "Database,Relational,PostgreSQL"
+            }
+
+            # 中间件
+            mq = container "消息队列" "..." "..." {
+                tags "MessageBus,Kafka,Async"
+            }
+
+            # 基础设施
+            nginx = infrastructureNode "Nginx" "..." "..." {
+                tags "Infrastructure,LoadBalancer"
+            }
+        }
+    }
+
+    views {
+        # 可以基于标签过滤
+        container system "backend-only" "仅后端" {
+            include element.tag==Backend || element.tag==Database
+            autolayout lr
+        }
+    }
+}
+```
+
+## 常见错误
+
+### 错误 1: 忘记技术栈参数
+
+```
+# ❌ 错误: 缺少技术栈
+apiApp = container "API 应用" "后端服务"
+
+# ✅ 正确: 必须包含技术栈
+apiApp = container "API 应用" "后端服务" "Spring Boot"
+```
+
+### 错误 2: 过度细分容器
+
+```
+# ❌ 错误: 把每个类都当作容器
+controller = container "UserController" "处理请求" "Java"
+service = container "UserService" "业务逻辑" "Java"
+repository = container "UserRepository" "数据访问" "Java"
+
+# ✅ 正确: 容器是独立部署单元
+apiApp = container "API 应用" "用户管理服务" "Spring Boot" {
+    # Controller/Service/Repository 是 Component,不是 Container
+}
+```
+
+### 错误 3: 混淆 Container 和 Component
+
+```
+# ❌ 错误: Component 层次出现在 Container 视图
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            apiApp = container "API" "后端" "Java" {
+                controller = component "Controller" "..." "..."  # 不应出现
+            }
+        }
+    }
+    views {
+        container system "containers" {
+            include *  # 会显示 controller,错误
+        }
+    }
+}
+
+# ✅ 正确: Container 视图只显示容器
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            apiApp = container "API" "后端" "Java"
+            database = container "数据库" "存储" "PostgreSQL"
+            apiApp -> database "读写" "JDBC"
+        }
+    }
+    views {
+        container system "containers" {
+            include *  # 只显示 apiApp 和 database
+        }
+    }
+}
+```
+
+### 错误 4: 关系缺少技术协议
+
+```
+# ❌ 错误: 不清楚通信方式
+webApp -> apiApp "调用"
+
+# ✅ 正确: 明确技术协议
+webApp -> apiApp "调用 API" "HTTPS/REST"
+```
+
+### 错误 5: 数据库关系方向错误
+
+```
+# ❌ 错误: 数据库主动推送
+database -> apiApp "推送数据"
+
+# ✅ 正确: 应用主动访问数据库
+apiApp -> database "读写数据" "JDBC"
+```
+
+### 错误 6: 忽略容器间的中间件
+
+```
+# ❌ 错误: 直接关系,忽略消息队列
+orderService -> paymentService "通知支付"
+
+# ✅ 正确: 显示中间件
+orderService -> messageQueue "发布订单事件" "AMQP"
+messageQueue -> paymentService "订阅订单事件" "AMQP"
+```

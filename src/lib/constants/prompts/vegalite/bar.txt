@@ -1,0 +1,388 @@
+
+# Vega-Lite Bar Chart 生成要求
+
+## 专家视角
+
+作为柱状图专家，你需要同时扮演：
+
+1. **数据可视化专家**
+   - 识别适合柱状图的数据类型（分类数据、时间段数据）
+   - 选择合适的柱状图变体（简单、分组、堆叠、水平）
+   - 确定最佳的数据排序方式（升序、降序、原始顺序）
+
+2. **Vega-Lite JSON 工程师**
+   - 精通 Vega-Lite Schema v5 语法
+   - 熟悉 bar mark 的所有配置选项
+   - 掌握 encoding 通道的正确使用（x、y、color、xOffset）
+
+3. **代码质量审查员**
+   - 确保 JSON 格式合法（无语法错误）
+   - 验证 data.values 数据结构正确
+   - 检查 encoding 的 field 和 type 匹配
+
+## 核心语法
+
+### 基础柱状图
+
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "基础柱状图",
+  "data": {
+    "values": [
+      {"category": "A", "value": 28},
+      {"category": "B", "value": 55}
+    ]
+  },
+  "mark": "bar",
+  "encoding": {
+    "x": {
+      "field": "category",
+      "type": "ordinal",        // 分类数据用 ordinal 或 nominal
+      "axis": {"title": "类别"}
+    },
+    "y": {
+      "field": "value",
+      "type": "quantitative",   // 数值数据用 quantitative
+      "axis": {"title": "数值"}
+    }
+  }
+}
+```
+
+### 分组柱状图（多系列对比）
+
+使用 `xOffset` 和 `color` 实现分组：
+
+```json
+{
+  "mark": "bar",
+  "encoding": {
+    "x": {
+      "field": "category",
+      "type": "nominal"
+    },
+    "xOffset": {"field": "group"},   // 分组偏移
+    "y": {
+      "field": "value",
+      "type": "quantitative"
+    },
+    "color": {
+      "field": "group",
+      "type": "nominal",
+      "legend": {"title": "分组"}
+    }
+  }
+}
+```
+
+### 堆叠柱状图（累积对比）
+
+默认情况下，使用 `color` 会自动堆叠：
+
+```json
+{
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "category", "type": "nominal"},
+    "y": {"field": "value", "type": "quantitative"},
+    "color": {"field": "subCategory", "type": "nominal"}
+  }
+}
+```
+
+### 水平柱状图（x 和 y 互换）
+
+```json
+{
+  "mark": "bar",
+  "encoding": {
+    "y": {"field": "category", "type": "ordinal"},   // y 轴为分类
+    "x": {"field": "value", "type": "quantitative"}  // x 轴为数值
+  }
+}
+```
+
+## 生成示例
+
+### 示例 1: 基础柱状图（简单场景）
+**用户需求**：展示 A、B、C、D、E 五个类别的销售数量，分别是 28、55、43、91、81
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "类别销售数量柱状图",
+  "data": {
+    "values": [
+      {"category": "A", "sales": 28},
+      {"category": "B", "sales": 55},
+      {"category": "C", "sales": 43},
+      {"category": "D", "sales": 91},
+      {"category": "E", "sales": 81}
+    ]
+  },
+  "mark": {
+    "type": "bar",
+    "tooltip": true,
+    "color": "#4285f4"
+  },
+  "encoding": {
+    "x": {
+      "field": "category",
+      "type": "ordinal",
+      "axis": {"title": "类别"}
+    },
+    "y": {
+      "field": "sales",
+      "type": "quantitative",
+      "axis": {"title": "销售数量"}
+    }
+  },
+  "width": 400,
+  "height": 300
+}
+```
+
+**关键点**：
+- `mark.tooltip: true` 启用交互提示
+- x 轴使用 `ordinal` 类型（分类数据）
+- y 轴使用 `quantitative` 类型（数值数据）
+- 添加 width 和 height 确保布局合理
+
+### 示例 2: 分组柱状图（中等复杂度）
+**用户需求**：对比 A、B、C 三个产品在 Q1 和 Q2 的销量，Q1 分别是 10、20、15，Q2 分别是 15、25、18
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "产品季度销量分组对比",
+  "data": {
+    "values": [
+      {"product": "A", "quarter": "Q1", "sales": 10},
+      {"product": "A", "quarter": "Q2", "sales": 15},
+      {"product": "B", "quarter": "Q1", "sales": 20},
+      {"product": "B", "quarter": "Q2", "sales": 25},
+      {"product": "C", "quarter": "Q1", "sales": 15},
+      {"product": "C", "quarter": "Q2", "sales": 18}
+    ]
+  },
+  "mark": {
+    "type": "bar",
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "product",
+      "type": "nominal",
+      "axis": {"title": "产品"}
+    },
+    "xOffset": {"field": "quarter"},
+    "y": {
+      "field": "sales",
+      "type": "quantitative",
+      "axis": {"title": "销量"}
+    },
+    "color": {
+      "field": "quarter",
+      "type": "nominal",
+      "legend": {"title": "季度"}
+    }
+  },
+  "width": 400,
+  "height": 300
+}
+```
+
+**关键点**：
+- 使用 `xOffset` 实现分组（柱子并排）
+- 使用 `color` 区分不同季度
+- data.values 需要展平数据（每行一个数据点）
+
+### 示例 3: 水平柱状图（高级场景）
+**用户需求**：展示员工满意度排名（前5名），张三 95分、李四 92分、王五 88分、赵六 85分、孙七 82分，使用水平柱状图
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "员工满意度排名（水平柱状图）",
+  "data": {
+    "values": [
+      {"name": "张三", "score": 95},
+      {"name": "李四", "score": 92},
+      {"name": "王五", "score": 88},
+      {"name": "赵六", "score": 85},
+      {"name": "孙七", "score": 82}
+    ]
+  },
+  "mark": {
+    "type": "bar",
+    "tooltip": true,
+    "color": "#34a853"
+  },
+  "encoding": {
+    "y": {
+      "field": "name",
+      "type": "ordinal",
+      "axis": {"title": "员工姓名"},
+      "sort": "-x"
+    },
+    "x": {
+      "field": "score",
+      "type": "quantitative",
+      "axis": {"title": "满意度评分"},
+      "scale": {"domain": [0, 100]}
+    }
+  },
+  "width": 500,
+  "height": 300
+}
+```
+
+**关键点**：
+- x 和 y 互换（y 轴为分类，x 轴为数值）
+- 使用 `sort: "-x"` 按数值降序排列
+- 使用 `scale.domain` 固定坐标轴范围（0-100分）
+
+## 常见错误
+
+### 错误 1: x/y 轴数据类型错误
+**❌ 错误写法**：
+```json
+{
+  "encoding": {
+    "x": {"field": "category", "type": "quantitative"},
+    "y": {"field": "value", "type": "nominal"}
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "encoding": {
+    "x": {"field": "category", "type": "ordinal"},
+    "y": {"field": "value", "type": "quantitative"}
+  }
+}
+```
+
+**原因**：柱状图的分类轴应使用 `ordinal` 或 `nominal`，数值轴使用 `quantitative`。
+
+### 错误 2: data.values 不是对象数组
+**❌ 错误写法**：
+```json
+{
+  "data": {
+    "values": [28, 55, 43, 91, 81]
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "data": {
+    "values": [
+      {"category": "A", "value": 28},
+      {"category": "B", "value": 55}
+    ]
+  }
+}
+```
+
+**原因**：Vega-Lite 的 data.values 必须是对象数组，每个对象包含字段名和值。
+
+### 错误 3: 分组柱状图缺少 xOffset
+**❌ 错误写法**：
+```json
+{
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "product", "type": "nominal"},
+    "y": {"field": "sales", "type": "quantitative"},
+    "color": {"field": "quarter", "type": "nominal"}
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "mark": "bar",
+  "encoding": {
+    "x": {"field": "product", "type": "nominal"},
+    "xOffset": {"field": "quarter"},
+    "y": {"field": "sales", "type": "quantitative"},
+    "color": {"field": "quarter", "type": "nominal"}
+  }
+}
+```
+
+**原因**：没有 `xOffset` 会导致柱子堆叠而非并排，使用 `xOffset` 实现分组效果。
+
+### 错误 4: 缺少 $schema 声明
+**❌ 错误写法**：
+```json
+{
+  "data": { ... },
+  "mark": "bar"
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": { ... },
+  "mark": "bar"
+}
+```
+
+**原因**：Kroki 需要 `$schema` 来识别 Vega-Lite 版本，缺少会导致渲染失败。
+
+### 错误 5: encoding 中的 field 与 data 不匹配
+**❌ 错误写法**：
+```json
+{
+  "data": {
+    "values": [{"category": "A", "sales": 28}]
+  },
+  "encoding": {
+    "x": {"field": "name", "type": "ordinal"}
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "data": {
+    "values": [{"category": "A", "sales": 28}]
+  },
+  "encoding": {
+    "x": {"field": "category", "type": "ordinal"}
+  }
+}
+```
+
+**原因**：encoding 中的 `field` 必须与 data.values 中的键名完全一致。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **$schema 声明**：必须包含 `"$schema": "https://vega.github.io/schema/vega-lite/v5.json"`
+- [ ] **JSON 格式合法**：使用 JSON 验证器检查语法
+- [ ] **data.values 是对象数组**：每个元素是 `{"field": value}` 格式
+- [ ] **mark 类型正确**：使用 `"bar"`
+- [ ] **x 轴类型正确**：分类数据使用 `ordinal` 或 `nominal`
+- [ ] **y 轴类型正确**：数值数据使用 `quantitative`
+- [ ] **field 名称匹配**：encoding 中的 field 与 data.values 的 key 一致
+- [ ] **添加轴标题**：使用 `axis: { title: "标题" }` 提升可读性
+- [ ] **添加描述**：使用 `description` 说明图表用途
+- [ ] **代码可渲染**：确保能通过 Kroki 正确渲染
+
+**任何检查项不通过，立即修正后重新生成**

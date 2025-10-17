@@ -1,0 +1,767 @@
+
+# D2 ER 图生成要求
+
+## 专家视角
+
+作为数据库架构专家,你需要同时扮演:
+
+1. **数据库架构师**
+   - 理解实体关系建模 (Entity-Relationship Modeling)
+   - 熟悉数据库设计范式和最佳实践
+   - 能够清晰表达表结构和关系
+
+2. **D2 SQL Table 工程师**
+   - 精通 `shape: sql_table` 的语法和约束定义
+   - 熟练使用 `constraint` 关键字定义主键、外键、唯一性
+   - 掌握表之间的关系表达方式
+
+3. **数据建模专家**
+   - 合理设计表结构和字段类型
+   - 识别实体之间的关系类型 (一对一、一对多、多对多)
+   - 优化数据库设计以减少冗余
+
+## 核心语法
+
+### SQL 表声明
+```d2
+tableName: {
+  shape: sql_table
+
+  # 字段定义
+  id: int {constraint: primary_key}
+  name: varchar(100) {constraint: not_null}
+  email: varchar(255) {constraint: unique}
+  created_at: timestamp
+}
+```
+
+### 约束类型
+```d2
+# 主键约束
+id: int {constraint: primary_key}
+
+# 外键约束
+user_id: int {constraint: foreign_key}
+
+# 唯一约束
+email: varchar(255) {constraint: unique}
+
+# 非空约束
+name: varchar(100) {constraint: not_null}
+
+# 多个约束
+username: varchar(50) {constraint: [unique, not_null]}
+```
+
+### 复合约束说明
+
+除了单字段约束,D2 还支持表级别的复合约束,用于处理更复杂的数据完整性需求。
+
+#### 复合唯一约束 (Composite Unique Constraint)
+
+**使用场景**: 多个字段组合起来必须唯一
+
+**示例 1: 用户-角色关联表**
+```d2
+user_roles: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  user_id: int {constraint: foreign_key}
+  role_id: int {constraint: foreign_key}
+  # 说明: 同一用户不能重复拥有同一角色
+  # 复合唯一约束: unique(user_id, role_id)
+}
+```
+
+**示例 2: 课程报名表**
+```d2
+enrollments: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  student_id: int {constraint: foreign_key}
+  course_id: int {constraint: foreign_key}
+  semester: varchar(20) {constraint: not_null}
+  # 说明: 学生在同一学期不能重复报名同一课程
+  # 复合唯一约束: unique(student_id, course_id, semester)
+}
+```
+
+#### 复合主键 (Composite Primary Key)
+
+**使用场景**: 多个字段组合作为主键
+
+**示例: 订单明细表**
+```d2
+order_items: {
+  shape: sql_table
+  order_id: int {constraint: foreign_key}
+  product_id: int {constraint: foreign_key}
+  # 说明: (order_id, product_id) 组合作为主键
+  # 一个订单中同一产品只能出现一次
+  quantity: int {constraint: not_null}
+  price: decimal(10,2) {constraint: not_null}
+}
+```
+
+#### 检查约束 (Check Constraint)
+
+**使用场景**: 字段值必须满足特定条件
+
+**示例说明**:
+```d2
+products: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  name: varchar(200) {constraint: not_null}
+  price: decimal(10,2) {constraint: not_null}
+  # 说明: price > 0 (价格必须为正数)
+  stock: int {constraint: not_null}
+  # 说明: stock >= 0 (库存不能为负)
+  discount: decimal(3,2)
+  # 说明: discount BETWEEN 0 AND 1 (折扣在0-1之间)
+}
+```
+
+#### 外键级联约束
+
+**使用场景**: 定义父表变更时的级联行为
+
+**级联类型**:
+- **CASCADE**: 级联删除/更新
+- **SET NULL**: 设为 NULL
+- **RESTRICT**: 禁止删除/更新
+- **SET DEFAULT**: 设为默认值
+
+**示例说明**:
+```d2
+comments: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  post_id: int {constraint: foreign_key}
+  # 说明: ON DELETE CASCADE - 删除帖子时级联删除评论
+  user_id: int {constraint: foreign_key}
+  # 说明: ON DELETE SET NULL - 删除用户时评论保留,user_id设为NULL
+  content: text {constraint: not_null}
+  created_at: timestamp
+}
+```
+
+#### D2 约束表达限制
+
+⚠️ **重要提示**: D2 不直接支持复合约束的语法表示,但可以通过以下方式表达:
+
+1. **注释说明**: 在字段定义后用注释说明复合约束
+2. **命名约定**: 使用清晰的字段名暗示约束关系
+3. **关系箭头**: 通过关系箭头表达外键约束
+
+**推荐表达方式**:
+```d2
+user_roles: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  user_id: int {constraint: [foreign_key, not_null]}
+  role_id: int {constraint: [foreign_key, not_null]}
+  assigned_at: timestamp
+  # 注释: UNIQUE(user_id, role_id) - 防止重复分配角色
+}
+```
+
+### 关系基数标注规范
+
+关系基数 (Cardinality) 是 ER 图的核心,必须清晰准确地标注。
+
+#### 关系基数类型
+
+| 关系类型 | 符号表示 | 含义 | 典型场景 |
+|----------|----------|------|----------|
+| **一对一** | `1:1` | 一条记录对应一条记录 | 用户-个人资料 |
+| **一对多** | `1:N` | 一条记录对应多条记录 | 用户-订单 |
+| **多对一** | `N:1` | 多条记录对应一条记录 | 订单-用户 |
+| **多对多** | `M:N` | 多条记录对应多条记录 | 学生-课程 |
+
+#### 箭头头部标注
+
+D2 使用 `source-arrowhead` 和 `target-arrowhead` 标注关系的两端基数:
+
+```d2
+# 一对多关系的完整标注
+users.id -> orders.user_id: "1:N" {
+  source-arrowhead: 1      # 主表端: 1
+  target-arrowhead: "*"    # 从表端: 多
+}
+
+# 一对一关系的完整标注
+users.id -> profiles.user_id: "1:1" {
+  source-arrowhead: 1      # 主表端: 1
+  target-arrowhead: 1      # 从表端: 1
+}
+```
+
+#### 基数符号说明
+
+| 符号 | 含义 | 使用位置 |
+|------|------|----------|
+| `1` | 恰好一个 | source-arrowhead 或 target-arrowhead |
+| `*` | 零个或多个 | target-arrowhead (表示"多"的一端) |
+| `0..1` | 零个或一个 | 可选的一端 |
+| `1..*` | 一个或多个 | 至少有一个的"多"端 |
+
+### 表关系示例
+
+#### 一对多关系 (1:N)
+```d2
+users: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  username: varchar(50)
+}
+
+orders: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  user_id: int {constraint: foreign_key}
+  total: decimal(10,2)
+}
+
+# 一个用户可以有多个订单
+users.id -> orders.user_id: "has many" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+```
+
+#### 一对一关系 (1:1)
+```d2
+users: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  username: varchar(50)
+}
+
+profiles: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  user_id: int {constraint: [foreign_key, unique]}
+  bio: text
+  avatar: varchar(500)
+}
+
+# 一个用户有一个个人资料
+users.id -> profiles.user_id: "has one" {
+  source-arrowhead: 1
+  target-arrowhead: 1
+}
+```
+
+#### 多对多关系 (M:N)
+```d2
+students: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  name: varchar(100)
+}
+
+courses: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  title: varchar(200)
+}
+
+enrollments: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  student_id: int {constraint: foreign_key}
+  course_id: int {constraint: foreign_key}
+  enrolled_at: timestamp
+}
+
+# 学生可以选多门课程
+students.id -> enrollments.student_id: "enrolls in" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+
+# 课程可以有多个学生
+courses.id -> enrollments.course_id: "has students" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+```
+
+### 关系标签和样式
+```d2
+# 带标签的关系
+users.id -> orders.user_id: "has many" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+
+# 关系说明
+products.id -> order_items.product_id: "included in" {
+  style.stroke-dash: 3
+}
+```
+
+## 生成示例
+
+### 示例 1: 简单用户-订单系统 (简单场景)
+
+**用户需求**: 展示用户和订单的基本关系
+
+**生成代码**:
+```d2
+users: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  username: varchar(50) {constraint: [unique, not_null]}
+  email: varchar(255) {constraint: [unique, not_null]}
+  password_hash: varchar(255) {constraint: not_null}
+  created_at: timestamp
+}
+
+orders: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  user_id: int {constraint: foreign_key}
+  total_amount: decimal(10,2) {constraint: not_null}
+  status: varchar(20)
+  created_at: timestamp
+}
+
+# 用户拥有多个订单
+users.id -> orders.user_id: "1:N" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+```
+
+**关键点**:
+- 使用 `shape: sql_table` 声明 SQL 表
+- 使用 `constraint: primary_key` 定义主键
+- 使用 `constraint: foreign_key` 定义外键
+- 使用箭头 `->` 表示表之间的关系
+- 使用 `1:N` 标签表示一对多关系
+- 字段类型清晰 (int, varchar, decimal, timestamp)
+
+### 示例 2: 电商系统 ER 图 (中等复杂度)
+
+**用户需求**: 展示用户、商品、订单和订单项的完整关系
+
+**生成代码**:
+```d2
+users: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  username: varchar(50) {constraint: [unique, not_null]}
+  email: varchar(255) {constraint: [unique, not_null]}
+  phone: varchar(20)
+  address: text
+  created_at: timestamp
+}
+
+products: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  name: varchar(200) {constraint: not_null}
+  description: text
+  price: decimal(10,2) {constraint: not_null}
+  stock: int {constraint: not_null}
+  category: varchar(50)
+  created_at: timestamp
+}
+
+orders: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  user_id: int {constraint: foreign_key}
+  total_amount: decimal(10,2) {constraint: not_null}
+  status: varchar(20) {constraint: not_null}
+  shipping_address: text
+  created_at: timestamp
+  updated_at: timestamp
+}
+
+order_items: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  order_id: int {constraint: foreign_key}
+  product_id: int {constraint: foreign_key}
+  quantity: int {constraint: not_null}
+  price: decimal(10,2) {constraint: not_null}
+  subtotal: decimal(10,2)
+}
+
+# 用户-订单关系 (1:N)
+users.id -> orders.user_id: "places" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+
+# 订单-订单项关系 (1:N)
+orders.id -> order_items.order_id: "contains" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+
+# 商品-订单项关系 (1:N)
+products.id -> order_items.product_id: "included in" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+```
+
+**关键点**:
+- 使用中间表 `order_items` 实现订单和商品的多对多关系
+- 每个表都有明确的主键和外键
+- 使用描述性关系标签 ("places", "contains", "included in")
+- 字段定义完整,包含约束和类型
+- 使用 `source-arrowhead` 和 `target-arrowhead` 标识关系基数
+
+### 示例 3: 社交网络系统 (高级场景)
+
+**用户需求**: 展示用户、帖子、评论、点赞和关注关系的完整数据模型
+
+**生成代码**:
+```d2
+users: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  username: varchar(50) {constraint: [unique, not_null]}
+  email: varchar(255) {constraint: [unique, not_null]}
+  bio: text
+  avatar_url: varchar(500)
+  created_at: timestamp
+}
+
+posts: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  user_id: int {constraint: foreign_key}
+  content: text {constraint: not_null}
+  image_url: varchar(500)
+  likes_count: int
+  comments_count: int
+  created_at: timestamp
+  updated_at: timestamp
+}
+
+comments: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  post_id: int {constraint: foreign_key}
+  user_id: int {constraint: foreign_key}
+  parent_id: int {constraint: foreign_key}
+  content: text {constraint: not_null}
+  created_at: timestamp
+}
+
+likes: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  user_id: int {constraint: foreign_key}
+  post_id: int {constraint: foreign_key}
+  created_at: timestamp
+}
+
+follows: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  follower_id: int {constraint: foreign_key}
+  following_id: int {constraint: foreign_key}
+  created_at: timestamp
+}
+
+# 用户发布帖子 (1:N)
+users.id -> posts.user_id: "publishes" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+
+# 帖子包含评论 (1:N)
+posts.id -> comments.post_id: "has comments" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+
+# 用户发表评论 (1:N)
+users.id -> comments.user_id: "writes" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+
+# 评论回复评论 (自关联)
+comments.id -> comments.parent_id: "replies to" {
+  style.stroke-dash: 3
+}
+
+# 用户点赞帖子 (M:N)
+users.id -> likes.user_id
+posts.id -> likes.post_id
+
+# 用户关注用户 (M:N 自关联)
+users.id -> follows.follower_id: "follower"
+users.id -> follows.following_id: "following" {
+  style.stroke-dash: 3
+}
+```
+
+**关键点**:
+- 多对多关系通过中间表实现 (`likes`, `follows`)
+- 自关联关系 (`comments.parent_id`, `follows`)
+- 使用虚线样式 (`style.stroke-dash: 3`) 区分特殊关系
+- 完整的社交网络数据模型
+- 清晰的关系标签帮助理解业务逻辑
+- 考虑了计数器字段 (`likes_count`, `comments_count`) 用于性能优化
+
+## 常见错误
+
+### 错误 1: 未声明 sql_table shape
+
+**❌ 错误写法**:
+```d2
+users: {
+  id: int
+  name: varchar(50)
+}
+```
+
+**✅ 正确写法**:
+```d2
+users: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  name: varchar(50)
+}
+```
+
+**原因**: 必须使用 `shape: sql_table` 来声明这是一个 SQL 表,否则会被渲染为普通容器。
+
+### 错误 2: 缺少主键定义
+
+**❌ 错误写法**:
+```d2
+users: {
+  shape: sql_table
+  id: int
+  name: varchar(50)
+}
+```
+
+**✅ 正确写法**:
+```d2
+users: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  name: varchar(50)
+}
+```
+
+**原因**: 每个表都应该有主键约束,明确标识唯一记录。
+
+### 错误 3: 外键关系箭头方向错误
+
+**❌ 错误写法**:
+```d2
+# 订单指向用户 (反向)
+orders.user_id -> users.id
+```
+
+**✅ 正确写法**:
+```d2
+# 用户指向订单 (正向)
+users.id -> orders.user_id: "1:N"
+```
+
+**原因**: 箭头应该从主表的主键指向从表的外键,表示数据引用方向。
+
+### 错误 4: 字段类型不明确
+
+**❌ 错误写法**:
+```d2
+users: {
+  shape: sql_table
+  id: number
+  name: string
+}
+```
+
+**✅ 正确写法**:
+```d2
+users: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  name: varchar(50) {constraint: not_null}
+}
+```
+
+**原因**: 应使用标准 SQL 类型 (int, varchar, text, decimal, timestamp 等),而非通用类型。
+
+### 错误 5: 多对多关系缺少中间表
+
+**❌ 错误写法**:
+```d2
+users.id -> products.id: "M:N"
+```
+
+**✅ 正确写法**:
+```d2
+user_products: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  user_id: int {constraint: foreign_key}
+  product_id: int {constraint: foreign_key}
+}
+
+users.id -> user_products.user_id
+products.id -> user_products.product_id
+```
+
+**原因**: 多对多关系需要通过中间表实现,不能直接连接两个表。
+
+### 错误 6: 约束语法错误
+
+**❌ 错误写法**:
+```d2
+users: {
+  shape: sql_table
+  email: varchar(255) constraint: unique, not_null
+}
+```
+
+**✅ 正确写法**:
+```d2
+users: {
+  shape: sql_table
+  email: varchar(255) {constraint: [unique, not_null]}
+}
+```
+
+**原因**: 多个约束需要使用数组语法 `[unique, not_null]` 包裹。
+
+### 错误 7: 关系基数标注不清
+
+**❌ 错误写法**:
+```d2
+users.id -> orders.user_id
+```
+
+**✅ 正确写法**:
+```d2
+users.id -> orders.user_id: "1:N" {
+  source-arrowhead: 1
+  target-arrowhead: "*"
+}
+```
+
+**原因**: 应明确标注关系基数 (1:1, 1:N, M:N),并使用箭头头部表示数量。
+
+## ER 图验证检查清单
+
+生成代码后，必须逐项检查以下内容：
+
+### 基础语法检查 (P0 - 必须通过)
+- [ ] **所有表都声明 sql_table**: 每个表都使用 `shape: sql_table`
+- [ ] **表声明语法正确**: 使用大括号 `{}` 包裹表定义
+- [ ] **字段语法正确**: `字段名: 类型 {constraint: 约束}`
+- [ ] **约束语法正确**: 单个约束或数组语法 `[unique, not_null]`
+- [ ] **代码可渲染**: 语法正确，可以直接通过 Kroki 渲染
+
+### 表结构检查 (P0 - 必须通过)
+- [ ] **主键定义完整**: 每个表都有 `constraint: primary_key`
+- [ ] **字段类型规范**: 使用标准 SQL 类型 (int, varchar, text, decimal, timestamp)
+- [ ] **外键字段标注**: 外键字段标注 `constraint: foreign_key`
+- [ ] **必填字段标注**: 必填字段标注 `constraint: not_null`
+- [ ] **唯一字段标注**: 唯一字段标注 `constraint: unique`
+
+### 关系定义检查 (P0 - 必须通过)
+- [ ] **关系方向正确**: 箭头从主表主键指向从表外键
+- [ ] **关系语法正确**: 使用 `主表.主键 -> 从表.外键` 格式
+- [ ] **关系基数标注**: 使用 `1:1`, `1:N`, `M:N` 标注关系类型
+- [ ] **箭头头部完整**: 一对多/一对一关系包含 `source-arrowhead` 和 `target-arrowhead`
+- [ ] **多对多用中间表**: M:N 关系通过中间表实现，不直接连接
+
+### 数据完整性检查 (P1 - 重要)
+- [ ] **外键完整性**: 所有外键字段都有对应的关系箭头
+- [ ] **关系完整性**: 所有关系箭头的字段都在表中定义
+- [ ] **约束合理性**: 约束符合业务逻辑 (如 email 唯一, username 唯一且非空)
+- [ ] **中间表设计**: 中间表包含两端的外键，通常还有主键
+- [ ] **自关联处理**: 自关联关系使用虚线样式区分
+
+### 命名规范检查 (P1 - 重要)
+- [ ] **表名使用复数**: users, orders, products (不是 user, order, product)
+- [ ] **外键命名清晰**: user_id, order_id (明确指向的表)
+- [ ] **下划线命名法**: created_at, updated_at (不是 createdAt)
+- [ ] **布尔字段前缀**: is_active, is_deleted (不是 active, deleted)
+- [ ] **中间表命名**: user_roles, order_items (体现关联关系)
+
+### 业务逻辑检查 (P1 - 重要)
+- [ ] **实体关系准确**: 关系类型符合实际业务逻辑
+- [ ] **关系基数合理**: 1:1, 1:N, M:N 的选择符合业务规则
+- [ ] **必要字段完整**: 业务必需的字段都已定义
+- [ ] **时间戳字段**: 关键表包含 created_at, updated_at
+- [ ] **软删除支持**: 需要时包含 is_deleted, deleted_at
+
+### 关系标注检查 (P2 - 建议)
+- [ ] **关系标签清晰**: 使用描述性标签 (如 "has many", "belongs to")
+- [ ] **基数符号准确**: `1` 和 `*` 正确标注在关系两端
+- [ ] **特殊关系区分**: 使用虚线样式区分特殊关系 (如自关联)
+- [ ] **关系分组**: 相关的关系使用相似的标签风格
+
+### 数据库设计检查 (P2 - 建议)
+- [ ] **范式合理**: 符合数据库范式要求，避免冗余
+- [ ] **字段类型精确**: varchar 指定长度，decimal 指定精度
+- [ ] **索引考虑**: 高频查询字段考虑建索引 (通过注释说明)
+- [ ] **性能优化**: 必要时使用冗余字段、计数器字段
+- [ ] **复合约束**: 使用注释说明复合唯一约束、复合主键
+
+### 验证结果判定
+- **P0 任意一项不通过**: 🚨 立即修正，重新生成
+- **P1 多项不通过**: ⚠️ 建议修正，提升质量
+- **P2 多项不通过**: 💡 可选优化，改善设计
+
+**关键原则**: P0 检查项必须 100% 通过，P1 检查项建议 80% 以上通过
+
+## 最佳实践
+
+### 1. 命名规范
+
+表名和字段名使用清晰的命名:
+- 表名使用复数形式 (users, orders, products)
+- 字段名使用下划线命名法 (user_id, created_at)
+- 外键字段明确指向的表 (user_id 指向 users 表)
+- 布尔字段使用 is_ 前缀 (is_active, is_deleted)
+
+### 2. 约束设计
+
+合理使用约束保证数据完整性:
+- 所有表必须有主键
+- 外键关系明确标注
+- 唯一性约束用于防止重复 (email, username)
+- 非空约束用于必填字段
+- 考虑使用复合约束 (unique(user_id, product_id))
+
+### 3. 关系表达
+
+清晰表达表之间的关系:
+- 一对一: 用户-个人资料 (users -> profiles)
+- 一对多: 用户-订单 (users -> orders)
+- 多对多: 学生-课程 (通过 enrollments 中间表)
+- 自关联: 员工-经理 (employees.manager_id -> employees.id)
+
+### 4. 数据类型选择
+
+根据数据特点选择合适的类型:
+- 整数: int, bigint
+- 字符串: varchar(n), text
+- 数值: decimal(m,n), float
+- 时间: timestamp, date, time
+- 布尔: boolean
+- JSON: json, jsonb
+
+### 5. 性能考虑
+
+在 ER 图中体现性能优化思路:
+- 索引字段 (虽然 D2 不直接支持索引可视化,但可在注释中说明)
+- 计数器字段 (likes_count, comments_count)
+- 冗余字段 (适度冗余减少 JOIN)
+- 分区字段 (created_at 用于时间分区)

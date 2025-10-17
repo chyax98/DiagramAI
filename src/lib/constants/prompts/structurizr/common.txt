@@ -1,0 +1,854 @@
+# Structurizr DSL 通用规范
+
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: workspace 必须是根元素
+workspace 是 Structurizr DSL 的**唯一根元素**,必须包含 model 和 views 块,不允许有其他顶层元素。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 缺少 views 块
+workspace "系统" {
+    model {
+        user = person "用户"
+    }
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确
+workspace "系统" {
+    model {
+        user = person "用户"
+        system = softwareSystem "系统"
+        user -> system "使用"
+    }
+    views {
+        systemContext system "key" {
+            include *
+            autolayout
+        }
+    }
+}
+```
+
+**违反后果**: `Error: workspace must contain at least one view`
+
+---
+
+### ⚠️ 规则 2: 视图必须使用 include 语句指定元素
+所有视图(systemLandscape, systemContext, container, component, deployment)必须显式包含元素。
+
+**错误示例**：
+```structurizr
+❌ 编译成功但生成空白视图
+views {
+    systemContext system "key" {
+        autolayout
+    }
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 使用 include *
+views {
+    systemContext system "key" {
+        include *
+        autolayout
+    }
+}
+```
+
+**违反后果**: 视图为空白,无法看到任何元素
+
+---
+
+### ⚠️ 规则 3: Container 必须定义在 softwareSystem 内部
+Container 是 C4 模型的第二层,必须嵌套在 softwareSystem 内部,表示系统的内部组成。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 容器在系统外部
+model {
+    system = softwareSystem "系统"
+    webapp = container "Web应用" "前端" "React"
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 容器嵌套在系统内部
+model {
+    system = softwareSystem "系统" {
+        webapp = container "Web应用" "前端" "React"
+    }
+}
+```
+
+**违反后果**: `Error: container must be defined inside a software system`
+
+---
+
+### ⚠️ 规则 4: Component 必须定义在 container 内部
+Component 是 C4 模型的第三层,必须嵌套在 container 内部,表示容器的内部模块。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 组件在容器外部
+model {
+    system = softwareSystem "系统" {
+        api = container "API" "后端" "Spring Boot"
+    }
+    controller = component "控制器" "处理请求" "Spring MVC"
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 组件嵌套在容器内部
+model {
+    system = softwareSystem "系统" {
+        api = container "API" "后端" "Spring Boot" {
+            controller = component "控制器" "处理请求" "Spring MVC"
+        }
+    }
+}
+```
+
+**违反后果**: `Error: component must be defined inside a container`
+
+---
+
+### ⚠️ 规则 5: 关系必须使用 -> 符号
+Structurizr DSL 只支持 `->` 作为关系符号,不支持 `=>` 或 `-->` 等其他箭头。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 错误的箭头符号
+user => system "使用"
+user --> system "使用"
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 使用 ->
+user -> system "使用"
+user -> system "使用" "HTTPS"
+```
+
+**违反后果**: `Error: unexpected token '=>'` 或 `Error: unexpected token '--'`
+
+---
+
+### ⚠️ 规则 6: containerInstance 必须定义在 deploymentNode 内部
+容器实例表示容器在部署环境中的实例,必须嵌套在部署节点内部。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 容器实例直接在环境下
+deploymentEnvironment "生产" {
+    containerInstance api
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 容器实例在部署节点内
+deploymentEnvironment "生产" {
+    deploymentNode "AWS" {
+        deploymentNode "EKS" {
+            deploymentNode "Pod" {
+                containerInstance api
+            }
+        }
+    }
+}
+```
+
+**违反后果**: `Error: container instance must be defined inside a deployment node`
+
+---
+
+### ⚠️ 规则 7: 视图键值 (key) 必须唯一
+每个视图必须有唯一的键值 (key) 标识,用于引用和区分不同视图。
+
+**错误示例**：
+```structurizr
+❌ 编译失败: 键值重复
+views {
+    systemContext system "key" { }
+    container system "key" { }
+}
+```
+
+**正确写法**：
+```structurizr
+✅ 正确: 每个视图使用唯一键值
+views {
+    systemContext system "SystemContext" { }
+    container system "ContainerView" { }
+}
+```
+
+**违反后果**: `Error: duplicate view key 'key'`
+
+---
+
+## Kroki 兼容性
+
+Structurizr DSL 在 Kroki 环境下的兼容性说明:
+
+### ✅ 支持的特性
+- workspace, model, views 三层结构
+- 所有元素类型 (person, softwareSystem, container, component)
+- 所有视图类型 (systemLandscape, systemContext, container, component, deployment, dynamic)
+- 样式配置 (styles, element, relationship)
+- 部署环境 (deploymentEnvironment, deploymentNode, containerInstance)
+- 自动布局 (autoLayout)
+- 标签系统 (tags)
+
+### ❌ 不支持的特性
+- 外部主题 (theme URL) - 仅支持 default 主题
+- 文档嵌入 (documentation) - Kroki 不渲染文档部分
+- 属性 (properties) - Kroki 不显示属性信息
+- URL 链接 - Kroki 不支持交互式链接
+- 高级 DSL 特性 (extends, include, ref)
+
+### ⚠️ 使用建议
+- 始终使用 `theme default` 或不指定主题
+- 不要在 workspace 中使用 documentation 块
+- 避免依赖 properties 传递信息
+- 专注于核心架构建模,不使用扩展特性
+
+---
+
+## 语法要求
+
+### 工作空间声明
+```structurizr
+workspace "名称" "描述" {
+    model { }
+    views { }
+}
+```
+
+### 元素定义
+```structurizr
+# 人员
+person "名称" "描述"
+
+# 软件系统
+softwareSystem "名称" "描述" { }
+
+# 容器(在系统内部)
+container "名称" "描述" "技术" { }
+
+# 组件(在容器内部)
+component "名称" "描述" "技术" { }
+```
+
+### 关系定义
+```structurizr
+# 基础关系
+源元素 -> 目标元素 "描述"
+
+# 带技术标签的关系
+源元素 -> 目标元素 "描述" "技术" {
+    tags "标签"
+}
+```
+
+### 视图定义
+```structurizr
+# 系统上下文视图
+systemContext 系统 "键值" {
+    include *
+    autolayout lr
+}
+
+# 容器视图
+container 系统 "键值" {
+    include *
+    autolayout tb
+}
+
+# 组件视图
+component 容器 "键值" {
+    include *
+    autolayout lr
+}
+
+# 部署视图
+deployment 系统 "环境" "键值" {
+    include *
+    autolayout tb
+}
+
+# 动态视图
+dynamic 系统 "键值" {
+    元素1 -> 元素2 "1. 步骤"
+    元素2 -> 元素3 "2. 步骤"
+    autolayout lr
+}
+```
+
+### 注释
+```structurizr
+# 单行注释
+```
+
+---
+
+# L2 - Structurizr DSL 完整语法规范
+
+## 核心结构
+
+```
+workspace "工作空间名称" "工作空间描述" {
+    model {
+        // 定义元素和关系
+    }
+    views {
+        // 定义视图
+    }
+    configuration {
+        // 可选配置
+    }
+}
+```
+
+## Model 定义
+
+### 1. Person (人员)
+```
+person = person "人员名称" "人员描述" {
+    tags "标签1" "标签2"
+}
+```
+
+**示例**:
+```
+user = person "用户" "使用系统的终端用户"
+admin = person "管理员" "系统管理人员" {
+    tags "Internal"
+}
+```
+
+### 2. Software System (软件系统)
+```
+system = softwareSystem "系统名称" "系统描述" {
+    tags "标签"
+}
+```
+
+**示例**:
+```
+orderSystem = softwareSystem "订单管理系统" "处理客户订单的核心系统"
+paymentSystem = softwareSystem "支付系统" "第三方支付网关" {
+    tags "External"
+}
+```
+
+### 3. Container (容器)
+```
+container = container "容器名称" "容器描述" "技术栈" {
+    tags "标签"
+}
+```
+
+**示例**:
+```
+webApp = container "Web 应用" "提供订单管理功能" "React" {
+    tags "Web"
+}
+database = container "数据库" "存储订单和用户数据" "PostgreSQL" {
+    tags "Database"
+}
+apiApp = container "API 应用" "提供 RESTful API" "Spring Boot" {
+    tags "Backend"
+}
+```
+
+### 4. Component (组件)
+```
+component = component "组件名称" "组件描述" "技术实现" {
+    tags "标签"
+}
+```
+
+**示例**:
+```
+orderController = component "订单控制器" "处理订单相关的 HTTP 请求" "Spring MVC Controller" {
+    tags "Controller"
+}
+orderService = component "订单服务" "实现订单业务逻辑" "Spring Service"
+orderRepository = component "订单仓储" "订单数据访问层" "Spring Data JPA"
+```
+
+### 5. Deployment Node (部署节点)
+```
+deploymentEnvironment "环境名称" {
+    deploymentNode "节点名称" "节点描述" "技术" {
+        containerInstance 容器引用
+    }
+}
+```
+
+**示例**:
+```
+deploymentEnvironment "生产环境" {
+    deploymentNode "阿里云" {
+        deploymentNode "Web 服务器" "Nginx" {
+            containerInstance webApp
+        }
+        deploymentNode "应用服务器" "Docker" {
+            containerInstance apiApp
+        }
+        deploymentNode "数据库服务器" "MySQL" {
+            containerInstance database
+        }
+    }
+}
+```
+
+### 6. Relationship (关系)
+```
+// 基本语法
+source -> destination "描述" "技术" {
+    tags "标签"
+}
+
+// 简化语法
+source -> destination "描述"
+```
+
+**示例**:
+```
+// 人员和系统
+user -> orderSystem "查询和管理订单"
+
+// 系统间
+orderSystem -> paymentSystem "调用支付接口" "HTTPS/REST" {
+    tags "External"
+}
+
+// 容器间
+webApp -> apiApp "调用 API" "HTTPS/JSON"
+apiApp -> database "读写数据" "JDBC"
+
+// 组件间
+orderController -> orderService "调用业务逻辑"
+orderService -> orderRepository "访问数据"
+```
+
+## Views 定义
+
+### 1. System Landscape (系统全景)
+```
+systemLandscape "视图键" "视图标题" {
+    include *                    // 包含所有元素
+    include element1 element2    // 包含指定元素
+    exclude element3             // 排除指定元素
+
+    autolayout lr               // 自动布局: lr/rl/tb/bt
+    // 或手动布局
+    element1 x y
+}
+```
+
+### 2. System Context (系统上下文)
+```
+systemContext 软件系统 "视图键" "视图标题" {
+    include *
+    autolayout lr
+}
+```
+
+**示例**:
+```
+systemContext orderSystem "订单系统上下文" {
+    include *
+    autolayout lr
+}
+```
+
+### 3. Container (容器视图)
+```
+container 软件系统 "视图键" "视图标题" {
+    include *
+    autolayout lr
+}
+```
+
+**示例**:
+```
+container orderSystem "订单系统容器" {
+    include *
+    autolayout tb
+}
+```
+
+### 4. Component (组件视图)
+```
+component 容器 "视图键" "视图标题" {
+    include *
+    autolayout lr
+}
+```
+
+**示例**:
+```
+component apiApp "API 应用组件" {
+    include *
+    autolayout lr
+}
+```
+
+### 5. Deployment (部署视图)
+```
+deployment 软件系统 "环境名称" "视图键" "视图标题" {
+    include *
+    autolayout lr
+}
+```
+
+**示例**:
+```
+deployment orderSystem "生产环境" "部署架构" {
+    include *
+    autolayout tb
+}
+```
+
+### 6. Dynamic (动态视图)
+```
+dynamic 容器或软件系统 "视图键" "视图标题" {
+    元素1 -> 元素2 "步骤描述"
+    元素2 -> 元素3 "步骤描述"
+    autolayout lr
+}
+```
+
+**示例**:
+```
+dynamic apiApp "创建订单流程" {
+    orderController -> orderService "1. 验证订单"
+    orderService -> orderRepository "2. 保存订单"
+    orderService -> paymentGateway "3. 调用支付"
+    autolayout lr
+}
+```
+
+### 7. Filtered View (过滤视图)
+```
+filtered "视图键" {
+    include "标签1"
+    exclude "标签2"
+}
+```
+
+## 样式定义 (Styles)
+
+```
+styles {
+    element "标签" {
+        shape Box|RoundedBox|Circle|Ellipse|Hexagon|Cylinder|Component|Person|Robot|Folder|WebBrowser|MobileDevicePortrait|MobileDeviceLandscape|Pipe
+        background #颜色
+        color #颜色
+        fontSize 数字
+        border solid|dashed|dotted
+    }
+
+    relationship "标签" {
+        color #颜色
+        dashed true|false
+        routing Direct|Orthogonal|Curved
+        fontSize 数字
+    }
+}
+```
+
+**示例**:
+```
+styles {
+    element "Person" {
+        shape Person
+        background #08427b
+        color #ffffff
+    }
+    element "Software System" {
+        background #1168bd
+        color #ffffff
+    }
+    element "Container" {
+        background #438dd5
+        color #ffffff
+    }
+    element "Database" {
+        shape Cylinder
+    }
+    element "External" {
+        background #999999
+    }
+
+    relationship "Relationship" {
+        routing Orthogonal
+        color #707070
+    }
+}
+```
+
+## 自动布局
+
+```
+autolayout [direction] [rankSeparation] [nodeSeparation]
+```
+
+**参数**:
+- `direction`: lr (左到右), rl, tb (上到下), bt
+- `rankSeparation`: 层级间距 (默认 300)
+- `nodeSeparation`: 节点间距 (默认 300)
+
+**示例**:
+```
+autolayout lr 400 200  // 左到右，层级间距400，节点间距200
+autolayout tb          // 上到下，使用默认间距
+```
+
+## 关键字总结
+
+### Model 关键字
+- `person` - 人员
+- `softwareSystem` - 软件系统
+- `container` - 容器
+- `component` - 组件
+- `deploymentEnvironment` - 部署环境
+- `deploymentNode` - 部署节点
+- `containerInstance` - 容器实例
+- `->` - 关系
+
+### Views 关键字
+- `systemLandscape` - 系统全景视图
+- `systemContext` - 系统上下文视图
+- `container` - 容器视图
+- `component` - 组件视图
+- `deployment` - 部署视图
+- `dynamic` - 动态视图
+- `filtered` - 过滤视图
+- `include` - 包含元素
+- `exclude` - 排除元素
+- `autolayout` - 自动布局
+
+### Configuration 关键字
+- `styles` - 样式定义
+- `element` - 元素样式
+- `relationship` - 关系样式
+- `tags` - 标签
+
+## 常见模式
+
+### 微服务架构
+```
+workspace {
+    model {
+        user = person "用户"
+
+        system = softwareSystem "系统" {
+            webApp = container "前端" "SPA" "React"
+            apiGateway = container "API 网关" "路由和认证" "Spring Cloud Gateway"
+            serviceA = container "服务 A" "业务服务" "Spring Boot"
+            serviceB = container "服务 B" "业务服务" "Spring Boot"
+            messageQueue = container "消息队列" "异步通信" "Kafka"
+            database = container "数据库" "数据存储" "PostgreSQL"
+        }
+
+        user -> webApp "使用"
+        webApp -> apiGateway "调用 API"
+        apiGateway -> serviceA "路由请求"
+        apiGateway -> serviceB "路由请求"
+        serviceA -> messageQueue "发布事件"
+        serviceB -> messageQueue "订阅事件"
+        serviceA -> database "读写"
+        serviceB -> database "读写"
+    }
+
+    views {
+        container system {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+### 分层架构
+```
+component apiApp {
+    controllerLayer = component "控制器层" "处理 HTTP 请求" "Spring MVC"
+    serviceLayer = component "服务层" "业务逻辑" "Spring Service"
+    repositoryLayer = component "仓储层" "数据访问" "Spring Data"
+
+    controllerLayer -> serviceLayer "调用"
+    serviceLayer -> repositoryLayer "调用"
+}
+```
+
+## 注意事项
+
+1. **标识符**: 使用驼峰命名法，不能包含空格
+2. **字符串**: 使用双引号包裹，支持中文
+3. **层次**: 元素必须在正确的层次（系统 > 容器 > 组件）
+4. **关系**: 只能在同层或跨层定义
+5. **视图**: 确保引用的元素已定义
+6. **布局**: 优先使用 autolayout，复杂场景才手动定位
+
+---
+
+### ⚠️ Kroki 环境特别限制
+
+**不支持的特性 (生成时避免使用):**
+- `themes <url>` - 仅支持 default 主题
+- `!docs` - Kroki 不渲染文档部分
+- `properties { }` - Kroki 不显示属性
+- `url` 链接 - Kroki 不支持交互
+- `!include`, `extends` - Kroki 仅支持单文件
+
+**使用建议:**
+- 始终使用 `include *` 确保元素可见
+- 优先使用 `autoLayout` 而非手动坐标
+- 样式仅使用基本颜色和形状
+- 避免依赖外部主题文件
+
+---
+
+# Structurizr 视图类型说明
+
+Structurizr DSL 支持 7 种核心视图类型，每种视图对应 C4 模型的不同抽象层次或特定用途。
+
+---
+
+## 总结
+
+- **Level 0 (Landscape)**: 企业级全景
+- **Level 1 (Context)**: 系统边界和外部依赖
+- **Level 2 (Container)**: 技术架构和运行时单元
+- **Level 3 (Component)**: 代码组织和职责划分
+- **特殊 (Deployment)**: 部署环境和基础设施
+- **特殊 (Dynamic)**: 运行时交互和业务流程
+- **工具 (Filtered)**: 定制受众视图
+
+选择合适的视图组合，确保架构文档既全面又易于理解。
+
+---
+
+## 常见错误
+
+### 错误 1: workspace 缺少 views 块 (对应强制规则 1)
+
+**错误代码:**
+```
+workspace {
+    model {
+        user = person "用户"
+        system = softwareSystem "系统"
+    }
+    // ❌ 缺少 views 块
+}
+```
+
+**修正:**
+```
+workspace {
+    model {
+        user = person "用户"
+        system = softwareSystem "系统"
+    }
+    views {
+        systemContext system "Context" {
+            include *
+            autoLayout
+        }
+    }
+}
+```
+
+---
+
+### 错误 2: 视图缺少 include 语句 (对应强制规则 2)
+
+**错误代码:**
+```
+views {
+    systemContext system "Context" {
+        // ❌ 缺少 include 语句
+        autoLayout
+    }
+}
+```
+
+**修正:**
+```
+views {
+    systemContext system "Context" {
+        include *  // ✅ 必须显式包含元素
+        autoLayout
+    }
+}
+```
+
+---
+
+### 错误 5: 关系语法错误 (对应强制规则 5)
+
+**错误代码:**
+```
+user -> system "使用"  // ❌ 箭头前后缺少空格
+user->system "使用"    // ❌ 箭头前后缺少空格
+user --> system "使用" // ❌ 错误的箭头符号
+```
+
+**修正:**
+```
+user -> system "使用" "HTTPS"  // ✅ 正确: 空格 + 单箭头
+```
+
+---
+
+### 错误 9: autoLayout 参数错误
+
+**错误代码:**
+```
+autoLayout lr 200 200     // ❌ Kroki 不支持间距参数
+autoLayout left-to-right  // ❌ 错误的方向标识
+```
+
+**修正:**
+```
+autoLayout lr  // ✅ 正确: 仅方向参数 (lr/rl/tb/bt)
+autoLayout     // ✅ 正确: 无参数时默认 tb
+```
+
+---
+
+
+## 生成检查清单
+
+生成代码后,逐项检查:
+
+- [ ] **工作空间结构完整**: 包含 `workspace`, `model`, `views` 三层结构
+- [ ] **元素声明正确**: 使用 person, softwareSystem, container, component 声明元素
+- [ ] **层次嵌套正确**: 容器在系统内,组件在容器内,部署实例在部署节点内
+- [ ] **关系语法正确**: 使用 `->` 定义关系,包含关系描述和技术标签
+- [ ] **视图定义完整**: 至少包含 systemContext 和 container 视图
+- [ ] **视图包含元素**: 每个视图包含 `include *` 或 `include element.tag==XXX`
+- [ ] **视图键值唯一**: 每个视图有唯一的 key 标识
+- [ ] **自动布局配置**: 视图包含 `autoLayout` 配置 (lr/rl/tb/bt)
+- [ ] **技术栈标注**: 容器和组件标注了技术栈 (第三个参数)
+- [ ] **标签使用一致**: 元素标签与样式定义保持一致
+- [ ] **样式配置完整**: 定义了 Person, Software System, Container, Database 等基础样式
+- [ ] **部署视图层次**: 部署节点层次合理,容器实例正确嵌套
+- [ ] **代码可渲染**: 语法正确,可直接通过 Kroki 渲染
+
+**任何检查项不通过,立即修正后重新生成**

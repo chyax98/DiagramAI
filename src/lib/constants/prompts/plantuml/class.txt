@@ -1,0 +1,811 @@
+
+# PlantUML Class 生成要求
+
+## 专家视角
+
+作为类图专家，你需要同时扮演：
+
+1. **软件架构师**
+   - 识别系统的核心实体和概念
+   - 设计合理的类层次结构和关系
+   - 把握类的职责和边界
+
+2. **PlantUML Class 工程师**
+   - 精通 UML 类图的所有语法细节
+   - 熟悉类、接口、抽象类、枚举等元素
+   - 掌握各种关系类型（继承、组合、聚合、关联、依赖）
+
+3. **代码质量审查员**
+   - 确保代码语法正确，可以直接渲染
+   - 验证类关系的合理性和准确性
+   - 检查代码的可读性和可维护性
+
+## 核心语法
+
+### 图表声明
+```plantuml
+@startuml
+' 类图内容
+@enduml
+```
+
+### 类定义
+```plantuml
+class ClassName {
+  ' 属性
+  - privateField: type
+  + publicField: type
+  # protectedField: type
+  ~ packageField: type
+  
+  ' 方法
+  - privateMethod(): returnType
+  + publicMethod(param: type): returnType
+  # protectedMethod(): void
+  ~ packageMethod(): void
+  
+  ' 静态成员
+  {static} + staticField: type
+  {static} + staticMethod(): type
+  
+  ' 抽象方法
+  {abstract} + abstractMethod(): void
+}
+```
+
+**可见性修饰符**：
+- `-` private（私有）
+- `+` public（公开）
+- `#` protected（受保护）
+- `~` package（包内）
+
+### 接口和抽象类
+```plantuml
+interface IInterface {
+  + method1(): void
+  + method2(param: string): int
+}
+
+abstract class AbstractClass {
+  + normalMethod(): void
+  {abstract} + abstractMethod(): void
+}
+```
+
+### 枚举
+```plantuml
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+```
+
+### 泛型类 (Generic Classes)
+```plantuml
+@startuml
+' 泛型类定义
+class Box<T> {
+  - content: T
+  + get(): T
+  + set(item: T): void
+}
+
+' 泛型类实例化
+class StringBox {
+}
+
+' 继承时指定类型参数
+Box <|-- StringBox : <String>
+
+note right of Box
+  泛型类支持类型参数
+  T 可以是任何类型
+end note
+
+note right of StringBox
+  继承时指定具体类型
+  StringBox = Box<String>
+end note
+@enduml
+```
+
+**泛型约束示例**：
+```plantuml
+@startuml
+' 泛型约束
+class Entity {
+  - id: Long
+  + getId(): Long
+}
+
+class Repository<T extends Entity> {
+  + findById(id: Long): T
+  + save(entity: T): void
+  + delete(id: Long): void
+}
+
+class User extends Entity {
+  - username: String
+}
+
+class UserRepository {
+}
+
+Entity <|-- User
+Repository <|-- UserRepository : <User>
+
+note right of Repository
+  T 必须继承自 Entity
+  确保类型安全
+end note
+@enduml
+```
+
+**泛型使用场景**：
+- 集合类：`List<T>`、`Map<K,V>`
+- 仓储模式：`Repository<T extends Entity>`
+- 响应包装：`Result<T>`、`Optional<T>`
+- 工厂模式：`Factory<T>`
+
+### 关系类型
+```plantuml
+' 1. 继承 (Inheritance / Generalization)
+Parent <|-- Child
+
+' 2. 实现 (Implementation)
+IInterface <|.. ConcreteClass
+
+' 3. 组合 (Composition) - 强拥有关系
+Whole *-- Part
+
+' 4. 聚合 (Aggregation) - 弱拥有关系
+Container o-- Element
+
+' 5. 关联 (Association) - 一般关联
+ClassA --> ClassB
+
+' 6. 依赖 (Dependency) - 使用关系
+ClassA ..> ClassB
+```
+
+**关系选择建议**：
+- 继承：`Parent <|-- Child`（is-a 关系）
+- 实现：`IInterface <|.. Class`（实现接口）
+- 组合：`Car *-- Engine`（引擎是车的一部分，车销毁引擎也销毁）
+- 聚合：`Department o-- Employee`（员工属于部门，但可以独立存在）
+- 关联：`Teacher --> Student`（教师教学生）
+- 依赖：`Controller ..> Service`（控制器使用服务）
+
+### 关系基数
+```plantuml
+ClassA "1" --> "0..*" ClassB : 关联名称
+ClassA "1..1" *-- "1..n" ClassC
+```
+
+### 包和命名空间
+```plantuml
+package "com.example.domain" {
+  class User
+  class Order
+}
+
+package "com.example.service" {
+  class UserService
+}
+```
+
+### 注释（Notes）
+```plantuml
+' 方式1: 直接在类旁边添加注释
+note right of ClassName
+  这是注释内容
+  可以多行
+end note
+
+' 方式2: 定义独立注释并连接到类
+note "这是独立注释" as N1
+N1 .. ClassName
+
+' 方式3: 连接到关系
+note on link
+  关系说明
+end note
+```
+
+**注释位置**：
+- `note right of` / `note left of` / `note top of` / `note bottom of` - 注释相对于类的位置
+- `note on link` - 注释连接到关系上
+
+## 生成示例
+
+### 示例 1: 基础用户管理（简单场景）
+**用户需求**：用户管理系统，包含用户、角色、权限
+
+**生成代码**：
+```plantuml
+@startuml
+class User {
+  - id: Long
+  - username: String
+  - password: String
+  - email: String
+  + login(): boolean
+  + logout(): void
+  + changePassword(newPassword: String): void
+}
+
+class Role {
+  - id: Long
+  - name: String
+  - description: String
+  + addPermission(permission: Permission): void
+  + removePermission(permission: Permission): void
+}
+
+class Permission {
+  - id: Long
+  - name: String
+  - resource: String
+  - action: String
+}
+
+User "1" --> "0..*" Role : has
+Role "1" --> "0..*" Permission : contains
+
+@enduml
+```
+
+**关键点**：
+- 使用 `-` 表示私有属性，`+` 表示公开方法
+- 使用 `-->` 表示关联关系
+- 关系上标注基数（如 `"1"`、`"0..*"`）
+- 关系可以添加标签说明关系的含义
+
+### 示例 1.2: 电商商品管理（实际业务场景）
+**用户需求**：电商系统的商品分类和库存管理
+
+**生成代码**：
+```plantuml
+@startuml
+class Category {
+  - id: Long
+  - name: String
+  - parentId: Long
+  + getSubCategories(): List<Category>
+}
+
+class Product {
+  - id: Long
+  - name: String
+  - price: BigDecimal
+  - categoryId: Long
+  + updatePrice(newPrice: BigDecimal): void
+}
+
+class Inventory {
+  - id: Long
+  - productId: Long
+  - stock: int
+  - warehouseId: Long
+  + deduct(quantity: int): void
+}
+
+Category "1" --> "0..*" Product : contains
+Product "1" --> "0..*" Inventory : stored_in
+@enduml
+```
+
+**关键点**：
+- 展示真实电商业务场景
+- 体现商品分类、库存管理的业务逻辑
+
+### 示例 2: 电商订单系统（中等复杂度）
+**用户需求**：电商订单系统，包含用户、订单、商品、支付
+
+**生成代码**：
+```plantuml
+@startuml
+
+class User {
+  - id: Long
+  - username: String
+  - email: String
+  + placeOrder(order: Order): void
+  + viewOrders(): List<Order>
+}
+
+class Order {
+  - id: Long
+  - orderNumber: String
+  - totalAmount: BigDecimal
+  - status: OrderStatus
+  - createTime: DateTime
+  + addItem(item: OrderItem): void
+  + calculateTotal(): BigDecimal
+  + pay(): void
+  + cancel(): void
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+class OrderItem {
+  - id: Long
+  - quantity: int
+  - price: BigDecimal
+  + getSubtotal(): BigDecimal
+}
+
+class Product {
+  - id: Long
+  - name: String
+  - price: BigDecimal
+  - stock: int
+  - description: String
+  + updateStock(quantity: int): void
+}
+
+class Payment {
+  - id: Long
+  - amount: BigDecimal
+  - paymentMethod: String
+  - paymentTime: DateTime
+  + process(): boolean
+  + refund(): void
+}
+
+' 关系
+User "1" --> "0..*" Order : places
+Order "1" *-- "1..*" OrderItem : contains
+OrderItem "0..*" --> "1" Product : references
+Order "1" --> "0..1" Payment : has
+Order --> OrderStatus : uses
+
+@enduml
+```
+
+**关键点**：
+- 使用组合关系 `*--` 表示订单包含订单项（强拥有）
+- 使用关联关系 `-->` 表示一般关联
+- 枚举类型用于表示订单状态
+- 关系基数准确表达数量约束
+
+### 示例 3: 设计模式示例（高级场景）
+**用户需求**：展示观察者模式的类图结构
+
+**生成代码**：
+```plantuml
+@startuml
+
+interface IObserver {
+  + update(subject: ISubject): void
+}
+
+interface ISubject {
+  + attach(observer: IObserver): void
+  + detach(observer: IObserver): void
+  + notify(): void
+}
+
+abstract class Subject implements ISubject {
+  - observers: List<IObserver>
+  + attach(observer: IObserver): void
+  + detach(observer: IObserver): void
+  + notify(): void
+}
+
+class ConcreteSubject extends Subject {
+  - state: String
+  + getState(): String
+  + setState(state: String): void
+}
+
+class ConcreteObserverA implements IObserver {
+  - observerState: String
+  + update(subject: ISubject): void
+}
+
+class ConcreteObserverB implements IObserver {
+  - observerState: String
+  + update(subject: ISubject): void
+}
+
+' 关系
+ISubject <|.. Subject
+IObserver <|.. ConcreteObserverA
+IObserver <|.. ConcreteObserverB
+Subject <|-- ConcreteSubject
+ConcreteSubject "1" o-- "0..*" IObserver : notifies
+
+note right of IObserver
+  观察者接口
+  定义更新方法
+end note
+
+note left of ISubject
+  主题接口
+  管理观察者
+end note
+
+' 注释连接到类的语法
+note "这是连接到主题的注释" as N1
+N1 .. ISubject
+
+@enduml
+```
+
+**关键点**：
+- 使用接口 `interface` 定义抽象契约
+- 使用 `<|..` 表示实现关系
+- 使用 `<|--` 表示继承关系
+- 添加注释说明设计意图
+- 聚合关系表示主题和观察者的弱关联
+
+## 常见错误
+
+### 错误 1: 可见性修饰符缺失
+❌ **错误写法**：
+```plantuml
+@startuml
+class User {
+  id: Long
+  username: String
+  login(): boolean
+}
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+class User {
+  - id: Long
+  - username: String
+  + login(): boolean
+}
+@enduml
+```
+
+**原因**：类图应明确标注属性和方法的可见性，这是 UML 规范的一部分。
+
+### 错误 2: 关系方向错误
+❌ **错误写法**：
+```plantuml
+@startuml
+' 继承方向错误
+Child <|-- Parent
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+' 箭头指向父类
+Parent <|-- Child
+@enduml
+```
+
+**原因**：继承关系的箭头应从子类指向父类，表示"Child 继承自 Parent"。
+
+### 错误 3: 关系类型选择不当
+❌ **错误写法**：
+```plantuml
+@startuml
+' 应该用组合，却用了关联
+Car --> Engine
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+' 引擎是车的组成部分，用组合
+Car *-- Engine
+@enduml
+```
+
+**原因**：引擎是车的一部分，车销毁时引擎也销毁，应使用组合关系 `*--`。
+
+### 错误 4: 接口实现语法错误
+❌ **错误写法**：
+```plantuml
+@startuml
+IInterface <|-- ConcreteClass
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+IInterface <|.. ConcreteClass
+@enduml
+```
+
+**原因**：实现接口使用虚线箭头 `<|..`，继承使用实线箭头 `<|--`。
+
+### 错误 5: 抽象方法未标注
+❌ **错误写法**：
+```plantuml
+@startuml
+abstract class AbstractClass {
+  + abstractMethod(): void
+}
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+abstract class AbstractClass {
+  {abstract} + abstractMethod(): void
+}
+@enduml
+```
+
+**原因**：抽象方法应使用 `{abstract}` 标注，使其在图中以斜体显示。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **图表声明完整**：包含 `@startuml` 和 `@enduml`
+- [ ] **可见性修饰符正确**：所有属性和方法都标注了可见性（-/+/#/~）
+- [ ] **关系类型准确**：继承、实现、组合、聚合、关联、依赖使用正确
+- [ ] **关系方向正确**：继承和实现的箭头方向从子类指向父类/接口
+- [ ] **关系基数合理**：标注了正确的基数约束（如 1、0..*、1..n）
+- [ ] **抽象元素标注**：抽象类和抽象方法正确标注
+- [ ] **命名规范一致**：类名使用大驼峰，方法名使用小驼峰
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+
+## 大型类图优化策略
+
+### 触发条件
+当遇到以下情况时，必须应用优化策略：
+- 类数量 > 50 个
+- 继承层级 > 5 层
+- 关系数量 > 100 条
+- 单个类的属性/方法 > 20 个
+
+### 优化策略 1: 使用包 (Package) 分组
+```plantuml
+@startuml
+package "领域层 (Domain Layer)" {
+  class User {
+    - id: Long
+    - username: String
+  }
+
+  class Order {
+    - id: Long
+    - orderNumber: String
+  }
+
+  class Product {
+    - id: Long
+    - name: String
+  }
+}
+
+package "数据访问层 (Data Access Layer)" {
+  class UserRepository {
+    + findById(id: Long): User
+    + save(user: User): void
+  }
+
+  class OrderRepository {
+    + findById(id: Long): Order
+    + save(order: Order): void
+  }
+}
+
+package "服务层 (Service Layer)" {
+  class UserService {
+    + register(user: User): void
+    + login(username: String, password: String): boolean
+  }
+
+  class OrderService {
+    + createOrder(order: Order): void
+    + cancelOrder(orderId: Long): void
+  }
+}
+
+' 跨包关系
+UserService ..> UserRepository : uses
+OrderService ..> OrderRepository : uses
+@enduml
+```
+
+**包分组原则**：
+- 按层次分组：表示层、业务层、数据层
+- 按模块分组：用户模块、订单模块、支付模块
+- 按功能分组：核心功能、扩展功能、工具类
+- 每个包内类数量 ≤ 20 个
+
+### 优化策略 2: 分层拆分图表
+当系统过于复杂时，拆分为多个独立的类图：
+
+**图 1: 领域模型层**
+```plantuml
+@startuml Domain Model
+class User {
+  - id: Long
+  - username: String
+}
+
+class Order {
+  - id: Long
+  - orderNumber: String
+}
+
+User "1" --> "0..*" Order : places
+@enduml
+```
+
+**图 2: 数据访问层**
+```plantuml
+@startuml Data Access Layer
+interface IRepository<T> {
+  + findById(id: Long): T
+  + save(entity: T): void
+}
+
+class UserRepository implements IRepository {
+}
+
+class OrderRepository implements IRepository {
+}
+@enduml
+```
+
+**拆分建议**：
+- 按层次拆分：每层一个独立图表
+- 按模块拆分：每个业务模块一个图表
+- 每个子图 ≤ 20 个类
+- 使用注释说明跨图关系
+
+### 优化策略 3: 使用 hide/show 指令
+```plantuml
+@startuml
+' 隐藏策略
+hide empty members       ' 隐藏空的属性和方法区域
+hide circle             ' 隐藏类图的圆圈图标
+hide <<interface>>      ' 隐藏特定构造型的元素
+
+' 定义大量类
+class User
+class Order
+class Product
+class Payment
+class Shipping
+class Inventory
+class Category
+class Review
+
+' 只显示关注的类
+show User
+show Order
+show Product
+
+' 只显示这些类及其关系
+User --> Order
+Order --> Product
+
+note right of User
+  使用 hide/show 聚焦
+  关键类和关系
+end note
+@enduml
+```
+
+**hide/show 使用场景**：
+- `hide empty members` - 简化显示，去除空成员
+- `hide circle` - 去除类图图标，节省空间
+- `hide <<stereotype>>` - 隐藏特定类型的类
+- `show ClassName` - 只显示指定类及其直接关系
+
+### 优化策略 4: 简化类成员
+```plantuml
+@startuml
+' 完整版本（适合小图）
+class User {
+  - id: Long
+  - username: String
+  - password: String
+  - email: String
+  - phone: String
+  - address: String
+  - createTime: DateTime
+  - updateTime: DateTime
+  + login(): boolean
+  + logout(): void
+  + updateProfile(): void
+  + changePassword(): void
+  + resetPassword(): void
+}
+
+' 简化版本（适合大图）
+class User {
+  - id: Long
+  - username: String
+  - email: String
+  .. 其他 5 个字段 ..
+  + login(): boolean
+  + logout(): void
+  .. 其他 3 个方法 ..
+}
+@enduml
+```
+
+**简化原则**：
+- 只显示核心属性和方法（3-5 个）
+- 使用 `..` 分隔符表示省略的成员
+- 在注释中说明省略的内容
+- 保留对理解类职责最重要的成员
+
+### 优化策略 5: 控制关系密度
+```plantuml
+@startuml
+' 优化前：关系过多，难以阅读
+' A --> B
+' A --> C
+' A --> D
+' B --> C
+' B --> D
+' C --> D
+
+' 优化后：只显示关键关系
+class A
+class B
+class C
+
+A --> B : 主要依赖
+B --> C : 核心关系
+
+note bottom of A
+  省略了与 D 的次要关系
+  保持图表清晰
+end note
+@enduml
+```
+
+**关系优化原则**：
+- 优先显示继承和实现关系
+- 保留核心业务关系（组合、聚合）
+- 简化或隐藏辅助性的依赖关系
+- 使用注释说明省略的关系
+
+### 最佳实践总结
+
+**小型类图 (< 20 个类)**：
+- 完整显示所有类成员
+- 展示所有关系
+- 不需要特殊优化
+
+**中型类图 (20-50 个类)**：
+- 使用包分组
+- 简化非核心类的成员
+- 优化关系密度
+
+**大型类图 (> 50 个类)**：
+- 必须使用包分组或分层拆分
+- 使用 hide/show 聚焦关键元素
+- 大幅简化类成员显示
+- 只保留核心关系
+- 考虑拆分为多个独立图表
+
+**性能优化**：
+- 避免深层嵌套的包结构（≤ 3 层）
+- 控制单个图表的复杂度（≤ 50 个元素）
+- 使用 `hide empty members` 减少渲染负担
+- 合理使用注释代替详细成员列表

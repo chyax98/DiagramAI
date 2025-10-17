@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+  <!-- C4 模型层次结构 - 外层（系统上下文） -->
+  <rect x="2" y="2" width="20" height="20" rx="1" fill="none" stroke="#1168BD" stroke-width="2"/>
+
+  <!-- 中层（容器） -->
+  <rect x="4" y="4" width="16" height="16" rx="1" fill="none" stroke="#438DD5" stroke-width="1.5"/>
+
+  <!-- 内层（组件） -->
+  <rect x="6" y="6" width="12" height="12" rx="0.5" fill="none" stroke="#85BBF0" stroke-width="1"/>
+
+  <!-- 核心元素 -->
+  <rect x="8" y="8" width="8" height="8" rx="0.5" fill="#B3D9FF" stroke="none"/>
+
+  <!-- 层次标签 -->
+  <text x="3" y="6" font-size="3" fill="#1168BD" font-family="Arial, sans-serif" font-weight="bold">1</text>
+  <text x="5" y="8" font-size="3" fill="#438DD5" font-family="Arial, sans-serif" font-weight="bold">2</text>
+  <text x="7" y="10" font-size="3" fill="#85BBF0" font-family="Arial, sans-serif" font-weight="bold">3</text>
+  <text x="9" y="12" font-size="3" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="bold">4</text>
+
+  <!-- C4 标识 -->
+  <text x="10.5" y="14" font-size="4" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle">C4</text>
+</svg>

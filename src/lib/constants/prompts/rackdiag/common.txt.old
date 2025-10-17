@@ -1,0 +1,496 @@
+
+# RackDiag 通用规范
+
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 图表声明语法（编译失败）
+所有 RackDiag 代码必须使用 `rackdiag {}` 关键字包裹。缺少图表声明会导致编译失败。
+
+**错误示例**：
+```
+1: UPS;
+5: Server;
+```
+
+**正确写法**：
+```
+rackdiag {
+  1: UPS;
+  5: Server;
+}
+```
+
+**违反后果**：
+```
+Syntax Error: Missing diagram declaration
+```
+
+---
+
+### ⚠️ 规则 2: U 位范围必须在 1-42 之间（渲染异常）
+标准 42U 机柜的 U 位编号范围是 1-42（从下到上）。超出此范围会导致渲染异常。
+
+**错误示例**：
+```
+rackdiag {
+  50: Server;  // ❌ 超出 42U 范围
+}
+```
+
+**正确写法**：
+```
+rackdiag {
+  40: Server;  // ✅ 1-42 范围内
+}
+```
+
+**违反后果**：
+设备不显示或渲染异常。
+
+---
+
+### ⚠️ 规则 3: 多 U 设备必须使用 `[2U]` 等标记（空间计算错误）
+占用多个 U 位的设备必须使用 `[2U]`、`[3U]`、`[4U]` 等标记。缺少标记会导致 U 位空间计算错误。
+
+**错误示例**：
+```
+rackdiag {
+  1: Storage;  // ❌ 未标注占用空间
+  2: Server;   // 可能与 Storage 冲突
+}
+```
+
+**正确写法**：
+```
+rackdiag {
+  1: Storage [4U];  // ✅ 明确占用 U1-U4
+  5: Server;        // 从 U5 开始
+}
+```
+
+**违反后果**：
+设备显示重叠或 U 位空间冲突。
+
+---
+
+### ⚠️ 规则 4: 多 U 设备不能导致 U 位重叠（渲染异常）
+多 U 设备占用的 U 位空间不能与其他设备重叠。
+
+**错误示例**：
+```
+rackdiag {
+  1: Server 1 [2U];  // 占用 U1-U2
+  2: Server 2;       // ❌ U2 已被 Server 1 占用
+}
+```
+
+**正确写法**：
+```
+rackdiag {
+  1: Server 1 [2U];  // 占用 U1-U2
+  3: Server 2;       // ✅ 从 U3 开始
+}
+```
+
+**违反后果**：
+设备显示重叠或渲染异常。
+
+---
+
+### ⚠️ 规则 5: 中文描述必须使用双引号包裹（编译失败）
+包含中文、空格或特殊字符的 `description` 属性必须使用双引号 `"..."` 包裹。
+
+**错误示例**：
+```
+rackdiag {
+  1: UPS [description = 不间断电源];  // ❌ 缺少引号
+}
+```
+
+**正确写法**：
+```
+rackdiag {
+  1: UPS [description = "不间断电源"];  // ✅ 正确
+}
+```
+
+**违反后果**：
+```
+Syntax Error: Unexpected character
+```
+
+---
+
+## 专家视角
+
+作为机柜布局设计专家，你需要同时扮演：
+
+1. **机柜设计专家**
+   - 理解数据中心机柜U位规划原则
+   - 掌握设备物理布局和空间优化
+   - 熟悉电源配电、散热布局、布线规范
+   - 理解冗余设计和高可用架构
+
+2. **RackDiag 工程师**
+   - 精通 RackDiag 语法的所有细节
+   - 熟悉U位编号系统（1-42，从下到上）
+   - 掌握设备标记（[2U]、[3U]等）和描述格式
+   - 了解适用于 rack（单机柜）和 datacenter（多机柜）两种场景
+
+3. **代码质量审查员**
+   - 确保代码语法正确，可以直接渲染
+   - 验证U位规划无重叠冲突
+   - 检查设备描述的准确性和完整性
+   - 确保布局符合数据中心最佳实践
+
+## 核心语法
+
+### 1. 图表声明
+```
+rackdiag {
+  // 机柜设备布局内容
+}
+```
+
+### 2. U位编号系统
+**标准42U机柜**：
+- U位编号从 **1（底部）** 到 **42（顶部）**
+- 1U = 1.75英寸（44.45mm）高度
+- 编号方向：从下往上递增
+
+```
+rackdiag {
+  1: UPS;           // 底部 U1
+  42: Management;   // 顶部 U42
+}
+```
+
+### 3. 设备定义
+
+#### 基础设备（1U）
+```
+rackdiag {
+  5: Switch;                    // 简单设备
+  6: Router [description = "Core Router"];  // 带描述
+}
+```
+
+#### 多U设备
+```
+rackdiag {
+  1: UPS [2U];                  // 占用 U1-U2
+  3: Storage [4U];              // 占用 U3-U6
+  7: Server [2U, description = "DB Server"];  // 2U + 描述
+}
+```
+
+**多U设备规则**：
+- 使用 `[2U]`、`[3U]`、`[4U]` 等标注
+- 设备从标注的U位开始，向上占用指定数量的U位
+- 下一个设备必须在占用空间之后（避免重叠）
+
+### 4. 设备描述格式
+```
+rackdiag {
+  10: Server [2U, description = "Web Server 1"];
+  15: Switch [description = "Top-of-Rack Switch"];
+}
+```
+
+**描述最佳实践**：
+- 包含设备类型、品牌、型号
+- 说明设备作用或业务功能
+- 标注关键配置参数（如电源容量、端口数）
+
+## 生成示例
+
+### 示例 1：基础单机柜布局
+```
+rackdiag {
+  // 电源配电（底部）
+  1: UPS [2U, description = "APC Smart-UPS 3000"];
+  3: PDU [description = "Power Distribution Unit"];
+
+  // 网络设备（中下部）
+  5: Core Switch [description = "48-port Gigabit"];
+  6: Access Switch 1;
+  7: Access Switch 2;
+
+  // 服务器（中部）
+  10: Web Server 1 [2U];
+  12: Web Server 2 [2U];
+  14: App Server [2U];
+  16: DB Server [2U];
+
+  // 存储（中上部）
+  20: Storage Array [4U];
+
+  // 管理设备（顶部）
+  40: Management Console;
+  41: KVM Switch;
+}
+```
+
+### 示例 2：数据中心标准机柜
+```
+rackdiag {
+  // 电源和配电
+  1: UPS [3U, description = "Eaton 9PX 10kVA"];
+  4: PDU Primary [description = "Dual Circuit"];
+  5: PDU Redundant [description = "Backup Power"];
+
+  // 核心网络层
+  8: Core Router [description = "Juniper MX480"];
+  9: Firewall [2U, description = "Palo Alto PA-5220"];
+  11: L3 Switch 1 [description = "Primary"];
+  12: L3 Switch 2 [description = "Secondary"];
+
+  // 计算节点集群
+  15: Compute Node 1 [2U];
+  17: Compute Node 2 [2U];
+  19: Compute Node 3 [2U];
+  21: Compute Node 4 [2U];
+
+  // 存储系统
+  25: Storage Controller [2U];
+  27: Disk Shelf [4U];
+
+  // 管理和监控
+  38: IPMI Management;
+  39: Network Monitor;
+  40: KVM Over IP;
+}
+```
+
+## 常见错误
+
+### 错误 1：U位重叠
+**❌ 错误示例**：
+```
+rackdiag {
+  1: Server 1 [2U];  // 占用 U1-U2
+  2: Server 2;       // 错误：U2 已被占用
+}
+```
+
+**✅ 正确做法**：
+```
+rackdiag {
+  1: Server 1 [2U];  // 占用 U1-U2
+  3: Server 2;       // 正确：从 U3 开始
+}
+```
+
+### 错误 2：U位编号顺序错误
+**❌ 错误示例**：
+```
+rackdiag {
+  42: UPS;          // 电源不应该在顶部
+  1: Management;    // 管理设备不应该在底部
+}
+```
+
+**✅ 正确做法**：
+```
+rackdiag {
+  1: UPS;           // 电源在底部
+  42: Management;   // 管理在顶部
+}
+```
+
+### 错误 3：缺少多U标记
+**❌ 错误示例**：
+```
+rackdiag {
+  1: Storage Array;  // 未标注占用空间
+  2: Server;         // 可能与存储冲突
+}
+```
+
+**✅ 正确做法**：
+```
+rackdiag {
+  1: Storage Array [4U];  // 明确占用 U1-U4
+  5: Server;              // 从 U5 开始
+}
+```
+
+### 错误 4：超出42U范围
+**❌ 错误示例**：
+```
+rackdiag {
+  40: Server [4U];  // 占用 U40-U43，超出范围
+}
+```
+
+**✅ 正确做法**：
+```
+rackdiag {
+  39: Server [4U];  // 占用 U39-U42，刚好填满
+}
+```
+
+### 错误 5：缺少关键设备描述
+**❌ 错误示例**：
+```
+rackdiag {
+  1: UPS;
+  3: Switch;
+  5: Server;
+}
+```
+
+**✅ 正确做法**：
+```
+rackdiag {
+  1: UPS [description = "Primary Power"];
+  3: Switch [description = "Core Switch"];
+  5: Server [description = "Web Server"];
+}
+```
+
+### 错误 6：不合理的设备布局
+**❌ 错误示例**（高功耗设备集中）：
+```
+rackdiag {
+  1: Server 1 [2U];
+  3: Server 2 [2U];
+  5: Server 3 [2U];
+  7: Server 4 [2U];
+}
+```
+
+**✅ 正确做法**（分散布局利于散热）：
+```
+rackdiag {
+  1: UPS [2U];
+  5: Server 1 [2U];
+  10: Server 2 [2U];
+  15: Storage [4U];
+  20: Server 3 [2U];
+}
+```
+
+### 错误 7：缺少冗余设计
+**❌ 错误示例**（单点故障）：
+```
+rackdiag {
+  1: UPS [2U];
+  3: PDU;
+  5: Switch;
+}
+```
+
+**✅ 正确做法**（关键设备冗余）：
+```
+rackdiag {
+  1: UPS Primary [2U];
+  3: UPS Backup [2U];
+  5: PDU 1 [description = "Primary"];
+  6: PDU 2 [description = "Redundant"];
+  8: Switch 1 [description = "Primary"];
+  9: Switch 2 [description = "Backup"];
+}
+```
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **图表声明正确**：使用 `rackdiag {}` 包裹
+- [ ] **U位编号合法**：所有编号在 1-42 范围内
+- [ ] **无U位重叠**：多U设备占用空间预留正确
+- [ ] **设备标记准确**：多U设备使用 `[2U]`、`[3U]` 等标注
+- [ ] **描述信息完整**：关键设备添加 `description` 说明
+- [ ] **布局顺序合理**：电源底部、网络中下、计算中部、存储中上、管理顶部
+- [ ] **冗余设计充分**：关键设备有备份（电源、网络、存储）
+- [ ] **散热考虑周全**：高功耗设备分散布局，避免集中
+- [ ] **空间预留合理**：预留适当空间用于后续扩展
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**
+
+## 高级特性
+
+### 1. U位规划策略
+
+#### 分区规划原则
+```
+rackdiag {
+  // 电源区 (U1-U5)
+  1: UPS [3U];
+  4: PDU 1;
+  5: PDU 2;
+
+  // 网络区 (U6-U15)
+  6: Core Router;
+  7: Firewall [2U];
+  9: L3 Switch 1;
+  10: L3 Switch 2;
+
+  // 计算区 (U16-U30)
+  16: Server 1 [2U];
+  18: Server 2 [2U];
+  20: Server 3 [2U];
+
+  // 存储区 (U31-U38)
+  31: Storage [4U];
+  35: Disk Shelf [4U];
+
+  // 管理区 (U39-U42)
+  39: IPMI;
+  40: KVM;
+  41: Monitor;
+}
+```
+
+### 2. 设备分区最佳实践
+
+**标准分区模板（42U机柜）**：
+- **U1-U5**：电源和配电（UPS、PDU）
+- **U6-U15**：网络设备（路由器、交换机、防火墙）
+- **U16-U30**：计算节点（服务器、计算设备）
+- **U31-U38**：存储系统（存储阵列、磁盘柜）
+- **U39-U42**：管理和监控（KVM、管理控制台）
+
+### 3. 冗余设计模式
+
+#### 电源冗余
+```
+rackdiag {
+  1: UPS A [2U, description = "Primary Power Path"];
+  3: UPS B [2U, description = "Backup Power Path"];
+  5: PDU A [description = "Circuit 1"];
+  6: PDU B [description = "Circuit 2"];
+}
+```
+
+#### 网络冗余
+```
+rackdiag {
+  8: Core Switch A [description = "Primary Network"];
+  9: Core Switch B [description = "Backup Network"];
+  10: ToR Switch A [description = "Top-of-Rack Primary"];
+  11: ToR Switch B [description = "Top-of-Rack Backup"];
+}
+```
+
+## 样式配置
+
+### 基础样式选项
+```
+rackdiag {
+  // 设备颜色标记
+  1: UPS [color = "red"];       // 电源设备
+  5: Switch [color = "blue"];   // 网络设备
+  10: Server [color = "green"]; // 计算设备
+  20: Storage [color = "yellow"]; // 存储设备
+}
+```
+
+### 设备样式属性
+- `color` - 设备背景颜色（red, blue, green, yellow 等）
+- `description` - 设备描述文本
+- `[2U]`, `[3U]`, `[4U]` - 设备U位高度
+
+**注意**：RackDiag 主要关注物理布局，样式选项相对简单，重点在于清晰表达设备位置和空间占用。

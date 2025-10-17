@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+  <!-- ASCII 字符风格的美化图形 -->
+  <!-- 左侧：ASCII 文本 -->
+  <text x="3" y="6" font-family="monospace" font-size="4" fill="#9E9E9E">+--+</text>
+  <text x="3" y="10" font-family="monospace" font-size="4" fill="#9E9E9E">|  |</text>
+  <text x="3" y="14" font-family="monospace" font-size="4" fill="#9E9E9E">+--+</text>
+
+  <!-- 箭头 -->
+  <text x="10" y="10" font-family="monospace" font-size="5" fill="#9E9E9E">-></text>
+
+  <!-- 右侧：美化后的 SVG -->
+  <rect x="15" y="4" width="6" height="8" rx="1" fill="none" stroke="#8BC34A" stroke-width="2"/>
+  <line x1="17" y1="6" x2="19" y2="6" stroke="#8BC34A" stroke-width="1"/>
+  <line x1="17" y1="8" x2="19" y2="8" stroke="#8BC34A" stroke-width="1"/>
+  <line x1="17" y1="10" x2="19" y2="10" stroke="#8BC34A" stroke-width="1"/>
+
+  <!-- 装饰线 -->
+  <line x1="3" y1="18" x2="21" y2="18" stroke="#E0E0E0" stroke-width="0.5" stroke-dasharray="2,2"/>
+
+  <!-- 标签 -->
+  <text x="12" y="22" font-size="3" fill="#666" text-anchor="middle">ASCII → SVG</text>
+</svg>

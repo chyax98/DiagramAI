@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <!-- 背景 -->
+  <rect width="256" height="256" rx="24" fill="#EC4899"/>
+
+  <!-- Graphviz 节点和边 -->
+  <!-- 顶部节点 -->
+  <circle cx="128" cy="60" r="20" fill="white" stroke="#EC4899" stroke-width="3"/>
+
+  <!-- 中间节点 (左) -->
+  <circle cx="70" cy="128" r="20" fill="white" stroke="#EC4899" stroke-width="3"/>
+
+  <!-- 中间节点 (右) -->
+  <circle cx="186" cy="128" r="20" fill="white" stroke="#EC4899" stroke-width="3"/>
+
+  <!-- 底部节点 -->
+  <circle cx="128" cy="196" r="20" fill="white" stroke="#EC4899" stroke-width="3"/>
+
+  <!-- 边/箭头 -->
+  <defs>
+    <marker id="graphviz-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="white"/>
+    </marker>
+  </defs>
+
+  <path d="M 118 75 L 80 113" stroke="white" stroke-width="4" marker-end="url(#graphviz-arrow)"/>
+  <path d="M 138 75 L 176 113" stroke="white" stroke-width="4" marker-end="url(#graphviz-arrow)"/>
+  <path d="M 70 148 L 70 176" stroke="white" stroke-width="4" marker-end="url(#graphviz-arrow)"/>
+  <path d="M 75 150 L 108 181" stroke="white" stroke-width="4" marker-end="url(#graphviz-arrow)"/>
+  <path d="M 181 150 L 148 181" stroke="white" stroke-width="4" marker-end="url(#graphviz-arrow)"/>
+
+  <!-- DOT 文字 -->
+  <text x="128" y="240" font-family="monospace" font-size="16" font-weight="bold" fill="white" text-anchor="middle">DOT</text>
+</svg>

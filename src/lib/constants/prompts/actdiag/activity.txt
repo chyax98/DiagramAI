@@ -1,0 +1,246 @@
+
+# ActDiag Activity 生成要求
+
+## 图表类型：活动图（Activity Diagram）
+
+活动图用于展示并行活动流程图，强调活动的时间顺序和并行关系，适用于：
+- 业务流程中的并行任务
+- 多阶段项目执行流程
+- 时间线活动规划
+
+## 核心语法
+
+### 基础活动图
+```
+actdiag {
+  A [label = "任务 A"];
+  B [label = "任务 B"];
+  C [label = "任务 C"];
+  D [label = "任务 D"];
+
+  A -> B -> D;
+  A -> C -> D;
+}
+```
+
+**语法要点**：
+- 活动使用 `[label = "..."]` 定义
+- `->` 定义活动顺序
+- 并行活动从同一起点分叉
+
+### 并行活动展示
+```
+actdiag {
+  Start [label = "开始"];
+  Task1 [label = "任务 1"];
+  Task2 [label = "任务 2"];
+  Task3 [label = "任务 3"];
+  End [label = "结束"];
+
+  // 并行任务
+  Start -> Task1 -> End;
+  Start -> Task2 -> End;
+  Start -> Task3 -> End;
+}
+```
+
+## 生成示例
+
+### 示例 1: 软件发布流程（简单场景）
+**用户需求**：展示软件发布流程中的并行任务
+
+**生成代码**：
+```
+actdiag {
+  Start [label = "开始发布"];
+  CodeReview [label = "代码审查"];
+  UnitTest [label = "单元测试"];
+  Integration [label = "集成测试"];
+  Build [label = "构建"];
+  Deploy [label = "部署"];
+  Verify [label = "验证"];
+  End [label = "发布完成"];
+
+  // 并行执行代码审查和测试
+  Start -> CodeReview -> Build;
+  Start -> UnitTest -> Build;
+  Start -> Integration -> Build;
+
+  // 串行执行构建、部署、验证
+  Build -> Deploy -> Verify -> End;
+}
+```
+
+**关键点**：
+- 代码审查、单元测试、集成测试并行执行
+- 完成后汇聚到构建步骤
+- 构建后串行执行部署和验证
+
+### 示例 2: 项目开发流程（中等复杂度）
+**用户需求**：展示敏捷开发迭代中的并行活动
+
+**生成代码**：
+```
+actdiag {
+  // 迭代开始
+  SprintStart [label = "Sprint 开始"];
+
+  // 需求阶段
+  RequirementAnalysis [label = "需求分析"];
+  DesignReview [label = "设计评审"];
+
+  // 并行开发
+  Feature1 [label = "功能 1 开发"];
+  Feature2 [label = "功能 2 开发"];
+  Feature3 [label = "功能 3 开发"];
+
+  // 并行测试
+  UnitTest1 [label = "功能 1 测试"];
+  UnitTest2 [label = "功能 2 测试"];
+  UnitTest3 [label = "功能 3 测试"];
+
+  // 集成
+  Integration [label = "功能集成"];
+  SystemTest [label = "系统测试"];
+  UAT [label = "用户验收"];
+
+  // 发布
+  Release [label = "发布"];
+  Retrospective [label = "回顾会议"];
+  SprintEnd [label = "Sprint 结束"];
+
+  // 流程连接
+  SprintStart -> RequirementAnalysis -> DesignReview;
+
+  // 并行开发
+  DesignReview -> Feature1 -> UnitTest1 -> Integration;
+  DesignReview -> Feature2 -> UnitTest2 -> Integration;
+  DesignReview -> Feature3 -> UnitTest3 -> Integration;
+
+  // 串行集成和测试
+  Integration -> SystemTest -> UAT -> Release -> Retrospective -> SprintEnd;
+}
+```
+
+**关键点**：
+- 需求分析和设计评审串行执行
+- 三个功能并行开发和测试
+- 完成后汇聚到集成步骤
+- 集成后串行执行系统测试、验收、发布
+
+### 示例 3: 数据处理管道（高级场景）
+**用户需求**：展示大数据处理流程中的并行处理阶段
+
+**生成代码**：
+```
+actdiag {
+  // 数据采集
+  Start [label = "开始"];
+  DataIngestion [label = "数据采集"];
+
+  // 并行数据清洗
+  CleanLog [label = "日志清洗"];
+  CleanUser [label = "用户数据清洗"];
+  CleanTransaction [label = "交易数据清洗"];
+
+  // 并行数据转换
+  TransformLog [label = "日志转换"];
+  TransformUser [label = "用户数据转换"];
+  TransformTransaction [label = "交易数据转换"];
+
+  // 并行数据加载
+  LoadDataWarehouse [label = "加载数据仓库"];
+  LoadCache [label = "加载缓存"];
+  LoadSearchEngine [label = "加载搜索引擎"];
+
+  // 数据验证
+  Validate [label = "数据验证"];
+
+  // 报表生成
+  GenerateReport [label = "生成报表"];
+  Notify [label = "通知用户"];
+  End [label = "结束"];
+
+  // 流程连接
+  Start -> DataIngestion;
+
+  // 并行清洗
+  DataIngestion -> CleanLog -> TransformLog -> LoadDataWarehouse;
+  DataIngestion -> CleanUser -> TransformUser -> LoadDataWarehouse;
+  DataIngestion -> CleanTransaction -> TransformTransaction -> LoadDataWarehouse;
+
+  // 并行加载
+  LoadDataWarehouse -> Validate;
+  TransformLog -> LoadCache -> Validate;
+  TransformUser -> LoadSearchEngine -> Validate;
+
+  // 串行验证和报表
+  Validate -> GenerateReport -> Notify -> End;
+}
+```
+
+**关键点**：
+- 数据采集后分三路并行处理
+- 每路数据独立完成清洗→转换→加载
+- 部分数据还需要额外加载到缓存和搜索引擎
+- 所有数据加载完成后汇聚到验证步骤
+- 验证后串行执行报表生成和通知
+
+## 常见错误
+
+### 错误 1: 并行活动未正确连接
+**❌ 错误写法**：
+```
+actdiag {
+  A -> B;
+  A -> C;
+  D;  // D 孤立，未连接
+}
+```
+
+**✅ 正确写法**：
+```
+actdiag {
+  A [label = "开始"];
+  B [label = "任务 B"];
+  C [label = "任务 C"];
+  D [label = "结束"];
+
+  A -> B -> D;
+  A -> C -> D;
+}
+```
+
+**原因**：所有并行活动最终应该汇聚到某个节点。
+
+### 错误 2: 活动缺少标签
+**❌ 错误写法**：
+```
+actdiag {
+  A -> B -> C;
+}
+```
+
+**✅ 正确写法**：
+```
+actdiag {
+  A [label = "任务 A"];
+  B [label = "任务 B"];
+  C [label = "任务 C"];
+
+  A -> B -> C;
+}
+```
+
+**原因**：所有活动都应该定义清晰的标签。
+
+## 生成检查清单
+
+- [ ] **图表声明**：使用 `actdiag {}` 包裹
+- [ ] **活动标签**：所有活动都定义了 `label`
+- [ ] **并行分支**：并行活动从同一起点分叉
+- [ ] **汇聚点**：并行活动最终汇聚到某个节点
+- [ ] **时间线清晰**：活动的先后顺序明确
+- [ ] **代码可渲染**：语法正确，可直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

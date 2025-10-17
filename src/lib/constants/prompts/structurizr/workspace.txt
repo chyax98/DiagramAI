@@ -1,0 +1,626 @@
+# Workspace (完整工作空间)
+
+生成一个完整的 Structurizr workspace，包含 model 和 views 两个主要部分。
+
+## Workspace 结构详解
+
+Structurizr workspace 由三个核心部分组成：
+
+### 1. Model (模型)
+model 块定义了架构的所有元素和它们之间的关系：
+
+**元素类型**：
+- `person` - 用户、角色、外部参与者
+- `softwareSystem` - 软件系统（边界）
+- `container` - 容器（应用程序、数据库、微服务等）
+- `component` - 组件（代码模块、类库）
+- `deploymentNode` - 部署节点（服务器、容器、云资源）
+
+**关系语法**：
+```
+source -> destination "描述" "技术（可选）" {
+    tags "标签1" "标签2"
+}
+```
+
+**嵌套规则**：
+- Person 和 Software System 在 model 根层
+- Container 必须在 Software System 内部
+- Component 必须在 Container 内部
+- Deployment Node 可以嵌套（如：云 → 区域 → 集群 → 节点）
+
+### 2. Views (视图)
+views 块定义了如何可视化模型中的元素：
+
+**视图类型**：
+- `systemLandscape` - 企业级全景视图（所有系统和用户）
+- `systemContext` - 系统上下文视图（单个系统的边界和外部依赖）
+- `container` - 容器视图（系统内部的技术架构）
+- `component` - 组件视图（容器内部的代码结构）
+- `deployment` - 部署视图（运行时基础设施）
+- `dynamic` - 动态视图（时序交互流程）
+- `filtered` - 过滤视图（基于标签过滤元素）
+
+**视图配置**：
+- `include *` - 包含所有相关元素
+- `include element1 element2` - 仅包含指定元素
+- `exclude element` - 排除特定元素
+- `autolayout lr/tb/rl/bt` - 自动布局方向（左右/上下/右左/下上）
+- `autoLayout lr 300 50` - 自动布局 + 节点间距控制
+- `title "标题"` - 视图标题
+
+### 3. Configuration (配置)
+configuration 块定义样式和主题：
+
+**样式配置**：
+- `element` - 元素样式（形状、颜色、图标）
+- `relationship` - 关系样式（线条、颜色、粗细）
+- `theme` - 主题（预定义样式集）
+
+**注意**：Kroki 对样式支持有限，建议聚焦于结构，简化样式。
+
+## 关键要求
+
+1. **完整性**: workspace 必须包含：
+   - `model {}` - 定义所有元素和关系
+   - `views {}` - 定义至少一个视图
+   - 可选 `configuration {}` - 样式定义
+
+2. **视图选择**: 根据用户需求选择合适的视图类型：
+   - 企业级 → System Landscape
+   - 单系统边界 → System Context
+   - 技术架构 → Container
+   - 代码结构 → Component
+   - 部署环境 → Deployment
+   - 业务流程 → Dynamic
+
+3. **层次规范**: 遵循 C4 模型的嵌套规则：
+   - Person 和 Software System 在 model 根层
+   - Container 在 Software System 内部
+   - Component 在 Container 内部
+
+4. **布局**: 优先使用 `autolayout lr/tb`，除非用户明确要求手动布局
+
+## 高级特性
+
+### 标识符策略
+
+**层次标识符（推荐）**：
+```
+!identifiers hierarchical
+```
+使用层次标识符后，元素自动继承父级前缀：
+- `mySystem.webApp` 而不是手动命名
+- 避免标识符冲突
+- 更清晰的命名空间
+
+**示例**：
+```
+!identifiers hierarchical
+
+model {
+    ecommerce = softwareSystem "电商系统" {
+        webApp = container "Web 应用"        # 实际 ID: ecommerce.webApp
+        database = container "数据库"        # 实际 ID: ecommerce.database
+    }
+}
+```
+
+### 模块化组织
+
+使用 `!include` 将大型 workspace 拆分为多个文件：
+
+**主文件（workspace.dsl）**：
+```
+workspace "企业架构" {
+    !include model.dsl
+    !include views.dsl
+    !include styles.dsl
+}
+```
+
+**模型文件（model.dsl）**：
+```
+model {
+    !include users.dsl
+    !include systems.dsl
+}
+```
+
+**注意**：Kroki 不支持 `!include`，仅用于本地开发。
+
+### 逻辑分组
+
+使用 `group` 对相关元素进行逻辑分组：
+
+```
+model {
+    group "前台系统" {
+        webPortal = softwareSystem "门户网站"
+        mobileApp = softwareSystem "移动应用"
+    }
+
+    group "后台系统" {
+        admin = softwareSystem "管理后台"
+        crm = softwareSystem "CRM 系统"
+    }
+}
+```
+
+分组在视图中会显示为虚线边界框。
+
+### 隐含关系
+
+默认情况下，Structurizr 会自动创建隐含关系（从 Container 到 Container，从 Component 到 Component）。
+
+**禁用隐含关系**：
+```
+!impliedRelationships false
+```
+
+**使用场景**：
+- 当你需要完全控制关系时
+- 避免自动生成的关系造成混乱
+- 明确定义每一条关系
+
+### 标签系统
+
+标签用于分类和样式化元素：
+
+**定义标签**：
+```
+model {
+    user = person "用户" {
+        tags "External"
+    }
+
+    api = container "API" "REST API" "Node.js" {
+        tags "Backend" "Critical"
+    }
+}
+```
+
+**在视图中使用标签过滤**：
+```
+views {
+    filtered "backend" {
+        include element.tag==Backend
+        autolayout lr
+    }
+}
+```
+
+## 样式配置
+
+### 基本样式结构
+
+configuration 块用于自定义元素和关系的视觉样式：
+
+```
+configuration {
+    styles {
+        element "标签" {
+            shape 形状
+            background 背景色
+            color 文字颜色
+            icon 图标URL
+        }
+
+        relationship "标签" {
+            color 线条颜色
+            thickness 线条粗细
+            style solid/dashed/dotted
+        }
+    }
+}
+```
+
+### 常用元素样式
+
+**Person 样式**：
+```
+element "Person" {
+    shape Person
+    background #08427b
+    color #ffffff
+}
+```
+
+**Software System 样式**：
+```
+element "Software System" {
+    shape RoundedBox
+    background #1168bd
+    color #ffffff
+}
+```
+
+**Container 样式**：
+```
+element "Container" {
+    shape RoundedBox
+    background #438dd5
+    color #ffffff
+}
+```
+
+**Database 样式**：
+```
+element "Database" {
+    shape Cylinder
+    background #438dd5
+    color #ffffff
+}
+```
+
+### 关系样式
+
+**同步调用**：
+```
+relationship "Synchronous" {
+    color #707070
+    thickness 2
+    style solid
+}
+```
+
+**异步消息**：
+```
+relationship "Asynchronous" {
+    color #707070
+    thickness 2
+    style dashed
+}
+```
+
+### 可用形状列表
+
+Structurizr 支持的形状：
+- `Box` - 矩形（默认）
+- `RoundedBox` - 圆角矩形
+- `Circle` - 圆形
+- `Ellipse` - 椭圆
+- `Hexagon` - 六边形
+- `Cylinder` - 圆柱体（数据库）
+- `Component` - 组件图标
+- `Person` - 人形图标
+- `Robot` - 机器人图标（外部系统）
+- `Folder` - 文件夹
+- `WebBrowser` - 浏览器
+- `MobileDevicePortrait` - 手机竖屏
+- `MobileDeviceLandscape` - 手机横屏
+- `Pipe` - 管道
+
+### Kroki 限制
+
+**注意**：Kroki 对 Structurizr 的样式支持有限：
+- ✅ 支持：基本形状、标签、布局
+- ❌ 不支持：自定义颜色、图标、主题
+- 建议：专注于结构清晰，简化样式
+
+## 完整示例
+
+以下是一个完整的电商系统 workspace 示例：
+
+```
+workspace "电商系统架构" "在线购物平台的 C4 架构" {
+
+    !identifiers hierarchical
+
+    model {
+        # 用户
+        customer = person "客户" "使用平台购物的用户"
+        admin = person "管理员" "管理平台的运营人员"
+
+        # 外部系统
+        paymentGateway = softwareSystem "支付网关" "第三方支付服务" {
+            tags "External"
+        }
+
+        emailSystem = softwareSystem "邮件系统" "发送通知邮件" {
+            tags "External"
+        }
+
+        # 核心系统
+        ecommerce = softwareSystem "电商系统" "提供在线购物功能" {
+
+            # 前端容器
+            webApp = container "Web 应用" "提供购物界面" "React" {
+                tags "Frontend"
+            }
+
+            mobileApp = container "移动应用" "移动端购物" "React Native" {
+                tags "Frontend"
+            }
+
+            # 后端容器
+            apiGateway = container "API 网关" "统一入口" "Nginx" {
+                tags "Backend"
+            }
+
+            orderService = container "订单服务" "处理订单逻辑" "Node.js" {
+                tags "Backend"
+
+                # 组件
+                orderController = component "订单控制器" "REST API" "Express"
+                orderProcessor = component "订单处理器" "业务逻辑" "TypeScript"
+                orderRepository = component "订单仓储" "数据访问" "TypeORM"
+
+                orderController -> orderProcessor "调用"
+                orderProcessor -> orderRepository "使用"
+            }
+
+            productService = container "商品服务" "管理商品信息" "Java" {
+                tags "Backend"
+            }
+
+            userService = container "用户服务" "用户认证授权" "Go" {
+                tags "Backend"
+            }
+
+            # 数据存储
+            orderDB = container "订单数据库" "存储订单数据" "PostgreSQL" {
+                tags "Database"
+            }
+
+            productDB = container "商品数据库" "存储商品数据" "MongoDB" {
+                tags "Database"
+            }
+
+            cache = container "缓存" "缓存热点数据" "Redis" {
+                tags "Database"
+            }
+        }
+
+        # 关系定义
+        customer -> webApp "访问" "HTTPS"
+        customer -> mobileApp "使用" "HTTPS"
+        admin -> webApp "管理" "HTTPS"
+
+        webApp -> apiGateway "调用 API" "JSON/HTTPS"
+        mobileApp -> apiGateway "调用 API" "JSON/HTTPS"
+
+        apiGateway -> orderService "路由请求" "HTTP"
+        apiGateway -> productService "路由请求" "HTTP"
+        apiGateway -> userService "路由请求" "HTTP"
+
+        orderService -> orderDB "读写" "SQL"
+        orderService -> paymentGateway "发起支付" "HTTPS"
+        orderService -> emailSystem "发送通知" "SMTP"
+        orderService -> cache "缓存订单" "Redis 协议"
+
+        productService -> productDB "读写" "MongoDB 协议"
+        productService -> cache "缓存商品" "Redis 协议"
+    }
+
+    views {
+        # 系统全景视图
+        systemLandscape "SystemLandscape" "系统全景" {
+            include *
+            autolayout lr
+        }
+
+        # 系统上下文视图
+        systemContext ecommerce "SystemContext" "电商系统上下文" {
+            include *
+            autolayout lr
+        }
+
+        # 容器视图
+        container ecommerce "Containers" "电商系统容器视图" {
+            include *
+            autolayout tb
+        }
+
+        # 组件视图（订单服务）
+        component orderService "OrderServiceComponents" "订单服务组件" {
+            include *
+            autolayout tb
+        }
+
+        # 动态视图（下单流程）
+        dynamic ecommerce "OrderFlow" "下单流程" {
+            customer -> webApp "1. 提交订单"
+            webApp -> apiGateway "2. 发送请求"
+            apiGateway -> orderService "3. 路由到订单服务"
+            orderService -> orderDB "4. 保存订单"
+            orderService -> paymentGateway "5. 发起支付"
+            paymentGateway -> orderService "6. 支付成功回调"
+            orderService -> emailSystem "7. 发送确认邮件"
+            autolayout lr
+        }
+    }
+
+    configuration {
+        styles {
+            element "Person" {
+                shape Person
+            }
+
+            element "Software System" {
+                shape RoundedBox
+            }
+
+            element "Container" {
+                shape RoundedBox
+            }
+
+            element "Database" {
+                shape Cylinder
+            }
+
+            element "External" {
+                background #999999
+            }
+
+            element "Frontend" {
+                background #85bbf0
+            }
+
+            element "Backend" {
+                background #5d82a8
+            }
+        }
+    }
+}
+```
+
+## 输出要求
+
+- 使用中文描述（除了 DSL 关键字）
+- 确保所有引用的元素都已定义
+- 视图中的元素必须存在于 model 中
+- 关系描述要清晰明确
+
+## 常见错误与解决方案
+
+### 错误 1: Workspace 缺少 views
+
+**错误代码**：
+```
+workspace "我的系统" {
+    model {
+        user = person "用户"
+        system = softwareSystem "系统"
+        user -> system "使用"
+    }
+    # 忘记定义 views
+}
+```
+
+**问题**：Workspace 必须包含至少一个视图，否则无法渲染。
+
+**正确代码**：
+```
+workspace "我的系统" {
+    model {
+        user = person "用户"
+        system = softwareSystem "系统"
+        user -> system "使用"
+    }
+
+    views {
+        systemContext system {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+### 错误 2: 元素前向引用
+
+**错误代码**：
+```
+workspace "系统架构" {
+    model {
+        # 关系引用了尚未定义的元素
+        user -> backend "调用"
+
+        user = person "用户"
+        backend = softwareSystem "后端系统"
+    }
+
+    views {
+        systemContext backend {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+**问题**：在定义关系时引用的元素 `backend` 尚未声明。
+
+**正确代码**：
+```
+workspace "系统架构" {
+    model {
+        # 先定义元素
+        user = person "用户"
+        backend = softwareSystem "后端系统"
+
+        # 再定义关系
+        user -> backend "调用"
+    }
+
+    views {
+        systemContext backend {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+### 错误 3: 标识符冲突
+
+**错误代码**：
+```
+workspace "多系统架构" {
+    model {
+        systemA = softwareSystem "系统 A" {
+            api = container "API" "REST API" "Node.js"
+        }
+
+        systemB = softwareSystem "系统 B" {
+            api = container "API" "REST API" "Java"  # 标识符冲突！
+        }
+    }
+
+    views {
+        container systemA {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+**问题**：两个不同系统中的容器使用了相同的标识符 `api`。
+
+**解决方案 1: 使用不同标识符**：
+```
+workspace "多系统架构" {
+    model {
+        systemA = softwareSystem "系统 A" {
+            apiA = container "API" "REST API" "Node.js"
+        }
+
+        systemB = softwareSystem "系统 B" {
+            apiB = container "API" "REST API" "Java"
+        }
+    }
+
+    views {
+        container systemA {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+**解决方案 2: 使用层次标识符**：
+```
+workspace "多系统架构" {
+    !identifiers hierarchical
+
+    model {
+        systemA = softwareSystem "系统 A" {
+            api = container "API" "REST API" "Node.js"  # 实际 ID: systemA.api
+        }
+
+        systemB = softwareSystem "系统 B" {
+            api = container "API" "REST API" "Java"  # 实际 ID: systemB.api
+        }
+    }
+
+    views {
+        container systemA {
+            include *
+            autolayout lr
+        }
+    }
+}
+```

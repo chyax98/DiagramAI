@@ -1,0 +1,485 @@
+# Deployment (部署图)
+
+生成软件的部署环境和基础设施架构。
+
+## 关键特点
+
+- **环境视图**: 展示部署环境（开发、测试、生产）
+- **Deployment Node**: 物理/虚拟节点（服务器、容器、云实例）
+- **Container Instance**: 容器的部署实例
+- **嵌套结构**: 节点可以嵌套（数据中心 > 服务器 > Docker）
+
+## 输出结构
+
+```
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            webApp = container "Web 应用" "前端" "React"
+            apiApp = container "API 应用" "后端" "Spring Boot"
+            database = container "数据库" "数据存储" "PostgreSQL"
+        }
+
+        # 生产环境部署
+        deploymentEnvironment "生产环境" {
+            deploymentNode "阿里云" {
+                deploymentNode "负载均衡器" "Nginx" {
+                    webAppInstance = containerInstance webApp
+                }
+
+                deploymentNode "Kubernetes 集群" "K8s" {
+                    deploymentNode "API Pod" "Docker" {
+                        apiAppInstance1 = containerInstance apiApp "实例1"
+                        apiAppInstance2 = containerInstance apiApp "实例2"
+                    }
+                }
+
+                deploymentNode "RDS" "托管数据库" {
+                    databaseInstance = containerInstance database
+                }
+            }
+        }
+    }
+
+    views {
+        deployment system "生产环境" "prod" "生产环境部署" {
+            include *
+            autolayout tb
+        }
+    }
+}
+```
+
+## 注意事项
+
+- 使用 `deploymentEnvironment` 区分环境（开发、测试、生产）
+- `deploymentNode` 可以嵌套，体现基础设施层次
+- `containerInstance` 映射容器到部署节点
+- 第二个参数可以指定技术（Docker、K8s、Nginx）
+- 适合运维团队和 SRE 理解部署架构
+
+## infrastructureNode 详解
+
+infrastructureNode 表示物理或虚拟的基础设施节点:
+
+### 基础用法
+
+```
+deploymentNode "服务器名称" "技术栈" {
+    # 容器实例
+}
+
+infrastructureNode "基础设施名称" "技术栈" {
+    # 不运行业务代码
+}
+```
+
+### 完整示例
+
+```
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            webApp = container "Web 应用" "前端" "React"
+            apiApp = container "API 应用" "后端" "Spring Boot"
+            database = container "数据库" "数据" "PostgreSQL"
+        }
+
+        deploymentEnvironment "生产环境" {
+            # 云服务提供商
+            deploymentNode "AWS" {
+                # 基础设施: CDN
+                cdn = infrastructureNode "CloudFront" "CDN" {
+                    tags "Infrastructure,CDN"
+                }
+
+                # 基础设施: 负载均衡器
+                alb = infrastructureNode "Application Load Balancer" "ALB" {
+                    tags "Infrastructure,LoadBalancer"
+                }
+
+                # 应用节点: EC2 集群
+                deploymentNode "EC2 集群" "Auto Scaling Group" {
+                    # Web 服务器
+                    deploymentNode "Web 服务器" "Nginx + Docker" {
+                        webAppInstance = containerInstance webApp
+                    }
+
+                    # API 服务器
+                    deploymentNode "API 服务器" "Docker" {
+                        apiAppInstance = containerInstance apiApp
+                    }
+                }
+
+                # 托管数据库
+                rds = deploymentNode "RDS" "托管数据库服务" {
+                    databaseInstance = containerInstance database
+                }
+
+                # 基础设施: 对象存储
+                s3 = infrastructureNode "S3" "对象存储" {
+                    tags "Infrastructure,Storage"
+                }
+
+                # 关系
+                cdn -> alb "转发动态请求"
+                alb -> webAppInstance "负载均衡"
+                alb -> apiAppInstance "负载均衡"
+                webAppInstance -> cdn "静态资源"
+                apiAppInstance -> s3 "存储文件"
+            }
+        }
+    }
+
+    views {
+        deployment system "生产环境" "prod" {
+            include *
+            autolayout tb
+        }
+    }
+}
+```
+
+**关键区别**:
+- **deploymentNode**: 运行容器实例(webApp, apiApp, database)
+- **infrastructureNode**: 不运行容器(CDN, LoadBalancer, S3)
+
+## 多环境对比示例
+
+展示开发、测试、生产三个环境的部署差异:
+
+```
+workspace {
+    model {
+        system = softwareSystem "电商系统" {
+            webApp = container "Web 应用" "前端" "React"
+            apiApp = container "API 应用" "后端" "Spring Boot"
+            database = container "数据库" "数据" "PostgreSQL"
+            redis = container "缓存" "缓存" "Redis"
+        }
+
+        # 开发环境: 单机部署
+        deploymentEnvironment "开发环境" {
+            deploymentNode "开发机" "MacBook Pro" {
+                deploymentNode "Docker Desktop" "Docker" {
+                    webAppDev = containerInstance webApp
+                    apiAppDev = containerInstance apiApp
+                    databaseDev = containerInstance database
+                    redisDev = containerInstance redis
+                }
+            }
+        }
+
+        # 测试环境: 简化集群
+        deploymentEnvironment "测试环境" {
+            deploymentNode "测试服务器" "Ubuntu 22.04" {
+                deploymentNode "Docker Compose" "Docker" {
+                    # 前端
+                    webAppTest = containerInstance webApp
+
+                    # 后端(单实例)
+                    apiAppTest = containerInstance apiApp
+
+                    # 数据
+                    databaseTest = containerInstance database
+                    redisTest = containerInstance redis
+                }
+            }
+        }
+
+        # 生产环境: 高可用集群
+        deploymentEnvironment "生产环境" {
+            deploymentNode "阿里云" {
+                # 负载均衡
+                slb = infrastructureNode "SLB" "负载均衡器" {
+                    tags "Infrastructure"
+                }
+
+                # CDN
+                cdn = infrastructureNode "阿里云 CDN" "内容分发" {
+                    tags "Infrastructure"
+                }
+
+                # Kubernetes 集群
+                deploymentNode "ACK 集群" "Kubernetes 1.28" {
+                    # 前端 Pod
+                    deploymentNode "Web Pod" "Docker" {
+                        instances "3"
+                        webAppProd1 = containerInstance webApp "实例 1"
+                        webAppProd2 = containerInstance webApp "实例 2"
+                        webAppProd3 = containerInstance webApp "实例 3"
+                    }
+
+                    # 后端 Pod
+                    deploymentNode "API Pod" "Docker" {
+                        instances "5"
+                        apiAppProd1 = containerInstance apiApp "实例 1"
+                        apiAppProd2 = containerInstance apiApp "实例 2"
+                        apiAppProd3 = containerInstance apiApp "实例 3"
+                        apiAppProd4 = containerInstance apiApp "实例 4"
+                        apiAppProd5 = containerInstance apiApp "实例 5"
+                    }
+                }
+
+                # 托管数据库(主从)
+                deploymentNode "RDS MySQL" "主从架构" {
+                    databaseProdMaster = containerInstance database "主库"
+                    databaseProdSlave = containerInstance database "从库"
+                }
+
+                # 托管缓存(集群)
+                deploymentNode "Redis 集群" "3 主 3 从" {
+                    redisProd1 = containerInstance redis "主节点 1"
+                    redisProd2 = containerInstance redis "主节点 2"
+                    redisProd3 = containerInstance redis "主节点 3"
+                }
+
+                # 对象存储
+                oss = infrastructureNode "OSS" "对象存储" {
+                    tags "Infrastructure"
+                }
+
+                # 关系
+                cdn -> slb "动态请求"
+                slb -> webAppProd1 "负载均衡"
+                slb -> webAppProd2 "负载均衡"
+                slb -> webAppProd3 "负载均衡"
+                slb -> apiAppProd1 "负载均衡"
+                slb -> apiAppProd2 "负载均衡"
+                slb -> apiAppProd3 "负载均衡"
+                webAppProd1 -> cdn "静态资源"
+                apiAppProd1 -> databaseProdMaster "写操作"
+                apiAppProd1 -> databaseProdSlave "读操作"
+                apiAppProd1 -> redisProd1 "缓存"
+                apiAppProd1 -> oss "存储文件"
+            }
+        }
+    }
+
+    views {
+        # 开发环境视图
+        deployment system "开发环境" "dev" "开发环境部署" {
+            include *
+            autolayout lr
+        }
+
+        # 测试环境视图
+        deployment system "测试环境" "test" "测试环境部署" {
+            include *
+            autolayout lr
+        }
+
+        # 生产环境视图
+        deployment system "生产环境" "prod" "生产环境部署" {
+            include *
+            autolayout tb
+        }
+
+        # 对比: 容器视图(不关心部署)
+        container system "containers" "容器架构" {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+**环境差异总结**:
+- **开发环境**: 单机 Docker,所有容器在一台机器
+- **测试环境**: Docker Compose,单实例部署
+- **生产环境**: Kubernetes 集群,多实例高可用,主从/集群架构
+
+## softwareSystemInstance
+
+当部署图需要显示外部系统时,使用 softwareSystemInstance:
+
+```
+workspace {
+    model {
+        # 主系统
+        ecommerce = softwareSystem "电商系统" {
+            webApp = container "Web 应用" "前端" "React"
+            apiApp = container "API 应用" "后端" "Spring Boot"
+        }
+
+        # 外部系统
+        paymentGateway = softwareSystem "支付网关" {
+            tags "External"
+        }
+        logisticsAPI = softwareSystem "物流 API" {
+            tags "External"
+        }
+
+        deploymentEnvironment "生产环境" {
+            # 内部部署
+            deploymentNode "内网" {
+                deploymentNode "K8s 集群" {
+                    webAppInstance = containerInstance webApp
+                    apiAppInstance = containerInstance apiApp
+                }
+            }
+
+            # 外部系统实例
+            deploymentNode "第三方服务" {
+                # 支付网关实例
+                paymentInstance = softwareSystemInstance paymentGateway {
+                    tags "External,ThirdParty"
+                }
+
+                # 物流 API 实例
+                logisticsInstance = softwareSystemInstance logisticsAPI {
+                    tags "External,ThirdParty"
+                }
+            }
+
+            # 关系
+            apiAppInstance -> paymentInstance "调用支付" "HTTPS"
+            apiAppInstance -> logisticsInstance "查询物流" "HTTPS"
+        }
+    }
+
+    views {
+        deployment ecommerce "生产环境" "prod" {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+**使用场景**:
+- 显示外部系统在部署视图中的位置
+- 展示与第三方服务的网络关系
+- 标记外部依赖和通信方式
+
+## 常见错误
+
+### 错误 1: 忘记 deploymentEnvironment
+
+```
+# ❌ 错误: 直接定义 deploymentNode
+workspace {
+    model {
+        deploymentNode "服务器" {  # 错误:缺少环境
+            ...
+        }
+    }
+}
+
+# ✅ 正确: 必须先定义 deploymentEnvironment
+workspace {
+    model {
+        deploymentEnvironment "生产环境" {
+            deploymentNode "服务器" {
+                ...
+            }
+        }
+    }
+}
+```
+
+### 错误 2: containerInstance 指向不存在的容器
+
+```
+# ❌ 错误: 容器未定义
+workspace {
+    model {
+        deploymentEnvironment "生产" {
+            deploymentNode "服务器" {
+                webAppInstance = containerInstance webApp  # webApp 未定义
+            }
+        }
+    }
+}
+
+# ✅ 正确: 先定义容器
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            webApp = container "Web" "..." "..."
+        }
+        
+        deploymentEnvironment "生产" {
+            deploymentNode "服务器" {
+                webAppInstance = containerInstance webApp
+            }
+        }
+    }
+}
+```
+
+### 错误 3: 混淆 deploymentNode 和 infrastructureNode
+
+```
+# ❌ 错误: 把 CDN 当作 deploymentNode
+deploymentNode "CloudFront" "CDN" {
+    webAppInstance = containerInstance webApp  # CDN 不运行容器
+}
+
+# ✅ 正确: CDN 是基础设施
+infrastructureNode "CloudFront" "CDN" {
+    tags "Infrastructure"
+}
+```
+
+### 错误 4: 嵌套层次过深
+
+```
+# ❌ 错误: 嵌套 5 层
+deploymentNode "云服务商" {
+    deploymentNode "区域" {
+        deploymentNode "可用区" {
+            deploymentNode "集群" {
+                deploymentNode "节点" {
+                    deploymentNode "Pod" {  # 过深
+                        ...
+                    }
+                }
+            }
+        }
+    }
+}
+
+# ✅ 正确: 控制在 3-4 层
+deploymentNode "云服务商" {
+    deploymentNode "Kubernetes 集群" {
+        deploymentNode "Pod" {
+            containerInstance ...
+        }
+    }
+}
+```
+
+### 错误 5: 部署视图包含不相关的环境
+
+```
+# ❌ 错误: 视图混合多个环境
+views {
+    deployment system "生产环境" "mixed" {
+        include *  # 包含所有环境的实例
+    }
+}
+
+# ✅ 正确: 视图指定单个环境
+views {
+    deployment system "生产环境" "prod" {
+        include *  # 只包含生产环境
+    }
+    
+    deployment system "测试环境" "test" {
+        include *  # 只包含测试环境
+    }
+}
+```
+
+### 错误 6: 忘记标记基础设施节点
+
+```
+# ❌ 错误: 无法区分应用节点和基础设施
+loadBalancer = infrastructureNode "负载均衡器" "..." "..."
+
+# ✅ 正确: 使用标签标记
+loadBalancer = infrastructureNode "负载均衡器" "..." "..." {
+    tags "Infrastructure,LoadBalancer"
+}
+```

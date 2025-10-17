@@ -1,0 +1,93 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+*.tgz
+
+# Cache
+.cache/
+.temp/
+.tmp/
+*.cache
+
+# Database files
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+logs/
+*.log
+*.jsonl
+
+# Reports and review files
+reports/
+
+.bmad-core
+.claude
+claudedocs/
+.factory/
+
+# Claude learning sessions (keep templates and docs)
+.claude/learning/session-*.md
+.claude/learning/learner-profile.md
+.claude/learning/backup/
+.claude/learning/exports/
+
+# Legacy and backup files
+*.legacy
+*.backup
+*~
+
+# Tests
+**/__tests__/
+**/*.test.ts*

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": [
+    "src/app/**/{page,layout,loading,error,not-found,global-error}.{ts,tsx}",
+    "src/app/api/**/route.ts",
+    "src/middleware.ts",
+    "src/contexts/**/*.tsx"
+  ],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    "src/types/**",
+    "**/*.d.ts",
+    "**/__tests__/**",
+    "**/*.test.{ts,tsx}",
+    "**/*.spec.{ts,tsx}"
+  ],
+  "ignoreDependencies": ["@types/*"],
+  "next": {
+    "entry": [
+      "src/app/**/{page,layout,loading,error,not-found}.{ts,tsx}",
+      "src/app/api/**/route.ts"
+    ]
+  }
+}

@@ -1,0 +1,812 @@
+# BPMN 2.0 语法规范 (L2: 语言通用规范)
+
+## BPMN 简介
+
+**BPMN (Business Process Model and Notation)** 是 OMG (Object Management Group) 制定的业务流程建模标准,用于以图形化方式描述业务流程。
+
+### BPMN 2.0 核心特性
+
+- **标准化**: 国际标准 (ISO/IEC 19510),全球通用
+- **可执行性**: XML 格式可被流程引擎执行 (如 Camunda, Activiti)
+- **表达力**: 支持复杂业务逻辑、异常处理、事务管理
+- **跨组织**: 支持泳道 (Swimlane) 表达多方协作
+
+### Kroki 渲染模式
+
+Kroki 支持 BPMN 2.0 XML 渲染,使用 `bpmn-js` 引擎:
+
+**支持模式**:
+- ✅ **完整 XML 结构**: 包含命名空间和流程定义
+- ✅ **图形信息**: 支持 BPMNDiagram 布局信息 (可选)
+
+**输出格式**: SVG (推荐), PNG
+
+## 核心概念
+
+### BPMN 图表类型
+
+1. **Process Diagram (流程图)**: 最常用,描述端到端业务流程
+2. **Collaboration Diagram (协作图)**: 多个参与者的交互流程
+3. **Choreography Diagram (编排图)**: 消息驱动的流程编排 (高级用法)
+
+### 五大核心元素
+
+1. **Flow Objects (流对象)**:
+   - Task (任务)
+   - Event (事件)
+   - Gateway (网关)
+
+2. **Connecting Objects (连接对象)**:
+   - Sequence Flow (顺序流)
+   - Message Flow (消息流)
+   - Association (关联)
+
+3. **Swimlanes (泳道)**:
+   - Pool (池)
+   - Lane (泳道)
+
+4. **Artifacts (工件)**:
+   - Data Object (数据对象)
+   - Group (分组)
+   - Annotation (注释)
+
+5. **Data (数据)**:
+   - Data Store (数据存储)
+   - Message (消息)
+
+---
+
+## XML 结构规范
+
+### 必需的命名空间
+
+所有 BPMN 2.0 文档必须声明以下命名空间:
+
+```xml
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://bpmn.io/schema/bpmn"
+             id="Definitions_1">
+  <!-- BPMN 内容 -->
+</definitions>
+```
+
+**命名空间说明**:
+- `xmlns` (默认): BPMN 2.0 模型命名空间 (必需)
+- `bpmndi`: BPMN 图形交换信息 (Diagram Interchange, 可选)
+- `dc`: OMG 绘图元素 (可选,配合 bpmndi)
+- `di`: OMG 图形信息 (可选,配合 bpmndi)
+- `xsi`: XML Schema 实例命名空间 (可选)
+- `targetNamespace`: 文档目标命名空间
+
+### 两层结构: 逻辑层 + 视觉层 (可选)
+
+#### 逻辑层 (<process>)
+
+定义业务流程的**逻辑结构**,不包含视觉布局信息:
+
+```xml
+<process id="Process_1" isExecutable="false">
+  <!-- 事件、任务、网关等 -->
+  <startEvent id="StartEvent_1" name="开始"/>
+  <task id="Task_1" name="执行任务"/>
+  <sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1"/>
+</process>
+```
+
+#### 视觉层 (<bpmndi:BPMNDiagram>) - 可选
+
+定义元素的**坐标、尺寸、样式**,用于图形渲染:
+
+```xml
+<bpmndi:BPMNDiagram id="BPMNDiagram_1">
+  <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+    <bpmndi:BPMNShape id="Shape_StartEvent_1" bpmnElement="StartEvent_1">
+      <dc:Bounds x="150" y="100" width="36" height="36"/>
+    </bpmndi:BPMNShape>
+    <bpmndi:BPMNShape id="Shape_Task_1" bpmnElement="Task_1">
+      <dc:Bounds x="250" y="80" width="100" height="80"/>
+    </bpmndi:BPMNShape>
+    <bpmndi:BPMNEdge id="Edge_Flow_1" bpmnElement="Flow_1">
+      <di:waypoint x="186" y="118"/>
+      <di:waypoint x="250" y="120"/>
+    </bpmndi:BPMNEdge>
+  </bpmndi:BPMNPlane>
+</bpmndi:BPMNDiagram>
+```
+
+**关键点**:
+- 逻辑层元素使用 `id` 属性标识
+- 视觉层元素使用 `bpmnElement` 属性引用逻辑层元素
+- **视觉层可选**: Kroki 可以自动布局,不强制要求 BPMNDiagram
+
+### 最小化 BPMN 模板
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://bpmn.io/schema/bpmn"
+             id="Definitions_1">
+
+  <process id="Process_1" isExecutable="false">
+    <startEvent id="StartEvent_1" name="开始"/>
+    <task id="Task_1" name="任务"/>
+    <endEvent id="EndEvent_1" name="结束"/>
+    <sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1"/>
+    <sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="EndEvent_1"/>
+  </process>
+
+</definitions>
+```
+
+---
+
+## 核心元素类型
+
+### 1. 事件 (Events)
+
+事件表示流程中发生的事情,分为三类:
+
+#### Start Events (开始事件)
+
+**触发流程启动的事件**:
+
+- **None Start Event (空开始事件)**: 最常用
+  ```xml
+  <startEvent id="StartEvent_1" name="流程开始"/>
+  ```
+
+- **Message Start Event (消息开始事件)**: 收到消息后启动
+  ```xml
+  <startEvent id="StartEvent_1" name="收到订单">
+    <messageEventDefinition id="MessageEventDefinition_1"/>
+  </startEvent>
+  ```
+
+- **Timer Start Event (定时开始事件)**: 定时启动
+  ```xml
+  <startEvent id="StartEvent_1" name="每日凌晨">
+    <timerEventDefinition id="TimerEventDefinition_1">
+      <timeCycle xsi:type="tFormalExpression">0 0 0 * * ?</timeCycle>
+    </timerEventDefinition>
+  </startEvent>
+  ```
+
+- **Signal Start Event (信号开始事件)**: 收到广播信号
+  ```xml
+  <startEvent id="StartEvent_1" name="收到告警">
+    <signalEventDefinition id="SignalEventDefinition_1"/>
+  </startEvent>
+  ```
+
+**规则**:
+- ✅ 不能有 incoming sequence flow
+- ✅ 必须有至少一个 outgoing sequence flow
+- ✅ 每个流程至少有一个开始事件
+
+#### End Events (结束事件)
+
+**终止流程的事件**:
+
+- **None End Event (空结束事件)**: 最常用
+  ```xml
+  <endEvent id="EndEvent_1" name="流程结束"/>
+  ```
+
+- **Message End Event (消息结束事件)**: 发送消息后结束
+  ```xml
+  <endEvent id="EndEvent_1" name="发送确认邮件">
+    <messageEventDefinition id="MessageEventDefinition_2"/>
+  </endEvent>
+  ```
+
+- **Error End Event (错误结束事件)**: 抛出错误
+  ```xml
+  <endEvent id="EndEvent_1" name="错误结束">
+    <errorEventDefinition id="ErrorEventDefinition_1"/>
+  </endEvent>
+  ```
+
+- **Terminate End Event (终止结束事件)**: 强制终止所有活动路径
+  ```xml
+  <endEvent id="EndEvent_1" name="紧急终止">
+    <terminateEventDefinition id="TerminateEventDefinition_1"/>
+  </endEvent>
+  ```
+
+**规则**:
+- ✅ 必须有至少一个 incoming sequence flow
+- ✅ 不能有 outgoing sequence flow
+- ✅ 每个流程至少有一个结束事件
+
+#### Intermediate Events (中间事件)
+
+**流程执行过程中触发的事件**:
+
+- **Intermediate Throw Event (中间抛出事件)**: 主动触发
+  ```xml
+  <intermediateThrowEvent id="IntermediateEvent_1" name="发送通知">
+    <messageEventDefinition id="MessageEventDefinition_3"/>
+  </intermediateThrowEvent>
+  ```
+
+- **Intermediate Catch Event (中间捕获事件)**: 等待事件发生
+  ```xml
+  <intermediateCatchEvent id="IntermediateEvent_2" name="等待审批">
+    <messageEventDefinition id="MessageEventDefinition_4"/>
+  </intermediateCatchEvent>
+  ```
+
+- **Timer Intermediate Event (定时器中间事件)**: 等待时间
+  ```xml
+  <intermediateCatchEvent id="IntermediateEvent_3" name="等待2小时">
+    <timerEventDefinition id="TimerEventDefinition_2">
+      <timeDuration xsi:type="tFormalExpression">PT2H</timeDuration>
+    </timerEventDefinition>
+  </intermediateCatchEvent>
+  ```
+
+**规则**:
+- ✅ 必须有 incoming 和 outgoing sequence flow
+- ✅ Catching Event: 等待事件发生后继续
+- ✅ Throwing Event: 触发事件后继续
+
+### 2. 任务 (Tasks)
+
+任务表示需要执行的工作单元:
+
+#### Task (通用任务)
+```xml
+<task id="Task_1" name="处理订单"/>
+```
+
+#### User Task (用户任务)
+需要人工参与的任务:
+```xml
+<userTask id="Task_2" name="人工审批"/>
+```
+
+#### Service Task (服务任务)
+自动化任务,由系统执行:
+```xml
+<serviceTask id="Task_3" name="调用API"/>
+```
+
+#### Script Task (脚本任务)
+执行脚本代码:
+```xml
+<scriptTask id="Task_4" name="计算总价" scriptFormat="javascript">
+  <script>total = price * quantity;</script>
+</scriptTask>
+```
+
+#### Send Task (发送任务)
+发送消息:
+```xml
+<sendTask id="Task_5" name="发送邮件">
+  <messageEventDefinition id="MessageEventDefinition_5"/>
+</sendTask>
+```
+
+#### Receive Task (接收任务)
+等待接收消息:
+```xml
+<receiveTask id="Task_6" name="等待响应">
+  <messageEventDefinition id="MessageEventDefinition_6"/>
+</receiveTask>
+```
+
+#### Manual Task (手动任务)
+系统外的手动操作:
+```xml
+<manualTask id="Task_7" name="现场检查"/>
+```
+
+#### Business Rule Task (业务规则任务)
+执行业务规则:
+```xml
+<businessRuleTask id="Task_8" name="信用评分"/>
+```
+
+### 3. 网关 (Gateways)
+
+网关控制流程的分支和汇聚:
+
+#### Exclusive Gateway (排他网关)
+
+**XOR 逻辑**: 只能选择一条路径
+
+```xml
+<exclusiveGateway id="Gateway_1" name="金额检查" default="Flow_Default"/>
+<sequenceFlow id="Flow_2" name="&lt; 1000" sourceRef="Gateway_1" targetRef="Task_Auto">
+  <conditionExpression xsi:type="tFormalExpression">${amount &lt; 1000}</conditionExpression>
+</sequenceFlow>
+<sequenceFlow id="Flow_3" name="&gt;= 1000" sourceRef="Gateway_1" targetRef="Task_Manual">
+  <conditionExpression xsi:type="tFormalExpression">${amount &gt;= 1000}</conditionExpression>
+</sequenceFlow>
+<sequenceFlow id="Flow_Default" name="其他" sourceRef="Gateway_1" targetRef="Task_Default"/>
+```
+
+**规则**:
+- ✅ 必须指定 `default` 默认流
+- ✅ 其他分支必须有 `conditionExpression`
+- ✅ 只有一条流会被激活
+- ✅ 特殊字符使用 XML 实体: `<` → `&lt;`, `>` → `&gt;`, `&` → `&amp;`
+
+#### Parallel Gateway (并行网关)
+
+**AND 逻辑**: 所有路径同时执行
+
+```xml
+<!-- 分支 -->
+<parallelGateway id="Gateway_2" name="并行处理"/>
+<sequenceFlow id="Flow_4" sourceRef="Gateway_2" targetRef="Task_A"/>
+<sequenceFlow id="Flow_5" sourceRef="Gateway_2" targetRef="Task_B"/>
+
+<!-- 汇聚 -->
+<parallelGateway id="Gateway_3" name="等待所有"/>
+<sequenceFlow id="Flow_6" sourceRef="Task_A" targetRef="Gateway_3"/>
+<sequenceFlow id="Flow_7" sourceRef="Task_B" targetRef="Gateway_3"/>
+```
+
+**规则**:
+- ✅ 分支: 所有 outgoing flow 同时激活
+- ✅ 汇聚: 等待所有 incoming flow 到达
+- ✅ 不需要条件表达式
+- ✅ Fork 和 Join 必须成对使用
+
+#### Inclusive Gateway (包容网关)
+
+**OR 逻辑**: 可选择一条或多条路径
+
+```xml
+<inclusiveGateway id="Gateway_4" name="通知选项" default="Flow_Default"/>
+<sequenceFlow id="Flow_8" name="发送邮件" sourceRef="Gateway_4" targetRef="Task_Email">
+  <conditionExpression xsi:type="tFormalExpression">${emailEnabled == true}</conditionExpression>
+</sequenceFlow>
+<sequenceFlow id="Flow_9" name="发送短信" sourceRef="Gateway_4" targetRef="Task_SMS">
+  <conditionExpression xsi:type="tFormalExpression">${smsEnabled == true}</conditionExpression>
+</sequenceFlow>
+<sequenceFlow id="Flow_Default" sourceRef="Gateway_4" targetRef="Task_Next"/>
+```
+
+**规则**:
+- ✅ 可以激活一条或多条流
+- ✅ 必须有 `default` 默认流
+- ✅ 其他流必须有条件表达式
+- ✅ 汇聚时: 等待所有被激活的分支
+
+#### Event-Based Gateway (事件网关)
+
+**等待事件**: 第一个到达的事件决定路径
+
+```xml
+<eventBasedGateway id="Gateway_5" name="等待事件"/>
+<intermediateCatchEvent id="Event_Message" name="收到消息">
+  <messageEventDefinition id="MessageEventDefinition_7"/>
+</intermediateCatchEvent>
+<intermediateCatchEvent id="Event_Timeout" name="2小时超时">
+  <timerEventDefinition id="TimerEventDefinition_3">
+    <timeDuration xsi:type="tFormalExpression">PT2H</timeDuration>
+  </timerEventDefinition>
+</intermediateCatchEvent>
+<sequenceFlow sourceRef="Gateway_5" targetRef="Event_Message"/>
+<sequenceFlow sourceRef="Gateway_5" targetRef="Event_Timeout"/>
+```
+
+**规则**:
+- ✅ outgoing flow 必须指向 Intermediate Catch Event 或 Receive Task
+- ✅ 第一个到达的事件激活对应流程
+- ✅ 其他分支被取消
+
+### 4. 顺序流 (Sequence Flow)
+
+连接流对象的箭头:
+
+```xml
+<!-- 基本顺序流 -->
+<sequenceFlow id="Flow_1" sourceRef="Task_1" targetRef="Task_2"/>
+
+<!-- 带名称 -->
+<sequenceFlow id="Flow_2" name="审批通过" sourceRef="Task_1" targetRef="Task_2"/>
+
+<!-- 带条件 -->
+<sequenceFlow id="Flow_1" name="审批通过" sourceRef="Task_1" targetRef="Task_2">
+  <conditionExpression xsi:type="tFormalExpression">
+    ${approved == true}
+  </conditionExpression>
+</sequenceFlow>
+```
+
+**属性**:
+- `id`: 唯一标识符
+- `name`: 流名称 (可选,用于条件说明)
+- `sourceRef`: 来源元素 ID
+- `targetRef`: 目标元素 ID
+- `conditionExpression`: 条件表达式 (用于网关分支)
+
+**规则**:
+- ✅ 只能在同一个 Pool 内部
+- ✅ 不能跨越 Pool 边界
+- ✅ sourceRef 和 targetRef 必须精确匹配元素 ID
+
+---
+
+## 泳道 (Swimlanes)
+
+### Pool (池)
+
+代表一个参与者 (组织、角色或系统):
+
+```xml
+<collaboration id="Collaboration_1">
+  <!-- Pool 1: 客户 -->
+  <participant id="Participant_Customer" name="客户" processRef="Process_Customer"/>
+
+  <!-- Pool 2: 系统 -->
+  <participant id="Participant_System" name="系统" processRef="Process_System"/>
+
+  <!-- Black Box Pool (不显示内部流程) -->
+  <participant id="Participant_ExternalAPI" name="外部API"/>
+
+  <!-- 消息流 -->
+  <messageFlow id="MessageFlow_1" sourceRef="Task_SendRequest" targetRef="Participant_ExternalAPI"/>
+</collaboration>
+
+<process id="Process_Customer" isExecutable="false">
+  <task id="Task_SendRequest" name="发送请求"/>
+</process>
+
+<process id="Process_System" isExecutable="false">
+  <task id="Task_ProcessRequest" name="处理请求"/>
+</process>
+```
+
+**规则**:
+- ✅ 代表一个参与者 (组织、系统、角色)
+- ✅ 必须通过 `processRef` 引用 Process
+- ✅ Black Box Pool: 不指定 `processRef`
+- ✅ Pool 之间用 Message Flow 连接
+
+### Lane (泳道)
+
+在 Pool 内部进一步划分职责:
+
+```xml
+<process id="Process_OrderFulfillment">
+  <laneSet id="LaneSet_1">
+    <!-- 销售部门 -->
+    <lane id="Lane_Sales" name="销售部">
+      <flowNodeRef>Task_CreateOrder</flowNodeRef>
+      <flowNodeRef>Task_SendInvoice</flowNodeRef>
+    </lane>
+
+    <!-- 仓库部门 -->
+    <lane id="Lane_Warehouse" name="仓库">
+      <flowNodeRef>Task_PickItems</flowNodeRef>
+      <flowNodeRef>Task_PackOrder</flowNodeRef>
+    </lane>
+  </laneSet>
+
+  <!-- Flow Objects -->
+  <task id="Task_CreateOrder" name="创建订单"/>
+  <task id="Task_PickItems" name="拣货"/>
+  <task id="Task_PackOrder" name="打包"/>
+  <task id="Task_SendInvoice" name="发送发票"/>
+</process>
+```
+
+**规则**:
+- ✅ Lane 必须在 LaneSet 中定义
+- ✅ 用 `flowNodeRef` 指定包含的 Flow Objects
+- ✅ Lane 可以嵌套 (Sub-Lane)
+- ✅ 一个 Flow Object 只能属于一个 Lane
+
+### Message Flow (消息流)
+
+跨 Pool 通信:
+
+```xml
+<!-- 定义消息 -->
+<message id="Message_OrderRequest" name="订单请求"/>
+
+<!-- Pool A 发送消息 -->
+<sendTask id="Task_SendOrder" name="发送订单">
+  <messageEventDefinition messageRef="Message_OrderRequest"/>
+</sendTask>
+
+<!-- Pool B 接收消息 -->
+<receiveTask id="Task_ReceiveOrder" name="接收订单">
+  <messageEventDefinition messageRef="Message_OrderRequest"/>
+</receiveTask>
+
+<!-- 消息流连接 -->
+<messageFlow id="MessageFlow_1" sourceRef="Task_SendOrder" targetRef="Task_ReceiveOrder"/>
+```
+
+**规则**:
+- ✅ 只能在不同 Pool 之间
+- ✅ 不能在同一个 Pool 内部
+- ✅ 可以连接到: Message Event, Send/Receive Task, Pool 边界
+
+---
+
+## 高级特性
+
+### 子流程 (Sub-Process)
+
+将复杂流程封装为可复用的子流程:
+
+```xml
+<subProcess id="SubProcess_1" name="订单处理子流程">
+  <startEvent id="SubStart_1" name="开始"/>
+  <task id="SubTask_1" name="验证库存"/>
+  <task id="SubTask_2" name="计算价格"/>
+  <endEvent id="SubEnd_1" name="结束"/>
+  <sequenceFlow id="SubFlow_1" sourceRef="SubStart_1" targetRef="SubTask_1"/>
+  <sequenceFlow id="SubFlow_2" sourceRef="SubTask_1" targetRef="SubTask_2"/>
+  <sequenceFlow id="SubFlow_3" sourceRef="SubTask_2" targetRef="SubEnd_1"/>
+</subProcess>
+```
+
+### 边界事件 (Boundary Events)
+
+附加在任务上的事件,用于异常处理:
+
+```xml
+<task id="Task_1" name="处理订单"/>
+
+<!-- 超时边界事件 -->
+<boundaryEvent id="BoundaryEvent_1" name="超时" attachedToRef="Task_1" cancelActivity="true">
+  <timerEventDefinition id="TimerEventDefinition_4">
+    <timeDuration xsi:type="tFormalExpression">PT1H</timeDuration>
+  </timerEventDefinition>
+</boundaryEvent>
+
+<!-- 错误边界事件 -->
+<boundaryEvent id="BoundaryEvent_2" name="错误" attachedToRef="Task_1" cancelActivity="true">
+  <errorEventDefinition id="ErrorEventDefinition_2"/>
+</boundaryEvent>
+
+<task id="Task_Timeout" name="超时处理"/>
+<sequenceFlow id="Flow_Timeout" sourceRef="BoundaryEvent_1" targetRef="Task_Timeout"/>
+```
+
+**规则**:
+- ✅ 必须用 `attachedToRef` 附加到 Activity
+- ✅ `cancelActivity="true"`: 中断型 (中断活动)
+- ✅ `cancelActivity="false"`: 非中断型 (并行执行)
+- ✅ 不能有 incoming sequence flow
+
+### 多实例活动 (Multi-Instance)
+
+并行或顺序处理多个实例:
+
+```xml
+<!-- 并行多实例 - 多个审批人同时审批 -->
+<userTask id="Task_ParallelApproval" name="多人会签">
+  <multiInstanceLoopCharacteristics isSequential="false">
+    <loopCardinality>3</loopCardinality>
+    <completionCondition>${nrOfCompletedInstances &gt;= 2}</completionCondition>
+  </multiInstanceLoopCharacteristics>
+</userTask>
+
+<!-- 顺序多实例 - 多个审批人依次审批 -->
+<userTask id="Task_SequentialApproval" name="多级审批">
+  <multiInstanceLoopCharacteristics isSequential="true">
+    <loopCardinality>3</loopCardinality>
+  </multiInstanceLoopCharacteristics>
+</userTask>
+```
+
+### 数据对象 (Data Objects)
+
+表示流程中使用的数据:
+
+```xml
+<!-- 数据对象定义 -->
+<dataObject id="DataObject_1"/>
+
+<!-- 数据对象引用 -->
+<dataObjectReference id="DataObject_Order" name="订单数据" dataObjectRef="DataObject_1"/>
+
+<!-- 数据存储 -->
+<dataStoreReference id="DataStore_1" name="客户数据库"/>
+
+<!-- 数据输入关联 -->
+<task id="Task_1" name="任务1"/>
+<dataInputAssociation id="Association_1">
+  <sourceRef>DataObject_Order</sourceRef>
+  <targetRef>Task_1</targetRef>
+</dataInputAssociation>
+```
+
+### 文本注释 (Text Annotations)
+
+为流程元素添加说明:
+
+```xml
+<!-- 文本注释 -->
+<textAnnotation id="TextAnnotation_1">
+  <text>注意: 超过3天自动拒绝</text>
+</textAnnotation>
+
+<!-- 关联到活动 -->
+<association id="Association_1" sourceRef="Task_1" targetRef="TextAnnotation_1"/>
+```
+
+---
+
+## ID 命名规范
+
+**推荐的 ID 命名模式**:
+
+```xml
+<startEvent id="StartEvent_1"/>        <!-- 开始事件: StartEvent_序号 -->
+<endEvent id="EndEvent_1"/>            <!-- 结束事件: EndEvent_序号 -->
+<task id="Task_Submit"/>               <!-- 任务: Task_描述 -->
+<userTask id="UserTask_Approve"/>      <!-- 用户任务: UserTask_描述 -->
+<exclusiveGateway id="Gateway_Amount"/><!-- 网关: Gateway_描述 -->
+<sequenceFlow id="Flow_1"/>            <!-- 顺序流: Flow_序号 -->
+<lane id="Lane_Applicant"/>            <!-- 泳道: Lane_角色 -->
+```
+
+**命名规则**:
+- 所有 ID 必须在整个文档中唯一
+- 使用英文字母、数字和下划线,推荐驼峰命名
+- ID 应该具有语义,便于理解和维护
+- 中文描述放在 `name` 属性中
+
+---
+
+## XML 特殊字符编码
+
+在 XML 中必须使用实体编码特殊字符:
+
+| 字符 | 实体编码 | 使用场景                   |
+| ---- | -------- | -------------------------- |
+| `<`  | `&lt;`   | 条件表达式: `amount &lt; 1000`   |
+| `>`  | `&gt;`   | 条件表达式: `amount &gt; 1000`   |
+| `&`  | `&amp;`  | 逻辑运算: `a &amp;&amp; b` |
+| `"`  | `&quot;` | 字符串: `status == &quot;pending&quot;` |
+| `'`  | `&apos;` | 字符串: `status == &apos;done&apos;` |
+
+**示例**:
+
+```xml
+<!-- ❌ 错误: 直接使用特殊字符 -->
+<conditionExpression>amount > 10000 && status == "pending"</conditionExpression>
+
+<!-- ✅ 正确: 使用实体编码 -->
+<conditionExpression xsi:type="tFormalExpression">amount &gt; 10000 &amp;&amp; status == &quot;pending&quot;</conditionExpression>
+```
+
+---
+
+## 常见错误
+
+### 错误 1: 缺少 XML 声明或命名空间
+
+❌ **错误写法**:
+```xml
+<definitions>
+  <process id="Process_1">
+    <startEvent id="start"/>
+  </process>
+</definitions>
+```
+
+✅ **正确写法**:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             targetNamespace="http://bpmn.io/schema/bpmn"
+             id="Definitions_1">
+  <process id="Process_1" isExecutable="false">
+    <startEvent id="StartEvent_1"/>
+  </process>
+</definitions>
+```
+
+### 错误 2: 元素 ID 重复
+
+❌ **错误写法**:
+```xml
+<startEvent id="Event_1" name="开始"/>
+<endEvent id="Event_1" name="结束"/>
+```
+
+✅ **正确写法**:
+```xml
+<startEvent id="StartEvent_1" name="开始"/>
+<endEvent id="EndEvent_1" name="结束"/>
+```
+
+### 错误 3: 顺序流连接错误
+
+❌ **错误写法**:
+```xml
+<startEvent id="StartEvent_1"/>
+<task id="Task_1" name="任务"/>
+<sequenceFlow id="Flow_1" sourceRef="start" targetRef="task"/>
+```
+
+✅ **正确写法**:
+```xml
+<startEvent id="StartEvent_1"/>
+<task id="Task_1" name="任务"/>
+<sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1"/>
+```
+
+### 错误 4: 网关分支缺少条件表达式
+
+❌ **错误写法**:
+```xml
+<exclusiveGateway id="Gateway_1"/>
+<sequenceFlow id="Flow_1" name="条件A" sourceRef="Gateway_1" targetRef="Task_A"/>
+<sequenceFlow id="Flow_2" name="条件B" sourceRef="Gateway_1" targetRef="Task_B"/>
+```
+
+✅ **正确写法**:
+```xml
+<exclusiveGateway id="Gateway_1" default="Flow_Default"/>
+<sequenceFlow id="Flow_1" name="金额 &gt; 10000" sourceRef="Gateway_1" targetRef="Task_A">
+  <conditionExpression xsi:type="tFormalExpression">${amount &gt; 10000}</conditionExpression>
+</sequenceFlow>
+<sequenceFlow id="Flow_Default" name="其他" sourceRef="Gateway_1" targetRef="Task_B"/>
+```
+
+---
+
+## 最佳实践
+
+1. **完整的 XML 声明和命名空间**
+   - 始终包含 `<?xml version="1.0" encoding="UTF-8"?>`
+   - 必须声明 BPMN 2.0 命名空间 `xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"`
+
+2. **全局唯一的元素 ID**
+   - 使用有意义的 ID 前缀：`StartEvent_`, `Task_`, `Gateway_`, `Flow_`
+   - 确保每个 ID 在整个文档中全局唯一
+
+3. **精确的流程连接**
+   - 仔细检查所有 `sourceRef` 和 `targetRef` 与实际 ID 匹配
+   - 避免拼写错误和大小写不一致
+
+4. **排他网关必须有条件或默认路径**
+   - 为每个分支添加条件表达式
+   - 或者使用 `default` 属性指定默认路径
+
+5. **正确转义 XML 特殊字符**
+   - 在条件表达式中使用实体编码（`&lt;`, `&gt;`, `&amp;` 等）
+   - 避免直接使用 `<`, `>`, `&`, `"` 等字符
+
+6. **流程结构规范**
+   - 每个流程必须有且仅有一个开始事件
+   - 每个流程至少有一个结束事件
+   - 网关必须成对使用：分支网关 → 汇聚网关
+
+7. **泳道使用**
+   - 当涉及多个参与者时，使用泳道（Pool/Lane）区分职责
+   - 跨泳道通信使用消息流（Message Flow）
+
+8. **避免过度复杂**
+   - 单个流程不超过 15 个元素为宜
+   - 复杂流程拆分为多个子流程
+
+9. **层次结构嵌套限制**
+   - **子流程嵌套深度**: 建议不超过 3 层嵌套子流程
+   - **可读性原因**: 过深的嵌套会导致流程图难以理解和维护
+   - **性能考虑**: 深度嵌套增加渲染复杂度,影响编辑器性能
+   - **最佳实践**:
+     - Level 1: 主流程 (Main Process)
+     - Level 2: 子流程 (Sub Process)
+     - Level 3: 嵌套子流程 (Nested Sub Process)
+     - ❌ Level 4+: 避免更深嵌套,改用调用活动 (Call Activity)
+
+10. **中文命名**
+    - 使用中文 `name` 属性提升可读性
+    - 英文 `id` 用于系统标识,中文 `name` 用于业务描述

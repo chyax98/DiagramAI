@@ -1,0 +1,281 @@
+# Erd 通用语法规范 (L2)
+
+## 渲染引擎特性
+- 简洁 ER 图语法 (比 DBML 更简单)
+- 基于 Graphviz DOT 引擎
+- 专注于实体关系建模
+
+---
+
+## 文件结构 (严格顺序)
+
+**必须按以下顺序**:
+1. **全局指令** (可选, 必须在最前面)
+2. **实体定义**
+3. **关系定义**
+
+**错误示例**:
+```
+[Person]       ← 实体定义
+name
+
+title {label: "Schema"}  ← ❌ 全局指令在实体之后,语法错误
+```
+
+**正确示例**:
+```
+title {label: "Schema"}  ← ✓ 全局指令在最前面
+
+[Person]                 ← ✓ 实体定义
+name
+
+Person *--1 Address      ← ✓ 关系定义
+```
+
+---
+
+## 核心语法规则
+
+### 1. 全局指令 (可选)
+必须在所有实体和关系之前：
+
+```
+title {label: "图表标题", size: "20", color: "#000000"}
+entity {bgcolor: "#ececfc", size: "16"}
+header {bgcolor: "#d0e0d0", color: "#000000"}
+relationship {color: "#333333", size: "14"}
+```
+
+### 2. 实体定义
+
+**基本语法**:
+```
+[实体名]
+属性1
+属性2
+```
+
+**命名规则**:
+- 基本: ASCII 字母、数字、下划线 → `[Person]`, `[User_Account]`
+- 空格/特殊字符: 必须用引号 → `` [`Birth Place`] ``, `['User Account']`, `["Product Info"]`
+- 不能使用: ASCII 控制字符 (回车、换行等)
+
+**实体命名规范**:
+- ✅ **大写开头，单数形式**: `Person`, `User_Account`, `Product_Category`
+- ✅ **可使用下划线**: `User_Account`, `Order_Item` (多词实体)
+- ✅ **清晰描述**: 命名应明确表达实体含义
+- ✅ **包含空格需引号**: `` [`Birth Place`] ``, `['User Account']`, `["Product Info"]`
+- ❌ **避免复数**: `Person` (not `Persons`), `Order` (not `Orders`)
+- ❌ **避免缩写**: 使用 `Customer` 而非 `Cust`, 除非是行业标准缩写
+
+**属性命名规范**:
+- ✅ **使用小写字母和下划线**: `user_id`, `created_at`, `full_name`
+- ✅ **主键统一后缀**: `id` 或 `<entity>_id` (如 `user_id`)
+- ✅ **外键统一格式**: `<referenced_entity>_id` (如 `order_id`)
+- ✅ **布尔值前缀**: `is_active`, `has_children`, `can_login`
+- ✅ **时间戳后缀**: `created_at`, `updated_at`, `deleted_at`
+
+### 3. 属性标记
+
+**主键 (Primary Key)**: `*` 前缀
+```
+[Person]
+*person_id
+name
+```
+
+**外键 (Foreign Key)**: `+` 前缀
+```
+[Person]
+*person_id
++birth_place_id
+```
+
+**复合键**: `*+` 或 `+*` (同时是主键和外键)
+```
+[Order_Item]
+*+order_id
+*+product_id
+quantity
+```
+
+### 4. 关系定义
+
+**语法**: `实体A 基数1--基数2 实体B`
+
+**基数符号**:
+| 符号 | 含义 | 说明 |
+|------|------|------|
+| `?` | 0 或 1 | 可选的单一关系 |
+| `1` | 恰好 1 | 必须的单一关系 |
+| `*` | 0 或多个 | 可选的多重关系 |
+| `+` | 1 或多个 | 必须的多重关系 |
+
+**示例**:
+```
+# 每个 Person 有恰好一个 Birth Place
+Person *--1 `Birth Place`
+
+# 一对多
+Department 1--* Employee
+
+# 多对多
+Student *--* Course
+
+# 自引用 (员工有经理)
+Employee ?--1 Employee {label: "manages"}
+```
+
+### 5. 格式化选项
+
+**实体级别样式**:
+```
+[Person] {bgcolor: "#ececfc", size: "20", border: "2"}
+*person_id
+name
+```
+
+**属性级别样式**:
+```
+[Person]
+*person_id {label: "varchar(50), not null", color: "#ff0000"}
+full_name {label: "varchar(100), null"}
+age {label: "integer"}
+```
+
+**关系标签**:
+```
+Person *--1 Address {label: "lives at"}
+game *--1 team {label: "home"}
+game *--1 team {label: "away"}
+```
+
+**支持的格式化属性**:
+- `label`: 标签文本
+- `color`: 字体颜色 (十六进制 `#3366ff` 或 X11 颜色名 `CornflowerBlue`)
+- `bgcolor`: 背景颜色 (实体、属性)
+- `size`: 字体大小 (数字字符串 `"16"`)
+- `font`: 字体 (Times-Roman, Helvetica, Courier)
+- `border-color`: 边框颜色
+- `border`: 边框宽度 (像素)
+
+**格式化语法规则**:
+```
+[实体] {属性1: "值1", 属性2: "值2"}
+
+# 多行格式
+[实体] {
+  bgcolor: "#ececfc",
+  size: "20",
+  font: "Helvetica"
+}
+```
+
+**注意事项**:
+- 左花括号 `{` 必须在同一行
+- 属性名后跟冒号 `:`
+- 值使用双引号 (包括数字: `"20"`)
+- 用逗号分隔
+- 允许尾随逗号
+- 可跨多行
+
+### 6. 注释
+单行注释: `#`
+
+```
+# 这是一行注释
+[Person]  # 也可以在行尾注释
+```
+
+**不支持块注释** - 只能使用 `#` 单行注释
+
+---
+
+## 严格限制
+
+### 不支持的特性
+- ❌ 块注释 (只支持 `#` 单行注释)
+- ❌ 嵌套实体
+- ❌ 条件逻辑 (if/else)
+- ❌ 变量定义
+- ❌ 循环语句
+
+### 命名限制
+避免使用:
+- ASCII 控制字符 (0x00-0x1F, 0x7F)
+- 回车 `\r`, 换行 `\n` (除非在字符串内)
+
+安全命名:
+- 使用字母、数字、下划线
+- 或使用引号包裹特殊名称
+
+### 关系语法
+**错误**: 缺少基数
+```
+Person -- Address  ← ❌ 缺少基数符号
+```
+
+**正确**:
+```
+Person *--1 Address  ← ✓ 明确基数
+```
+
+---
+
+## 最佳实践
+
+### 组织结构
+```
+# 1. 全局指令
+title {...}
+entity {...}
+
+# 2. 核心实体
+[Entity1]
+...
+
+[Entity2]
+...
+
+# 3. 关联实体
+[Association]
+...
+
+# 4. 关系定义
+Entity1 *--1 Entity2
+...
+```
+
+### 命名约定
+- **实体名**: 大写开头, 单数形式 (Person, not Persons; User_Account)
+- **属性名**: 小写下划线 (user_id, not userId; created_at)
+- **关系标签**: 动词短语描述关系 (owns, belongs to, manages, created by)
+
+### 格式化建议
+- **主实体**: 显眼背景色 (如 `#d0e0d0`)
+- **关联实体**: 对比色 (如 `#ffe0e0`)
+- **必填字段**: label 中标注 "not null"
+- **键约束**: 明确标注 PK/FK
+
+---
+
+## 输出格式
+- 默认: DOT (Graphviz)
+- 可转换: SVG, PNG, PDF
+- Kroki 支持: SVG (推荐), PNG
+
+---
+
+## Kroki 兼容性
+- 完全支持 Erd 语法
+- 基于 Graphviz 引擎渲染
+- URL 编码: deflate + base64url
+- 推荐使用 SVG 格式以获得最佳质量
+
+---
+
+## 调试技巧
+1. 检查全局指令位置: 必须在实体之前
+2. 验证关系基数: 必须包含基数符号
+3. 确认格式化语法: 花括号在同一行
+4. 测试 DOT 输出: `erd -i schema.er -o schema.dot`

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <!-- 背景 -->
+  <rect width="256" height="256" rx="24" fill="#6366F1"/>
+
+  <!-- 手绘风格 - 矩形 -->
+  <path d="M 60 60 Q 90 58, 120 62 Q 150 64, 180 60 Q 184 90, 182 120 Q 180 150, 184 180 Q 154 182, 124 178 Q 94 176, 64 180 Q 62 150, 64 120 Q 66 90, 60 60"
+        fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- 手绘箭头 -->
+  <path d="M 120 100 Q 145 98, 170 102"
+        stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M 160 96 L 170 102 L 164 110"
+        stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- 手绘圆形 -->
+  <ellipse cx="90" cy="130" rx="18" ry="16"
+        fill="none" stroke="white" stroke-width="3"/>
+
+  <!-- 手绘文字效果线条 -->
+  <path d="M 130 130 Q 132 128, 148 132"
+        stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 130 145 Q 140 143, 160 147"
+        stroke="white" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- 装饰点 -->
+  <circle cx="70" cy="70" r="3" fill="white"/>
+  <circle cx="170" cy="170" r="3" fill="white"/>
+  <circle cx="85" cy="180" r="3" fill="white"/>
+</svg>

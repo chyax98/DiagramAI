@@ -1,0 +1,84 @@
+=== Main Stream Languages Migration Report ===
+
+Date: 2025-10-18
+Task: Migrate prompt files for 10 main stream languages to data/prompts/
+
+✓ Migration Status: COMPLETE
+
+Languages Migrated:
+==================
+1. mermaid      - 15 files  ✓
+2. plantuml     -  9 files  ✓
+3. d2           -  8 files  ✓
+4. graphviz     -  7 files  ✓
+5. wavedrom     -  5 files  ✓
+6. nomnoml      -  5 files  ✓
+7. excalidraw   -  7 files  ✓
+8. c4plantuml   -  5 files  ✓
+9. vegalite     -  8 files  ✓
+10. dbml        -  5 files  ✓
+
+Total: 74 files
+
+Target Directory: /Users/Apple/dev/DiagramAI/data/prompts/
+
+File Details:
+=============
+
+Mermaid (15 files):
+- class.txt, common.txt, er.txt, flowchart.txt, gantt.txt
+- gitgraph.txt, journey.txt, mindmap.txt, pie.txt, quadrant.txt
+- sankey.txt, sequence.txt, state.txt, timeline.txt, xychart.txt
+
+PlantUML (9 files):
+- activity.txt, class.txt, common.txt, component.txt
+- deployment.txt, object.txt, sequence.txt, state.txt, usecase.txt
+
+D2 (8 files):
+- architecture.txt, class.txt, common.txt, er.txt
+- flowchart.txt, grid.txt, network.txt, sequence.txt
+
+Graphviz (7 files):
+- architecture.txt, common.txt, er.txt, flowchart.txt
+- network.txt, state.txt, tree.txt
+
+WaveDrom (5 files):
+- bitfield.txt, common.txt, register.txt, signal.txt, timing.txt
+
+Nomnoml (5 files):
+- architecture.txt, class.txt, common.txt, component.txt, flowchart.txt
+
+Excalidraw (7 files):
+- architecture.txt, common.txt, diagram.txt, flowchart.txt
+- generic.txt, sketch.txt, wireframe.txt
+
+C4PlantUML (5 files):
+- common.txt, component.txt, container.txt, context.txt, sequence.txt
+
+Vega-Lite (8 files):
+- area.txt, bar.txt, common.txt, expert-guide.txt
+- heatmap.txt, line.txt, pie.txt, point.txt
+
+DBML (5 files):
+- common.txt, erd.txt, migration.txt, schema.txt, single_table.txt
+
+Verification:
+============
+- ✓ All 74 files successfully migrated
+- ✓ Directory structure preserved (no nesting issues)
+- ✓ File integrity verified
+- ✓ All files accessible in target location
+
+Additional Notes:
+================
+- Migration also copied extended languages (13 additional languages)
+- Total languages in data/prompts/: 23 languages
+- Source files remain in git history for recovery if needed
+- Empty c4 directory created (can be removed)
+
+Command Used:
+=============
+for lang in mermaid plantuml d2 graphviz wavedrom nomnoml excalidraw c4plantuml vegalite dbml; do
+  mkdir -p data/prompts/$lang
+  cp -r src/lib/constants/prompts/$lang/* data/prompts/$lang/
+done

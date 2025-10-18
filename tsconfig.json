@@ -1,0 +1,83 @@
+{
+  // TypeScript 编译器配置
+  // 文档: https://www.typescriptlang.org/tsconfig
+
+  "compilerOptions": {
+    /* 基础配置 */
+    "target": "ES2022", // 编译目标: ES2022 (现代浏览器都支持)
+    "lib": ["ES2023", "DOM", "DOM.Iterable"], // 包含的类型库: ES2023 + 浏览器 DOM API
+    "jsx": "preserve", // JSX 处理: 保留原样,交给 Next.js 处理
+    "module": "ESNext", // 模块系统: 最新的 ES Module
+    "moduleResolution": "Bundler", // 模块解析: Bundler 模式(Next.js 15 推荐)
+
+    /* 严格类型检查(核心!) */
+    "strict": true, // 启用所有严格类型检查选项
+    "noImplicitAny": true, // 禁止隐式 any,必须明确类型
+    "strictNullChecks": true, // null 和 undefined 严格检查
+    "strictFunctionTypes": true, // 函数参数类型严格检查
+    "strictBindCallApply": true, // bind/call/apply 严格检查
+    "strictPropertyInitialization": true, // 类属性必须初始化
+    "noImplicitThis": true, // this 必须有明确类型
+    "alwaysStrict": true, // 始终以严格模式解析
+
+    /* 额外检查 */
+    "noUnusedLocals": true, // 禁止未使用的局部变量
+    "noUnusedParameters": true, // 禁止未使用的函数参数
+    "noImplicitReturns": true, // 函数所有路径都要有返回值
+    "noFallthroughCasesInSwitch": true, // switch 语句禁止 fallthrough
+    "noUncheckedIndexedAccess": true, // 索引访问返回 T | undefined
+
+    /* 模块解析 */
+    "baseUrl": ".", // 模块解析基础路径
+    "paths": {
+      // 路径别名(方便导入)
+      "@/*": ["./src/*"], // @/components = ./src/components
+      "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/contexts/*": ["./src/contexts/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/app/*": ["./src/app/*"]
+    },
+    "resolveJsonModule": true, // 允许导入 .json 文件
+
+    /* Interop 互操作性 */
+    "esModuleInterop": true, // ES 模块与 CommonJS 互操作
+    "allowSyntheticDefaultImports": true, // 允许从没有默认导出的模块中默认导入
+    "forceConsistentCasingInFileNames": true, // 强制文件名大小写一致
+    "isolatedModules": true, // 每个文件都是独立模块(Next.js 要求)
+    "allowJs": true, // 允许编译 .js 文件
+
+    /* 输出配置 */
+    "noEmit": true, // 不生成输出文件(Next.js 自己处理编译)
+    "incremental": true, // 启用增量编译(加快编译速度)
+    "skipLibCheck": true, // 跳过 .d.ts 文件检查(提升性能)
+
+    /* 实验性功能 */
+    "plugins": [
+      {
+        "name": "next" // Next.js TypeScript 插件
+      }
+    ]
+  },
+
+  /* 包含的文件 */
+  "include": [
+    "next-env.d.ts", // Next.js 环境类型定义
+    "**/*.ts", // 所有 .ts 文件
+    "**/*.tsx", // 所有 .tsx 文件
+    ".next/types/**/*.ts" // Next.js 生成的类型
+  ],
+
+  /* 排除的文件 */
+  "exclude": [
+    "node_modules", // 排除 node_modules
+    ".next", // 排除 Next.js 构建输出
+    "dist", // 排除构建产物
+    "build", // 排除构建产物
+    "scripts", // 排除工具脚本 (独立运行,不参与构建)
+    "**/__tests__/**", // 排除所有测试文件
+    "**/*.test.ts", // 排除所有测试文件
+    "**/*.test.tsx" // 排除所有测试文件
+  ]
+}

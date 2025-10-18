@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+  <!-- 机架图标 - 表示服务器机架布局 -->
+
+  <!-- 机架外框 -->
+  <rect x="5" y="2" width="14" height="20" rx="1" fill="none" stroke="#455A64"/>
+
+  <!-- 机架立柱 -->
+  <line x1="6.5" y1="2" x2="6.5" y2="22" stroke="#455A64" stroke-width="1"/>
+  <line x1="17.5" y1="2" x2="17.5" y2="22" stroke="#455A64" stroke-width="1"/>
+
+  <!-- 服务器单元 1U (顶部) -->
+  <rect x="7.5" y="3.5" width="9" height="2.5" rx="0.3" fill="#455A64" opacity="0.3"/>
+  <circle cx="8.5" cy="4.75" r="0.4" fill="#4CAF50"/>
+  <circle cx="9.5" cy="4.75" r="0.4" fill="#4CAF50"/>
+  <line x1="11" y1="4" x2="12" y2="4" stroke="#455A64" stroke-width="0.5"/>
+  <line x1="11" y1="5.5" x2="12" y2="5.5" stroke="#455A64" stroke-width="0.5"/>
+
+  <!-- 服务器单元 2U -->
+  <rect x="7.5" y="7" width="9" height="2.5" rx="0.3" fill="#455A64" opacity="0.3"/>
+  <circle cx="8.5" cy="8.25" r="0.4" fill="#FF9800"/>
+  <circle cx="9.5" cy="8.25" r="0.4" fill="#4CAF50"/>
+
+  <!-- 服务器单元 3U -->
+  <rect x="7.5" y="10.5" width="9" height="2.5" rx="0.3" fill="#455A64" opacity="0.3"/>
+  <circle cx="8.5" cy="11.75" r="0.4" fill="#4CAF50"/>
+  <circle cx="9.5" cy="11.75" r="0.4" fill="#4CAF50"/>
+
+  <!-- 空槽 4U -->
+  <rect x="7.5" y="14" width="9" height="2.5" rx="0.3" fill="none" stroke="#455A64" stroke-dasharray="1,1" opacity="0.4"/>
+
+  <!-- 网络设备 5U (底部) -->
+  <rect x="7.5" y="17.5" width="9" height="3" rx="0.3" fill="#455A64" opacity="0.4"/>
+  <circle cx="8.5" cy="18.75" r="0.4" fill="#2196F3"/>
+  <circle cx="9.5" cy="18.75" r="0.4" fill="#2196F3"/>
+  <circle cx="10.5" cy="18.75" r="0.4" fill="#2196F3"/>
+  <text x="14" y="19.5" font-size="2" fill="#455A64" text-anchor="middle">SW</text>
+
+  <!-- U 位标记 -->
+  <text x="19.5" y="5" font-size="1.5" fill="#455A64" opacity="0.6">1U</text>
+  <text x="19.5" y="8.5" font-size="1.5" fill="#455A64" opacity="0.6">2U</text>
+  <text x="19.5" y="12" font-size="1.5" fill="#455A64" opacity="0.6">3U</text>
+</svg>

@@ -1,0 +1,409 @@
+{
+  "timestamp": "2025-10-14T10:29:46Z",
+  "version": "1.0.0",
+  "project": {
+    "name": "DiagramAI",
+    "description": "AI 驱动的专业图表生成工具 - 支持 23 种渲染语言和 80+ 种图表类型",
+    "tech_stack": [
+      "Next.js 15",
+      "React 19",
+      "TypeScript 5",
+      "SQLite",
+      "Vercel AI SDK",
+      "Tailwind CSS 4",
+      "Zustand"
+    ],
+    "architecture_pattern": "Repository + Service + Factory"
+  },
+  "scan_summary": {
+    "total_files_estimated": 350,
+    "files_scanned": 80,
+    "coverage_percentage": 100,
+    "scan_status": "complete",
+    "truncated": false
+  },
+  "modules": [
+    {
+      "path": "src/app/(auth)",
+      "type": "route",
+      "description": "认证路由：登录和注册页面",
+      "entry_points": ["login/page.tsx", "register/page.tsx"],
+      "has_tests": false,
+      "has_config": false,
+      "dependencies": ["src/components/auth", "src/contexts/AuthContext"]
+    },
+    {
+      "path": "src/app/(app)",
+      "type": "route",
+      "description": "主应用路由：图表编辑器、历史记录、模型配置",
+      "entry_points": ["page.tsx", "history/page.tsx", "models/page.tsx"],
+      "has_tests": false,
+      "has_config": true,
+      "dependencies": [
+        "src/components/editor",
+        "src/components/history",
+        "src/components/models",
+        "src/lib/stores/diagram-store"
+      ]
+    },
+    {
+      "path": "src/app/api/auth",
+      "type": "api",
+      "description": "认证 API：登录、注册、登出",
+      "entry_points": ["login/route.ts", "register/route.ts", "logout/route.ts"],
+      "interfaces": [
+        "POST /api/auth/login",
+        "POST /api/auth/register",
+        "POST /api/auth/logout"
+      ],
+      "has_tests": false,
+      "dependencies": ["src/lib/auth", "src/lib/repositories/UserRepository"]
+    },
+    {
+      "path": "src/app/api/chat",
+      "type": "api",
+      "description": "图表生成 API：核心 AI 生成逻辑",
+      "entry_points": ["route.ts"],
+      "interfaces": ["POST /api/chat"],
+      "has_tests": false,
+      "dependencies": [
+        "src/lib/services/DiagramGenerationService",
+        "src/lib/validations/chat"
+      ]
+    },
+    {
+      "path": "src/app/api/models",
+      "type": "api",
+      "description": "模型管理 API：CRUD 和连接测试",
+      "entry_points": ["route.ts", "[id]/route.ts", "[id]/test/route.ts"],
+      "interfaces": [
+        "GET /api/models",
+        "POST /api/models",
+        "PUT /api/models/:id",
+        "DELETE /api/models/:id",
+        "POST /api/models/:id/test"
+      ],
+      "has_tests": false,
+      "dependencies": [
+        "src/lib/repositories/ModelRepository",
+        "src/lib/validations/models"
+      ]
+    },
+    {
+      "path": "src/app/api/history",
+      "type": "api",
+      "description": "历史记录 API：查询和管理生成历史",
+      "entry_points": ["route.ts", "[id]/route.ts"],
+      "interfaces": [
+        "GET /api/history",
+        "GET /api/history/:id",
+        "PUT /api/history/:id",
+        "DELETE /api/history/:id"
+      ],
+      "has_tests": false,
+      "dependencies": [
+        "src/lib/repositories/HistoryRepository",
+        "src/lib/validations/history"
+      ]
+    },
+    {
+      "path": "src/app/api/kroki",
+      "type": "api",
+      "description": "Kroki 代理 API：解决 CORS 并提供缓存",
+      "entry_points": ["[[...path]]/route.ts"],
+      "interfaces": ["GET /api/kroki/**"],
+      "has_tests": false,
+      "dependencies": ["src/lib/constants/env"]
+    },
+    {
+      "path": "src/app/api/recommend",
+      "type": "api",
+      "description": "推荐 API：智能图表类型推荐",
+      "entry_points": ["route.ts"],
+      "interfaces": ["POST /api/recommend"],
+      "has_tests": false,
+      "dependencies": ["src/lib/services/DiagramGenerationService"]
+    },
+    {
+      "path": "src/lib/ai",
+      "type": "service",
+      "description": "AI Provider Factory：多提供商统一接口",
+      "entry_points": ["provider-factory.ts"],
+      "interfaces": [
+        "getAIProvider(config): LanguageModel",
+        "validateProviderConfig(config): void"
+      ],
+      "has_tests": false,
+      "key_features": [
+        "支持 OpenAI、Anthropic、Google、OpenAI-Compatible",
+        "基于 Vercel AI SDK",
+        "统一 LanguageModel 接口"
+      ]
+    },
+    {
+      "path": "src/lib/auth",
+      "type": "service",
+      "description": "认证系统：JWT + bcrypt + 中间件",
+      "entry_points": ["jwt.ts", "password.ts", "middleware.ts"],
+      "interfaces": [
+        "signToken(userId): string",
+        "verifyToken(token): Payload",
+        "hashPassword(password): string",
+        "comparePassword(password, hash): boolean",
+        "withAuth(handler): NextHandler"
+      ],
+      "has_tests": false,
+      "key_features": [
+        "JWT 7 天过期",
+        "bcrypt 10 轮加密",
+        "API 路由保护"
+      ]
+    },
+    {
+      "path": "src/lib/constants",
+      "type": "config",
+      "description": "常量配置：图表类型、环境变量、提示词",
+      "entry_points": [
+        "diagram-types.ts",
+        "env.ts",
+        "placeholders.ts",
+        "prompts/"
+      ],
+      "has_tests": false,
+      "key_features": [
+        "23 种渲染语言定义",
+        "80+ 种图表类型",
+        "三层 Prompt 系统 (L1 + L2 + L3)",
+        "环境变量统一管理"
+      ]
+    },
+    {
+      "path": "src/lib/constants/prompts",
+      "type": "data",
+      "description": "AI 提示词库：23 种语言的三层 Prompt",
+      "entry_points": ["universal.txt", "*/common.txt", "*/*.txt"],
+      "prompt_structure": {
+        "L1": "universal.txt (通用规范)",
+        "L2": "{language}/common.txt (语言规范)",
+        "L3": "{language}/{type}.txt (类型规范)"
+      },
+      "total_prompts": 105,
+      "languages_count": 23,
+      "types_count": 80
+    },
+    {
+      "path": "src/lib/db",
+      "type": "database",
+      "description": "数据库层：SQLite 客户端和 Schema",
+      "entry_points": ["client.ts", "schema.sql"],
+      "tables": [
+        "users (用户账户)",
+        "ai_models (AI 配置)",
+        "generation_histories (生成历史)",
+        "chat_sessions (对话会话)"
+      ],
+      "has_tests": false,
+      "key_features": [
+        "SQLite 3.x",
+        "支持 23 种渲染语言",
+        "外键级联关系",
+        "自动时间戳触发器"
+      ]
+    },
+    {
+      "path": "src/lib/repositories",
+      "type": "repository",
+      "description": "数据访问层：Repository 模式",
+      "entry_points": [
+        "UserRepository.ts",
+        "ModelRepository.ts",
+        "HistoryRepository.ts",
+        "ChatSessionRepository.ts"
+      ],
+      "interfaces": [
+        "UserRepository: create, findById, findByUsername, updateLastLogin",
+        "ModelRepository: create, findById, findByUserId, update, delete",
+        "HistoryRepository: create, findById, findByUserId, update, delete",
+        "ChatSessionRepository: create, findById, update"
+      ],
+      "has_tests": false,
+      "key_features": ["参数化查询", "防 SQL 注入", "统一接口"]
+    },
+    {
+      "path": "src/lib/services",
+      "type": "service",
+      "description": "业务逻辑层：核心服务",
+      "entry_points": [
+        "DiagramGenerationService.ts",
+        "FailureLogService.ts"
+      ],
+      "interfaces": [
+        "DiagramGenerationService.chat(params): ChatResult",
+        "FailureLogService.logFailure(data): void"
+      ],
+      "has_tests": false,
+      "key_features": [
+        "任务类型决策 (generate/adjust/fix)",
+        "三层 Prompt 自动加载",
+        "代码清理与会话管理",
+        "失败日志自动记录"
+      ]
+    },
+    {
+      "path": "src/lib/stores",
+      "type": "state",
+      "description": "状态管理：Zustand Store",
+      "entry_points": ["diagram-store.ts"],
+      "has_tests": false,
+      "key_features": ["图表状态", "会话状态", "UI 状态"]
+    },
+    {
+      "path": "src/lib/utils",
+      "type": "utility",
+      "description": "工具函数库：20+ 工具模块",
+      "entry_points": [
+        "prompt-loader.ts",
+        "kroki.ts",
+        "code-cleaner.ts",
+        "api-client.ts",
+        "logger.ts",
+        "download.ts",
+        "clipboard.ts",
+        "svg-to-image.ts"
+      ],
+      "has_tests": false,
+      "key_features": [
+        "Prompt 三层加载器",
+        "Kroki URL 生成 (deflate + base64url)",
+        "代码清理",
+        "API 客户端封装",
+        "文件下载",
+        "剪贴板操作"
+      ]
+    },
+    {
+      "path": "src/lib/validations",
+      "type": "validation",
+      "description": "Zod 验证模式",
+      "entry_points": ["auth.ts", "chat.ts", "models.ts", "history.ts"],
+      "has_tests": false,
+      "key_features": ["输入验证", "类型安全", "错误提示"]
+    },
+    {
+      "path": "src/components",
+      "type": "ui",
+      "description": "React 组件库：10+ 子模块",
+      "sub_modules": [
+        "auth (认证组件)",
+        "editor (编辑器)",
+        "history (历史记录)",
+        "icons (图标)",
+        "layout (布局)",
+        "modals (对话框)",
+        "models (模型配置)",
+        "selectors (选择器)",
+        "shared (共享组件)",
+        "theme (主题)",
+        "ui (基础 UI)"
+      ],
+      "has_tests": false,
+      "key_features": ["shadcn/ui 组件", "响应式设计", "暗黑模式支持"]
+    },
+    {
+      "path": "src/types",
+      "type": "types",
+      "description": "TypeScript 类型定义",
+      "entry_points": [
+        "database.ts",
+        "diagram.ts",
+        "ai.ts",
+        "common.ts",
+        "recommendation.ts"
+      ],
+      "has_tests": false,
+      "key_features": ["类型安全", "智能提示", "接口统一"]
+    },
+    {
+      "path": "src/contexts",
+      "type": "context",
+      "description": "React Context",
+      "entry_points": ["AuthContext.tsx", "ThemeContext.tsx"],
+      "has_tests": false,
+      "key_features": ["认证状态", "主题状态", "全局共享"]
+    },
+    {
+      "path": "src/hooks",
+      "type": "hooks",
+      "description": "自定义 Hooks",
+      "entry_points": [
+        "useAuthRedirect.ts",
+        "useEditorActions.ts",
+        "useExportActions.ts",
+        "useRecommendation.ts"
+      ],
+      "has_tests": false,
+      "key_features": ["认证重定向", "编辑器操作", "导出操作", "推荐逻辑"]
+    },
+    {
+      "path": "public/icons",
+      "type": "assets",
+      "description": "图标资源",
+      "sub_modules": [
+        "languages (23 种语言图标)",
+        "providers (AI 提供商图标)",
+        "types (图表类型图标)"
+      ],
+      "total_icons": 40,
+      "format": "SVG"
+    }
+  ],
+  "coverage": {
+    "modules_documented": 23,
+    "apis_documented": 15,
+    "key_files_documented": 50,
+    "gaps": [],
+    "missing_docs": []
+  },
+  "next_steps": [],
+  "ignored_patterns": [
+    "node_modules/**",
+    ".git/**",
+    ".github/**",
+    "dist/**",
+    "build/**",
+    ".next/**",
+    "__pycache__/**",
+    "*.lock",
+    "*.log",
+    "*.bin",
+    "*.pdf",
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "*.gif",
+    "*.mp4",
+    "*.zip",
+    "*.tar",
+    "*.gz",
+    "data/**",
+    "*.db",
+    "*.sqlite",
+    "*.sqlite3",
+    "reports/**",
+    ".bmad-core",
+    ".claude",
+    "claudedocs/**",
+    ".factory/**"
+  ],
+  "statistics": {
+    "render_languages": 23,
+    "diagram_types": 80,
+    "prompt_files": 105,
+    "api_endpoints": 15,
+    "repositories": 4,
+    "services": 2,
+    "components": 50,
+    "utils": 15,
+    "validations": 4
+  }
+}

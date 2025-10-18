@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <!-- 背景 -->
+  <rect width="256" height="256" rx="24" fill="#8B5CF6"/>
+
+  <!-- 波形信号线 -->
+  <path d="M40 80 H80 L100 120 L120 80 H160 L180 120 L200 80 H216"
+        stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <path d="M40 140 H60 V180 H100 V140 H140 V180 H180 V140 H216"
+        stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- 时钟信号 -->
+  <circle cx="50" cy="80" r="4" fill="white"/>
+  <circle cx="90" cy="100" r="4" fill="white"/>
+  <circle cx="130" cy="80" r="4" fill="white"/>
+  <circle cx="170" cy="100" r="4" fill="white"/>
+  <circle cx="206" cy="80" r="4" fill="white"/>
+</svg>

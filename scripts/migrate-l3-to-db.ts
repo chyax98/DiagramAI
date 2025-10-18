@@ -63,7 +63,7 @@ async function migrateL3ToDatabase() {
     }
 
     // 2. 查找所有 L3 TOML 文件
-    const l3Dir = path.join(process.cwd(), 'data/Promote-V4/data/L3');
+    const l3Dir = path.join(process.cwd(), 'data/Promote/data/L3');
     const l3Files = findTomlFiles(l3Dir);
     stats.total = l3Files.length;
 

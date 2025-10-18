@@ -1,0 +1,248 @@
+# RackDiag DataCenter 生成要求
+
+## 图表类型:数据中心机柜布局(Data Center Rack Layout)
+
+数据中心机柜布局用于展示**企业级单机柜的高可用配置**,侧重于冗余配置、分区规划、散热优化和扩展能力。与基础单机柜(rack)相比,数据中心场景更关注高可用架构、容量规划和运维管理。
+
+**注意**:
+- 本图表类型为**单机柜(Single Rack)**的企业级配置
+- 如需展示**多机柜布局**,请使用L2通用语法的 `rack {}` 多机架语法
+- 重点关注: 双电源冗余、双网络冗余、散热优化、扩展预留
+
+---
+
+## 核心语法
+
+### 基础机架定义
+```
+rackdiag {
+  // 电源分区
+  1: UPS [2U];
+  3: PDU-Primary;
+  4: PDU-Backup;
+
+  // 网络分区
+  8: Core Router;
+  9: Firewall [2U];
+
+  // 计算/存储分区
+  15: Server [2U];
+  25: Storage [4U];
+
+  // 管理分区
+  40: KVM;
+}
+```
+
+**数据中心特性**:
+- **分区规划**: 电源→网络→计算→存储→管理清晰分层
+- **冗余设计**: 关键设备(电源/网络)有主备配置
+- **散热优化**: 高功耗设备分散布局,避免热点
+- **扩展预留**: 预留U位空间用于未来扩展
+
+---
+
+## 生成示例
+
+### 示例 1: 企业级数据中心标准机柜
+```
+rackdiag {
+  // ========== 电源分区 (U1-U6) ==========
+  1: UPS-Primary [3U, description = "Eaton 9PX 10kVA"];
+  4: PDU-A [description = "Primary Power Distribution"];
+  5: PDU-B [description = "Redundant Power"];
+
+  // ========== 网络核心分区 (U7-U14) ==========
+  7: Core Router [2U, description = "Juniper MX"];
+  9: Firewall-Primary [2U, description = "Palo Alto PA-5200"];
+  11: Firewall-Backup [2U, description = "Palo Alto PA-5200"];
+  13: L3 Switch-A [description = "Cisco Catalyst"];
+  14: L3 Switch-B [description = "Cisco Catalyst"];
+
+  // ========== 计算集群分区 (U15-U28) ==========
+  15: Hypervisor-01 [2U, description = "VMware ESXi"];
+  17: Hypervisor-02 [2U, description = "VMware ESXi"];
+  19: Hypervisor-03 [2U, description = "VMware ESXi"];
+  21: Hypervisor-04 [2U, description = "VMware ESXi"];
+  23: DB-Primary [2U, description = "Oracle RAC Node 1"];
+  25: DB-Standby [2U, description = "Oracle RAC Node 2"];
+  27: App Server [2U];
+
+  // ========== 存储分区 (U29-U36) ==========
+  29: Storage-Primary [4U, description = "NetApp FAS"];
+  33: Disk Shelf [4U, description = "Expansion"];
+
+  // ========== 管理分区 (U38-U42) ==========
+  38: Management Console [description = "Out-of-Band"];
+  39: Patch Panel [description = "Cable Management"];
+  40: KVM Switch [description = "Console Access"];
+}
+```
+
+**关键点**:
+- 电源双冗余:UPS + 双PDU
+- 网络双冗余:双防火墙 + 双L3交换机
+- 计算集群:4个虚拟化主机 + 2节点数据库集群
+- 存储冗余:主存储 + 扩展磁盘柜
+
+### 示例 2: 云服务商高密度计算机柜
+```
+rackdiag {
+  // ========== 基础设施 (U1-U8) ==========
+  1: UPS [3U, description = "APC Symmetra"];
+  4: PDU-1;
+  5: PDU-2;
+  6: ToR Switch-A [description = "Top-of-Rack"];
+  7: ToR Switch-B [description = "Redundant ToR"];
+
+  // ========== 计算节点阵列 (U9-U32, 24台1U服务器) ==========
+  9: Cloud-Node-01 [description = "Intel Xeon Gold"];
+  10: Cloud-Node-02;
+  11: Cloud-Node-03;
+  12: Cloud-Node-04;
+  13: Cloud-Node-05;
+  14: Cloud-Node-06;
+  15: Cloud-Node-07;
+  16: Cloud-Node-08;
+  17: Cloud-Node-09;
+  18: Cloud-Node-10;
+  19: Cloud-Node-11;
+  20: Cloud-Node-12;
+  21: Cloud-Node-13;
+  22: Cloud-Node-14;
+  23: Cloud-Node-15;
+  24: Cloud-Node-16;
+  25: Cloud-Node-17;
+  26: Cloud-Node-18;
+  27: Cloud-Node-19;
+  28: Cloud-Node-20;
+  29: Cloud-Node-21;
+  30: Cloud-Node-22;
+  31: Cloud-Node-23;
+  32: Cloud-Node-24;
+
+  // ========== 管理 (U40) ==========
+  40: IPMI Controller [description = "Baseboard Management"];
+}
+```
+
+**关键点**:
+- 超高密度:24台1U云计算节点
+- 双ToR交换机:避免单点故障
+- IPMI远程管理:无需KVM物理访问
+- 预留U33-U39空间用于扩展
+
+### 示例 3: 金融级数据中心(强冗余)
+```
+rackdiag {
+  // ========== 电源高可用 (U1-U8) ==========
+  1: UPS-A [3U, description = "Schneider APC"];
+  4: UPS-B [3U, description = "Eaton 9395"];
+  7: PDU-Primary-A;
+  8: PDU-Primary-B;
+
+  // ========== 网络高可用 (U9-U16) ==========
+  9: Core Switch-A [2U, description = "Cisco Nexus"];
+  11: Core Switch-B [2U, description = "Cisco Nexus"];
+  13: Firewall-A [2U, description = "Fortinet"];
+  15: Firewall-B [2U, description = "Fortinet"];
+
+  // ========== 计算高可用 (U17-U28) ==========
+  17: App-Cluster-01 [2U, description = "Active"];
+  19: App-Cluster-02 [2U, description = "Active"];
+  21: App-Cluster-03 [2U, description = "Standby"];
+  23: DB-Primary [2U, description = "Oracle Exadata"];
+  25: DB-Standby [2U, description = "Oracle Exadata"];
+  27: Cache-Primary [2U, description = "Redis Cluster"];
+
+  // ========== 存储高可用 (U29-U36) ==========
+  29: Storage-SiteA [4U, description = "EMC VMAX"];
+  33: Storage-SiteB [4U, description = "EMC VMAX"];
+
+  // ========== 监控管理 (U38-U42) ==========
+  38: Monitor Server [description = "Zabbix/Prometheus"];
+  39: Log Aggregator [description = "ELK Stack"];
+  40: KVM;
+}
+```
+
+**关键点**:
+- 双UPS不同品牌:避免固件漏洞同时影响
+- 全链路冗余:网络/计算/存储全部双活或主备
+- 3节点应用集群:2 Active + 1 Standby
+- 监控完善:独立监控和日志服务器
+
+---
+
+## 常见错误
+
+### 错误 1: 冗余配置不完整
+**❌ 错误**: 只有单电源、单网络、单存储
+**✅ 正确**: 关键路径全部冗余(双UPS/双PDU/双交换机/双存储)
+
+**原因**: 数据中心级别应用要求高可用,单点故障不可接受
+
+---
+
+### 错误 2: 散热规划不合理
+**❌ 错误**: 24台服务器连续堆叠在U10-U33,无散热间隔
+**✅ 正确**: 每8-10台服务器预留1-2U空位,或使用专用散热U位
+
+**原因**: 高密度部署会导致局部过热,影响设备寿命
+
+---
+
+### 错误 3: 扩展性不足
+**❌ 错误**: 所有U位塞满设备,无预留空间
+**✅ 正确**: 预留15-20%空位用于未来扩展
+
+**原因**: 数据中心设备需要定期升级和扩容
+
+---
+
+### 错误 4: 管理设备缺失
+**❌ 错误**: 无KVM/监控/日志设备
+**✅ 正确**: 至少包含KVM和带外管理(IPMI/iDRAC)
+
+**原因**: 数据中心运维需要远程管理能力
+
+---
+
+## 数据中心设计原则
+
+### 1. 高可用架构
+- **N+1冗余**: 关键设备至少N+1配置
+- **无单点故障**: 电源/网络/存储全链路冗余
+- **故障域隔离**: 不同设备使用不同品牌/型号
+
+### 2. 分区规划
+- **电源分区(U1-U8)**: UPS + 双PDU
+- **网络分区(U9-U16)**: 核心路由/交换/防火墙
+- **计算分区(U17-U32)**: 虚拟化/应用/数据库
+- **存储分区(U33-U38)**: 存储阵列/磁盘柜
+- **管理分区(U39-U42)**: 监控/日志/KVM
+
+### 3. 散热优化
+- **热密度分散**: 避免高功耗设备集中
+- **冷热通道**: 考虑数据中心冷热通道布局
+- **预留空位**: 每10U预留1-2U散热空间
+
+### 4. 扩展预留
+- **垂直扩展**: 预留15-20% U位空间
+- **水平扩展**: 设计支持多机柜横向扩展
+- **线缆预留**: 考虑未来布线需求
+
+---
+
+## 生成检查清单
+
+- [ ] **冗余完整**: 电源/网络/存储关键路径有备份
+- [ ] **分区清晰**: 电源→网络→计算→存储→管理分层合理
+- [ ] **散热优化**: 高功耗设备分散布局,有散热空位
+- [ ] **扩展预留**: 预留15-20%空间用于未来扩展
+- [ ] **管理完善**: 包含KVM/监控/日志等管理设备
+- [ ] **U位无重叠**: 多U设备占用空间计算正确
+- [ ] **设备描述完整**: 关键设备标注品牌/型号/功能
+- [ ] **代码可渲染**: 语法正确,通过Kroki渲染
+
+**任何检查项不通过,立即修正后重新生成**

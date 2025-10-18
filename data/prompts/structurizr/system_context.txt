@@ -1,0 +1,440 @@
+# System Context (系统上下文图) - C4 Level 1
+
+生成单个系统的边界和外部依赖图。
+
+## 关键特点
+
+- **聚焦单系统**: 明确一个 Software System 作为主体
+- **边界定义**: 展示什么在系统内，什么在系统外
+- **用户交互**: 展示系统的直接用户（Person）
+- **外部集成**: 展示与其他系统的集成关系
+
+## 输出结构
+
+```
+workspace {
+    model {
+        # 用户
+        user = person "用户"
+        admin = person "管理员"
+
+        # 主系统
+        targetSystem = softwareSystem "目标系统" "系统描述"
+
+        # 外部系统
+        externalA = softwareSystem "外部系统A" {
+            tags "External"
+        }
+        externalB = softwareSystem "外部系统B" {
+            tags "External"
+        }
+
+        # 关系
+        user -> targetSystem "使用"
+        admin -> targetSystem "管理"
+        targetSystem -> externalA "调用 API"
+        targetSystem -> externalB "发送数据"
+    }
+
+    views {
+        systemContext targetSystem "context" "系统上下文" {
+            include *
+            autolayout lr
+        }
+    }
+}
+```
+
+## 注意事项
+
+- 不要深入到容器内部（那是 Container 视图的工作）
+- 关系描述要清晰：用户做什么，系统与外部如何交互
+- 适合非技术干系人理解系统定位
+
+## 隐式关系语法 (元素块内定义)
+
+除了在 model 层定义关系,还可以在元素块内使用 `->` 语法:
+
+```
+workspace {
+    model {
+        user = person "用户"
+        admin = person "管理员"
+
+        # 在 softwareSystem 块内定义关系
+        targetSystem = softwareSystem "目标系统" {
+            this -> externalA "调用 API"  # this 指向当前系统
+            this -> externalB "发送数据"
+        }
+
+        externalA = softwareSystem "外部系统A" {
+            tags "External"
+        }
+        externalB = softwareSystem "外部系统B" {
+            tags "External"
+        }
+
+        # 用户关系仍在外部定义
+        user -> targetSystem "使用"
+        admin -> targetSystem "管理"
+    }
+}
+```
+
+**优势**:
+- 关系更贴近元素定义
+- 适合聚焦单个系统的所有出向关系
+- 减少全局关系定义的视觉噪音
+
+## include/exclude 表达式详解
+
+在 systemContext 视图中,可以精确控制显示哪些元素:
+
+### 基础选择器
+
+```
+views {
+    systemContext targetSystem "context" {
+        # 包含所有元素
+        include *
+
+        # 排除特定元素
+        exclude externalSystemC
+
+        # 只包含特定元素
+        include user admin targetSystem externalA
+    }
+}
+```
+
+### 关系选择器
+
+```
+views {
+    systemContext targetSystem "context" {
+        # 包含目标系统的所有关系
+        include targetSystem->*
+
+        # 包含所有指向目标系统的关系
+        include *->targetSystem
+
+        # 包含特定关系路径
+        include user->targetSystem->externalA
+    }
+}
+```
+
+### 标签选择器
+
+```
+views {
+    systemContext targetSystem "context" {
+        # 包含带特定标签的元素
+        include element.tag==External
+
+        # 排除内部系统
+        exclude element.tag==Internal
+
+        # 组合条件
+        include element.tag==Critical || element.tag==Core
+    }
+}
+```
+
+### 实战案例: 分层展示
+
+```
+workspace {
+    model {
+        user = person "客户"
+        admin = person "运营人员"
+        analyst = person "数据分析师"
+
+        system = softwareSystem "电商平台" {
+            tags "Target"
+        }
+
+        paymentGateway = softwareSystem "支付网关" {
+            tags "External,Critical"
+        }
+        emailService = softwareSystem "邮件服务" {
+            tags "External,Support"
+        }
+        analytics = softwareSystem "分析平台" {
+            tags "External,Support"
+        }
+        erp = softwareSystem "ERP 系统" {
+            tags "External,Integration"
+        }
+
+        user -> system "下单、支付"
+        admin -> system "管理商品"
+        analyst -> analytics "查看报表"
+
+        system -> paymentGateway "调用支付"
+        system -> emailService "发送通知"
+        system -> analytics "推送数据"
+        system -> erp "同步订单"
+    }
+
+    views {
+        # 视图1: 核心用户视角
+        systemContext system "user-view" "用户视角" {
+            include user system paymentGateway emailService
+            autolayout lr
+        }
+
+        # 视图2: 运营视角
+        systemContext system "admin-view" "运营视角" {
+            include admin system erp emailService
+            autolayout lr
+        }
+
+        # 视图3: 完整集成视图
+        systemContext system "full-view" "完整集成" {
+            include *
+            autolayout tb
+        }
+
+        # 视图4: 只显示关键外部依赖
+        systemContext system "critical-view" "关键依赖" {
+            include element.tag==Target || element.tag==Critical
+            include user
+            autolayout lr
+        }
+    }
+}
+```
+
+## 多种外部系统集成模式
+
+### 模式 1: 同步 API 调用
+
+```
+targetSystem = softwareSystem "订单系统"
+paymentAPI = softwareSystem "支付 API" {
+    tags "External,Sync"
+}
+
+targetSystem -> paymentAPI "同步调用支付接口" "HTTPS/REST"
+```
+
+**特点**:
+- 实时响应
+- 关系描述包含协议
+- 适合关键业务流程
+
+### 模式 2: 异步消息队列
+
+```
+targetSystem = softwareSystem "订单系统"
+messageQueue = softwareSystem "消息队列" {
+    tags "External,Async"
+}
+notificationSystem = softwareSystem "通知系统" {
+    tags "External"
+}
+
+targetSystem -> messageQueue "发布订单事件" "Kafka"
+messageQueue -> notificationSystem "订阅订单事件"
+```
+
+**特点**:
+- 解耦系统
+- 关系形成链路
+- 适合非实时场景
+
+### 模式 3: 数据同步
+
+```
+targetSystem = softwareSystem "业务系统"
+dataWarehouse = softwareSystem "数据仓库" {
+    tags "External,Analytics"
+}
+
+targetSystem -> dataWarehouse "定时同步数据" "ETL/Batch"
+```
+
+**特点**:
+- 单向数据流
+- 批处理模式
+- 适合分析场景
+
+### 模式 4: 共享数据库 (反模式)
+
+```
+systemA = softwareSystem "系统 A"
+systemB = softwareSystem "系统 B"
+sharedDB = softwareSystem "共享数据库" {
+    tags "External,Database,AntiPattern"
+}
+
+systemA -> sharedDB "读写"
+systemB -> sharedDB "读写"
+```
+
+**特点**:
+- 紧耦合
+- 标记为反模式
+- 可视化技术债务
+
+### 完整案例: 微服务生态
+
+```
+workspace {
+    model {
+        # 用户
+        customer = person "客户"
+        merchant = person "商家"
+
+        # 目标系统
+        platform = softwareSystem "电商平台" {
+            tags "Target"
+        }
+
+        # 第三方服务
+        paymentGateway = softwareSystem "支付网关" {
+            tags "External,Critical,Sync"
+        }
+        smsService = softwareSystem "短信服务" {
+            tags "External,Sync"
+        }
+        logisticsAPI = softwareSystem "物流 API" {
+            tags "External,Sync"
+        }
+
+        # 异步服务
+        messageQueue = softwareSystem "消息队列" {
+            tags "External,Async,Infrastructure"
+        }
+        emailWorker = softwareSystem "邮件服务" {
+            tags "External,Async"
+        }
+
+        # 数据服务
+        analyticsEngine = softwareSystem "分析引擎" {
+            tags "External,Analytics"
+        }
+        dataLake = softwareSystem "数据湖" {
+            tags "External,Storage"
+        }
+
+        # 用户交互
+        customer -> platform "下单、支付、查询"
+        merchant -> platform "管理商品、订单"
+
+        # 同步集成
+        platform -> paymentGateway "调用支付" "HTTPS/REST"
+        platform -> smsService "发送验证码" "HTTPS"
+        platform -> logisticsAPI "查询物流" "HTTPS"
+
+        # 异步集成
+        platform -> messageQueue "发布业务事件" "Kafka"
+        messageQueue -> emailWorker "订阅订单事件"
+        messageQueue -> analyticsEngine "订阅所有事件"
+
+        # 数据同步
+        platform -> dataLake "批量同步" "ETL/Daily"
+        analyticsEngine -> dataLake "读取数据"
+    }
+
+    views {
+        systemContext platform "full" "完整生态" {
+            include *
+            autolayout tb
+        }
+
+        systemContext platform "sync" "同步集成" {
+            include customer platform paymentGateway smsService logisticsAPI
+            autolayout lr
+        }
+
+        systemContext platform "async" "异步集成" {
+            include platform messageQueue emailWorker analyticsEngine
+            autolayout lr
+        }
+    }
+}
+```
+
+## 常见错误
+
+### 错误 1: 混淆 System Context 和 Container
+
+```
+# ❌ 错误: 在 System Context 中展示 Container
+workspace {
+    model {
+        system = softwareSystem "系统" {
+            webApp = container "Web 应用" "前端" "React"  # 不应出现
+        }
+    }
+    views {
+        systemContext system "context" {
+            include *
+        }
+    }
+}
+
+# ✅ 正确: System Context 只关注系统边界
+workspace {
+    model {
+        system = softwareSystem "系统" "完整系统描述"
+        externalAPI = softwareSystem "外部 API"
+        system -> externalAPI "调用"
+    }
+    views {
+        systemContext system "context" {
+            include *
+        }
+    }
+}
+```
+
+### 错误 2: 关系描述过于技术化
+
+```
+# ❌ 错误: 过于技术化的描述
+user -> system "发送 HTTP POST 请求到 /api/v1/orders 端点"
+
+# ✅ 正确: 业务语言描述
+user -> system "创建订单"
+```
+
+### 错误 3: 忘记标记外部系统
+
+```
+# ❌ 错误: 无法区分内外部
+externalSystem = softwareSystem "外部系统"
+
+# ✅ 正确: 使用标签标记
+externalSystem = softwareSystem "外部系统" {
+    tags "External"
+}
+```
+
+### 错误 4: 视图包含过多细节
+
+```
+# ❌ 错误: 显示所有外部系统(20+)
+systemContext targetSystem "context" {
+    include *  # 导致图表过于复杂
+}
+
+# ✅ 正确: 选择关键外部系统
+systemContext targetSystem "context" {
+    include targetSystem user admin
+    include element.tag==Critical
+    autolayout lr
+}
+```
+
+### 错误 5: 关系方向错误
+
+```
+# ❌ 错误: 主动方向错误
+externalAPI -> targetSystem "被调用"
+
+# ✅ 正确: 主动方向应该是目标系统发起
+targetSystem -> externalAPI "调用 API"
+```

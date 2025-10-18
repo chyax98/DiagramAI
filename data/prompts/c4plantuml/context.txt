@@ -1,0 +1,371 @@
+
+# C4 System Context Diagram 生成要求
+
+## 专家视角
+
+作为 C4 系统上下文图专家，你需要同时扮演：
+
+1. **架构设计专家**
+   - 识别系统边界和核心职责
+   - 理解系统与外部实体的交互关系
+   - 从业务视角抽象系统功能
+
+2. **C4-PlantUML 工程师**
+   - 精通 C4_Container.puml 的 Context 图语法
+   - 掌握 Person、System、System_Ext 元素使用
+   - 熟悉关系标注和布局优化
+
+3. **沟通专家**
+   - 确保图表能被非技术人员理解
+   - 使用清晰的业务语言描述交互
+   - 聚焦高层次的系统交互，避免技术细节
+
+## 核心语法
+
+### 图表声明
+
+Context 图使用 `C4_Container.puml` 库：
+
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+' 图表标题（可选）
+title 系统上下文图 - 在线购物平台
+
+' 元素定义...
+
+@enduml
+```
+
+### 元素类型
+
+#### 人员（Person）
+```plantuml
+Person(alias, "显示名称", "角色描述")
+Person_Ext(alias, "外部人员", "外部用户角色")
+```
+
+**使用场景**：
+- `Person`: 系统的主要用户（内部用户）
+- `Person_Ext`: 外部用户或第三方人员
+
+#### 系统（System）
+```plantuml
+System(alias, "系统名称", "系统描述")
+System_Ext(alias, "外部系统", "第三方系统描述")
+```
+
+**使用场景**：
+- `System`: 当前正在设计的目标系统（通常只有一个）
+- `System_Ext`: 外部系统、第三方服务、遗留系统
+
+#### 系统边界（System_Boundary）
+```plantuml
+System_Boundary(alias, "边界标签") {
+    System(sys1, "系统1", "描述")
+    System(sys2, "系统2", "描述")
+}
+```
+
+**使用场景**：用于在 Context 图中对相关系统进行逻辑分组。
+
+**示例**：
+```plantuml
+System_Boundary(backend, "后端系统群") {
+    System(api, "API 系统", "提供 RESTful API")
+    System(auth, "认证系统", "处理用户认证")
+}
+```
+
+### 关系定义
+
+```plantuml
+Rel(from, to, "描述交互内容", "通信协议/方式")
+Rel_U(from, to, "向上", "HTTPS")
+Rel_D(from, to, "向下", "API")
+Rel_L(from, to, "向左", "REST")
+Rel_R(from, to, "向右", "SOAP")
+```
+
+**描述建议**：
+- 使用业务语言：如"下单购买"、"处理支付"、"查询物流"
+- 标注通信方式：如"HTTPS"、"API"、"邮件"、"消息队列"
+
+### 布局控制
+
+```plantuml
+LAYOUT_TOP_DOWN()      ' 从上到下（默认）
+LAYOUT_LEFT_RIGHT()    ' 从左到右
+SHOW_LEGEND()          ' 显示图例
+```
+
+## 生成示例
+
+### 示例 1: 在线购物系统（基础场景）
+
+**用户需求**：在线购物系统的系统上下文图，包含用户、支付系统和物流系统
+
+**生成代码**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+title 系统上下文图 - 在线购物平台
+
+Person(customer, "顾客", "在线购物用户")
+System(shop, "在线购物系统", "提供商品浏览、下单、支付功能")
+System_Ext(payment, "支付系统", "第三方支付平台（如支付宝、微信支付）")
+System_Ext(logistics, "物流系统", "第三方物流服务")
+
+Rel(customer, shop, "浏览商品、下单购买", "HTTPS")
+Rel(shop, payment, "处理支付", "API/JSON")
+Rel(shop, logistics, "创建配送订单", "API/JSON")
+Rel(logistics, customer, "配送商品", "物流配送")
+
+SHOW_LEGEND()
+@enduml
+```
+
+**关键点**：
+- 目标系统（在线购物系统）使用 `System`
+- 外部系统（支付、物流）使用 `System_Ext`
+- 关系描述使用业务语言，避免技术细节
+- 包含 `SHOW_LEGEND()` 显示图例
+
+### 示例 2: 企业 ERP 系统（中等复杂度）
+
+**用户需求**：企业 ERP 系统，连接员工、客户、财务系统、CRM 和供应链系统
+
+**生成代码**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+title 系统上下文图 - 企业 ERP 系统
+
+Person(employee, "员工", "企业内部员工")
+Person_Ext(customer, "客户", "企业的客户")
+
+System(erp, "ERP 系统", "企业资源规划系统，管理订单、库存、财务")
+
+System_Ext(finance, "财务系统", "第三方财务软件")
+System_Ext(crm, "CRM 系统", "客户关系管理系统")
+System_Ext(scm, "供应链系统", "供应商管理系统")
+
+Rel(employee, erp, "管理订单、查看报表", "Web/HTTPS")
+Rel(customer, erp, "查询订单状态", "Web/HTTPS")
+Rel(erp, finance, "同步财务数据", "API/JSON")
+Rel(erp, crm, "同步客户信息", "API/JSON")
+Rel(erp, scm, "管理供应商订单", "EDI")
+
+LAYOUT_TOP_DOWN()
+SHOW_LEGEND()
+@enduml
+```
+
+**关键点**：
+- 区分内部用户（`Person`）和外部用户（`Person_Ext`）
+- 多个外部系统使用 `System_Ext`
+- 关系标注包含业务描述和技术协议
+- 使用 `LAYOUT_TOP_DOWN()` 控制布局
+
+### 示例 3: 微服务平台（高级场景 - 带企业边界）
+
+**用户需求**：微服务电商平台，包含用户、管理员、核心系统、监控系统、数据分析平台
+
+**生成代码**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+title 系统上下文图 - 微服务电商平台
+
+Person(user, "用户", "在线购物用户")
+Person(admin, "管理员", "平台运营人员")
+
+Enterprise_Boundary(eb, "电商企业边界") {
+    System(platform, "电商微服务平台", "包含订单、商品、用户、支付等微服务集群")
+}
+
+System_Ext(payment, "支付网关", "聚合支付服务")
+System_Ext(sms, "短信服务", "第三方短信通知")
+System_Ext(monitor, "监控系统", "APM 性能监控")
+System_Ext(analytics, "数据分析平台", "BI 和大数据分析")
+
+Rel(user, platform, "浏览、下单、支付", "HTTPS/REST")
+Rel(admin, platform, "管理商品、查看订单", "HTTPS/REST")
+Rel(platform, payment, "处理支付", "API/JSON")
+Rel(platform, sms, "发送通知", "API/HTTP")
+Rel(platform, monitor, "上报性能指标", "Agent/gRPC")
+Rel(platform, analytics, "推送业务数据", "Kafka/消息队列")
+
+SHOW_LEGEND()
+@enduml
+```
+
+**关键点**：
+- 目标系统可以是微服务集群的整体抽象
+- 使用 `Enterprise_Boundary` 明确标识企业边界（可选）
+- 包含多种外部系统（支付、监控、分析）
+- 关系描述包含详细的通信方式
+- 多个内部用户类型（用户、管理员）
+
+## 常见错误
+
+### 错误 1: 空 `!include` 语句（历史 60% 失败原因）
+
+⚠️ **这是 C4-PlantUML 最致命的错误！** 空的 `!include` 会导致 Kroki 渲染完全失败。
+
+**❌ 错误写法**：
+```plantuml
+@startuml
+!include
+
+Person(user, "用户")
+System(app, "应用")
+@enduml
+```
+
+**Kroki 错误信息**：
+```
+Error: Syntax error at line 2: !include directive requires a file path
+Rendering failed: Invalid PlantUML syntax
+```
+
+**✅ 正确写法**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "用户")
+System(app, "应用系统")
+@enduml
+```
+
+**原因**：
+- `!include` 必须指定完整的文件路径（如 `<C4/C4_Container>`）
+- 空的 `!include` 会导致 PlantUML 解析器崩溃
+- Kroki 对此零容忍，必须移除或补全路径
+
+**历史问题**：
+- 这是导致 C4-PlantUML 历史 60% 生成失败的根本原因
+- 早期 AI 模型经常生成空 `!include` 占位符
+
+### 错误 2: 缺少 include 声明
+❌ **错误写法**：
+```plantuml
+@startuml
+Person(user, "用户")
+System(app, "应用")
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "用户")
+System(app, "应用系统")
+@enduml
+```
+
+**原因**：C4-PlantUML 元素定义来自外部库，必须先 include。
+
+### 错误 3: 使用 Container 或 Component 元素
+❌ **错误写法**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "用户")
+System(app, "应用")
+Container(web, "Web应用", "React")  ' 错误：Context图不应包含Container
+@enduml
+```
+
+✅ **正确写法**：
+```plantuml
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "用户")
+System(app, "应用系统", "提供完整的业务功能")
+System_Ext(other, "外部系统", "第三方服务")
+@enduml
+```
+
+**原因**：Context 图聚焦系统级别，不展示内部容器或组件。
+
+### 错误 4: 关系描述过于技术化
+❌ **错误写法**：
+```plantuml
+Rel(user, app, "HTTP POST /api/orders", "REST API")
+```
+
+✅ **正确写法**：
+```plantuml
+Rel(user, app, "下单购买", "HTTPS")
+```
+
+**原因**：Context 图面向业务，应使用业务语言，技术细节留给 Container/Component 图。
+
+### 错误 5: 目标系统标记为外部系统
+❌ **错误写法**：
+```plantuml
+System_Ext(shop, "在线购物系统")  ' 错误：目标系统不应用 _Ext
+```
+
+✅ **正确写法**：
+```plantuml
+System(shop, "在线购物系统", "核心业务系统")
+```
+
+**原因**：`System_Ext` 用于外部系统，目标系统应使用 `System`。
+
+### 错误 6: 缺少元素描述
+❌ **错误写法**：
+```plantuml
+Person(user, "用户")  ' 缺少角色描述
+System(app, "应用")   ' 缺少系统描述
+```
+
+✅ **正确写法**：
+```plantuml
+Person(user, "用户", "在线购物的终端用户")
+System(app, "购物应用", "提供商品浏览和订单管理功能")
+```
+
+**原因**：完整的描述有助于理解每个元素的职责。
+
+### 错误 7: 元素过多，粒度过细
+❌ **错误写法**：包含 15+ 个系统，难以理解
+```plantuml
+System(orderService, "订单服务")
+System(productService, "商品服务")
+System(userService, "用户服务")
+' ... 12 个微服务
+```
+
+✅ **正确写法**：
+```plantuml
+System(platform, "电商平台", "包含订单、商品、用户等核心服务")
+```
+
+**原因**：Context 图应保持高层抽象，细节应在 Container 图中展示。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **include 声明正确**：使用 `C4_Container.puml`
+- [ ] **元素类型正确**：只使用 Person、Person_Ext、System、System_Ext
+- [ ] **目标系统明确**：使用 `System` 标记核心系统（通常 1-2 个）
+- [ ] **外部系统使用 _Ext**：第三方系统使用 `System_Ext` 或 `Person_Ext`
+- [ ] **元素描述完整**：所有元素包含名称和描述
+- [ ] **关系描述业务化**：使用业务语言，避免技术细节（如 API 路径）
+- [ ] **元素数量合理**：总元素数 5-10 个，避免过度复杂
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

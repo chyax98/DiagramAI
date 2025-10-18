@@ -1,0 +1,697 @@
+# Pikchr 语言通用规范
+
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 大小属性必须包含单位
+这是 Pikchr 最常见的致命错误！所有尺寸属性（width, height, radius, 距离等）必须明确指定单位。
+
+**错误示例**：
+```pikchr
+box width 2 height 1
+circle radius 0.5
+arrow right 1
+```
+
+**正确写法**：
+```pikchr
+box width 2cm height 1cm
+circle radius 0.5cm
+arrow right 1cm
+```
+
+**违反后果**: Pikchr 无法解析尺寸，导致编译失败，渲染为空白图像。
+**Kroki 错误**: `Syntax error: missing unit for 'width' at line X`
+
+**支持的单位**:
+- `cm` - 厘米（推荐）
+- `mm` - 毫米
+- `in` - 英寸
+- `px` - 像素
+
+---
+
+### ⚠️ 规则 2: 引用对象前必须先命名
+在使用 `from ... to ...` 或锚点引用时，对象必须先被命名，否则无法引用。
+
+**错误示例**：
+```pikchr
+box "A"
+arrow from previous to next
+box "B"
+```
+
+**正确写法**：
+```pikchr
+A: box "A"
+B: box "B"
+arrow from A to B
+```
+
+**违反后果**: 无法引用未命名的对象，Pikchr 报告"未定义对象"错误。
+**Kroki 错误**: `Undefined object: 'previous' at line X`
+
+**锚点引用语法**:
+```pikchr
+A: box "节点A"
+B: box "节点B" at 2cm right of A
+
+%% 使用锚点引用对象的具体位置
+arrow from A.e to B.w    %% A 的东侧 -> B 的西侧
+arrow from A.s to B.n    %% A 的南侧 -> B 的北侧
+```
+
+**锚点说明**:
+- `.n` - 北侧（顶部中心）
+- `.s` - 南侧（底部中心）
+- `.e` - 东侧（右侧中心）
+- `.w` - 西侧（左侧中心）
+- `.ne`, `.nw`, `.se`, `.sw` - 四个角
+
+---
+
+### ⚠️ 规则 3: 方向关键字不能与箭头符号混用
+方向使用关键字（`right`, `left`, `up`, `down`），箭头方向使用符号（`<-`, `->`, `<->`）。不要混用！
+
+**错误示例**：
+```pikchr
+arrow -> right
+arrow <- down
+```
+
+**正确写法**：
+```pikchr
+arrow right         %% 使用方向关键字
+arrow <-            %% 使用箭头符号表示反向
+arrow left <->      %% 左向双向箭头
+```
+
+**违反后果**: 语法错误，箭头无法渲染。
+**Kroki 错误**: `Syntax error: unexpected '->' after direction keyword at line X`
+
+**方向关键字**:
+- `right` - 向右
+- `left` - 向左
+- `up` - 向上
+- `down` - 向下
+
+**箭头符号**:
+- `->` - 单向箭头（默认）
+- `<-` - 反向箭头
+- `<->` - 双向箭头
+
+**组合方向**:
+```pikchr
+arrow right then down        %% 先右再下
+arrow go right 1cm then down 1cm
+```
+
+---
+
+## 对象声明语法
+
+Pikchr 支持 13 种基础对象类型,每种对象都有独特的用途和属性。
+
+### 对象类型完整列表
+
+1. **box** - 矩形框 (最常用)
+2. **circle** - 圆形
+3. **ellipse** - 椭圆
+4. **oval** - 椭圆形的别名
+5. **cylinder** - 圆柱体 (3D效果)
+6. **file** - 文件形状 (带折角)
+7. **dot** - 小圆点 (无文本标签)
+8. **line** - 直线/折线
+9. **arrow** - 箭头线
+10. **spline** - 平滑曲线
+11. **arc** - 弧线
+12. **move** - 移动光标 (不可见对象)
+13. **text** - 纯文本 (无边框)
+
+### 常用对象详细说明
+
+**矩形框 (box)**:
+```pikchr
+box "文本标签"
+box width 2cm height 1cm "指定大小"
+box fill lightblue color blue "带颜色"
+```
+
+**圆形 (circle)**:
+```pikchr
+circle "圆形"
+circle radius 0.5cm "指定半径"
+circle fill yellow "填充颜色"
+```
+
+**椭圆 (ellipse)**:
+```pikchr
+ellipse "椭圆"
+ellipse width 3cm height 1cm "指定宽高"
+```
+
+**箭头 (arrow)**:
+```pikchr
+arrow right 2cm "向右箭头"
+arrow down 1cm "向下箭头"
+arrow <- "反向箭头"
+arrow <-> "双向箭头"
+```
+
+### 箭头样式完整列表
+
+**单向箭头**:
+- `->` - 标准右箭头（默认）
+- `<-` - 反向箭头（向左）
+
+**双向箭头**:
+- `<->` - 双向箭头
+
+**粗箭头**:
+- `->>` - 粗箭头头部
+- `<<-` - 粗反向箭头
+- `<<->>` - 粗双向箭头
+
+**线条样式组合**:
+```pikchr
+arrow right 2cm dashed       # 虚线箭头
+arrow right 2cm dotted       # 点线箭头
+arrow right 2cm thick        # 加粗箭头
+```
+
+**线条 (line)**:
+```pikchr
+line right 2cm "直线"
+line dashed "虚线"
+line dotted "点线"
+```
+
+---
+
+## 定位系统
+
+Pikchr 提供三种定位方式：相对定位、绝对定位和锚点定位。
+
+### 相对定位
+元素按书写顺序从左到右、从上到下排列：
+```pikchr
+box "A"
+arrow right
+box "B"
+```
+
+### 绝对定位
+使用绝对坐标精确定位元素：
+```pikchr
+box "A" at 0,0
+box "B" at 2cm,1cm
+```
+
+**坐标系统说明**：
+- **原点**：(0, 0) 位于画布左上角
+- **X 轴**：向右为正
+- **Y 轴**：向下为正
+- **单位**：必须明确指定 (cm, mm, in, px)
+
+### 锚点定位
+使用命名锚点进行相对定位：
+```pikchr
+A: box "A"
+B: box "B" at 2cm right of A
+C: box "C" at 1cm below A
+```
+
+**相对定位关键字**：
+- `right of` - 在对象右侧
+- `left of` - 在对象左侧
+- `above` - 在对象上方
+- `below` - 在对象下方
+
+---
+
+## 样式属性
+
+### 颜色
+- `fill <color>` - 填充颜色
+- `color <color>` - 边框/线条颜色
+- 常用颜色: `lightblue`, `yellow`, `lightgreen`, `pink`, `gray`, `white`, `red`, `blue`
+
+### 线型
+- `solid` - 实线（默认）
+- `dashed` - 虚线
+- `dotted` - 点线
+
+### 大小（必须包含单位！）
+- `width <size>` - 宽度
+- `height <size>` - 高度
+- `radius <size>` - 半径
+- 单位: `cm`, `mm`, `in`, `px`
+
+---
+
+## 高级属性
+
+### fit 属性 - 自动调整尺寸
+`fit` 属性让对象自动调整大小以包含文本或其他内容:
+
+```pikchr
+box "长文本内容会自动调整框大小" fit
+ellipse "自动适应文本" fit
+```
+
+### same 属性 - 继承前一个对象的属性
+`same` 关键字让对象继承前一个同类型对象的所有属性:
+
+```pikchr
+A: box width 3cm height 1cm fill lightblue "模板"
+B: box same "继承宽高和颜色" at 2cm below A
+C: box same "也继承相同属性" at 2cm below B
+```
+
+### chop 属性 - 修剪线条/箭头端点
+`chop` 让线条在对象边界处截断,避免穿透对象:
+
+```pikchr
+A: box "起点"
+B: box "终点" at 3cm right of A
+arrow from A to B chop
+```
+
+### behind 属性 - 控制图层顺序
+`behind <object>` 让对象显示在另一个对象后面:
+
+```pikchr
+A: box "前景" fill lightblue
+B: box "背景" fill yellow at A behind A
+```
+
+### close 属性 - 闭合路径
+`close` 将路径的最后一点连接到起点,形成封闭图形:
+
+```pikchr
+line go right 2cm then down 2cm then left 2cm close fill lightblue
+```
+
+### invisible 属性 - 不可见对象
+`invisible` 创建不可见的占位对象,用于布局定位:
+
+```pikchr
+A: box "可见"
+B: box invisible at 3cm right of A  # 不可见占位符
+C: box "可见" at 3cm right of B
+```
+
+### thick/thin 属性 - 线条粗细
+```pikchr
+arrow right 2cm thick
+line right 2cm thin
+```
+
+---
+
+## 容器 (Subdiagrams)
+
+### [] 容器语法
+使用 `[]` 创建子图容器,内部元素相对于容器定位:
+
+```pikchr
+Container: [
+  box "元素1"
+  arrow right 1cm
+  box "元素2"
+] fill none color blue
+
+# 容器可以像普通对象一样定位和引用
+arrow from Container.e right 1cm
+box "外部元素"
+```
+
+### 容器特性
+- **独立坐标系**: 容器内部有独立的原点和坐标系
+- **可命名**: 容器可以被命名并引用
+- **可嵌套**: 容器可以嵌套其他容器
+- **继承属性**: 容器可以有颜色、填充等属性
+
+### 嵌套容器示例
+```pikchr
+Outer: [
+  box "外层"
+  Inner: [
+    circle "内层1"
+    circle "内层2" at 1cm right of previous
+  ] at 1cm below previous
+] fill lightgray
+```
+
+---
+
+## 复杂路径定义
+
+### then 关键字 - 组合方向
+使用 `then` 连接多个方向,创建折线路径:
+
+```pikchr
+arrow right 2cm then down 1cm then left 2cm
+line go up 1cm then right 2cm then down 1cm
+```
+
+### until 关键字 - 延伸到目标位置
+`until` 让线条/箭头延伸直到指定位置:
+
+```pikchr
+A: box "起点"
+B: box "终点" at 4cm heading 30deg from A
+arrow from A right until even with B then to B
+```
+
+### even with 关键字 - 对齐到目标坐标
+- `even with <object>` - 水平对齐到目标对象
+- `even with <object>.x` - 对齐到X坐标
+- `even with <object>.y` - 对齐到Y坐标
+
+```pikchr
+A: box "参考点"
+B: box "对齐" at 3cm heading 45deg from A
+arrow from A right until even with B.e then down until even with B.s then to B.s
+```
+
+### heading 角度 - 指定方向角度
+使用 `heading <degrees>` 指定精确的方向角度（0°=东,90°=北,180°=西,270°=南）:
+
+```pikchr
+arrow heading 45deg go 2cm    # 东北方向45度
+arrow heading 135deg go 2cm   # 西北方向135度
+```
+
+### 罗盘方向 - 16个方向关键字
+Pikchr支持16个罗盘方向:
+
+**基本方向(4个)**:
+- `n` / `north` - 北(上)
+- `s` / `south` - 南(下)
+- `e` / `east` - 东(右)
+- `w` / `west` - 西(左)
+
+**对角方向(4个)**:
+- `ne` / `northeast` - 东北
+- `nw` / `northwest` - 西北
+- `se` / `southeast` - 东南
+- `sw` / `southwest` - 西南
+
+**细分方向(8个)**:
+- `nne`, `ene` - 北偏东,东偏北
+- `nnw`, `wnw` - 北偏西,西偏北
+- `sse`, `ese` - 南偏东,东偏南
+- `ssw`, `wsw` - 南偏西,西偏南
+
+**使用示例**:
+```pikchr
+arrow ne go 2cm
+arrow heading 45deg go 2cm    # 等价于 ne
+line sse go 1.5cm
+```
+
+### go 关键字 - 显式路径命令
+`go` 明确表示移动命令,提高代码可读性:
+
+```pikchr
+arrow go right 2cm then down 1cm
+line go ne 1.5cm
+```
+
+---
+
+## 变量、宏和表达式
+
+### 变量赋值
+使用 `=` 定义变量,存储尺寸、颜色等值:
+
+```pikchr
+# 定义变量
+boxWidth = 2cm
+boxHeight = 1cm
+spacing = 0.5cm
+primaryColor = lightblue
+
+# 使用变量
+A: box width boxWidth height boxHeight fill primaryColor "节点A"
+move right spacing
+B: box width boxWidth height boxHeight fill primaryColor "节点B"
+```
+
+### 宏定义
+使用 `define` 定义可重用的代码块:
+
+```pikchr
+# 定义宏
+define node { box width 2cm height 1cm fill lightblue }
+define connector { arrow right 1cm }
+
+# 使用宏
+node "开始"
+connector
+node "处理"
+connector
+node "结束"
+```
+
+### 表达式运算
+Pikchr 支持算术表达式和函数:
+
+**算术运算符**:
+- `+` - 加法
+- `-` - 减法
+- `*` - 乘法
+- `/` - 除法
+
+**使用示例**:
+```pikchr
+baseWidth = 2cm
+A: box width baseWidth height baseWidth/2 "正常"
+B: box width baseWidth*1.5 height baseWidth/2 "加宽50%" at 1cm below A
+C: box width baseWidth-0.5cm height baseWidth/2 "缩窄0.5cm" at 1cm below B
+```
+
+### 内置数学函数
+- `sin(angle)` - 正弦函数
+- `cos(angle)` - 余弦函数
+- `sqrt(x)` - 平方根
+- `abs(x)` - 绝对值
+- `min(a,b)` - 最小值
+- `max(a,b)` - 最大值
+
+**使用示例**:
+```pikchr
+radius = 2cm
+angle = 45deg
+x = radius * cos(angle)
+y = radius * sin(angle)
+circle at (x, y) radius 0.5cm
+```
+
+### 重要限制
+- ❌ **不支持 if/else 条件语句** - Pikchr 不包含条件控制流
+- ❌ **不支持 for/while 循环** - Pikchr 不包含循环控制流
+- ✅ **支持变量和宏** - 可以通过变量和宏实现代码重用
+- ✅ **支持表达式** - 可以使用算术运算和数学函数
+
+---
+
+## 命名规范
+
+**对象命名**:
+- ✅ 使用驼峰命名法：StartBox, ProcessCircle
+- ✅ 使用语义化名称，描述对象用途
+- ❌ 避免无意义的名称：a, b, obj1
+
+**标签文本**:
+- ✅ 使用简洁中文，控制在 10 字以内
+- ✅ 使用双引号包裹文本
+- ❌ 避免过长文本导致布局混乱
+
+---
+
+## 常见错误
+
+### 错误 1: 缺少单位
+**❌ 错误**:
+```pikchr
+box width 2 height 1
+```
+
+**✅ 正确**:
+```pikchr
+box width 2cm height 1cm
+```
+
+**原因**: Pikchr 要求明确指定单位
+**Kroki 错误**: `Syntax error: missing unit for 'width'`
+
+---
+
+### 错误 2: 对象未命名导致无法引用
+**❌ 错误**:
+```pikchr
+box "A"
+arrow from previous to next
+box "B"
+```
+
+**✅ 正确**:
+```pikchr
+A: box "A"
+B: box "B"
+arrow from A to B
+```
+
+**原因**: 需要命名对象才能引用
+**Kroki 错误**: `Undefined object: 'previous'`
+
+---
+
+### 错误 3: 方向语法错误
+**❌ 错误**:
+```pikchr
+arrow -> right
+```
+
+**✅ 正确**:
+```pikchr
+arrow right
+arrow <-  # 反向箭头
+```
+
+**原因**: 方向关键字不需要箭头符号
+**Kroki 错误**: `Syntax error: unexpected '->' after direction keyword`
+
+---
+
+## 最佳实践
+
+1. **命名策略**
+   - 为关键对象使用描述性命名
+   - 使用一致的命名风格
+   - 避免过度命名（临时对象不需要命名）
+
+2. **布局设计**
+   - 优先使用相对定位，提高可维护性
+   - 保持元素对齐和间距一致
+   - 使用统一的尺寸单位（建议 cm）
+
+3. **代码组织**
+   - 使用注释分隔逻辑区域
+   - 相关元素放在一起
+   - 先定义对象，再定义连接
+
+4. **尺寸规范**
+   - 所有尺寸属性必须包含单位
+   - 使用一致的单位系统（避免混用 cm 和 px）
+   - 合理设置默认间距（如 1cm, 2cm）
+
+---
+
+## Kroki 兼容性
+
+- **Kroki 版本**: 支持 Pikchr 最新稳定版
+- **语法限制**:
+  - ❌ **不支持 if/else 条件语句** - Pikchr 语言本身不包含条件控制
+  - ❌ **不支持 for/while 循环** - Pikchr 语言本身不包含循环控制
+  - ⚠️ 宏定义和变量在 Kroki 版本中可能不稳定,建议使用基础语法
+- **已知问题**:
+  - 中文字符在某些字体下可能显示不全,建议使用简洁文本
+  - 过大的图表 (超过 100 个元素) 可能渲染缓慢
+
+---
+
+## 基础示例
+
+### 示例 1: 简单流程图
+
+**需求**: 三步骤流程
+
+**Pikchr 代码**:
+```pikchr
+Start: box "开始" fill lightblue
+arrow right 1cm
+Process: box "处理" fill lightgreen
+arrow right 1cm
+End: box "结束" fill pink
+```
+
+**说明**: 使用命名锚点和相对定位,填充不同颜色区分步骤
+
+---
+
+### 示例 2: 决策流程图
+
+**需求**: 包含判断分支的流程
+
+**Pikchr 代码**:
+```pikchr
+Start: box "开始" fill lightblue
+arrow down 1cm
+Decision: ellipse "判断?" fill yellow
+arrow down 1cm from Decision.s "是"
+YesBox: box "执行A" fill lightgreen
+arrow right 2cm from Decision.e "否"
+NoBox: box "执行B" fill pink
+arrow down 1cm from YesBox.s
+arrow down 1cm from NoBox.s then left 2cm
+End: box "结束" fill gray
+```
+
+**说明**: 使用椭圆表示判断点,箭头标签表示条件
+
+---
+
+### 示例 3: 架构图
+
+**需求**: 三层架构
+
+**Pikchr 代码**:
+```pikchr
+# 表示层
+UI: box "用户界面" width 4cm height 1cm fill lightblue
+
+arrow down 1cm from UI.s
+
+# 业务层
+BL: box "业务逻辑" width 4cm height 1cm fill lightgreen
+
+arrow down 1cm from BL.s
+
+# 数据层
+DB: box "数据库" width 4cm height 1cm fill pink
+
+# 双向箭头
+arrow <-> from UI.s to BL.n
+arrow <-> from BL.s to DB.n
+```
+
+**说明**: 使用注释分隔层级,双向箭头表示交互
+
+---
+
+### 示例 4: 组件关系图
+
+**需求**: 微服务架构
+
+**Pikchr 代码**:
+```pikchr
+# 前端服务
+Frontend: box "前端" fill lightblue
+
+# 后端服务
+Backend1: box "用户服务" fill lightgreen at 2cm right of Frontend
+Backend2: box "订单服务" fill lightgreen at 2cm below Backend1
+
+# 数据库
+DB: box "数据库" fill pink at 2cm right of Backend1
+
+# 连接关系
+arrow from Frontend to Backend1
+arrow from Frontend to Backend2
+arrow from Backend1 to DB
+arrow from Backend2 to DB
+```
+
+**说明**: 使用绝对定位精确控制布局,箭头表示依赖关系

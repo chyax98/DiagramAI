@@ -1,0 +1,297 @@
+
+# Excalidraw 通用语法规范
+
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 必须包含完整的顶层 JSON 结构
+这是 Excalidraw JSON 最常见的致命错误！缺少顶层属性会导致渲染失败。
+
+**错误示例**：
+```json
+{
+  "elements": [
+    {"type": "rectangle", "id": "rect-1"}
+  ]
+}
+```
+**编译错误**：
+```
+Error: Invalid Excalidraw JSON: Missing required property 'type'
+Error: Invalid Excalidraw JSON: Missing required property 'version'
+```
+
+**正确写法**：
+```json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [],
+  "appState": {},
+  "files": {}
+}
+```
+
+**原因**: Excalidraw 渲染器严格要求这 6 个顶层属性，缺少任何一个都会导致渲染失败。
+
+---
+
+### ⚠️ 规则 2: 所有形状元素必须包含完整的位置和尺寸
+
+**错误示例**：
+```json
+{
+  "type": "rectangle",
+  "id": "rect-1",
+  "strokeColor": "#000000"
+}
+```
+**编译错误**：
+```
+Error: Element 'rect-1' is missing required property 'x'
+Error: Element 'rect-1' is missing required property 'y'
+Error: Element rendering failed: Invalid dimensions
+```
+
+**正确写法**：
+```json
+{
+  "type": "rectangle",
+  "id": "rect-1",
+  "x": 100,
+  "y": 100,
+  "width": 200,
+  "height": 100,
+  "strokeColor": "#000000",
+  "backgroundColor": "#ffffff"
+}
+```
+
+**原因**: 渲染器需要准确的坐标和尺寸信息才能正确显示元素。
+
+---
+
+### ⚠️ 规则 3: 元素 ID 必须唯一
+
+**错误示例**：
+```json
+{
+  "elements": [
+    {"type": "rectangle", "id": "item-1", "x": 0, "y": 0, "width": 100, "height": 100},
+    {"type": "ellipse", "id": "item-1", "x": 200, "y": 0, "width": 100, "height": 100}
+  ]
+}
+```
+**编译错误**：
+```
+Error: Duplicate element ID 'item-1'
+Warning: Arrow binding may fail due to ambiguous ID
+```
+
+**正确写法**：
+```json
+{
+  "elements": [
+    {"type": "rectangle", "id": "item-1", "x": 0, "y": 0, "width": 100, "height": 100},
+    {"type": "ellipse", "id": "item-2", "x": 200, "y": 0, "width": 100, "height": 100}
+  ]
+}
+```
+
+**原因**: 箭头绑定依赖唯一的元素 ID，重复 ID 会导致绑定失败或渲染异常。
+
+---
+
+### ⚠️ 规则 4: JSON 必须是有效的格式
+
+**错误示例**：
+```json
+{
+  "type": "excalidraw",
+  "elements": [
+    {"type": "rectangle", "id": "rect-1",}
+    {"type": "ellipse" "id": "ellipse-1"}
+  ]
+}
+```
+**编译错误**：
+```
+SyntaxError: Unexpected token } in JSON at position 58
+SyntaxError: Unexpected token 'id' at position 92
+```
+
+**正确写法**：
+```json
+{
+  "type": "excalidraw",
+  "elements": [
+    {"type": "rectangle", "id": "rect-1"},
+    {"type": "ellipse", "id": "ellipse-1"}
+  ]
+}
+```
+
+**原因**: JSON 格式要求严格，任何语法错误都会导致解析失败。
+
+---
+
+### ⚠️ 规则 5: 箭头绑定的 ID 必须存在
+
+**错误示例**：
+```json
+{
+  "elements": [
+    {"type": "rectangle", "id": "box-1", "x": 0, "y": 0, "width": 100, "height": 100},
+    {
+      "type": "arrow",
+      "id": "arrow-1",
+      "x": 0,
+      "y": 0,
+      "start": {"id": "box-1"},
+      "end": {"id": "box-2"}
+    }
+  ]
+}
+```
+**渲染警告**：
+```
+Warning: Arrow 'arrow-1' references non-existent element 'box-2'
+Arrow binding failed: Target element not found
+```
+
+**正确写法**：
+```json
+{
+  "elements": [
+    {"type": "rectangle", "id": "box-1", "x": 0, "y": 0, "width": 100, "height": 100},
+    {"type": "rectangle", "id": "box-2", "x": 200, "y": 0, "width": 100, "height": 100},
+    {
+      "type": "arrow",
+      "id": "arrow-1",
+      "x": 0,
+      "y": 0,
+      "start": {"id": "box-1"},
+      "end": {"id": "box-2"}
+    }
+  ]
+}
+```
+
+**原因**: 箭头需要连接到实际存在的元素，否则无法正确渲染连接关系。
+
+---
+
+## 核心元素类型
+
+### 基本形状
+- `rectangle` - 矩形：用于容器、框架
+- `ellipse` - 椭圆：用于开始/结束、强调
+- `diamond` - 菱形：用于判断、决策
+
+### 线条
+- `arrow` - 箭头：表示方向、关系
+- `line` - 线条：连接、分隔
+
+### 文本
+- `text` - 独立文本元素
+- `label` - 形状内的标签（嵌套在形状的 `label` 属性中）
+
+### 高级元素
+- `freedraw` - 自由绘制:手绘曲线
+- `image` - 图片:嵌入图像
+- `frame` - 框架:分组容器,组织多个元素
+
+## 必需属性
+
+每个形状元素必须包含：
+- `type` - 元素类型
+- `id` - 唯一标识符
+- `x` - X 坐标
+- `y` - Y 坐标
+- `width` - 宽度
+- `height` - 高度
+
+## 常用样式属性
+
+```json
+{
+  "strokeColor": "#000000",        // 边框颜色
+  "backgroundColor": "#ffffff",    // 填充颜色
+  "strokeWidth": 2,               // 边框宽度 (1, 2, 4)
+  "strokeStyle": "solid",         // solid, dashed, dotted
+  "fillStyle": "hachure",         // hachure, cross-hatch, solid
+  "roughness": 1,                 // 手绘粗糙度 (0-2)
+  "fontSize": 20,                 // 字体大小
+  "fontFamily": 1,                // 1=手绘, 2=正常, 3=代码
+  "textAlign": "center"           // left, center, right
+}
+```
+
+**注意**: 生成图表时可以省略非必需属性（如 `opacity`, `seed`, `version`, `versionNonce` 等），仅保留关键样式属性即可。
+
+## 命名规范
+
+### 元素 ID
+- **命名规范**: 遵循L1通用命名规则(英文、数字、下划线、连字符)
+- **推荐格式**:
+  - 有意义的英文ID: `login-button`, `user-icon`
+  - 类型-序号: `rect-1`, `arrow-2`
+- **用途**: ID必须唯一,用于箭头绑定
+
+### 颜色规范
+推荐使用现代、清晰的颜色：
+
+**浅色背景（用于形状填充）**:
+- `#c0eb75` (绿) - 用于正常/成功状态的元素
+- `#ffc9c9` (红) - 用于错误/警告状态的元素
+- `#a5d8ff` (蓝) - 用于信息/中性状态的元素
+
+**深色边框（用于形状边框）**:
+- `#1971c2` (蓝) - 用于主要元素、前端组件
+- `#2f9e44` (绿) - 用于成功状态、后端服务
+- `#5f3dc4` (紫) - 用于网关、代理、中间件
+
+## 布局最佳实践
+
+- 元素间距：至少 50px
+- 标准形状宽度：100-300px
+- 标准形状高度：50-150px
+- 字体大小：16-20px（正文），28-36px（标题）
+- 箭头起点/终点：精确绑定到元素 ID
+- **元素数量建议**:
+  - **最佳可读性**: 30-50个元素
+  - **性能上限**: 100个元素(Kroki限制)
+  - **最佳实践**: 如需展示复杂系统,拆分为多个子图
+
+## 手绘风格控制
+
+`roughness` 参数控制手绘效果：
+- `0` - 精确线条（适合线框图 wireframe）
+- `1` - 标准手绘（推荐用于通用图表 diagram）
+- `2` - 强烈手绘（适合手绘草图 sketch）
+- `3` - 极强手绘（适合艺术化草图）
+
+### 字体风格选择
+
+`fontFamily` 参数控制字体样式：
+
+**字体编号**:
+- `1` - 手绘风格字体（Virgil）- 推荐用于草图和创意图表
+- `2` - 正常字体（Helvetica）- 推荐用于正式文档和专业图表
+- `3` - 代码字体（Cascadia）- 推荐用于技术架构图和代码流程
+- `4` - 漫画字体（Comic Shanns）- 推荐用于轻松活泼的图表
+
+**搭配建议**:
+- 手绘风格 (`roughness: 1-2`) + 手绘字体 (`fontFamily: 1`)
+- 精确线条 (`roughness: 0`) + 正常字体 (`fontFamily: 2`)
+- 技术图表 (`roughness: 0`) + 代码字体 (`fontFamily: 3`)
+
+## Kroki 特定限制
+
+Excalidraw 图表通过 Kroki 渲染时的特殊要求:
+
+1. **元素数量**: 建议不超过100个元素(性能上限)
+2. **尺寸限制**: 避免使用过大的尺寸(width/height > 5000)
+3. **错误提示**: Kroki会返回HTTP 400错误和详细的错误信息
+
+**注意**: JSON格式和必需属性的验证规则见上方强制规则部分。

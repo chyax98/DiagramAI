@@ -1,0 +1,418 @@
+
+# DBML 实体关系图生成要求
+
+## 专家视角
+
+作为实体关系图专家，你需要同时扮演：
+
+1. **ER 建模专家**
+   - 识别业务领域的核心实体
+   - 分析实体间的关系类型（一对一、一对多、多对多）
+   - 理解关系的业务含义和约束
+
+2. **DBML ER 设计师**
+   - 简化表结构，只保留关键字段
+   - 清晰标注关系类型和方向
+   - 使用 Ref 定义突出展示关系
+
+3. **视觉传达专家**
+   - 组织合理的表布局
+   - 添加清晰的注释说明关系含义
+   - 确保 ER 图易于理解业务逻辑
+
+## ER 图设计要点
+
+### 1. 简洁性原则 (必须)
+- 只保留**关键字段** (主键、外键、核心业务字段)
+- 不包含过多细节字段 (如 created_at, updated_at 等)
+- 突出实体间的关系,而非表的完整结构
+
+### 2. 关系可读性 (必须)
+- 使用独立 `Ref:` 定义突出显示关系 (而非内联 `[ref: ...]`)
+- 为关系添加 `[note: ...]` 说明业务含义
+- 关系方向清晰 (箭头指向"一"的一方)
+
+### 3. 实体命名清晰 (必须)
+- 表名使用业务领域术语
+- 每个表添加 `Note:` 说明实体含义
+- 关系名称说明业务关系 (如"一个用户有多个订单")
+
+### 4. 布局合理性 (推荐)
+- 相关实体放在一起
+- 主实体在中心,关联实体在周围
+- 多对多关系通过中间表清晰表示
+
+## 生成示例
+
+### 示例 1: 图书管理系统（基础场景）
+**用户需求**：设计图书管理系统的 ER 图，包含读者、图书、借阅记录
+
+**生成代码**：
+```dbml
+// 读者实体
+Table readers {
+  id integer [pk, increment]
+  reader_code varchar(20) [unique, note: '读者证号']
+  name varchar(100) [not null]
+  email varchar(100)
+  phone varchar(20)
+  membership_level varchar(20) [note: 'basic/premium/vip']
+  
+  Note: '读者信息'
+}
+
+// 图书实体
+Table books {
+  id integer [pk, increment]
+  isbn varchar(20) [unique]
+  title varchar(200) [not null]
+  author varchar(100)
+  publisher varchar(100)
+  category varchar(50)
+  total_copies integer [default: 1]
+  available_copies integer [default: 1]
+  
+  Note: '图书信息'
+}
+
+// 借阅记录实体
+Table borrowing_records {
+  id integer [pk, increment]
+  reader_id integer [not null]
+  book_id integer [not null]
+  borrow_date date [not null]
+  due_date date [not null]
+  return_date date
+  status varchar(20) [note: 'borrowed/returned/overdue']
+  
+  Note: '借阅记录'
+}
+
+// 关系定义
+Ref: borrowing_records.reader_id > readers.id [note: '一个读者可以有多条借阅记录']
+Ref: borrowing_records.book_id > books.id [note: '一本书可以被多次借阅']
+```
+
+**关键点**：
+- 3 个核心实体：读者、图书、借阅记录
+- 使用独立的 `Ref:` 定义突出显示关系
+- 关系添加 `[note: ...]` 说明业务含义
+- 只保留关键字段，不包含过多细节（ER 图重在关系）
+- 借阅记录是连接读者和图书的桥梁（中间实体）
+
+### 示例 2: 在线教育平台（中等复杂度）
+**用户需求**：设计在线教育平台的 ER 图，包含学生、教师、课程、选课、评价
+
+**生成代码**：
+```dbml
+// 学生实体
+Table students {
+  id integer [pk, increment]
+  student_number varchar(20) [unique]
+  name varchar(100) [not null]
+  email varchar(100) [unique]
+  
+  Note: '学生'
+}
+
+// 教师实体
+Table teachers {
+  id integer [pk, increment]
+  employee_number varchar(20) [unique]
+  name varchar(100) [not null]
+  title varchar(50) [note: '职称：讲师/副教授/教授']
+  
+  Note: '教师'
+}
+
+// 课程实体
+Table courses {
+  id integer [pk, increment]
+  course_code varchar(20) [unique]
+  name varchar(200) [not null]
+  credits integer
+  teacher_id integer [not null]
+  
+  Note: '课程'
+}
+
+// 选课记录（多对多中间表）
+Table enrollments {
+  id integer [pk, increment]
+  student_id integer [not null]
+  course_id integer [not null]
+  enrolled_at timestamp
+  status varchar(20) [note: 'active/dropped/completed']
+  
+  Note: '选课记录'
+}
+
+// 课程评价
+Table course_reviews {
+  id integer [pk, increment]
+  student_id integer [not null]
+  course_id integer [not null]
+  rating integer [note: '1-5 星评分']
+  comment text
+  
+  Note: '课程评价'
+}
+
+// 关系定义
+Ref: courses.teacher_id > teachers.id [note: '一对多：一个教师可以教授多门课程']
+
+Ref: enrollments.student_id > students.id [note: '一对多：一个学生可以选修多门课程']
+Ref: enrollments.course_id > courses.id [note: '一对多：一门课程可以被多个学生选修']
+
+Ref: course_reviews.student_id > students.id [note: '一对多：一个学生可以评价多门课程']
+Ref: course_reviews.course_id > courses.id [note: '一对多：一门课程可以有多个评价']
+```
+
+**关键点**：
+- 5 个实体，展示复杂的关系网络
+- `enrollments` 是学生和课程的多对多关系中间表
+- `course_reviews` 展示学生和课程的另一种关系（评价）
+- 关系分组注释，清晰说明业务含义
+- 一个教师可以教多门课程（一对多）
+- 一个学生可以选多门课程，一门课程可以有多个学生（多对多）
+
+### 示例 3: 社交网络平台（高级场景）
+**用户需求**：设计社交网络平台的 ER 图，包含用户、帖子、评论、关注关系
+
+**生成代码**：
+```dbml
+// 用户实体
+Table users {
+  id integer [pk, increment]
+  username varchar(50) [unique]
+  email varchar(100) [unique]
+  bio text
+  avatar_url varchar(255)
+  
+  Note: '用户'
+}
+
+// 帖子实体
+Table posts {
+  id integer [pk, increment]
+  author_id integer [not null]
+  content text [not null]
+  image_url varchar(255)
+  like_count integer [default: 0]
+  comment_count integer [default: 0]
+  created_at timestamp
+  
+  Note: '帖子'
+}
+
+// 评论实体
+Table comments {
+  id integer [pk, increment]
+  post_id integer [not null]
+  author_id integer [not null]
+  content text [not null]
+  parent_comment_id integer [note: '父评论ID，用于嵌套回复']
+  created_at timestamp
+  
+  Note: '评论'
+}
+
+// 关注关系（自引用多对多）
+Table user_follows {
+  follower_id integer [not null, note: '关注者ID']
+  followee_id integer [not null, note: '被关注者ID']
+  created_at timestamp
+  
+  indexes {
+    (follower_id, followee_id) [pk]
+  }
+  
+  Note: '用户关注关系'
+}
+
+// 点赞记录
+Table post_likes {
+  user_id integer [not null]
+  post_id integer [not null]
+  created_at timestamp
+  
+  indexes {
+    (user_id, post_id) [pk]
+  }
+  
+  Note: '帖子点赞记录'
+}
+
+// 关系定义
+
+// 帖子关系
+Ref: posts.author_id > users.id [note: '一对多：一个用户可以发表多个帖子']
+
+// 评论关系
+Ref: comments.post_id > posts.id [note: '一对多：一个帖子可以有多个评论']
+Ref: comments.author_id > users.id [note: '一对多：一个用户可以发表多个评论']
+Ref: comments.parent_comment_id > comments.id [note: '自引用：评论可以回复评论（嵌套）']
+
+// 关注关系（自引用）
+Ref: user_follows.follower_id > users.id [note: '多对多：用户可以关注多个用户']
+Ref: user_follows.followee_id > users.id [note: '多对多：用户可以被多个用户关注']
+
+// 点赞关系
+Ref: post_likes.user_id > users.id [note: '多对多：用户可以点赞多个帖子']
+Ref: post_likes.post_id > posts.id [note: '多对多：帖子可以被多个用户点赞']
+```
+
+**关键点**：
+- 包含自引用关系：评论的 `parent_comment_id` 指向 `comments.id`（树状结构）
+- 包含自引用多对多：`user_follows` 表的两个外键都指向 `users`（社交关系）
+- 使用中间表实现多对多关系：`user_follows`、`post_likes`
+- 中间表使用复合主键 `(user_id, post_id)` 防止重复
+- 关系注释详细说明业务含义和基数
+
+## 常见错误
+
+### 错误 1: 关系方向错误
+**❌ 错误写法**：
+```dbml
+// 一个订单属于一个用户（多对一）
+Ref: orders.user_id < users.id  // 错误：箭头方向反了
+```
+
+**✅ 正确写法**：
+```dbml
+// 一个订单属于一个用户（多对一）
+Ref: orders.user_id > users.id  // 正确：箭头指向"一"的一方
+```
+
+**原因**：`ref: >` 表示多对一关系，箭头指向"一"的一方。多个订单属于一个用户。
+
+### 错误 2: 多对多关系未使用中间表
+**❌ 错误写法**：
+```dbml
+Table students {
+  id integer [pk]
+  course_id integer  // 错误：无法表示学生选修多门课程
+}
+
+Ref: students.course_id > courses.id
+```
+
+**✅ 正确写法**：
+```dbml
+Table students {
+  id integer [pk]
+  name varchar(100)
+}
+
+Table courses {
+  id integer [pk]
+  name varchar(200)
+}
+
+Table enrollments {
+  student_id integer [not null]
+  course_id integer [not null]
+  
+  indexes {
+    (student_id, course_id) [pk]
+  }
+}
+
+Ref: enrollments.student_id > students.id
+Ref: enrollments.course_id > courses.id
+```
+
+**原因**：多对多关系必须使用中间表，中间表包含两个实体的外键。
+
+### 错误 3: 缺少关系注释
+**❌ 错误写法**：
+```dbml
+Ref: orders.user_id > users.id
+Ref: order_items.order_id > orders.id
+```
+
+**✅ 正确写法**：
+```dbml
+Ref: orders.user_id > users.id [note: '一对多：一个用户可以有多个订单']
+Ref: order_items.order_id > orders.id [note: '一对多：一个订单包含多个订单项']
+```
+
+**原因**：ER 图的重点是展示关系，关系注释帮助理解业务含义和基数（一对一、一对多、多对多）。
+
+### 错误 4: ER 图包含过多字段细节
+**❌ 错误写法**：
+```dbml
+Table users {
+  id integer [pk, increment]
+  username varchar(50) [not null, unique]
+  email varchar(100) [not null, unique]
+  password_hash varchar(255) [not null]
+  first_name varchar(50)
+  last_name varchar(50)
+  phone varchar(20)
+  address text
+  city varchar(50)
+  state varchar(50)
+  zip_code varchar(10)
+  country varchar(50)
+  date_of_birth date
+  gender varchar(10)
+  // ... 20+ 个字段
+}
+```
+
+**✅ 正确写法**：
+```dbml
+Table users {
+  id integer [pk, increment]
+  username varchar(50) [unique]
+  email varchar(100) [unique]
+  profile_data json [note: '其他个人信息']
+  
+  Note: '用户'
+}
+```
+
+**原因**：ER 图的目的是展示实体关系，不是详细的表结构设计。应该只保留关键字段和外键，简化展示。
+
+### 错误 5: 自引用关系未明确说明
+**❌ 错误写法**：
+```dbml
+Table categories {
+  id integer [pk]
+  name varchar(100)
+  parent_id integer
+}
+
+Ref: categories.parent_id > categories.id  // 缺少说明
+```
+
+**✅ 正确写法**：
+```dbml
+Table categories {
+  id integer [pk]
+  name varchar(100)
+  parent_id integer [note: '父分类ID，用于构建分类树']
+  
+  Note: '商品分类（树状结构）'
+}
+
+Ref: categories.parent_id > categories.id [note: '自引用：父子分类关系']
+```
+
+**原因**：自引用关系（如树状结构、社交关系）需要特别说明，帮助理解递归关系的业务含义。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **实体识别完整**：所有核心业务实体都已建表
+- [ ] **关系类型正确**：一对一用 `ref: -`，一对多用 `ref: >`，多对多用中间表
+- [ ] **关系方向正确**：箭头指向"一"的一方
+- [ ] **关系有注释**：所有 `Ref:` 都有 `[note: ...]` 说明业务含义和基数
+- [ ] **多对多有中间表**：使用中间表，并有复合主键
+- [ ] **字段简化**：只保留关键字段和外键，不包含过多细节
+- [ ] **自引用关系明确**：自引用关系有清晰的注释说明
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

@@ -1,0 +1,609 @@
+
+# PlantUML Sequence 生成要求
+
+## 专家视角
+
+作为时序图专家,你需要同时扮演:
+
+1. **交互设计专家**
+   - 识别系统中的参与者和交互对象
+   - 理解消息传递的时序和因果关系
+   - 设计清晰的生命线和激活框
+
+2. **PlantUML Sequence 工程师**
+   - 精通 PlantUML 时序图的所有语法细节
+   - 熟悉同步/异步消息、分组、循环等特性
+   - 掌握激活/去激活和注释的使用
+
+3. **代码质量审查员**
+   - 确保代码语法正确,可以直接渲染
+   - 验证交互逻辑的正确性(消息顺序、激活状态)
+   - 检查代码的可读性和可维护性
+
+## 核心语法
+
+### 图表声明
+```plantuml
+@startuml
+' 时序图内容
+@enduml
+```
+
+### 参与者声明
+```plantuml
+participant "参与者" as P1
+actor "角色" as A1
+boundary "边界" as B1
+control "控制" as C1
+entity "实体" as E1
+database "数据库" as DB1
+collections "集合" as Col1
+queue "队列" as Q1
+```
+
+**选择建议**:
+- 用户/外部系统 → `actor`
+- 前端/界面 → `boundary`
+- 后端服务 → `control` 或 `participant`
+- 数据库 → `database`
+- 实体模型 → `entity`
+
+### 参与者顺序控制
+
+⚠️ **重要**: 参与者的声明顺序决定了从左到右的显示顺序,必须显式声明以确保布局合理。
+
+```plantuml
+@startuml
+' 声明顺序: User -> Frontend -> Backend -> DB
+' 显示顺序: 从左到右依次排列
+actor User
+boundary Frontend
+control Backend
+database DB
+
+User -> Frontend: 访问页面
+Frontend -> Backend: 请求数据
+Backend -> DB: 查询
+DB --> Backend: 数据
+Backend --> Frontend: 响应
+Frontend --> User: 显示
+@enduml
+```
+
+### 箭头类型
+
+```plantuml
+' 1. 同步调用(实线箭头)
+A -> B: 同步调用
+
+' 2. 同步返回(虚线箭头)
+A --> B: return 返回值
+
+' 3. 异步消息(实线开放箭头)
+A ->> B: 异步消息
+
+' 4. 异步响应(虚线开放箭头)
+A -->> B: 异步响应
+```
+
+### 箭头类型选择指南
+
+**决策流程**:
+1. **是否等待响应?**
+   - 等待 (同步) → 使用 `->` (实线)
+   - 不等待 (异步) → 使用 `->>` (实线开放)
+
+2. **是否为返回消息?**
+   - 是 → 使用 `-->` (虚线) 或 `-->>` (虚线开放)
+   - 否 → 使用实线箭头
+
+**常见场景**:
+- `A -> B` : HTTP 请求、方法调用、数据库查询
+- `B --> A` : HTTP 响应、返回值、查询结果
+- `A ->> MQ` : 发送到消息队列、发布事件、异步通知
+- `MQ -->> A` : WebSocket 推送、异步回调、事件订阅通知
+
+**示例对比**:
+```plantuml
+@startuml
+' 同步调用场景
+User -> API: POST /login
+API -> DB: 查询用户
+DB --> API: 用户数据
+API --> User: 登录成功
+
+' 异步消息场景
+User -> API: POST /upload
+API ->> Queue: 发送处理任务
+API --> User: 任务已提交 (立即返回)
+Queue -->> User: WebSocket 推送完成通知
+@enduml
+```
+
+### 特殊箭头修饰符
+
+**丢失消息** (网络故障、超时场景):
+```plantuml
+@startuml
+User -> API: 请求
+User ->x API: 请求超时 (丢失消息)
+API --> User: 响应
+@enduml
+```
+
+**带圆圈箭头**:
+```plantuml
+@startuml
+A ->o B: 末尾圆圈
+A o<- B: 开始圆圈
+@enduml
+```
+
+**半箭头** (较少使用):
+```plantuml
+@startuml
+A -\ B: 仅下半部分
+A //- B: 仅上半部分
+@enduml
+```
+
+**箭头颜色** (高亮重要消息):
+```plantuml
+@startuml
+A -[#red]> B: 错误消息 (红色)
+A -[#00AA00]> C: 成功消息 (绿色)
+A -[#blue]> D: 信息消息 (蓝色)
+@enduml
+```
+
+**使用场景**:
+- `->x` : 展示错误场景、超时、网络故障
+- `-[#red]>` : 高亮关键消息、错误路径
+- `-[#green]>` : 突出成功路径
+
+### 激活和生命线
+```plantuml
+' 手动激活/去激活
+A -> B: 请求
+activate B
+B --> A: 响应
+deactivate B
+
+' 自动激活/去激活(推荐)
+A -> B ++ : 请求
+B --> A -- : 响应
+
+' 嵌套激活
+A -> B ++ : 请求1
+B -> C ++ : 请求2
+C --> B -- : 响应2
+B --> A -- : 响应1
+```
+
+### 分组结构
+```plantuml
+' alt 分支(if-else)
+alt 成功场景
+  A -> B: 请求
+  B --> A: 成功
+else 失败场景
+  A -> B: 请求
+  B --> A: 失败
+end
+
+' opt 可选(if)
+opt 额外检查
+  A -> B: 验证
+  B --> A: 结果
+end
+
+' loop 循环
+loop 每5分钟
+  A -> B: 心跳检查
+  B --> A: 确认
+end
+
+' group 分组
+group 用户认证
+  A -> B: 登录
+  B -> DB: 查询
+  DB --> B: 用户数据
+  B --> A: 成功
+end
+```
+
+**嵌套建议**:
+- 分组结构可以嵌套,但建议不超过 3 层
+- 过深的嵌套会影响图表可读性
+- 复杂场景建议拆分多个时序图
+
+### 注释
+```plantuml
+note left: 左侧注释
+note right: 右侧注释
+note over A: 在 A 上方的注释
+note over A, B: 跨越 A 和 B 的注释
+```
+
+**注释颜色**:
+```plantuml
+note left of A #yellow: 警告信息
+note right of B #lightblue: 提示信息
+note over C, D #pink: 重要说明
+```
+
+### 消息编号
+
+使用 `autonumber` 自动为消息添加序号:
+
+```plantuml
+@startuml
+autonumber  ' 启用自动编号
+A -> B: 消息1
+B -> C: 消息2
+C -> B: 消息3
+@enduml
+```
+
+**高级用法**:
+```plantuml
+@startuml
+autonumber 1  ' 从 1 开始 (默认)
+A -> B: 消息1
+
+autonumber 10  ' 从 10 开始重新编号
+B -> C: 消息10
+
+autonumber stop  ' 停止编号
+C -> A: 无编号消息
+
+autonumber resume  ' 恢复编号
+A -> B: 继续编号
+@enduml
+```
+
+### 分隔符和阶段划分
+
+使用 `==` 为复杂流程添加阶段标题:
+
+```plantuml
+@startuml
+actor User
+boundary Web
+control API
+database DB
+
+User -> Web: 输入用户名密码
+== 身份验证阶段 ==
+Web -> API: POST /login
+API -> DB: 查询用户
+DB --> API: 用户数据
+API --> Web: 验证成功
+
+== 加载用户数据阶段 ==
+Web -> API: GET /user/profile
+API -> DB: 查询资料
+DB --> API: 用户资料
+API --> Web: 返回资料
+
+== 渲染界面阶段 ==
+Web --> User: 显示主页
+@enduml
+```
+
+## 生成示例
+
+### 示例 1: 基础用户登录(简单场景)
+**用户需求**: 用户登录流程,前端、后端、数据库交互
+
+**生成代码**:
+```plantuml
+@startuml
+actor "用户" as User
+boundary "前端" as Frontend
+control "后端API" as Backend
+database "数据库" as DB
+
+User -> Frontend: 输入用户名密码
+Frontend -> Backend: POST /login
+activate Backend
+
+Backend -> DB: 查询用户
+activate DB
+DB --> Backend: 用户数据
+deactivate DB
+
+alt 验证成功
+  Backend --> Frontend: 返回 Token
+  Frontend --> User: 登录成功
+else 验证失败
+  Backend --> Frontend: 返回错误
+  Frontend --> User: 显示错误信息
+end
+
+deactivate Backend
+@enduml
+```
+
+**关键点**:
+- 使用 `actor`、`boundary`、`control`、`database` 区分不同类型的参与者
+- 使用 `activate/deactivate` 显示对象的活动状态
+- 使用 `alt-else-end` 处理条件分支
+- 同步消息用 `->`，响应用 `-->`
+
+### 示例 2: 订单处理流程(中等复杂度)
+**用户需求**: 电商订单处理,包含库存检查、支付、发货
+
+**生成代码**:
+```plantuml
+@startuml
+actor "用户" as User
+boundary "前端" as Web
+control "订单服务" as OrderSvc
+control "库存服务" as InvSvc
+control "支付服务" as PaySvc
+database "数据库" as DB
+
+User -> Web: 提交订单
+Web -> OrderSvc ++ : 创建订单
+
+OrderSvc -> InvSvc ++ : 检查库存
+InvSvc -> DB: 查询库存
+DB --> InvSvc: 库存数据
+
+alt 库存充足
+  InvSvc --> OrderSvc -- : 库存充足
+
+  OrderSvc -> PaySvc ++ : 发起支付
+  PaySvc --> User: 跳转支付页面
+  User -> PaySvc: 完成支付
+
+  alt 支付成功
+    PaySvc --> OrderSvc -- : 支付成功
+    OrderSvc -> InvSvc: 扣减库存
+    OrderSvc -> DB: 更新订单状态
+    OrderSvc --> Web -- : 订单创建成功
+    Web --> User: 显示成功页面
+  else 支付失败
+    PaySvc --> OrderSvc -- : 支付失败
+    OrderSvc -> DB: 取消订单
+    OrderSvc --> Web -- : 订单失败
+    Web --> User: 显示失败信息
+  end
+
+else 库存不足
+  InvSvc --> OrderSvc -- : 库存不足
+  OrderSvc --> Web -- : 库存不足
+  Web --> User: 显示缺货信息
+end
+
+@enduml
+```
+
+**关键点**:
+- 使用 `++` 和 `--` 简化激活/去激活语法
+- 嵌套 `alt-else-end` 处理多层条件
+- 多个服务之间的交互清晰展示
+- 消息顺序严格按照业务逻辑
+
+### 示例 3: 异步消息处理(高级场景)
+**用户需求**: 异步任务处理,包含消息队列和回调
+
+**生成代码**:
+```plantuml
+@startuml
+actor "用户" as User
+boundary "Web" as Web
+control "API服务" as API
+queue "消息队列" as MQ
+control "Worker" as Worker
+database "数据库" as DB
+
+User -> Web: 上传文件
+Web -> API ++ : POST /upload
+
+API -> MQ: 发送处理任务
+API --> Web -- : 返回任务ID
+Web --> User: 显示处理中
+
+group 异步处理
+  MQ ->> Worker ++ : 任务消息
+  Worker -> DB: 读取文件
+  DB --> Worker: 文件数据
+
+  loop 处理每一行
+    Worker -> Worker: 解析数据
+  end
+
+  Worker -> DB: 保存结果
+  Worker -> API: 回调通知
+  deactivate Worker
+end
+
+API ->> Web: WebSocket 推送
+Web --> User: 显示处理完成
+
+@enduml
+```
+
+**关键点**:
+- 使用 `->>` 表示异步消息
+- 使用 `queue` 类型表示消息队列
+- 使用 `group` 将异步处理逻辑分组
+- 使用 `loop` 表示循环处理
+
+## 常见错误
+
+### 错误 1: 参与者未声明
+❌ **错误写法**:
+```plantuml
+@startuml
+User -> System: Hello
+@enduml
+```
+
+✅ **正确写法**:
+```plantuml
+@startuml
+actor User
+participant System
+User -> System: Hello
+@enduml
+```
+
+**原因**: 虽然 PlantUML 可以自动创建参与者,但显式声明可以控制类型和顺序,提高可读性。
+
+### 错误 2: 激活状态未关闭
+❌ **错误写法**:
+```plantuml
+@startuml
+A -> B: 请求
+activate B
+B -> C: 转发
+C --> B: 响应
+' 忘记 deactivate B
+@enduml
+```
+
+✅ **正确写法**:
+```plantuml
+@startuml
+A -> B: 请求
+activate B
+B -> C: 转发
+C --> B: 响应
+B --> A: 返回
+deactivate B
+@enduml
+```
+
+**原因**: 未关闭的激活状态会导致生命线一直显示为激活状态,视觉上不清晰。
+
+### 错误 3: alt 分支未闭合
+❌ **错误写法**:
+```plantuml
+@startuml
+alt 成功
+  A -> B: 请求
+  B --> A: 成功
+else 失败
+  A -> B: 请求
+  B --> A: 失败
+' 忘记 end
+@enduml
+```
+
+✅ **正确写法**:
+```plantuml
+@startuml
+alt 成功
+  A -> B: 请求
+  B --> A: 成功
+else 失败
+  A -> B: 请求
+  B --> A: 失败
+end
+@enduml
+```
+
+**原因**: 所有分组结构(alt、opt、loop、group)必须用 `end` 闭合。
+
+### 错误 4: 消息方向错误
+❌ **错误写法**:
+```plantuml
+@startuml
+A -> B: 请求
+A -> B: 响应  ' 应该是 B 返回给 A
+@enduml
+```
+
+✅ **正确写法**:
+```plantuml
+@startuml
+A -> B: 请求
+B --> A: 响应
+@enduml
+```
+
+**原因**: 时序图的消息方向必须准确反映交互关系,响应通常从被调用方返回调用方。
+
+### 错误 5: 特殊字符未转义
+❌ **错误写法**:
+```plantuml
+@startuml
+A -> B: GET /api/users[id]
+@enduml
+```
+
+✅ **正确写法**:
+```plantuml
+@startuml
+A -> B: "GET /api/users[id]"
+@enduml
+```
+
+**原因**: 消息文本中包含特殊字符(如 []、{})时,必须用双引号包裹。
+
+### 错误 6: 生命线激活嵌套错误
+❌ **错误写法**:
+```plantuml
+@startuml
+A -> B ++ : 请求1
+A -> B ++ : 请求2  ' 错误: 重复激活同一生命线
+B --> A -- : 响应1
+B --> A -- : 响应2
+@enduml
+```
+
+✅ **正确写法**:
+```plantuml
+@startuml
+A -> B ++ : 请求1
+B -> C ++ : 请求2
+C --> B -- : 响应2
+B --> A -- : 响应1
+@enduml
+```
+
+**原因**: 生命线的激活状态必须正确嵌套,不能在已激活的生命线上重复激活。应该激活另一个参与者或使用嵌套调用。
+
+### 错误 7: 消息编号重复或跳跃
+❌ **错误写法**:
+```plantuml
+@startuml
+autonumber
+A -> B: 消息1
+A -> C: 消息2
+autonumber 1  ' 错误: 编号重置导致冲突
+C -> B: 消息3
+@enduml
+```
+
+✅ **正确写法**:
+```plantuml
+@startuml
+autonumber
+A -> B: 消息1
+A -> C: 消息2
+C -> B: 消息3  ' 编号自动递增
+@enduml
+```
+
+**原因**: `autonumber` 命令会自动递增消息编号,不应在流程中重置编号,否则会导致编号重复或逻辑混乱。
+
+## 生成检查清单
+
+生成代码后,逐项检查:
+
+- [ ] **图表声明完整**: 包含 `@startuml` 和 `@enduml`
+- [ ] **参与者类型正确**: 使用合适的类型(actor、boundary、control、database 等)
+- [ ] **参与者顺序合理**: 声明顺序符合从左到右的逻辑(用户 → 前端 → 后端 → 数据库)
+- [ ] **消息方向正确**: 请求和响应的方向符合逻辑
+- [ ] **箭头类型正确**: 同步消息用 `->`，异步消息用 `->>`，返回用 `-->`
+- [ ] **激活状态平衡**: 所有 `activate` 都有对应的 `deactivate`(或使用 `++/--`)
+- [ ] **分组结构闭合**: 所有 `alt/opt/loop/group` 都有对应的 `end`
+- [ ] **消息顺序合理**: 消息的时序符合业务逻辑
+- [ ] **特殊字符转义**: 消息文本中的特殊字符用双引号包裹
+- [ ] **代码可渲染**: 语法正确,可以直接通过 Kroki 渲染
+
+**任何检查项不通过,立即修正后重新生成**

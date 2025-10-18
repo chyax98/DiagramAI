@@ -1,0 +1,36 @@
+# Mermaid 语法陷阱
+
+## 保留关键字 (禁止用作节点 ID)
+
+```
+graph, subgraph, end, flowchart, direction,
+class, classDef, style, click, call, href, callback,
+title, section, note
+```
+
+**示例**: 使用 `finish[结束]` 而非 `end`
+
+---
+
+## 特殊字符转义
+
+`[ ] { } ( ) < > | " '` 需用双引号包裹
+
+**示例**: `A["用户输入 (必需)"]`
+
+---
+
+## 注释语法
+
+单行注释: `%%`
+无块注释 (多行需每行加 `%%`)
+
+---
+
+## 图表类型专用箭头
+
+- **Flowchart**: `-->`, `-.->`, `==>`
+- **Sequence**: `->>`, `-->>`, `-x`
+- **Class**: `--|>`, `..|>`, `*--`
+
+详见 L3 各类型文件

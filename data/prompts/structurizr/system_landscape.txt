@@ -1,0 +1,314 @@
+# System Landscape (系统全景图) - C4 Level 0
+
+生成企业级系统全景图，展示多个系统及其关系。
+
+## 关键特点
+
+- **最高层视图**: 展示整个企业或业务领域的系统分布
+- **多系统**: 至少包含 2-3 个 Software System
+- **外部依赖**: 标记外部系统（tags "External"）
+- **用户角色**: 包含不同角色的 Person
+- **分组管理**: 使用 groups 对大型企业系统进行逻辑分组
+
+## Groups 分组功能
+
+在大型企业系统全景图中，使用 `group` 关键字对系统进行逻辑分组，提升可读性。
+
+### 分组语法
+
+```
+model {
+    group "分组名称" {
+        system1 = softwareSystem "系统1"
+        system2 = softwareSystem "系统2"
+    }
+
+    group "另一个分组" {
+        system3 = softwareSystem "系统3"
+    }
+}
+```
+
+### 分组最佳实践
+
+- **业务线分组**: 按业务领域划分 (核心业务、支撑系统、基础设施)
+- **组织架构分组**: 按部门或团队划分
+- **内外分组**: 区分内部系统和外部依赖
+- **层级分组**: 前台、中台、后台系统
+
+### 分组示例
+
+```
+model {
+    group "核心业务系统" {
+        ecommerce = softwareSystem "电商平台"
+        payment = softwareSystem "支付系统"
+    }
+
+    group "支撑系统" {
+        crm = softwareSystem "客户关系管理"
+        analytics = softwareSystem "数据分析平台"
+    }
+
+    group "外部依赖" {
+        emailProvider = softwareSystem "邮件服务商" {
+            tags "External"
+        }
+    }
+}
+```
+
+## 输出结构 - 大型企业示例
+
+以下是一个包含 15 个系统的大型企业全景图示例，展示了分组和多视图的使用。
+
+```
+workspace "大型企业系统全景" {
+    model {
+        # 人员角色
+        customer = person "客户" "购买商品和服务的最终用户"
+        employee = person "员工" "公司内部员工"
+        admin = person "系统管理员" "负责系统运维和配置"
+        partner = person "合作伙伴" "第三方合作公司"
+
+        # 前台系统组
+        group "前台客户系统" {
+            webPortal = softwareSystem "Web 门户" "面向客户的在线商城"
+            mobileApp = softwareSystem "移动应用" "iOS 和 Android 客户端"
+            customerService = softwareSystem "客服系统" "在线客服和工单管理"
+        }
+
+        # 中台业务系统组
+        group "中台业务系统" {
+            orderManagement = softwareSystem "订单管理系统" "处理订单全生命周期"
+            inventory = softwareSystem "库存管理系统" "管理商品库存和仓储"
+            payment = softwareSystem "支付中心" "统一支付网关"
+            logistics = softwareSystem "物流系统" "订单配送和追踪"
+            promotion = softwareSystem "营销活动平台" "优惠券、促销活动管理"
+        }
+
+        # 后台支撑系统组
+        group "后台支撑系统" {
+            crm = softwareSystem "客户关系管理" "客户信息和画像分析"
+            erp = softwareSystem "企业资源计划" "财务、人力、采购管理"
+            dataWarehouse = softwareSystem "数据仓库" "大数据分析和报表"
+            userCenter = softwareSystem "用户中心" "统一身份认证和授权"
+        }
+
+        # 外部依赖系统组
+        group "外部依赖" {
+            smsProvider = softwareSystem "短信服务商" "发送短信验证码和通知" {
+                tags "External"
+            }
+            emailProvider = softwareSystem "邮件服务商" "发送邮件通知" {
+                tags "External"
+            }
+            thirdPartyPayment = softwareSystem "第三方支付平台" "支付宝、微信支付" {
+                tags "External"
+            }
+        }
+
+        # 前台系统关系
+        customer -> webPortal "浏览商品，下单"
+        customer -> mobileApp "移动端购物"
+        customer -> customerService "咨询问题"
+        employee -> customerService "处理客户工单"
+
+        # 前台到中台关系
+        webPortal -> orderManagement "创建订单"
+        mobileApp -> orderManagement "创建订单"
+        webPortal -> promotion "获取优惠信息"
+        mobileApp -> promotion "获取优惠信息"
+
+        # 中台系统间关系
+        orderManagement -> inventory "查询库存，锁定库存"
+        orderManagement -> payment "发起支付请求"
+        orderManagement -> logistics "创建配送单"
+        payment -> orderManagement "支付结果通知"
+        logistics -> inventory "更新库存状态"
+        promotion -> orderManagement "应用优惠规则"
+
+        # 中台到后台关系
+        orderManagement -> userCenter "验证用户身份"
+        payment -> userCenter "验证支付权限"
+        crm -> orderManagement "获取订单数据"
+        dataWarehouse -> orderManagement "同步订单数据"
+        dataWarehouse -> crm "同步客户数据"
+
+        # 后台系统关系
+        admin -> userCenter "管理用户和权限"
+        admin -> erp "财务和运营管理"
+        erp -> orderManagement "获取订单财务数据"
+
+        # 外部依赖关系
+        customerService -> smsProvider "发送短信通知"
+        orderManagement -> smsProvider "发送订单状态通知"
+        customerService -> emailProvider "发送邮件通知"
+        payment -> thirdPartyPayment "对接支付渠道"
+        partner -> thirdPartyPayment "管理支付账户"
+    }
+
+    views {
+        # 完整全景视图
+        systemLandscape "fullLandscape" "完整系统全景图" {
+            include *
+            autolayout lr
+        }
+
+        # 仅内部系统视图 (过滤外部依赖)
+        systemLandscape "internalOnly" "内部系统视图" {
+            include element.tag!=External
+            autolayout lr
+        }
+
+        # 核心业务系统视图 (仅前台和中台)
+        systemLandscape "coreBusinessOnly" "核心业务系统" {
+            include webPortal mobileApp orderManagement inventory payment logistics promotion customer
+            autolayout lr
+        }
+
+        # 后台支撑系统视图
+        systemLandscape "backOfficeOnly" "后台支撑系统" {
+            include crm erp dataWarehouse userCenter admin employee
+            include orderManagement  # 数据源系统
+            autolayout lr
+        }
+
+        # 数据流视图 (聚焦数据仓库)
+        systemLandscape "dataFlowView" "数据流向图" {
+            include dataWarehouse orderManagement crm erp
+            autolayout tb
+        }
+
+        styles {
+            element "Person" {
+                shape person
+                background #08427b
+                color #ffffff
+            }
+            element "Software System" {
+                background #1168bd
+                color #ffffff
+            }
+            element "External" {
+                background #999999
+                color #ffffff
+            }
+        }
+    }
+}
+```
+
+## Filtered Views (过滤视图)
+
+System Landscape 支持创建多个过滤视图，从不同角度展示系统全景。
+
+### 视图类型
+
+1. **完整视图** - 包含所有系统和关系
+   ```
+   systemLandscape "fullView" "完整系统全景" {
+       include *
+       autolayout lr
+   }
+   ```
+
+2. **内部系统视图** - 排除外部依赖
+   ```
+   systemLandscape "internalOnly" "内部系统" {
+       include element.tag!=External
+       autolayout lr
+   }
+   ```
+
+3. **特定分组视图** - 聚焦特定业务域
+   ```
+   systemLandscape "frontendOnly" "前台系统" {
+       include webPortal mobileApp customer
+       autolayout lr
+   }
+   ```
+
+4. **数据流视图** - 展示数据流向
+   ```
+   systemLandscape "dataFlow" "数据流向" {
+       include dataWarehouse analytics crm
+       autolayout tb  # 上下布局
+   }
+   ```
+
+### 视图布局选项
+
+- `autolayout lr` - 左右布局 (Left-Right)
+- `autolayout tb` - 上下布局 (Top-Bottom)
+- `autolayout rl` - 右左布局 (Right-Left)
+- `autolayout bt` - 下上布局 (Bottom-Top)
+
+## 注意事项
+
+- 不要深入到容器和组件层次
+- 关系描述要业务化，避免技术细节
+- 使用标签区分内部和外部系统
+- 合理使用分组提升大型系统的可读性
+- 创建多个视图满足不同受众需求
+
+## 常见错误
+
+### 错误 1: 深入到容器层次
+
+❌ **错误示例** - System Landscape 不应包含容器和组件:
+
+```
+workspace {
+    model {
+        paymentSystem = softwareSystem "支付系统" {
+            webApp = container "Web 应用" {  # ❌ 不应该有容器
+                component "Controller"       # ❌ 不应该有组件
+            }
+        }
+    }
+}
+```
+
+✅ **正确示例** - 仅展示系统级别:
+
+```
+workspace {
+    model {
+        paymentSystem = softwareSystem "支付系统" "处理在线支付"
+        orderSystem = softwareSystem "订单系统" "管理订单"
+
+        orderSystem -> paymentSystem "发起支付请求"
+    }
+}
+```
+
+**说明**: System Landscape (C4 Level 0) 是最高层视图，只展示系统间关系。如需展示容器或组件，请使用 Container View 或 Component View。
+
+### 错误 2: 关系过于技术化
+
+❌ **错误示例** - 技术细节不适合全景图:
+
+```
+model {
+    webApp = softwareSystem "Web 应用"
+    database = softwareSystem "数据库"
+
+    # ❌ 技术细节过多
+    webApp -> database "通过 JDBC 连接池执行 SQL 查询，使用 HikariCP 管理连接"
+}
+```
+
+✅ **正确示例** - 业务化描述:
+
+```
+model {
+    webApp = softwareSystem "Web 应用"
+    database = softwareSystem "数据库"
+
+    # ✅ 业务化描述
+    webApp -> database "读写用户和订单数据"
+}
+```
+
+**说明**: System Landscape 的受众是业务人员和高层管理者，关系描述应聚焦业务价值和数据流向，避免技术实现细节。

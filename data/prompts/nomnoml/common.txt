@@ -1,0 +1,489 @@
+
+# Nomnoml 语言通用规范
+
+## 强制规则（Mandatory Rules）
+
+### ⚠️ 规则 1: 分隔符使用规则
+类属性和方法必须使用分号 `;` 或换行分隔，**不能使用逗号**。
+```nomnoml
+// ❌ 错误
+[Person| name: String, age: int]
+
+// ✅ 正确
+[Person| name: String; age: int]
+```
+
+### ⚠️ 规则 2: 继承方向规则
+继承箭头 `-:>` 必须从子类指向父类（UML 标准）。
+```nomnoml
+// ❌ 错误（语义错误）
+[Animal] -:> [Dog]
+
+// ✅ 正确
+[Dog] -:> [Animal]
+```
+
+### ⚠️ 规则 3: 类区域分隔符规则
+类定义使用 `|` 分隔，顺序必须是：**类名 | 属性 | 方法**。
+```nomnoml
+// ❌ 错误（方法在前）
+[Person| getName(): String | name: String]
+
+// ✅ 正确（属性在前）
+[Person| name: String | getName(): String]
+```
+
+### ⚠️ 规则 4: 分类器标签位置规则
+分类器标签（如 `<abstract>`）必须在类名**之前**。
+```nomnoml
+// ❌ 错误
+[Animal <abstract>]
+
+// ✅ 正确
+[<abstract> Animal]
+```
+
+### ⚠️ 规则 5: 指令位置规则
+所有 `#` 指令必须在**文件开头**，节点和连接之前。
+```nomnoml
+// ❌ 错误
+[ClassA] -> [ClassB]
+#direction: down
+
+// ✅ 正确
+#direction: down
+[ClassA] -> [ClassB]
+```
+
+---
+
+## 语法基础
+
+### 1. 基本结构
+```nomnoml
+[ClassA] -> [ClassB]    // 最简单的关联
+```
+
+### 2. 类的完整定义
+```nomnoml
+[ClassName|
+  attribute1: Type;
+  attribute2: Type
+|
+  method1(): ReturnType;
+  method2(param: Type): void
+]
+```
+
+**格式**：`[名称| 属性区 | 方法区]`
+- 使用 `|` 分隔三个区域
+- 属性和方法用分号 `;` 或换行分隔
+
+### 3. 关联类型（最常用）
+
+```nomnoml
+[A] -> [B]              // 关联（Association） - 一般性关系
+[A] <-> [B]             // 双向关联（Bidirectional Association） - 两个类互相引用
+[A] --> [B]             // 依赖（Dependency） - A 依赖 B
+[A] -:> [B]             // 继承/泛化（Generalization） - A 继承 B
+[A] <:- [B]             // 继承/泛化（反向） - B 继承 A
+[A] --:> [B]            // 实现（Implementation） - A 实现 B 接口
+[A] +-> [B]             // 组合（Composition） - 强拥有关系，生命周期绑定
+[A] o-> [B]             // 聚合（Aggregation） - 弱拥有关系，独立生命周期
+[A] ->o [B]             // 聚合（反向） - B 聚合 A
+[A] -o) [B]             // 球插座（Ball and Socket） - 接口实现
+[A] o<-) [B]            // 球插座（反向） - 接口提供
+[A] -- [B]              // 注释连接（Note Connection）
+[A] -/- [B]             // 隐藏连接（Hidden Connection）
+[A] <-- [B]             // 反向关联
+```
+
+**关联类型选择指南**：
+| 关系类型 | 语法 | 使用场景 |
+|---------|------|---------|
+| 关联 | `->` | 一般性关系，无特定强度要求 |
+| 双向关联 | `<->` | 两个类互相引用，需要双向导航 |
+| 依赖 | `-->` | 临时使用关系，方法参数或局部变量 |
+| 继承 | `-:>` | 子类继承父类（is-a 关系） |
+| 实现 | `--:>` | 类实现接口 |
+| 组合 | `+->` | 强拥有，部分不能脱离整体存在 |
+| 聚合 | `o->` | 弱拥有，部分可以独立存在 |
+
+### 4. 分类器类型（完整列表）
+
+**基本类型**：
+```nomnoml
+[NormalClass]                    // 普通类（无标签）
+[<abstract> AbstractClass]       // 抽象类
+[<instance> objectInstance]      // 实例/对象
+[<label> Label]                  // 纯文本标签
+[<note> This is a note]          // 注释/说明
+[<reference> Ref]                // 引用
+[<hidden> Hidden]                // 隐藏元素
+[<table> DataTable]              // 表格
+[<sync> SyncPoint]               // 同步点
+```
+
+**UML 类图专用**：
+```nomnoml
+[<abstract> AbstractClass]       // 抽象类（斜体）
+[<interface> IService]           // 接口
+[<input> UserInput]              // 输入（圆角矩形）
+```
+
+**组件图专用**：
+```nomnoml
+[<package> com.example]          // 包（文件夹图标）
+[<frame> SystemFrame]            // 框架/子系统
+[<module> ModuleName]            // 模块
+[<socket> Socket]                // 套接字
+[<lollipop> Interface]           // 棒棒糖接口（圆形+线）
+```
+
+**流程图专用**：
+```nomnoml
+[<start> Start]                  // 开始（圆角矩形）
+[<end> End]                      // 结束（圆角矩形）
+[<state> State]                  // 状态（圆角矩形）
+[<choice> Choice]                // 选择/决策（菱形）
+[<transceiver> Transceiver]      // 收发器（六边形）
+```
+
+**用例图专用**：
+```nomnoml
+[<actor> User]                   // 角色/参与者（小人图标）
+[<usecase> Login]                // 用例（椭圆形）
+```
+
+**数据存储专用**：
+```nomnoml
+[<database> Database]            // 数据库（圆柱形）
+[<pipe> DataPipe]                // 管道
+[<sender> Sender]                // 发送者
+[<receiver> Receiver]            // 接收者
+```
+
+### 5. 指令系统（完整列表）
+
+**⚠️ 重要**：所有指令必须在文件开头，在任何节点或连接之前声明（参见强制规则 5）。
+
+**布局指令**：
+```nomnoml
+#direction: down | right      // 布局方向（默认 down）
+#gravity: 1.0                 // 重力系数（影响节点间距）
+#ranker: network | longest-path | tight-tree  // 布局算法
+```
+
+**外观指令**：
+```nomnoml
+#stroke: #333333              // 边框颜色（十六进制）
+#fill: #ffffff                // 填充颜色（十六进制）
+#background: #f5f5f5          // 背景颜色（默认透明）
+#fontSize: 12                 // 字体大小（像素）
+#font: Arial                  // 字体族（使用系统字体）
+#lineWidth: 2                 // 线条宽度（像素）
+#visual: visualizer | handDrawn  // 视觉风格
+#edges: hard | rounded        // 边缘风格（默认 rounded）
+```
+
+**间距指令**：
+```nomnoml
+#spacing: 40                  // 节点间距（像素，默认 40）
+#padding: 8                   // 节点内边距（像素，默认 8）
+#gutter: 5                    // 内部元素间距（像素）
+```
+
+**箭头指令**：
+```nomnoml
+#arrowSize: 1.0               // 箭头大小（倍数，默认 1.0）
+#bendSize: 0.5                // 弯曲程度（0-1，默认 0.3）
+```
+
+**算法指令**：
+```nomnoml
+#acyclicer: greedy            // 有向无环图算法
+#leading: 1.25                // 行高倍数（默认 1.25）
+```
+
+**导入指令**（仅 Nomnoml 原生支持，Kroki 不支持）：
+```nomnoml
+#import: ./common.noml        // 导入外部文件
+```
+
+### 6. 注释语法
+
+```nomnoml
+// 单行注释，必须在行首
+// 不支持行中注释
+
+/* 多行注释
+   用于详细说明
+   支持跨多行 */
+
+// ❌ 错误：行中注释不支持
+[ClassA] -> [ClassB]  // 这样会报错
+
+// ✅ 正确：注释在行首
+// 这是关联关系
+[ClassA] -> [ClassB]
+```
+
+### 7. ID 属性（ID Attribute）
+
+Nomnoml 支持为节点分配唯一 ID，用于复杂图表中的引用和连接。
+
+**基本语法**：
+```nomnoml
+[<id> node1 | Label Text]
+[<id> node2 | Another Node]
+[node1] -> [node2]
+```
+
+**使用场景**：
+- **长标签简化**：为长标签分配短 ID，在连接中使用 ID
+- **重复引用**：同一节点被多次引用时避免重复定义
+- **嵌套结构**：在复杂嵌套中明确引用外部节点
+
+**示例**：
+```nomnoml
+// 定义带 ID 的节点
+[<id> u1 | 用户管理服务 (UserManagementService)]
+[<id> o1 | 订单处理服务 (OrderProcessingService)]
+[<id> db | <database> 数据库]
+
+// 使用 ID 进行连接
+[u1] -> [db]
+[o1] -> [db]
+[u1] --> [o1]
+```
+
+**注意事项**：
+- ID 必须在节点首次定义时声明
+- ID 在整个图表中必须唯一
+- 后续引用时仅使用 ID，不需要再次定义标签
+
+### 8. 导入系统（Import System）
+
+**⚠️ Kroki 限制**：Kroki 不支持 `#import` 指令，仅在本地 Nomnoml 环境中可用。
+
+**语法**：
+```nomnoml
+#import: ./common.noml
+#import: ../shared/styles.noml
+```
+
+**使用场景**（仅限本地 Nomnoml）：
+- 复用通用样式配置
+- 共享类定义和模板
+- 模块化大型图表
+
+**替代方案（Kroki 环境）**：
+- 使用代码生成工具预合并文件
+- 在应用层实现模板系统
+- 复制粘贴共用代码块
+
+## 命名规范
+
+### 类名和属性
+- **类名**：使用 PascalCase（如 `Person`、`OrderService`）
+- **属性**：使用 camelCase（如 `name`、`phoneNumber`）
+- **方法**：使用 camelCase（如 `getName()`、`setAge()`）
+- **包名**：使用点分隔的小写（如 `com.example.service`）
+
+### 关联标签
+- 保持简洁，使用动词或名词
+- 示例：`owns`、`uses`、`depends on`
+
+## 常见错误
+
+### 错误 1: 注释位置错误
+**❌ 错误**：行中注释
+```nomnoml
+[ClassA] -> [ClassB] // 不支持行中注释
+```
+
+**✅ 正确**：注释必须在行首
+```nomnoml
+// 正确的注释方式
+[ClassA] -> [ClassB]
+```
+
+**原因**: Nomnoml 的注释必须在独立一行，不支持行尾注释。
+
+### 错误 2: 嵌套结构缩进混乱
+**❌ 错误**：嵌套没有缩进
+```nomnoml
+[Engine|
+[Cylinder] -> [Piston]
+]
+```
+
+**✅ 正确**：使用缩进增强可读性
+```nomnoml
+[Engine|
+  [Cylinder] -> [Piston]
+  [Cylinder] -> [Valve]
+]
+```
+
+**原因**: 虽然 Nomnoml 不强制要求缩进，但正确缩进可以显著提升代码可读性。
+
+## 布局优化技巧
+
+### 1. 方向控制策略
+```nomnoml
+// 垂直布局（默认）- 适合类继承树
+#direction: down
+[Parent] -:> [Child1]
+[Parent] -:> [Child2]
+
+// 水平布局 - 适合流程图和时序
+#direction: right
+[Start] -> [Process] -> [End]
+```
+
+### 2. 节点间距调整
+```nomnoml
+// 紧凑布局（小图表）
+#spacing: 20
+#padding: 4
+
+// 宽松布局（大图表，增强可读性）
+#spacing: 60
+#padding: 12
+```
+
+### 3. 减少连接交叉
+- **分组策略**：将相关节点放在 `<frame>` 或 `<package>` 中
+- **方向优化**：选择合适的 `#direction` 减少线条交叉
+- **隐藏连接**：使用 `-/-` 隐藏非关键连接
+
+### 4. 复杂图表拆分原则
+- 单个图表节点数建议 < 30 个
+- 嵌套深度建议 < 3 层
+- 考虑拆分为多个子图（按模块/层次）
+
+## 生成原则
+
+1. **简洁优先**：Nomnoml 的优势是简洁，避免过度复杂
+2. **方向一致**：使用 `#direction` 统一布局方向
+3. **类型标签**：合理使用 `<abstract>`、`<package>` 等标签
+4. **关联清晰**：优先使用标准 UML 关联类型
+5. **注释辅助**：对复杂关系使用 `<note>` 标签说明
+
+## 样式系统
+
+### 分组使用场景
+
+#### 何时使用分组？
+- **模块划分**：将相关类组织到包（`<package>`）中
+  ```nomnoml
+  [<package> com.example.service|
+    [UserService]
+    [OrderService]
+  ]
+  ```
+
+- **层次结构**：使用框架（`<frame>`）表示系统分层
+  ```nomnoml
+  [<frame> 表示层|
+    [Controller]
+  ]
+  [<frame> 业务层|
+    [Service]
+  ]
+  ```
+
+- **组件边界**：分组相关组件展示内聚性
+
+### 常用样式属性
+
+```nomnoml
+#direction: down | right      // 布局方向（默认 down）
+#stroke: #333333              // 边框颜色（默认黑色）
+#fill: #ffffff                // 填充颜色（默认白色）
+#background: #f5f5f5          // 背景颜色（默认透明）
+#fontSize: 12                 // 字体大小（默认 12）
+#spacing: 40                  // 节点间距（默认 40）
+#padding: 8                   // 节点内边距（默认 8）
+#lineWidth: 2                 // 线条宽度（默认 1）
+#visual: visualizer | handDrawn  // 视觉风格（默认 visualizer）
+```
+
+### 配色建议
+
+- 🔵 **蓝色系** (#E3F2FD, #1976D2) - 专业、清新，适合流程图和架构图
+- 🟢 **绿色系** (#E8F5E9, #2E7D32) - 自然、稳定，适合状态图和组件图
+- 🟠 **橙色系** (#FFF3E0, #F57F17) - 活力、温暖，适合警告和重要节点
+- 🟣 **紫色系** (#F3E5F5, #7B1FA2) - 优雅、神秘，适合抽象概念和接口
+- 🟡 **黄色系** (#FEFECE, #A80036) - 经典 PlantUML 配色，适合类图
+
+### 样式使用建议
+
+1. **统一风格**: 同一图表使用统一的配色方案
+2. **对比度**: 确保文本和背景有足够对比度
+3. **柔和色调**: 避免使用纯色（如纯红 #FF0000），使用柔和的色调
+4. **视觉风格**:
+   - `visualizer` - 专业、清晰，适合正式文档
+   - `handDrawn` - 手绘、轻松，适合草图和演示
+
+## Kroki 渲染说明
+
+### Kroki 支持的 Nomnoml 特性
+
+**✅ 完全支持**：
+- 所有标准关联类型（14 种）
+- 所有分类器类型（20+ 种）
+- 所有样式指令（除 `#import`）
+- 中文和特殊字符（UTF-8）
+- 嵌套结构和分组
+- ID 属性引用
+
+**❌ 不支持**：
+- `#import` 指令（文件导入）
+- 自定义字体（使用系统默认字体）
+- 本地文件路径引用
+
+### Kroki 实际限制
+
+**基于经验的建议值**：
+1. **节点数量**: 建议 < 50 个（最佳 < 30 个）
+2. **嵌套深度**: 建议 < 4 层（最佳 < 3 层）
+3. **连接数量**: 建议 < 100 条
+4. **代码长度**: 建议 < 10KB（压缩前）
+
+**⚠️ 注意**: 以上是经验值，实际限制取决于 Kroki 服务器配置和图表复杂度。
+
+### 常见 Kroki 错误
+
+**错误 1: 语法错误（400 Bad Request）**
+```
+原因：违反 Nomnoml 语法规则
+解决：检查强制规则 1-5，验证分隔符和语法结构
+```
+
+**错误 2: 请求过大（413 Payload Too Large）**
+```
+原因：图表代码超过 Kroki 服务器限制（通常 10KB）
+解决：简化图表，减少节点/连接，拆分为多个子图
+```
+
+**错误 3: 渲染超时（504 Gateway Timeout）**
+```
+原因：图表过于复杂，Kroki 渲染超时
+解决：减少嵌套层级（< 3 层），降低连接复杂度，简化布局
+```
+
+**错误 4: 空白输出（200 但无内容）**
+```
+原因：语法正确但渲染失败（通常是极端嵌套或循环引用）
+解决：检查嵌套结构，避免循环引用，简化图表
+```
+
+### Kroki 最佳实践
+
+1. **渐进式构建**：从简单结构开始，逐步添加复杂度
+2. **分组优化**：合理使用 `<package>` 和 `<frame>`，避免过深嵌套
+3. **方向控制**：优先使用 `#direction` 改善布局，减少手动调整
+4. **测试驱动**：每次添加重要节点后立即测试渲染
+5. **模块化设计**：复杂系统拆分为多个独立图表

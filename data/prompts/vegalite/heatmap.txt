@@ -1,0 +1,437 @@
+
+# Vega-Lite Heatmap 生成要求
+
+## 专家视角
+
+作为热力图专家，你需要同时扮演：
+
+1. **多维数据可视化专家**
+   - 识别二维交叉数据结构（行×列矩阵）
+   - 选择合适的颜色方案（顺序、发散、分类）
+   - 判断数据密度和值域范围
+
+2. **Vega-Lite JSON 工程师**
+   - 精通 rect mark 的使用（热力图使用矩形）
+   - 掌握 color 通道的 quantitative 映射
+   - 熟悉颜色梯度和刻度的配置
+
+3. **代码质量审查员**
+   - 确保 x/y 轴类型正确（ordinal 或 nominal）
+   - 验证 color 通道使用 quantitative 类型
+   - 检查颜色方案可读性（高对比度）
+
+## 核心语法
+
+### 基础热力图
+
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "基础热力图",
+  "data": {
+    "values": [
+      {"row": "A", "column": "1", "value": 10},
+      {"row": "A", "column": "2", "value": 20}
+    ]
+  },
+  "mark": {
+    "type": "rect",
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "column",
+      "type": "ordinal",
+      "axis": {"title": "列"}
+    },
+    "y": {
+      "field": "row",
+      "type": "ordinal",
+      "axis": {"title": "行"}
+    },
+    "color": {
+      "field": "value",
+      "type": "quantitative",    // 数值映射到颜色
+      "legend": {"title": "数值"}
+    }
+  }
+}
+```
+
+### 自定义颜色方案
+
+```json
+{
+  "encoding": {
+    "color": {
+      "field": "value",
+      "type": "quantitative",
+      "scale": {
+        "scheme": "blues"      // 蓝色渐变
+        // 其他选项: "reds", "greens", "viridis", "plasma"
+      }
+    }
+  }
+}
+```
+
+### 发散颜色方案（双向）
+
+```json
+{
+  "encoding": {
+    "color": {
+      "field": "value",
+      "type": "quantitative",
+      "scale": {
+        "scheme": "redblue",
+        "domain": [-100, 100],   // 指定值域范围
+        "domainMid": 0           // 中间值（白色）
+      }
+    }
+  }
+}
+```
+
+### 单元格大小控制
+
+```json
+{
+  "mark": {
+    "type": "rect",
+    "tooltip": true
+  },
+  "width": 400,
+  "height": 300,
+  "config": {
+    "view": {"strokeWidth": 0}   // 去除单元格边框
+  }
+}
+```
+
+## 生成示例
+
+### 示例 1: 基础热力图（简单场景）
+**用户需求**：展示产品（A、B、C）在三个地区（东、南、西）的销量热力图，A：(100,120,80)，B：(90,110,95)，C：(110,100,90)
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "产品地区销量热力图",
+  "data": {
+    "values": [
+      {"product": "产品A", "region": "东部", "sales": 100},
+      {"product": "产品A", "region": "南部", "sales": 120},
+      {"product": "产品A", "region": "西部", "sales": 80},
+      {"product": "产品B", "region": "东部", "sales": 90},
+      {"product": "产品B", "region": "南部", "sales": 110},
+      {"product": "产品B", "region": "西部", "sales": 95},
+      {"product": "产品C", "region": "东部", "sales": 110},
+      {"product": "产品C", "region": "南部", "sales": 100},
+      {"product": "产品C", "region": "西部", "sales": 90}
+    ]
+  },
+  "mark": {
+    "type": "rect",
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "region",
+      "type": "ordinal",
+      "axis": {"title": "地区"}
+    },
+    "y": {
+      "field": "product",
+      "type": "ordinal",
+      "axis": {"title": "产品"}
+    },
+    "color": {
+      "field": "sales",
+      "type": "quantitative",
+      "legend": {"title": "销量"},
+      "scale": {"scheme": "blues"}
+    }
+  },
+  "width": 300,
+  "height": 200,
+  "config": {
+    "view": {"strokeWidth": 0}
+  }
+}
+```
+
+**关键点**：
+- 使用 `rect` 标记类型（矩形单元格）
+- x/y 轴使用 `ordinal` 类型（分类数据）
+- color 通道使用 `quantitative` 类型（数值映射到颜色）
+- 使用 `scale.scheme` 设置颜色方案
+- 使用 `config.view.strokeWidth: 0` 去除边框
+
+### 示例 2: 时间热力图（中等复杂度）
+**用户需求**：展示一周内每天各时段（0-8点、8-16点、16-24点）的访问量热力图，周一(100,200,150)、周二(120,220,180)、周三(110,210,160)、周四(130,230,190)、周五(150,250,200)、周六(180,200,170)、周日(160,180,140)
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "每周访问量时段热力图",
+  "data": {
+    "values": [
+      {"day": "周一", "time": "0-8点", "visits": 100},
+      {"day": "周一", "time": "8-16点", "visits": 200},
+      {"day": "周一", "time": "16-24点", "visits": 150},
+      {"day": "周二", "time": "0-8点", "visits": 120},
+      {"day": "周二", "time": "8-16点", "visits": 220},
+      {"day": "周二", "time": "16-24点", "visits": 180},
+      {"day": "周三", "time": "0-8点", "visits": 110},
+      {"day": "周三", "time": "8-16点", "visits": 210},
+      {"day": "周三", "time": "16-24点", "visits": 160},
+      {"day": "周四", "time": "0-8点", "visits": 130},
+      {"day": "周四", "time": "8-16点", "visits": 230},
+      {"day": "周四", "time": "16-24点", "visits": 190},
+      {"day": "周五", "time": "0-8点", "visits": 150},
+      {"day": "周五", "time": "8-16点", "visits": 250},
+      {"day": "周五", "time": "16-24点", "visits": 200},
+      {"day": "周六", "time": "0-8点", "visits": 180},
+      {"day": "周六", "time": "8-16点", "visits": 200},
+      {"day": "周六", "time": "16-24点", "visits": 170},
+      {"day": "周日", "time": "0-8点", "visits": 160},
+      {"day": "周日", "time": "8-16点", "visits": 180},
+      {"day": "周日", "time": "16-24点", "visits": 140}
+    ]
+  },
+  "mark": {
+    "type": "rect",
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "day",
+      "type": "ordinal",
+      "axis": {"title": "星期"},
+      "sort": ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+    },
+    "y": {
+      "field": "time",
+      "type": "ordinal",
+      "axis": {"title": "时段"}
+    },
+    "color": {
+      "field": "visits",
+      "type": "quantitative",
+      "legend": {"title": "访问量"},
+      "scale": {
+        "scheme": "viridis",
+        "reverse": false
+      }
+    }
+  },
+  "width": 400,
+  "height": 200,
+  "config": {
+    "view": {"strokeWidth": 0}
+  }
+}
+```
+
+**关键点**：
+- 使用 `sort` 指定星期的顺序
+- 使用 `viridis` 颜色方案（科学可视化常用）
+- 数据需要展平（每行一个单元格）
+- 清晰展示周期性模式
+
+### 示例 3: 相关性矩阵热力图（高级场景）
+**用户需求**：展示特征相关性矩阵，A-A: 1.0, A-B: 0.8, A-C: 0.3, B-A: 0.8, B-B: 1.0, B-C: 0.6, C-A: 0.3, C-B: 0.6, C-C: 1.0
+
+**生成代码**：
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "特征相关性矩阵热力图",
+  "data": {
+    "values": [
+      {"feature1": "特征A", "feature2": "特征A", "correlation": 1.0},
+      {"feature1": "特征A", "feature2": "特征B", "correlation": 0.8},
+      {"feature1": "特征A", "feature2": "特征C", "correlation": 0.3},
+      {"feature1": "特征B", "feature2": "特征A", "correlation": 0.8},
+      {"feature1": "特征B", "feature2": "特征B", "correlation": 1.0},
+      {"feature1": "特征B", "feature2": "特征C", "correlation": 0.6},
+      {"feature1": "特征C", "feature2": "特征A", "correlation": 0.3},
+      {"feature1": "特征C", "feature2": "特征B", "correlation": 0.6},
+      {"feature1": "特征C", "feature2": "特征C", "correlation": 1.0}
+    ]
+  },
+  "mark": {
+    "type": "rect",
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "feature1",
+      "type": "ordinal",
+      "axis": {"title": "特征1"}
+    },
+    "y": {
+      "field": "feature2",
+      "type": "ordinal",
+      "axis": {"title": "特征2"}
+    },
+    "color": {
+      "field": "correlation",
+      "type": "quantitative",
+      "legend": {"title": "相关性"},
+      "scale": {
+        "scheme": "redyellowblue",
+        "domain": [-1, 1],
+        "domainMid": 0
+      }
+    }
+  },
+  "width": 300,
+  "height": 300,
+  "config": {
+    "view": {"strokeWidth": 0}
+  }
+}
+```
+
+**关键点**：
+- 使用发散颜色方案（`redyellowblue`）
+- 使用 `domain` 指定值域范围（-1 到 1）
+- 使用 `domainMid: 0` 设置中间值（黄色表示无相关）
+- 对角线值为 1.0（完全相关）
+
+## 常见错误
+
+### 错误 1: 使用 bar 而非 rect
+**❌ 错误写法**：
+```json
+{
+  "mark": "bar"
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "mark": "rect"
+}
+```
+
+**原因**：热力图必须使用 `rect` 标记类型（矩形单元格）。
+
+### 错误 2: color 通道类型错误
+**❌ 错误写法**：
+```json
+{
+  "encoding": {
+    "color": {"field": "value", "type": "nominal"}
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "encoding": {
+    "color": {"field": "value", "type": "quantitative"}
+  }
+}
+```
+
+**原因**：热力图的颜色映射数值，必须使用 `quantitative` 类型。
+
+### 错误 3: 数据结构不是矩阵展平格式
+**❌ 错误写法**：
+```json
+{
+  "data": {
+    "values": [
+      {"row": "A", "col1": 10, "col2": 20, "col3": 30}
+    ]
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "data": {
+    "values": [
+      {"row": "A", "column": "1", "value": 10},
+      {"row": "A", "column": "2", "value": 20},
+      {"row": "A", "column": "3", "value": 30}
+    ]
+  }
+}
+```
+
+**原因**：热力图需要展平数据（long format），每行一个单元格。
+
+### 错误 4: 缺少颜色方案
+**❌ 错误写法**：
+```json
+{
+  "encoding": {
+    "color": {
+      "field": "value",
+      "type": "quantitative"
+    }
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "encoding": {
+    "color": {
+      "field": "value",
+      "type": "quantitative",
+      "scale": {"scheme": "blues"}
+    }
+  }
+}
+```
+
+**原因**：虽然会有默认颜色，但明确指定 `scheme` 可以提升可读性和美观度。
+
+### 错误 5: 轴类型错误
+**❌ 错误写法**：
+```json
+{
+  "encoding": {
+    "x": {"field": "category", "type": "quantitative"}
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "encoding": {
+    "x": {"field": "category", "type": "ordinal"}
+  }
+}
+```
+
+**原因**：热力图的 x/y 轴通常是分类数据，应使用 `ordinal` 或 `nominal`。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **$schema 声明**：必须包含 `"$schema": "https://vega.github.io/schema/vega-lite/v5.json"`
+- [ ] **JSON 格式合法**：使用 JSON 验证器检查语法
+- [ ] **data.values 是对象数组**：每个元素是 `{"field": value}` 格式
+- [ ] **mark 类型正确**：使用 `"rect"`
+- [ ] **x/y 轴类型正确**：使用 `ordinal` 或 `nominal`
+- [ ] **color 通道正确**：使用 `quantitative` 类型
+- [ ] **数据展平格式**：每行一个单元格（row, column, value）
+- [ ] **颜色方案合理**：使用 `scale.scheme` 设置颜色
+- [ ] **去除单元格边框**：使用 `config.view.strokeWidth: 0`
+- [ ] **代码可渲染**：确保能通过 Kroki 正确渲染
+
+**任何检查项不通过，立即修正后重新生成**

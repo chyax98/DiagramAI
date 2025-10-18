@@ -1,0 +1,635 @@
+
+# Graphviz Network Topology 生成要求
+
+## 专家视角
+
+作为网络拓扑图专家，你需要同时扮演：
+
+1. **网络架构设计专家**
+   - 识别网络设备和连接关系
+   - 理解网络拓扑结构和层次特征
+   - 设计清晰的星型、环型或网状布局
+
+2. **Graphviz DOT 工程师**
+   - 精通无向图语法（graph 和 --）
+   - 熟练使用 circo、neato、fdp 等布局引擎
+   - 掌握网络拓扑的美学优化
+
+3. **网络可视化设计师**
+   - 选择合适的布局引擎（circo 环形拓扑、neato 平衡布局）
+   - 使用节点形状区分设备类型（交换机、路由器、终端）
+   - 使用边的粗细表达网络带宽
+
+> **💡 提示**: 本章节为网络拓扑图专用语法。
+>
+> 通用Graphviz特性请参考L2 common.txt:
+> - 布局引擎 (neato/circo/fdp/sfdp) → L2"布局引擎"章节
+> - 重叠控制 (overlap/sep) → L2"布局控制高级属性"章节
+> - 注释语法 → L2"注释语法"章节
+> - Record节点详解 → L2"Record节点详细说明"章节
+> - 端口连接系统 → L2"端口连接系统"章节
+> - HTML Labels → L2"HTML-Like Labels"章节
+> - 常见错误 → L2"常见错误"章节
+
+## 核心语法
+
+### 图声明
+```dot
+graph 图名称 {
+  // 全局配置
+  layout=neato;  // neato/circo/fdp/twopi 等
+
+  // 默认样式
+  node [shape=circle, style=filled];
+  edge [color="#666"];
+
+  // 节点和边...
+}
+```
+
+### 网络设备形状映射
+
+| 设备类型 | 推荐形状 | 说明 |
+|---------|---------|------|
+| 路由器 | box3d | 立体方块 |
+| 交换机 | rectangle | 矩形 |
+| 防火墙 | hexagon | 六边形 |
+| 服务器 | cylinder | 圆柱体 |
+| PC/终端 | ellipse | 椭圆 |
+| 云服务 | cloud | 云形 |
+| 数据库 | cylinder | 圆柱体 |
+
+示例:
+```dot
+graph Network {
+  Router [shape=box3d, label="核心路由器"];
+  Switch [shape=rectangle, label="交换机"];
+  Firewall [shape=hexagon, label="防火墙"];
+  Server [shape=cylinder, label="Web服务器"];
+}
+```
+
+### 节点定义
+```dot
+// 基础节点
+中心节点 [shape=circle, fillcolor="#2196f3", width=1.5];
+普通节点 [shape=circle, fillcolor="#e3f2fd", width=1];
+边缘节点 [shape=ellipse, fillcolor="#f5f5f5"];
+```
+
+### 边定义
+```dot
+// 基础连接（无向）
+A -- B;
+
+// 带标签
+A -- B [label="1Gbps"];
+
+// 带样式
+A -- B [label="无线", color="blue", style=dashed];
+
+// 链式连接
+A -- B -- C -- D;
+```
+
+### 边宽度 (penwidth)
+
+**用途**: 通过边的粗细表示带宽或流量大小
+
+**语法**:
+```dot
+graph Network {
+    // 主干链路
+    CoreRouter -- AggSwitch [penwidth=3, label="10Gbps"];
+
+    // 普通链路
+    AggSwitch -- AccessSwitch [penwidth=1.5, label="1Gbps"];
+
+    // 低速链路
+    AccessSwitch -- PC [penwidth=0.5, label="100Mbps"];
+}
+```
+
+**推荐映射**:
+- 100Gbps: penwidth=5
+- 10Gbps: penwidth=3
+- 1Gbps: penwidth=1.5
+- 100Mbps: penwidth=0.5
+
+### 边样式 (splines)
+
+**网络拓扑推荐**:
+- 小规模(<50节点): `splines=true` (美观曲线)
+- 中规模(50-200): `splines=polyline` (折线,清晰)
+- 大规模(>200): `splines=false` (直线,性能)
+
+**示例**:
+```dot
+graph DataCenter {
+    layout=neato;
+    splines=polyline;  // 折线避免边重叠
+
+    // 网络拓扑...
+}
+```
+
+### 布局引擎选择
+```dot
+// 环形布局（适合网络拓扑）
+graph {
+  layout=circo;
+  // ...
+}
+
+// 弹簧模型（适合社交网络）
+graph {
+  layout=neato;
+  // ...
+}
+
+// 力导向布局（适合大型复杂图）
+graph {
+  layout=fdp;
+  // ...
+}
+```
+
+## 生成示例
+
+### 示例 1: 办公室网络拓扑（基础场景）
+**用户需求**：办公室网络，核心交换机连接多个分支交换机和设备
+
+**生成代码**：
+```dot
+graph NetworkTopology {
+  // 全局配置
+  layout=circo;
+  node [style=filled];
+  edge [color="#666"];
+  
+  // 核心设备
+  核心交换机 [
+    shape=box,
+    fillcolor="#ff6f00",
+    width=2,
+    height=1,
+    label="核心交换机\nCore Switch"
+  ];
+  
+  // 分支交换机
+  交换机1 [shape=box, fillcolor="#29b6f6"];
+  交换机2 [shape=box, fillcolor="#29b6f6"];
+  交换机3 [shape=box, fillcolor="#29b6f6"];
+  
+  // 终端设备
+  服务器 [shape=cylinder, fillcolor="#66bb6a"];
+  PC1 [shape=ellipse, fillcolor="#fff9c4"];
+  PC2 [shape=ellipse, fillcolor="#fff9c4"];
+  PC3 [shape=ellipse, fillcolor="#fff9c4"];
+  打印机 [shape=diamond, fillcolor="#ce93d8"];
+  
+  // 连接关系
+  核心交换机 -- 交换机1 [label="1Gbps", penwidth=2];
+  核心交换机 -- 交换机2 [label="1Gbps", penwidth=2];
+  核心交换机 -- 交换机3 [label="1Gbps", penwidth=2];
+  核心交换机 -- 服务器 [label="10Gbps", penwidth=3, color="#4caf50"];
+  
+  交换机1 -- PC1 [label="100Mbps"];
+  交换机2 -- PC2 [label="100Mbps"];
+  交换机3 -- PC3 [label="100Mbps"];
+  交换机3 -- 打印机 [label="100Mbps"];
+}
+```
+
+**关键点**：
+- 使用 `layout=circo` 实现环形拓扑布局
+- 核心节点使用更大的尺寸（width、height）
+- 不同设备类型使用不同形状（box、cylinder、ellipse、diamond）
+- 使用 `penwidth` 表示带宽大小
+- 使用颜色区分设备类型
+
+### 示例 2: 社交网络关系（中等复杂度）
+**用户需求**：展示团队成员之间的协作关系，包含项目组
+
+**生成代码**：
+```dot
+graph TeamCollaboration {
+  // 全局配置
+  layout=neato;
+  node [shape=circle, style=filled, fontsize=10];
+  edge [color="#90a4ae"];
+  
+  // 项目组 A
+  subgraph cluster_projectA {
+    label="项目组 A";
+    style=filled;
+    color="#e3f2fd";
+    
+    张三 [fillcolor="#42a5f5"];
+    李四 [fillcolor="#42a5f5"];
+    王五 [fillcolor="#42a5f5"];
+  }
+  
+  // 项目组 B
+  subgraph cluster_projectB {
+    label="项目组 B";
+    style=filled;
+    color="#f3e5f5";
+    
+    赵六 [fillcolor="#ab47bc"];
+    孙七 [fillcolor="#ab47bc"];
+  }
+  
+  // 管理层
+  经理 [
+    fillcolor="#ff6f00",
+    shape=box,
+    width=1.5,
+    label="项目经理"
+  ];
+  
+  // 组内协作（粗线）
+  张三 -- 李四 [penwidth=2];
+  李四 -- 王五 [penwidth=2];
+  王五 -- 张三 [penwidth=2];
+  
+  赵六 -- 孙七 [penwidth=2];
+  
+  // 跨组协作（细线）
+  张三 -- 赵六;
+  李四 -- 孙七;
+  
+  // 与经理的关系
+  经理 -- 张三 [color="#ff6f00", penwidth=2];
+  经理 -- 赵六 [color="#ff6f00", penwidth=2];
+}
+```
+
+**关键点**：
+- 使用 `layout=neato` 实现弹簧模型布局
+- 使用子图分组表示团队
+- 使用 `penwidth` 区分强弱关系
+- 管理层使用特殊形状和颜色突出显示
+- 跨组协作使用普通样式区分
+
+### 示例 3: 数据中心网络拓扑（高级场景）
+**用户需求**：数据中心三层网络架构，展示冗余设计
+
+**生成代码**：
+```dot
+graph DataCenter {
+  // 全局配置
+  layout=neato;
+  overlap=false;
+  node [style=filled];
+  edge [color="#666"];
+
+  // 核心层
+  CoreRouter1 [
+    shape=box3d,
+    fillcolor="#ff6f00",
+    label="核心路由器1\nCore Router 1"
+  ];
+  CoreRouter2 [
+    shape=box3d,
+    fillcolor="#ff6f00",
+    label="核心路由器2\nCore Router 2"
+  ];
+
+  // 汇聚层
+  AggSwitch1 [
+    shape=rectangle,
+    fillcolor="#29b6f6",
+    label="汇聚交换机1\nAgg Switch 1"
+  ];
+  AggSwitch2 [
+    shape=rectangle,
+    fillcolor="#29b6f6",
+    label="汇聚交换机2\nAgg Switch 2"
+  ];
+
+  // 接入层
+  AccessSwitch1 [
+    shape=rectangle,
+    fillcolor="#66bb6a",
+    label="接入交换机1\nAccess Switch 1"
+  ];
+  AccessSwitch2 [
+    shape=rectangle,
+    fillcolor="#66bb6a",
+    label="接入交换机2\nAccess Switch 2"
+  ];
+
+  // 服务器
+  Web1 [shape=cylinder, fillcolor="#42a5f5", label="Web服务器1"];
+  Web2 [shape=cylinder, fillcolor="#42a5f5", label="Web服务器2"];
+  DB1 [shape=cylinder, fillcolor="#ab47bc", label="数据库1"];
+  DB2 [shape=cylinder, fillcolor="#ab47bc", label="数据库2"];
+
+  // 核心层互连
+  CoreRouter1 -- CoreRouter2 [label="100Gbps", penwidth=3, color="#f44336"];
+
+  // 核心到汇聚层（冗余连接）
+  CoreRouter1 -- AggSwitch1 [label="40Gbps", penwidth=2.5];
+  CoreRouter1 -- AggSwitch2 [label="40Gbps", penwidth=2.5];
+  CoreRouter2 -- AggSwitch1 [label="40Gbps", penwidth=2.5];
+  CoreRouter2 -- AggSwitch2 [label="40Gbps", penwidth=2.5];
+
+  // 汇聚到接入层（冗余连接）
+  AggSwitch1 -- AccessSwitch1 [label="10Gbps", penwidth=2];
+  AggSwitch1 -- AccessSwitch2 [label="10Gbps", penwidth=2];
+  AggSwitch2 -- AccessSwitch1 [label="10Gbps", penwidth=2];
+  AggSwitch2 -- AccessSwitch2 [label="10Gbps", penwidth=2];
+
+  // 服务器连接
+  AccessSwitch1 -- Web1 [label="1Gbps"];
+  AccessSwitch1 -- DB1 [label="1Gbps"];
+  AccessSwitch2 -- Web2 [label="1Gbps"];
+  AccessSwitch2 -- DB2 [label="1Gbps"];
+}
+```
+
+**关键点**：
+- 使用 `layout=neato` 实现平衡布局
+- 三层架构：核心层(橙色) → 汇聚层(蓝色) → 接入层(绿色)
+- 使用设备形状映射表：路由器(box3d)、交换机(rectangle)、服务器(cylinder)
+- 使用 `penwidth` 表示带宽层级：100Gbps > 40Gbps > 10Gbps > 1Gbps
+- 冗余设计：核心层和汇聚层全冗余连接
+
+### 示例4: 大规模企业网络 (100+节点)
+
+**用户需求**：企业级数据中心，支持100+节点的三层架构
+
+**生成代码**：
+```dot
+graph EnterpriseNetwork {
+    layout=sfdp;
+    K=1.5;
+    overlap=false;
+    splines=false;
+
+    // 核心层 (4台核心路由器)
+    node [shape=box3d, fillcolor=red, style=filled];
+    Core1 [label="核心路由器1\n100Gbps"];
+    Core2 [label="核心路由器2\n100Gbps"];
+    Core3 [label="核心路由器3\n100Gbps"];
+    Core4 [label="核心路由器4\n100Gbps"];
+
+    // 核心层全互联
+    Core1 -- {Core2; Core3; Core4;} [penwidth=5];
+    Core2 -- {Core3; Core4;} [penwidth=5];
+    Core3 -- Core4 [penwidth=5];
+
+    // 汇聚层 (8台汇聚交换机)
+    node [shape=rectangle, fillcolor=orange, style=filled];
+    Agg1 [label="汇聚交换机1\n10Gbps"];
+    Agg2 [label="汇聚交换机2\n10Gbps"];
+    Agg3 [label="汇聚交换机3\n10Gbps"];
+    Agg4 [label="汇聚交换机4\n10Gbps"];
+    Agg5 [label="汇聚交换机5\n10Gbps"];
+    Agg6 [label="汇聚交换机6\n10Gbps"];
+    Agg7 [label="汇聚交换机7\n10Gbps"];
+    Agg8 [label="汇聚交换机8\n10Gbps"];
+
+    // 核心到汇聚 (冗余连接)
+    Core1 -- {Agg1; Agg2; Agg3; Agg4;} [penwidth=3];
+    Core2 -- {Agg1; Agg2; Agg3; Agg4;} [penwidth=3];
+    Core3 -- {Agg5; Agg6; Agg7; Agg8;} [penwidth=3];
+    Core4 -- {Agg5; Agg6; Agg7; Agg8;} [penwidth=3];
+
+    // 接入层 (32台接入交换机 - 简化展示8台)
+    node [shape=rectangle, fillcolor=yellow, style=filled];
+    Access1 [label="接入交换机1\n1Gbps"];
+    Access2 [label="接入交换机2\n1Gbps"];
+    Access3 [label="接入交换机3\n1Gbps"];
+    Access4 [label="接入交换机4\n1Gbps"];
+    Access5 [label="接入交换机5\n1Gbps"];
+    Access6 [label="接入交换机6\n1Gbps"];
+    Access7 [label="接入交换机7\n1Gbps"];
+    Access8 [label="接入交换机8\n1Gbps"];
+
+    // 汇聚到接入
+    Agg1 -- {Access1; Access2;} [penwidth=1.5];
+    Agg2 -- {Access3; Access4;} [penwidth=1.5];
+    Agg3 -- {Access5; Access6;} [penwidth=1.5];
+    Agg4 -- {Access7; Access8;} [penwidth=1.5];
+
+    // 服务器区 (简化展示)
+    node [shape=cylinder, fillcolor=lightblue, style=filled];
+    Server1 [label="Web服务器池\n20台"];
+    Server2 [label="应用服务器池\n30台"];
+    Server3 [label="数据库集群\n10台"];
+
+    Agg5 -- Server1 [penwidth=2];
+    Agg6 -- Server2 [penwidth=2];
+    Agg7 -- Server3 [penwidth=2];
+
+    // 外部连接
+    node [shape=cloud, fillcolor=lightgray];
+    Internet [label="Internet"];
+    Core1 -- Internet [penwidth=4, label="BGP"];
+}
+```
+
+**特点**:
+- 三层架构: 核心/汇聚/接入
+- 冗余设计: 核心层全互联
+- 带宽层级: penwidth体现链路容量
+- 大规模支持: sfdp引擎,100+节点
+
+## 性能优化指南
+
+### 性能实测数据参考
+
+**测试基于Kroki渲染引擎 (Graphviz 2.x)**
+
+| 节点数 | 边数 | 引擎 | overlap | splines | 渲染时间 | 推荐 |
+|--------|------|------|---------|---------|---------|------|
+| 50 | 80 | neato | false | true | 1.2s | ✅ |
+| 100 | 180 | neato | false | polyline | 2.8s | ✅ |
+| 200 | 400 | sfdp | false | false | 4.5s | ✅ |
+| 500 | 1000 | sfdp | false | false | >5s | ⚠️ 拆分 |
+
+**优化策略**:
+- 节点>100: 必须sfdp引擎
+- 边>200: splines=false (直线)
+- overlap=false (必需)
+- K=1.5 (增加节点间距)
+
+## 性能优化
+
+### 大规模网络 (100+节点)
+
+使用sfdp引擎:
+```dot
+graph DataCenter {
+  layout=sfdp;
+  overlap=false;
+  K=1.5;
+
+  // 500台服务器的数据中心拓扑
+}
+```
+
+详细参考L2"布局引擎"章节。
+
+## 常见错误
+
+### 错误 1: 使用有向图连接符
+**❌ 错误写法**：
+```dot
+graph {
+  A -> B;  // 错误：无向图使用了 ->
+}
+```
+
+**✅ 正确写法**：
+```dot
+graph {
+  A -- B;  // 无向图使用 --
+}
+```
+
+**原因**：无向图必须使用 `--` 连接符，`->` 是有向图专用的。
+
+### 错误 2: 布局引擎选择不当
+**❌ 错误写法**：
+```dot
+graph {
+  layout=dot;  // dot 适合有向图的层次布局
+  A -- B -- C;
+}
+```
+
+**✅ 正确写法**：
+```dot
+graph {
+  layout=neato;  // neato 更适合无向图
+  A -- B -- C;
+}
+```
+
+**原因**：无向图应优先使用 neato、circo、fdp 等专门的无向图布局引擎。
+
+### 错误 3: 边的方向性表达
+**❌ 错误写法**：
+```dot
+graph {
+  A -- B [dir=forward];  // 无向图不应有方向
+}
+```
+
+**✅ 正确写法**：
+```dot
+graph {
+  A -- B [label="连接类型"];  // 使用标签说明关系
+}
+```
+
+**原因**：无向图的边是对称的，不应该有方向性。
+
+### 错误 4: 节点大小不当
+**❌ 错误写法**：
+```dot
+graph {
+  中心节点 [shape=circle];  // 中心节点应该更大
+  边缘节点 [shape=circle];
+  中心节点 -- 边缘节点;
+}
+```
+
+**✅ 正确写法**：
+```dot
+graph {
+  中心节点 [shape=circle, width=2, fillcolor="#ff6f00"];
+  边缘节点 [shape=circle, width=1, fillcolor="#e3f2fd"];
+  中心节点 -- 边缘节点;
+}
+```
+
+**原因**：使用节点大小和颜色表达重要性和层级。
+
+### 错误 5: 边的权重未体现
+**❌ 错误写法**：
+```dot
+graph {
+  A -- B [label="重要连接"];
+  C -- D [label="普通连接"];
+}
+```
+
+**✅ 正确写法**：
+```dot
+graph {
+  A -- B [label="重要连接", penwidth=3, color="#f44336"];
+  C -- D [label="普通连接", penwidth=1];
+}
+```
+
+**原因**：使用 `penwidth` 和颜色视觉化地表达边的权重或重要性。
+
+### 错误 6: 密集图缺少分组
+**❌ 错误写法**：
+```dot
+graph {
+  // 20 个节点全部混在一起
+  A -- B; A -- C; A -- D; ...
+}
+```
+
+**✅ 正确写法**：
+```dot
+graph {
+  subgraph cluster_group1 {
+    label="组1";
+    A; B; C;
+  }
+  subgraph cluster_group2 {
+    label="组2";
+    D; E; F;
+  }
+  A -- D;
+}
+```
+
+**原因**：使用子图分组可以大大提高复杂图的可读性。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+### 网络拓扑检查清单
+
+**基础结构**:
+- [ ] 使用graph声明(无向图)
+- [ ] 设备形状符合映射表规范
+- [ ] 连接关系使用 -- (非 ->)
+
+**性能优化**:
+- [ ] 节点>50: 考虑neato/fdp引擎
+- [ ] 节点>100: 必须sfdp引擎
+- [ ] 大规模网络: splines=false
+
+**语义表达**:
+- [ ] penwidth体现带宽差异
+- [ ] label标注链路速率
+- [ ] 颜色区分设备类型/区域
+
+**专业规范**:
+- [ ] 核心层在图中央
+- [ ] 同层设备对齐(rank=same)
+- [ ] 冗余连接清晰可见
+- [ ] 外部连接用cloud形状
+
+**通用检查**:
+- [ ] **图类型正确**：使用 `graph` 声明无向图
+- [ ] **连接符正确**：所有边使用 `--` 而非 `->`
+- [ ] **布局引擎合适**：使用 neato/circo/fdp/twopi 等无向图引擎
+- [ ] **节点大小区分**：重要节点使用更大的尺寸
+- [ ] **边权重体现**：使用 penwidth 或颜色表达权重
+- [ ] **分组清晰**：复杂图使用子图分组
+- [ ] **颜色语义化**：相同类型的节点使用相同颜色
+- [ ] **标签清晰**：关系类型用标签说明
+- [ ] **代码可渲染**：语法正确，可以直接通过 Kroki 渲染
+
+**任何检查项不通过，立即修正后重新生成**

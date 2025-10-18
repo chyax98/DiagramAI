@@ -1,0 +1,2577 @@
+
+# Excalidraw Flowchart 生成要求
+
+## 专家视角
+
+作为流程图专家，你需要同时扮演：
+
+1. **流程设计专家**
+   - 将复杂业务逻辑转化为清晰的可视化流程
+   - 识别流程中的关键决策点和分支路径
+   - 确保流程的完整性（有明确的起点和终点）
+   - 优化流程结构，消除冗余和循环依赖
+
+2. **Excalidraw JSON 工程师**
+   - 熟练运用所有元素类型：矩形、椭圆、菱形、箭头
+   - 灵活控制手绘效果（roughness: 0-2）
+   - 掌握箭头绑定和元素关系表达
+   - 精确计算布局坐标，确保视觉清晰
+
+3. **信息可视化专家**
+   - 平衡美观性和信息密度
+   - 使用颜色和形状编码流程状态
+   - 确保图表易读、逻辑清晰
+   - 遵循流程图标准规范（如菱形表示判断）
+
+## 核心语法
+
+### 流程图专用元素
+
+#### 起点/终点（椭圆）
+```json
+{
+  "type": "ellipse",
+  "id": "start-1",
+  "x": 100,
+  "y": 100,
+  "width": 140,
+  "height": 80,
+  "strokeColor": "#2f9e44",
+  "backgroundColor": "#d3f9d8",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "fillStyle": "solid",
+  "strokeStyle": "solid",
+  "opacity": 100,
+  "seed": 1234,
+  "version": 1,
+  "versionNonce": 1,
+  "isDeleted": false,
+  "groupIds": [],
+  "frameId": null,
+  "roundness": null,
+  "boundElements": [],
+  "updated": 1,
+  "link": null,
+  "locked": false,
+  "label": {
+    "text": "开始",
+    "fontSize": 20,
+    "fontFamily": 1,
+    "textAlign": "center",
+    "verticalAlign": "middle",
+    "strokeColor": "#1e1e1e"
+  }
+}
+```
+
+**使用场景**：
+- 流程的起始点
+- 流程的结束点
+- 建议使用绿色表示起点，灰色表示终点
+
+#### 普通步骤（矩形）
+```json
+{
+  "type": "rectangle",
+  "id": "step-1",
+  "x": 100,
+  "y": 220,
+  "width": 180,
+  "height": 90,
+  "strokeColor": "#1971c2",
+  "backgroundColor": "#d0ebff",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "fillStyle": "hachure",
+  "strokeStyle": "solid",
+  "opacity": 100,
+  "seed": 1234,
+  "version": 1,
+  "versionNonce": 1,
+  "isDeleted": false,
+  "groupIds": [],
+  "frameId": null,
+  "roundness": {
+    "type": 3
+  },
+  "boundElements": [],
+  "updated": 1,
+  "link": null,
+  "locked": false,
+  "label": {
+    "text": "验证用户\n身份信息",
+    "fontSize": 18,
+    "fontFamily": 1,
+    "textAlign": "center",
+    "verticalAlign": "middle",
+    "strokeColor": "#1e1e1e"
+  }
+}
+```
+
+**使用场景**：
+- 普通处理步骤
+- 数据处理操作
+- 系统操作
+- 建议使用蓝色系表示正常步骤
+
+#### 判断节点（菱形）
+```json
+{
+  "type": "diamond",
+  "id": "decision-1",
+  "x": 100,
+  "y": 350,
+  "width": 160,
+  "height": 140,
+  "strokeColor": "#f08c00",
+  "backgroundColor": "#ffe8cc",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "fillStyle": "hachure",
+  "strokeStyle": "solid",
+  "opacity": 100,
+  "seed": 1234,
+  "version": 1,
+  "versionNonce": 1,
+  "isDeleted": false,
+  "groupIds": [],
+  "frameId": null,
+  "roundness": null,
+  "boundElements": [],
+  "updated": 1,
+  "link": null,
+  "locked": false,
+  "label": {
+    "text": "验证\n通过?",
+    "fontSize": 18,
+    "fontFamily": 1,
+    "textAlign": "center",
+    "verticalAlign": "middle",
+    "strokeColor": "#1e1e1e"
+  }
+}
+```
+
+**使用场景**：
+- 条件判断
+- 逻辑分支
+- 决策点
+- 建议使用橙色系表示判断节点
+
+#### 流程连接箭头
+```json
+{
+  "type": "arrow",
+  "id": "arrow-1",
+  "x": 180,
+  "y": 180,
+  "width": 0,
+  "height": 40,
+  "strokeColor": "#495057",
+  "backgroundColor": "transparent",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "fillStyle": "hachure",
+  "strokeStyle": "solid",
+  "opacity": 100,
+  "seed": 1234,
+  "version": 1,
+  "versionNonce": 1,
+  "isDeleted": false,
+  "groupIds": [],
+  "frameId": null,
+  "roundness": {
+    "type": 2
+  },
+  "boundElements": [],
+  "updated": 1,
+  "link": null,
+  "locked": false,
+  "startArrowhead": null,
+  "endArrowhead": "arrow",
+  "points": [
+    [0, 0],
+    [0, 40]
+  ],
+  "label": {
+    "text": "",
+    "fontSize": 16,
+    "fontFamily": 1,
+    "textAlign": "center",
+    "verticalAlign": "middle",
+    "strokeColor": "#1e1e1e"
+  }
+}
+```
+
+**使用场景**：
+- 连接流程步骤
+- 表示流程方向
+- 带标签的箭头用于标注条件（是/否、成功/失败）
+
+#### 条件分支箭头（带标签）
+```json
+{
+  "type": "arrow",
+  "id": "arrow-yes",
+  "x": 260,
+  "y": 420,
+  "width": 80,
+  "height": 0,
+  "strokeColor": "#2f9e44",
+  "backgroundColor": "transparent",
+  "strokeWidth": 2,
+  "roughness": 1,
+  "fillStyle": "hachure",
+  "strokeStyle": "solid",
+  "opacity": 100,
+  "seed": 1234,
+  "version": 1,
+  "versionNonce": 1,
+  "isDeleted": false,
+  "groupIds": [],
+  "frameId": null,
+  "roundness": {
+    "type": 2
+  },
+  "boundElements": [],
+  "updated": 1,
+  "link": null,
+  "locked": false,
+  "startArrowhead": null,
+  "endArrowhead": "arrow",
+  "points": [
+    [0, 0],
+    [80, 0]
+  ],
+  "label": {
+    "text": "是",
+    "fontSize": 16,
+    "fontFamily": 1,
+    "textAlign": "center",
+    "verticalAlign": "middle",
+    "strokeColor": "#2f9e44"
+  }
+}
+```
+
+**使用场景**：
+- 判断节点的分支连接
+- 条件路径标注
+- 建议：成功/是 用绿色，失败/否 用红色
+
+## 生成示例
+
+### 示例 1: 用户登录流程（简单场景）
+
+**用户需求**：用户登录系统的基本流程，包含验证和错误处理
+
+**生成代码**：
+```json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 200,
+      "y": 30,
+      "width": 200,
+      "height": 35,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "transparent",
+      "strokeWidth": 1,
+      "roughness": 0,
+      "fillStyle": "solid",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1001,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "text": "用户登录流程",
+      "fontSize": 28,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top"
+    },
+    {
+      "type": "ellipse",
+      "id": "start",
+      "x": 220,
+      "y": 100,
+      "width": 140,
+      "height": 80,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1002,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "开始",
+        "fontSize": 20,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "input",
+      "x": 200,
+      "y": 220,
+      "width": 180,
+      "height": 80,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1003,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "输入用户名\n和密码",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "diamond",
+      "id": "validate",
+      "x": 210,
+      "y": 350,
+      "width": 160,
+      "height": 140,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1004,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "验证\n成功?",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "success",
+      "x": 430,
+      "y": 380,
+      "width": 160,
+      "height": 80,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1005,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "登录成功\n跳转主页",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "error",
+      "x": 20,
+      "y": 380,
+      "width": 160,
+      "height": 80,
+      "strokeColor": "#e03131",
+      "backgroundColor": "#ffe0eb",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1006,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "显示错误\n提示信息",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "ellipse",
+      "id": "finish",
+      "x": 450,
+      "y": 520,
+      "width": 120,
+      "height": 70,
+      "strokeColor": "#868e96",
+      "backgroundColor": "#f1f3f5",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1007,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "结束",
+        "fontSize": 20,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-start-input",
+      "x": 290,
+      "y": 180,
+      "width": 0,
+      "height": 40,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2001,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 40]
+      ]
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-input-validate",
+      "x": 290,
+      "y": 300,
+      "width": 0,
+      "height": 50,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2002,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 50]
+      ]
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-validate-success",
+      "x": 370,
+      "y": 420,
+      "width": 60,
+      "height": 0,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2003,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [60, 0]
+      ],
+      "label": {
+        "text": "是",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-validate-error",
+      "x": 210,
+      "y": 420,
+      "width": 30,
+      "height": 0,
+      "strokeColor": "#e03131",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2004,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [-30, 0]
+      ],
+      "label": {
+        "text": "否",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#e03131"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-error-input",
+      "x": 100,
+      "y": 380,
+      "width": 0,
+      "height": 120,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "dashed",
+      "opacity": 100,
+      "seed": 2005,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, -120],
+        [100, -120],
+        [100, -20]
+      ],
+      "label": {
+        "text": "重试",
+        "fontSize": 14,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#868e96"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-success-finish",
+      "x": 510,
+      "y": 460,
+      "width": 0,
+      "height": 60,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2006,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 60]
+      ]
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": 20
+  },
+  "files": {}
+}
+```
+
+**关键点**：
+- 椭圆表示开始和结束节点
+- 菱形表示判断节点（验证成功?）
+- 箭头标注条件分支（是/否）
+- 失败路径通过虚线箭头回到输入步骤
+- 成功/失败使用不同颜色（绿色/红色）
+
+### 示例 2: 订单处理流程（中等复杂度）
+
+**用户需求**：电商订单处理流程，包括库存检查、支付、发货等步骤
+
+**生成代码**：
+```json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 300,
+      "y": 30,
+      "width": 250,
+      "height": 35,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "transparent",
+      "strokeWidth": 1,
+      "roughness": 0,
+      "fillStyle": "solid",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1001,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "text": "订单处理流程",
+      "fontSize": 28,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top"
+    },
+    {
+      "type": "ellipse",
+      "id": "start",
+      "x": 360,
+      "y": 100,
+      "width": 130,
+      "height": 75,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1002,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "开始",
+        "fontSize": 20,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "receive",
+      "x": 340,
+      "y": 210,
+      "width": 170,
+      "height": 80,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1003,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "接收订单",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "diamond",
+      "id": "check-stock",
+      "x": 350,
+      "y": 330,
+      "width": 150,
+      "height": 130,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1004,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "库存\n充足?",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "out-stock",
+      "x": 120,
+      "y": 355,
+      "width": 180,
+      "height": 80,
+      "strokeColor": "#e03131",
+      "backgroundColor": "#ffe0eb",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1005,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "通知缺货\n取消订单",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "diamond",
+      "id": "check-payment",
+      "x": 550,
+      "y": 330,
+      "width": 150,
+      "height": 130,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1006,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "支付\n完成?",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "wait-payment",
+      "x": 560,
+      "y": 500,
+      "width": 130,
+      "height": 80,
+      "strokeColor": "#5f3dc4",
+      "backgroundColor": "#e5dbff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1007,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "等待支付",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "ship",
+      "x": 760,
+      "y": 355,
+      "width": 150,
+      "height": 80,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1008,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "发货处理",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "notify",
+      "x": 760,
+      "y": 480,
+      "width": 150,
+      "height": 80,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1009,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "发送通知",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "ellipse",
+      "id": "finish",
+      "x": 380,
+      "y": 620,
+      "width": 120,
+      "height": 70,
+      "strokeColor": "#868e96",
+      "backgroundColor": "#f1f3f5",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1010,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "结束",
+        "fontSize": 20,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-start-receive",
+      "x": 425,
+      "y": 175,
+      "width": 0,
+      "height": 35,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2001,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 35]
+      ]
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-receive-check",
+      "x": 425,
+      "y": 290,
+      "width": 0,
+      "height": 40,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2002,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 40]
+      ]
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-stock-no",
+      "x": 350,
+      "y": 395,
+      "width": 50,
+      "height": 0,
+      "strokeColor": "#e03131",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2003,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [-50, 0]
+      ],
+      "label": {
+        "text": "否",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#e03131"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-stock-yes",
+      "x": 500,
+      "y": 395,
+      "width": 50,
+      "height": 0,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2004,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [50, 0]
+      ],
+      "label": {
+        "text": "是",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-payment-no",
+      "x": 625,
+      "y": 460,
+      "width": 0,
+      "height": 40,
+      "strokeColor": "#5f3dc4",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2005,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 40]
+      ],
+      "label": {
+        "text": "否",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#5f3dc4"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-payment-yes",
+      "x": 700,
+      "y": 395,
+      "width": 60,
+      "height": 0,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2006,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [60, 0]
+      ],
+      "label": {
+        "text": "是",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-wait-check",
+      "x": 690,
+      "y": 540,
+      "width": 115,
+      "height": 145,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "dashed",
+      "opacity": 100,
+      "seed": 2007,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [65, 0],
+        [65, -145],
+        [-50, -145]
+      ],
+      "label": {
+        "text": "超时重试",
+        "fontSize": 14,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#868e96"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-ship-notify",
+      "x": 835,
+      "y": 435,
+      "width": 0,
+      "height": 45,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2008,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 45]
+      ]
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-notify-finish",
+      "x": 760,
+      "y": 520,
+      "width": 320,
+      "height": 135,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2009,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [-320, 0],
+        [-320, 135]
+      ]
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-out-finish",
+      "x": 210,
+      "y": 435,
+      "width": 0,
+      "height": 185,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2010,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 185],
+        [230, 185]
+      ]
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#fffef7",
+    "gridSize": 20
+  },
+  "files": {}
+}
+```
+
+**关键点**：
+- 多个判断节点组成复杂流程
+- 包含循环逻辑（等待支付 → 检查支付）
+- 多个出口路径汇聚到同一个结束节点
+- 使用虚线箭头表示回退路径
+- 不同状态使用不同颜色区分
+
+### 示例 3: 数据处理流程（高级场景）
+
+**用户需求**：数据采集到分析的完整流程，包含多个处理阶段
+
+**生成代码**：
+```json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 300,
+      "y": 30,
+      "width": 280,
+      "height": 35,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "transparent",
+      "strokeWidth": 1,
+      "roughness": 0,
+      "fillStyle": "solid",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1001,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "text": "数据处理流程图",
+      "fontSize": 28,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top"
+    },
+    {
+      "type": "ellipse",
+      "id": "start",
+      "x": 50,
+      "y": 100,
+      "width": 120,
+      "height": 80,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1002,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "开始",
+        "fontSize": 20,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "collect",
+      "x": 210,
+      "y": 110,
+      "width": 140,
+      "height": 70,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1003,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "数据采集",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "diamond",
+      "id": "validate",
+      "x": 390,
+      "y": 95,
+      "width": 130,
+      "height": 110,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#ffe8cc",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1004,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "数据\n有效?",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "error-log",
+      "x": 395,
+      "y": 230,
+      "width": 120,
+      "height": 60,
+      "strokeColor": "#e03131",
+      "backgroundColor": "#ffe0eb",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1005,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "记录错误",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "clean",
+      "x": 560,
+      "y": 110,
+      "width": 140,
+      "height": 70,
+      "strokeColor": "#5f3dc4",
+      "backgroundColor": "#e5dbff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1006,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "数据清洗",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "transform",
+      "x": 730,
+      "y": 110,
+      "width": 140,
+      "height": 70,
+      "strokeColor": "#087f5b",
+      "backgroundColor": "#c3fae8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1007,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "数据转换",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "load",
+      "x": 730,
+      "y": 230,
+      "width": 140,
+      "height": 70,
+      "strokeColor": "#c2255c",
+      "backgroundColor": "#ffdeeb",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1008,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "加载入库",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "analyze",
+      "x": 560,
+      "y": 230,
+      "width": 140,
+      "height": 70,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#d0ebff",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1009,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "数据分析",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "visualize",
+      "x": 560,
+      "y": 350,
+      "width": 140,
+      "height": 70,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1010,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "可视化",
+        "fontSize": 18,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "ellipse",
+      "id": "finish",
+      "x": 570,
+      "y": 460,
+      "width": 120,
+      "height": 70,
+      "strokeColor": "#868e96",
+      "backgroundColor": "#f1f3f5",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "solid",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 1011,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "label": {
+        "text": "结束",
+        "fontSize": 20,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#1e1e1e"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-1",
+      "x": 170,
+      "y": 140,
+      "width": 40,
+      "height": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 3,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2001,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [40, 0]
+      ],
+      "label": {
+        "text": "1",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-2",
+      "x": 350,
+      "y": 145,
+      "width": 40,
+      "height": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 3,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2002,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [40, 0]
+      ],
+      "label": {
+        "text": "2",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-3-no",
+      "x": 455,
+      "y": 205,
+      "width": 0,
+      "height": 25,
+      "strokeColor": "#e03131",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2003,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 25]
+      ],
+      "label": {
+        "text": "否",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#e03131"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-3-yes",
+      "x": 520,
+      "y": 145,
+      "width": 40,
+      "height": 0,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "transparent",
+      "strokeWidth": 3,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2004,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [40, 0]
+      ],
+      "label": {
+        "text": "是/3",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-4",
+      "x": 700,
+      "y": 145,
+      "width": 30,
+      "height": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 3,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2005,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [30, 0]
+      ],
+      "label": {
+        "text": "4",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-5",
+      "x": 800,
+      "y": 180,
+      "width": 0,
+      "height": 50,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 3,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2006,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 50]
+      ],
+      "label": {
+        "text": "5",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-6",
+      "x": 730,
+      "y": 265,
+      "width": 30,
+      "height": 0,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 3,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2007,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [-30, 0]
+      ],
+      "label": {
+        "text": "6",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-7",
+      "x": 630,
+      "y": 300,
+      "width": 0,
+      "height": 50,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 3,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2008,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 50]
+      ],
+      "label": {
+        "text": "7",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-8",
+      "x": 630,
+      "y": 420,
+      "width": 0,
+      "height": 40,
+      "strokeColor": "#495057",
+      "backgroundColor": "transparent",
+      "strokeWidth": 3,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 2009,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [0, 40]
+      ],
+      "label": {
+        "text": "8",
+        "fontSize": 16,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#2f9e44"
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "arrow-error-retry",
+      "x": 395,
+      "y": 260,
+      "width": 185,
+      "height": 115,
+      "strokeColor": "#e03131",
+      "backgroundColor": "transparent",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "fillStyle": "hachure",
+      "strokeStyle": "dashed",
+      "opacity": 100,
+      "seed": 2010,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "points": [
+        [0, 0],
+        [-185, 0],
+        [-185, -115],
+        [-115, -115]
+      ],
+      "label": {
+        "text": "重新采集",
+        "fontSize": 14,
+        "fontFamily": 1,
+        "textAlign": "center",
+        "verticalAlign": "middle",
+        "strokeColor": "#868e96"
+      }
+    },
+    {
+      "type": "text",
+      "id": "note",
+      "x": 50,
+      "y": 550,
+      "width": 800,
+      "height": 25,
+      "strokeColor": "#868e96",
+      "backgroundColor": "transparent",
+      "strokeWidth": 1,
+      "roughness": 0,
+      "fillStyle": "solid",
+      "strokeStyle": "solid",
+      "opacity": 100,
+      "seed": 3001,
+      "version": 1,
+      "versionNonce": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "text": "数据流向：采集 → 验证 → 清洗 → 转换 → 入库 → 分析 → 可视化 → 结束",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": 20
+  },
+  "files": {}
+}
+```
+
+**关键点**：
+- 使用椭圆表示起点和终点
+- 箭头使用数字标记流程顺序（1-8）
+- 每个处理阶段使用不同颜色
+- 失败路径使用虚线箭头回到起始步骤
+- 底部添加流程说明文字
+- 包含错误处理和重试逻辑
+
+## 常见错误
+
+### 错误 1: 缺少必需的 JSON 属性
+
+**❌ 错误写法**：
+```json
+{
+  "elements": [
+    {
+      "type": "rectangle",
+      "id": "step1",
+      "x": 100,
+      "y": 100
+    }
+  ]
+}
+```
+
+**✅ 正确写法**：
+完整包含所有必需属性，参考示例中的完整 JSON 结构
+
+**原因**：Excalidraw 需要完整的元素属性才能正确渲染，缺少属性会导致渲染失败或显示异常。
+
+### 错误 2: 判断节点未使用菱形
+
+**❌ 错误写法**：
+```json
+{
+  "type": "rectangle",
+  "id": "decision",
+  "label": {
+    "text": "判断条件?"
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "type": "diamond",
+  "id": "decision",
+  "label": {
+    "text": "判断\n条件?"
+  }
+}
+```
+
+**原因**：流程图规范中，判断节点必须使用菱形表示，这是业界标准。
+
+### 错误 3: 条件分支箭头没有标签
+
+**❌ 错误写法**：
+```json
+{
+  "type": "arrow",
+  "id": "arrow-1",
+  "label": {
+    "text": ""
+  }
+}
+```
+
+**✅ 正确写法**：
+```json
+{
+  "type": "arrow",
+  "id": "arrow-yes",
+  "strokeColor": "#2f9e44",
+  "label": {
+    "text": "是",
+    "strokeColor": "#2f9e44"
+  }
+}
+```
+
+**原因**：判断节点的分支箭头必须标注条件（是/否、成功/失败），否则无法理解流程分支逻辑。
+
+### 错误 4: 流程没有明确的结束点
+
+**❌ 错误写法**：
+流程图中只有开始节点，没有结束节点，或者多个路径没有汇聚到结束点
+
+**✅ 正确写法**：
+- 使用椭圆表示明确的结束节点
+- 所有流程路径最终都汇聚到结束节点
+
+**原因**：完整的流程图必须有明确的起点和终点，确保所有路径都有明确的结束。
+
+### 错误 5: 手绘效果不一致
+
+**❌ 错误写法**：
+```json
+{
+  "elements": [
+    {"roughness": 0},
+    {"roughness": 2},
+    {"roughness": 1}
+  ]
+}
+```
+
+**✅ 正确写法**：
+所有流程图元素统一使用 `roughness: 1`
+
+**原因**：一致的手绘风格让图表更专业，混合使用不同 roughness 值会显得杂乱无章。
+
+### 错误 6: 颜色使用混乱
+
+**❌ 错误写法**：
+- 相同类型的元素使用不同颜色
+- 不同状态使用相同颜色
+- 成功/失败路径颜色不区分
+
+**✅ 正确写法**：
+- 起点：绿色系 (#2f9e44, #d3f9d8)
+- 普通步骤：蓝色系 (#1971c2, #d0ebff)
+- 判断节点：橙色系 (#f08c00, #ffe8cc)
+- 成功路径：绿色 (#2f9e44)
+- 失败路径：红色 (#e03131)
+- 终点：灰色系 (#868e96, #f1f3f5)
+
+**原因**：颜色应该传达信息状态和流程类型，建立一致的颜色编码系统。
+
+### 错误 7: 箭头未标注含义
+
+**❌ 错误写法**：
+所有箭头都没有标签或说明
+
+**✅ 正确写法**：
+- 条件分支箭头：标注"是"/"否"或"成功"/"失败"
+- 顺序箭头：可选择性标注序号（1, 2, 3...）
+- 回退箭头：标注"重试"/"返回"等
+
+**原因**：箭头需要说明连接关系的含义，特别是判断节点的分支。
+
+### 错误 8: 布局不平衡
+
+**❌ 错误写法**：
+- 所有元素挤在左上角
+- 箭头长度不一致
+- 节点间距过大或过小
+
+**✅ 正确写法**：
+- 合理分布元素，保持视觉平衡
+- 流程方向清晰（从上到下或从左到右）
+- 节点间距保持一致（建议 40-80 像素）
+
+**原因**：良好的布局增强可读性和专业度。
+
+## 生成检查清单
+
+生成代码后，逐项检查：
+
+- [ ] **JSON 结构完整**：包含 `type`, `version`, `source`, `elements`, `appState`, `files`
+- [ ] **元素属性完整**：每个元素包含所有必需属性（id, type, x, y, width, height, strokeColor, backgroundColor, strokeWidth, roughness, fillStyle, strokeStyle, opacity, seed, version, versionNonce, isDeleted, groupIds, frameId, roundness, boundElements, updated, link, locked）
+- [ ] **元素 ID 唯一**：所有元素 ID 不重复
+- [ ] **手绘效果统一**：所有元素使用 `roughness: 1`
+- [ ] **流程元素规范**：
+  - 起点/终点使用椭圆 (ellipse)
+  - 普通步骤使用矩形 (rectangle)
+  - 判断节点使用菱形 (diamond)
+- [ ] **箭头标注完整**：
+  - 判断分支箭头标注"是"/"否"
+  - 顺序箭头可选标注序号
+  - 回退箭头标注"重试"/"返回"
+- [ ] **颜色编码一致**：
+  - 起点：绿色系
+  - 普通步骤：蓝色系
+  - 判断节点：橙色系
+  - 成功路径：绿色
+  - 失败路径：红色
+  - 终点：灰色系
+- [ ] **流程完整性**：
+  - 有明确的起点（椭圆）
+  - 有明确的终点（椭圆）
+  - 所有路径最终汇聚到终点
+- [ ] **布局合理**：
+  - 元素分布均衡
+  - 流程方向清晰
+  - 节点间距一致
+- [ ] **JSON 格式有效**：无语法错误，可直接渲染
+
+**❗ 重点检查项**：
+1. 判断节点必须使用菱形 (diamond)
+2. 条件分支箭头必须标注"是"/"否"
+3. 流程必须有明确的起点和终点（椭圆）
+4. 所有元素的 roughness 必须统一为 1
+
+**任何检查项不通过，立即修正后重新生成**

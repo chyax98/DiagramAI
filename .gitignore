@@ -59,8 +59,10 @@ next-env.d.ts
 *.cache
 
 # Database files
-data/
+# data/
 *.db
+*.db-*
+*.backup*
 *.sqlite
 *.sqlite3
 

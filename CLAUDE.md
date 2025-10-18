@@ -234,8 +234,7 @@ src/
 │   │   └── prompts/              # AI 提示词 (23+ 语言)
 │   ├── db/                       # 数据库
 │   │   ├── client.ts             # SQLite 客户端
-│   │   ├── schema.sql            # 数据库 Schema (v5.0.0)
-│   │   └── migrate.ts            # 数据库迁移
+│   │   └── schema.sql            # 数据库 Schema
 │   ├── repositories/             # 数据访问层
 │   │   ├── UserRepository.ts
 │   │   ├── ModelRepository.ts
@@ -895,7 +894,7 @@ DiagramAI 支持 **23 种图表渲染语言**:
 7. **Excalidraw** - 5 种手绘风格图表 (草图、线框图、通用图表、流程图、架构图)
 8. **C4-PlantUML** - 4 种 C4 架构图 (上下文图、容器图、组件图、时序图)
 9. **Vega-Lite** - 6 种数据可视化 (柱状图、折线图、散点图、饼图、面积图、热力图)
-10. **DBML** - 4 种数据库图表 (完整 Schema、单表设计、ER 图、数据库迁移)
+10. **DBML** - 4 种数据库图表 (完整 Schema、单表设计、ER 图、表关系图)
 
 ### 扩展语言 (新增 13 种)
 
@@ -965,33 +964,13 @@ DiagramAI 支持用户自定义 AI 提示词,实现个性化图表生成。
 - 7 个 React 组件 - 完整的提示词管理 UI
 - CodeMirror 编辑器 - 专业的代码编辑体验
 
-### 架构与测试文档
-
-**核心架构文档**:
-
-- **架构设计文档**: `claudedocs/PROMPT_ARCHITECTURE_V2.md` - 完整的架构设计、数据库设计、API 设计
-- **迁移测试报告**: `claudedocs/PROMPT_MIGRATION_REPORT.md` - 数据库迁移和性能测试报告
+### 核心实现
 
 **代码实现**:
 
-- **数据库 Schema**: `src/lib/db/schema-prompts.sql` - v6.0.0 数据库结构定义
+- **数据库 Schema**: `src/lib/db/schema.sql` - 完整的数据库结构定义
 - **Repository 层**: `src/lib/repositories/PromptRepository.ts` - 数据访问层实现
 - **类型定义**: `src/types/prompt.ts` - TypeScript 类型定义
-
-**测试脚本**:
-
-- **单元测试**: `scripts/test-prompt-repository-simple.ts` - Repository 层测试 (15/15 通过)
-- **性能基准**: `scripts/benchmark-prompt-loading.ts` - 文件系统 vs 数据库性能对比
-- **迁移脚本**: `scripts/migrations/006_add_custom_prompts.js` - 数据库迁移脚本
-
-### 性能指标
-
-| 指标     | 文件系统     | 数据库 (v6)  | 说明                           |
-| -------- | ------------ | ------------ | ------------------------------ |
-| 查询延迟 | 0.166ms      | 0.179ms      | 性能相当 (7% 差异可忽略)       |
-| 首次加载 | 165ms        | 179ms        | 多次文件读取 vs 单次数据库查询 |
-| 吞吐量   | 6037 ops/sec | 5640 ops/sec | 高并发场景性能相当             |
-| 内存占用 | ~20KB/prompt | ~20KB/prompt | 内存占用一致                   |
 
 **核心优势**:
 
@@ -1009,7 +988,6 @@ DiagramAI 支持用户自定义 AI 提示词,实现个性化图表生成。
 - **README.en.md** - 英文版本
 - **KROKI_DEPLOYMENT.md** - Kroki 部署指南
 - **env.example** - 环境变量配置
-- **claudedocs/PROMPT_INTEGRATION_TEST.md** - 提示词管理集成测试报告
 
 ---
 

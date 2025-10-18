@@ -2,130 +2,122 @@
 
 ## 项目简介
 
-DiagramAI 是一个 AI 驱动的专业图表生成工具,支持 23 种图表渲染语言和 80+ 种图表类型。用户通过自然语言描述,AI 自动生成专业图表代码,支持实时渲染和导出。
+DiagramAI 是一个 AI 驱动的专业图表生成工具,支持 23 种渲染语言和 80+ 种图表类型。
 
-## 核心特性
+## 核心功能
 
-- **多 AI 提供商**: 支持 OpenAI、Anthropic、Google、OpenAI-Compatible (DeepSeek, SiliconFlow 等)
-- **23 种图表语言**: Mermaid、PlantUML、D2、Graphviz、WaveDrom、Excalidraw、C4-PlantUML、Vega-Lite、DBML 等
-- **用户自定义提示词**: 三层提示词系统 (L1 通用 + L2 语言 + L3 类型),支持版本管理
-- **多轮对话优化**: 支持生成、调整、修复三种任务类型,保持会话上下文
-- **实时渲染**: 通过 Kroki 代理实现无 CORS 问题的图表渲染
-- **历史记录**: 完整的生成历史,支持收藏和重新编辑
-- **认证系统**: JWT + bcrypt 安全认证
+### 1. 多语言图表支持
 
-## 技术栈
+- **23 种渲染语言**: Mermaid, PlantUML, D2, Graphviz, WaveDrom, Nomnoml, Excalidraw, C4-PlantUML, Vega-Lite, DBML, BPMN, Ditaa, NwDiag, BlockDiag, ActDiag, PacketDiag, RackDiag, SeqDiag, Structurizr, Erd, Pikchr, SvgBob, UMLet
+- **80+ 图表类型**: 流程图, 时序图, 类图, ER 图, 甘特图等
 
-### 核心框架
+### 2. AI 提供商支持
 
-- **Next.js 15** - React 框架 (App Router)
-- **React 19** - UI 库
-- **TypeScript 5** - 类型安全
-- **Tailwind CSS 4** - 样式系统
-- **shadcn/ui** - UI 组件库
+- OpenAI (GPT-4o, GPT-4o-mini, GPT-4-turbo, GPT-3.5-turbo)
+- Anthropic (Claude-3.5-sonnet, Claude-3-opus, Claude-3-sonnet)
+- Google (Gemini-1.5-pro, Gemini-1.5-flash)
+- OpenAI-Compatible (DeepSeek, SiliconFlow, Together AI, Groq)
 
-### 后端技术
+### 3. Prompt 管理系统
 
-- **SQLite** - 数据库 (better-sqlite3)
-- **JWT** - 认证 (jose)
-- **bcrypt** - 密码哈希
-- **Zod** - 数据验证
+- **L1 通用规范**: 所有图表共享的基础规范
+- **L2 语言规范**: 特定渲染语言的规范 (23 种)
+- **L3 类型规范**: 特定图表类型的规范 (80+ 类型)
+- **版本控制**: 语义化版本 + 历史回溯
+- **智能 Fallback**: 用户自定义 → 系统默认
 
-### AI 集成
+### 4. 核心功能
 
-- **Vercel AI SDK** - 统一 AI 接口
-- **多提供商**: OpenAI, Anthropic, Google, OpenAI-Compatible
+- 实时代码预览 (Kroki API 渲染)
+- 多格式导出 (PNG, SVG, PDF)
+- 多轮对话调整 (基于上下文优化)
+- 语法自动修复 (AI 辅助纠错)
+- 生成历史管理 (收藏, 搜索, 筛选)
+- 推荐系统 (智能推荐相似图表)
 
-### 图表渲染
+## 技术架构
 
-- **Kroki** - 图表渲染引擎 (23 种语言)
-- **Mermaid** - 前端实时预览
-- **pako** - 代码压缩 (deflate + base64url)
+### 前端技术栈
 
-### 状态管理
+- **框架**: Next.js 15 + React 19 + TypeScript 5
+- **状态管理**: Zustand
+- **样式**: Tailwind CSS 4 + shadcn/ui
+- **编辑器**: CodeMirror 6
+- **表单验证**: Zod
 
-- **Zustand** - 轻量级状态管理
-- **React Hook Form** - 表单管理
-- **CodeMirror** - 代码编辑器
+### 后端技术栈
 
-## 项目规模
+- **数据库**: SQLite (better-sqlite3) + Schema v7.0.0
+- **认证**: JWT + bcrypt
+- **AI SDK**: Vercel AI SDK
+- **图表渲染**: Kroki API
 
-- **代码行数**: ~27,500 行 (架构清理后)
-- **组件数量**: 50+ React 组件
-- **API 端点**: 20+ 个
-- **数据库表**: 5 个 (users, ai_models, generation_histories, chat_sessions, custom_prompts)
-- **提示词文件**: 113 个 (23 种语言,位于 data/prompts/)
+### 架构模式
 
-## 开发团队规范
+- **Repository Pattern**: 数据访问层抽象
+- **Service Pattern**: 业务逻辑层封装
+- **Factory Pattern**: AI 提供商抽象
 
-- **代码语言**: TypeScript (严格模式)
-- **注释语言**: 中文
-- **提交规范**: Conventional Commits (feat/fix/docs/refactor/test/chore)
-- **架构模式**: Repository + Service + Factory Pattern
+## 数据库 Schema v7.0.0
 
-## 当前状态 (2025-10-18)
+### 核心表
 
-### ✅ 架构清理已完成
+1. **users** - 用户认证
+2. **ai_models** - AI 模型配置
+3. **generation_histories** - 生成历史
+4. **chat_sessions** - 多轮对话
+5. **custom_prompts** - 用户自定义提示词
+6. **render_failure_logs** - 失败案例收集
 
-**日期**: 2025-10-18  
-**状态**: ✅ 生产就绪  
-**评分**: 8.1/10 (优秀)  
-**分支**: feat/clean-architecture
+### 关键特性
 
-**关键改进**:
+- 完整的外键约束
+- 性能索引优化
+- 软删除支持
+- 审计追踪
 
-- ✅ 架构简化 - 从双模式 → 纯数据库 (↓50% 复杂度)
-- ✅ 代码精简 - 净减少 1,500 行 (↓5.2%)
-- ✅ 文档重写 - 删除所有演进历史,呈现首次发布状态
-- ✅ 目录优化 - 提示词迁移到 data/prompts/ (113 个文件)
-- ✅ 质量保证 - TypeScript + ESLint 全部通过
+## 目录结构
 
-**清理统计**:
+```
+src/
+├── app/          # Next.js App Router (页面 + API)
+├── components/   # React 组件库 (10+ 子模块)
+├── lib/          # 核心业务逻辑
+│   ├── ai/       # AI 提供商抽象
+│   ├── auth/     # 认证系统
+│   ├── db/       # 数据库层
+│   ├── repositories/  # 数据访问层 (6 个)
+│   ├── services/      # 业务逻辑层 (3 个)
+│   └── stores/        # 状态管理
+├── types/        # TypeScript 类型定义
+├── hooks/        # 自定义 Hooks (5 个)
+└── contexts/     # React Contexts (2 个)
 
-- 删除文件: 137+ 个
-- 修改文件: 30+ 个
-- 净减少代码: ~1,500 行 (35%)
-- 并行 Agent: 22 个
-- 执行时间: ~2 小时
+data/
+├── prompts/      # 提示词文件 (113 个)
+└── diagram-ai.db # SQLite 数据库
+```
 
-## 重要提示
+## 性能优化
 
-### 对新加入的开发者
+- API 请求防抖
+- React 渲染优化 (useMemo + useCallback)
+- Kroki 结果缓存 (1 小时)
+- 代码分割和懒加载
+- 数据库索引优化
 
-**DiagramAI 现在是一个全新的、无历史包袱的代码库！**
+## 安全特性
 
-1. **架构**: 纯数据库模式,无文件系统 Fallback
-2. **提示词**: 全部在 `data/prompts/` 目录
-3. **Schema**: 统一在 `src/lib/db/schema.sql`
-4. **迁移**: 无迁移脚本,直接使用最新 Schema
-5. **文档**: 首次发布状态,无演进历史
+- JWT 认证 (7 天过期)
+- bcrypt 密码哈希 (10 轮)
+- API 路由保护中间件
+- Zod 输入验证
+- SQL 注入防护
 
-### 维护建议
+## 开发工具
 
-1. **添加新提示词**:
-   - 文件放在 `data/prompts/{language}/`
-   - 通过 `seed-default-prompts.ts` 导入数据库
-   - 更新 `diagram-types.ts` 类型定义
-
-2. **修改 Schema**:
-   - 直接修改 `schema.sql`
-   - 运行 `init-db.js` 重新初始化
-   - 无需创建迁移脚本
-
-3. **代码修改**:
-   - 遵循现有架构模式
-   - 保持纯数据库模式
-   - 避免引入向后兼容代码
-
-## 详细信息
-
-完整的项目信息请查看其他记忆文件:
-
-- `tech_stack.md` - 技术栈详解
-- `architecture_patterns.md` - 架构模式详解
-- `codebase_structure.md` - 代码库结构
-- `code_style_conventions.md` - 代码规范
-- `suggested_commands.md` - 常用命令
-- `task_completion_checklist.md` - 任务检查清单
-- `key_features_and_workflows.md` - 核心功能详解
-- `architecture_cleanup_history.md` - 架构清理历史 (2025-10-18)
+- TypeScript strict 模式
+- ESLint + Prettier
+- Husky Git Hooks
+- Conventional Commits
+- 中文注释和文档

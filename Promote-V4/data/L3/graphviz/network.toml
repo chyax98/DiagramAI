@@ -1,0 +1,259 @@
+# ============================================
+# L3 类型层 - GraphViz Network (网络拓扑图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "graphviz"
+diagram_type = "network"
+version = "1.0.0"
+description = "L3: graphviz - 网络拓扑图 图表生成规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关元数据
+complexity = "medium"
+target_length = 2800
+use_cases = ["网络架构", "服务器拓扑", "云基础设施", "网络连接关系", "分布式系统"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "网络架构设计师",
+  "网络拓扑专家",
+  "基础设施工程师"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **网络拓扑图必须使用 graph**: 网络拓扑表达无向的连接关系, 必须使用 `graph` 声明和 `--` 连接符。
+  ```dot
+  // ✅ 正确
+  graph NetworkTopology {
+    ServerA -- RouterB;
+    RouterB -- SwitchC;
+  }
+
+  // ❌ 错误 - 网络拓扑图不使用有向图
+  digraph NetworkTopology {
+    ServerA -> RouterB;
+  }
+  ```
+  """,
+
+  """
+  **网络设备形状语义化**: 根据设备类型选择合适的形状:
+  - 服务器 `shape=box3d`: 三维盒子表示物理服务器
+  - 路由器 `shape=hexagon`: 六边形表示路由器
+  - 交换机 `shape=rectangle`: 矩形表示交换机
+  - 防火墙 `shape=octagon`: 八边形表示防火墙
+  - 云服务 `shape=ellipse`: 椭圆表示云平台
+  - 客户端 `shape=box, style="rounded"`: 圆角矩形表示客户端
+  - 数据库 `shape=cylinder`: 圆柱表示数据存储
+  """,
+
+  """
+  **连接线属性规范**: 使用边属性表达连接特性:
+  - 带宽标注: `[label="1Gbps"]`
+  - 连接类型: 实线 (物理连接), 虚线 `style=dashed` (逻辑连接)
+  - 链路重要性: 粗线 `penwidth=3` (主干链路), 细线 `penwidth=1` (边缘链路)
+  - 连接协议: `[label="TCP/IP"]`, `[label="HTTP"]`
+  ```dot
+  ServerA -- RouterB [label="10Gbps", penwidth=3];
+  RouterB -- SwitchC [label="1Gbps", style=dashed];
+  ```
+  """,
+
+  """
+  **网络层级结构**: 使用 `rank` 和 `subgraph` 表达网络层次:
+  - 核心层: `subgraph cluster_core` 汇聚关键路由设备
+  - 汇聚层: `subgraph cluster_aggregation` 中间层交换设备
+  - 接入层: `subgraph cluster_access` 边缘接入设备
+  - 使用 `rank=same` 使同层设备水平对齐
+  ```dot
+  subgraph cluster_core {
+    label = "核心层";
+    CoreRouter1; CoreRouter2;
+  }
+  ```
+  """,
+
+  """
+  **IP 地址和标识**: 网络设备必须包含关键网络信息:
+  - 设备 IP 地址: 在节点标签中显示
+  - 设备名称: 使用语义化名称
+  - 网段标识: 使用子图 label 标注
+  ```dot
+  ServerWeb [label="Web Server\\n192.168.1.10", shape=box3d, fillcolor="#4caf50"];
+  ```
+  """,
+
+  """
+  **冗余和备份路径**: 高可用网络必须显示冗余设计:
+  - 主路径: 实线, 粗线
+  - 备份路径: 虚线, 细线, 不同颜色
+  - 使用颜色区分 (主路径绿色, 备份路径蓝色)
+  ```dot
+  ServerA -- RouterB [label="主链路", color="green", penwidth=3];
+  ServerA -- RouterC [label="备份链路", color="blue", style=dashed, penwidth=1];
+  ```
+  """,
+
+  """
+  **布局优化**: 网络拓扑图使用特定布局算法:
+  - `layout=neato`: 物理模拟布局, 适合复杂网络
+  - `layout=fdp`: 力导向布局, 适合大规模网络
+  - `layout=circo`: 环形布局, 适合环形拓扑
+  - `layout=dot`: 层次布局, 适合树状网络 (配合 rankdir)
+  - 默认推荐 `neato` 获得美观的网络拓扑效果
+  """,
+
+  """
+  **网络安全边界**: 使用颜色和样式标识安全区域:
+  - 内网设备: 绿色填充 `fillcolor="#c8e6c9"`
+  - 公网设备: 黄色填充 `fillcolor="#fff9c4"`
+  - DMZ 区域: 橙色填充 `fillcolor="#ffe0b2"`
+  - 防火墙: 红色边框 `color="red", penwidth=2`
+  ```dot
+  WebServer [label="Web Server", fillcolor="#ffe0b2", shape=box3d];
+  Firewall [label="防火墙", shape=octagon, color="red", penwidth=2];
+  ```
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别网络要素**:
+  - 网络设备: 服务器、路由器、交换机、防火墙、负载均衡器
+  - 连接关系: 物理连接、逻辑连接、虚拟连接
+  - 网络层次: 核心层、汇聚层、接入层
+  - 安全边界: 内网、DMZ、外网
+  - 关键节点: 网关、DNS、DHCP 服务器
+  """,
+
+  """
+  **2. 提取网络拓扑**:
+  - 主干网络: 核心路由器和主要连接路径
+  - 分支网络: 接入层设备和终端连接
+  - 冗余路径: 高可用备份链路
+  - 网络协议: TCP/IP、HTTP、VPN 等
+  - 带宽和性能: 链路带宽、延迟要求
+  """,
+
+  """
+  **3. 设计网络层次**:
+  - 使用子图划分网络层次 (核心/汇聚/接入)
+  - 使用 `rank=same` 对齐同层设备
+  - 确定设备间的连接关系和路径
+  - 标注关键链路的带宽和协议
+  - 突出显示主干链路 (粗线) 和备份链路 (虚线)
+  """,
+
+  """
+  **4. 选择布局算法**:
+  - 小型网络 (<20 设备): `layout=dot` 或 `layout=neato`
+  - 中型网络 (20-50 设备): `layout=neato` 或 `layout=fdp`
+  - 大型网络 (>50 设备): `layout=fdp` 或 `layout=sfdp`
+  - 环形拓扑: `layout=circo`
+  - 层次拓扑: `layout=dot, rankdir=TB`
+  """,
+
+  """
+  **5. 优化网络可视化**:
+  - 使用颜色区分安全区域 (内网/DMZ/外网)
+  - 使用不同形状表示不同设备类型
+  - 标注 IP 地址和设备名称
+  - 使用子图标签标识网段或区域
+  - 确保关键路径清晰可见
+  - 添加图例说明符号含义
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **网络拓扑完整性**:
+  - 所有网络设备都已包含
+  - 连接关系准确无误
+  - 冗余路径清晰标识
+  - 网络层次结构合理
+  - 无孤立节点 (除非是独立设备)
+  """,
+
+  """
+  **设备标识清晰度**:
+  - 设备名称语义化 (如 CoreRouter1, WebServer)
+  - 显示 IP 地址 (如 192.168.1.1)
+  - 设备类型通过形状区分
+  - 关键属性标注 (带宽, 协议)
+  """,
+
+  """
+  **安全边界明确性**:
+  - 内网/DMZ/外网使用颜色区分
+  - 防火墙位置正确标识
+  - 访问控制点清晰可见
+  - 安全路径明确标注
+  """,
+
+  """
+  **网络可读性**:
+  - 布局美观, 节点分布均匀
+  - 连接线不过度交叉
+  - 主干链路突出显示
+  - 颜色使用语义化
+  - 子图分组合理, 层次清晰
+  """
+]
+
+# ============================================
+# 使用场景示例 (Use Cases)
+# ============================================
+
+[[use_cases]]
+title = "企业局域网拓扑"
+scenario = "展示企业内部的核心网络架构, 包括核心交换机、楼层交换机、服务器区、办公区的网络连接关系"
+key_points = [
+  "使用 subgraph cluster_core/cluster_server/cluster_office 划分区域",
+  "核心交换机使用 hexagon 形状, 服务器使用 box3d",
+  "主干链路使用粗线 (penwidth=3) 标注 10Gbps 带宽",
+  "使用 layout=dot, rankdir=TB 实现层次化布局"
+]
+
+[[use_cases]]
+title = "云基础设施架构"
+scenario = "展示云平台上的虚拟网络拓扑, 包括 VPC、子网、负载均衡器、云数据库、CDN 的网络连接"
+key_points = [
+  "云服务使用 ellipse 形状, 填充淡蓝色",
+  "负载均衡器使用 hexagon 形状",
+  "使用虚线 (style=dashed) 表示虚拟网络连接",
+  "使用 layout=neato 获得美观的分布式布局"
+]
+
+[[use_cases]]
+title = "网络安全架构"
+scenario = "展示包含防火墙、DMZ、内网的安全网络架构, 清晰标识安全边界和访问控制点"
+key_points = [
+  "内网设备使用绿色填充 (#c8e6c9)",
+  "DMZ 设备使用橙色填充 (#ffe0b2)",
+  "防火墙使用 octagon 形状, 红色边框 (penwidth=2)",
+  "使用子图 cluster_internal/cluster_dmz/cluster_external 划分安全区域"
+]

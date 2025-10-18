@@ -1,0 +1,301 @@
+# ============================================
+# L3 类型层 - GraphViz Architecture (架构图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "graphviz"
+diagram_type = "architecture"
+version = "1.0.0"
+description = "L3: graphviz - 架构图 图表生成规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关元数据
+complexity = "high"
+target_length = 3200
+use_cases = ["系统架构", "软件架构", "微服务架构", "分层架构", "组件关系图"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "软件架构师",
+  "系统架构设计专家",
+  "技术架构顾问"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **架构图必须使用 digraph 分层布局**: 架构图展示有向的依赖关系和调用关系, 必须使用 `digraph` 声明和 `->` 连接符, 并使用 `rankdir=TB` 或 `rankdir=LR` 实现分层布局。
+  ```dot
+  // ✅ 正确
+  digraph Architecture {
+    rankdir=TB;  // 上→下分层
+    Frontend -> Backend;
+    Backend -> Database;
+  }
+
+  // ❌ 错误 - 架构图不使用无向图
+  graph Architecture {
+    Frontend -- Backend;
+  }
+  ```
+  """,
+
+  """
+  **分层架构语义化**: 使用 `subgraph cluster_*` 和 `rank=same` 表达架构层次:
+  - 表现层 (Presentation Layer): 前端组件, UI, 客户端
+  - 业务逻辑层 (Business Layer): 服务, 业务逻辑, API
+  - 数据访问层 (Data Layer): 数据库, 缓存, 存储
+  - 基础设施层 (Infrastructure Layer): 消息队列, 日志, 监控
+  ```dot
+  subgraph cluster_presentation {
+    label = "表现层";
+    rank = same;
+    WebApp; MobileApp;
+  }
+  subgraph cluster_business {
+    label = "业务逻辑层";
+    rank = same;
+    UserService; OrderService;
+  }
+  ```
+  """,
+
+  """
+  **组件形状语义化**: 根据组件类型选择合适的形状:
+  - 服务/模块 `shape=box, style="rounded,filled"`: 圆角矩形表示服务或模块
+  - API 网关 `shape=hexagon`: 六边形表示网关
+  - 数据库 `shape=cylinder`: 圆柱表示数据存储
+  - 缓存 `shape=note`: 便签形状表示缓存
+  - 消息队列 `shape=parallelogram`: 平行四边形表示队列
+  - 外部服务 `shape=ellipse`: 椭圆表示第三方服务
+  - 微服务 `shape=component`: 组件形状表示微服务
+  """,
+
+  """
+  **依赖关系标注**: 使用边属性表达组件间的依赖关系:
+  - 同步调用: 实线黑色箭头 `A -> B [label="同步调用"]`
+  - 异步调用: 虚线蓝色箭头 `A -> B [label="异步", style=dashed, color="blue"]`
+  - 数据流: 粗线绿色箭头 `A -> B [label="数据", penwidth=2, color="green"]`
+  - 依赖关系: 细线灰色箭头 `A -> B [label="依赖", color="gray"]`
+  ```dot
+  UserService -> Database [label="查询", color="green", penwidth=2];
+  UserService -> MessageQueue [label="发布事件", style=dashed, color="blue"];
+  ```
+  """,
+
+  """
+  **架构层级约束**: 严格遵守分层架构的依赖方向:
+  - 上层可依赖下层 (表现层 → 业务层 → 数据层)
+  - 下层不可依赖上层 (数据层 ✗ → 表现层)
+  - 同层组件可相互调用
+  - 使用 `constraint=false` 避免跨层反向连接破坏布局
+  ```dot
+  // ✅ 正确的依赖方向
+  Frontend -> API -> Database;
+
+  // ❌ 错误 - 下层依赖上层
+  Database -> Frontend [constraint=false, color="red", style=dashed];
+  ```
+  """,
+
+  """
+  **微服务架构特殊规范**: 微服务架构需体现服务自治性:
+  - 每个微服务使用独立的子图 `subgraph cluster_service_*`
+  - 服务间通过 API 网关或消息总线通信
+  - 每个服务拥有独立的数据库 (Database Per Service)
+  - 使用颜色区分不同业务域的服务
+  ```dot
+  subgraph cluster_user_service {
+    label = "用户服务";
+    UserAPI; UserDB [shape=cylinder];
+    UserAPI -> UserDB;
+  }
+  ```
+  """,
+
+  """
+  **布局方向选择**: 根据架构复杂度选择布局方向:
+  - `rankdir=TB` (上→下): 适合经典分层架构 (3-5 层)
+  - `rankdir=LR` (左→右): 适合微服务架构 (服务数量多)
+  - 简单架构 (<10 组件): TB 布局清晰美观
+  - 复杂架构 (>10 组件): LR 布局避免图表过高
+  """,
+
+  """
+  **架构边界清晰化**: 使用子图和颜色标识架构边界:
+  - 系统边界: `subgraph cluster_system` 包裹整个系统
+  - 安全边界: 内部服务 (绿色填充), 外部服务 (黄色填充)
+  - 业务域边界: 不同业务使用不同颜色子图
+  ```dot
+  subgraph cluster_system {
+    label = "核心系统";
+    color = "blue";
+    InternalService [fillcolor="#c8e6c9"];
+  }
+  ExternalAPI [label="第三方 API", fillcolor="#fff9c4", shape=ellipse];
+  ```
+  """,
+
+  """
+  **技术栈标注**: 架构图应标注关键技术栈:
+  - 在节点标签中显示技术 (如 "用户服务\\n(Node.js)")
+  - 在边标签中显示协议 (如 "HTTP/REST", "gRPC", "Kafka")
+  - 在子图标签中显示部署环境 (如 "Kubernetes 集群")
+  ```dot
+  UserService [label="用户服务\\n(Spring Boot)", shape=box, style="rounded,filled"];
+  UserService -> Redis [label="缓存\\n(Redis Protocol)", color="orange"];
+  ```
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别架构要素**:
+  - 架构层次: 表现层、业务层、数据层、基础设施层
+  - 核心组件: 服务、模块、子系统
+  - 数据存储: 数据库、缓存、文件存储
+  - 集成点: API 网关、消息队列、服务总线
+  - 外部依赖: 第三方服务、外部 API
+  """,
+
+  """
+  **2. 提取组件关系**:
+  - 调用关系: 同步调用、异步调用、事件驱动
+  - 依赖关系: 强依赖、弱依赖、可选依赖
+  - 数据流: 读操作、写操作、数据同步
+  - 通信协议: HTTP/REST, gRPC, WebSocket, Kafka
+  - 部署关系: 容器化、微服务、分布式部署
+  """,
+
+  """
+  **3. 设计分层结构**:
+  - 确定架构层次数量 (通常 3-5 层)
+  - 使用 `subgraph cluster_*` 划分每一层
+  - 使用 `rank=same` 对齐同层组件
+  - 确保依赖方向从上到下 (表现层 → 数据层)
+  - 标注层间接口和协议
+  """,
+
+  """
+  **4. 选择布局配置**:
+  - 分层架构: `rankdir=TB, splines=ortho` (正交路由)
+  - 微服务架构: `rankdir=LR, splines=true` (曲线路由)
+  - 复杂架构: `concentrate=true` (合并相似连接)
+  - 大规模架构: `nodesep=1.0, ranksep=1.5` (增大间距)
+  """,
+
+  """
+  **5. 优化架构可视化**:
+  - 使用颜色区分不同层次或业务域
+  - 使用不同形状表示不同组件类型
+  - 标注技术栈和通信协议
+  - 使用子图标签标识架构模块
+  - 确保依赖路径清晰可追踪
+  - 添加架构说明和图例
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **架构层次清晰度**:
+  - 分层结构明确 (表现层/业务层/数据层)
+  - 同层组件水平对齐 (使用 rank=same)
+  - 层间边界清晰可辨
+  - 依赖方向遵循分层原则 (上→下)
+  """,
+
+  """
+  **组件关系准确性**:
+  - 调用关系准确无误
+  - 依赖方向正确标注
+  - 通信协议清晰标识
+  - 数据流向明确标注
+  - 异步调用使用虚线区分
+  """,
+
+  """
+  **技术栈完整性**:
+  - 关键组件标注技术栈 (如 Spring Boot, Redis)
+  - 通信协议清晰标注 (如 HTTP/REST, gRPC)
+  - 部署环境标识 (如 Kubernetes, Docker)
+  - 外部服务明确区分
+  """,
+
+  """
+  **架构可读性**:
+  - 布局美观, 组件分布均匀
+  - 连接线不过度交叉
+  - 关键路径清晰可见
+  - 颜色使用语义化
+  - 子图分组合理, 层次清晰
+  - 架构复杂度适中 (建议 <20 组件)
+  """
+]
+
+# ============================================
+# 使用场景示例 (Use Cases)
+# ============================================
+
+[[use_cases]]
+title = "经典三层架构"
+scenario = "展示传统的表现层-业务层-数据层三层架构, 包括 Web 应用、API 服务、数据库的分层关系"
+key_points = [
+  "使用 rankdir=TB 实现上下分层布局",
+  "使用 subgraph cluster_presentation/cluster_business/cluster_data 划分三层",
+  "Web 应用使用 rounded box, API 使用 hexagon, 数据库使用 cylinder",
+  "依赖方向严格从上到下 (Web → API → Database)"
+]
+
+[[use_cases]]
+title = "微服务架构"
+scenario = "展示微服务系统的架构, 包括 API 网关、多个微服务、各自的数据库、消息队列的集成关系"
+key_points = [
+  "使用 rankdir=LR 实现左右布局 (适合多服务)",
+  "每个微服务使用独立的 subgraph cluster_service_*",
+  "API 网关使用 hexagon 形状, 作为统一入口",
+  "服务间通过消息队列异步通信 (虚线蓝色箭头)",
+  "每个服务拥有独立数据库 (Database Per Service)"
+]
+
+[[use_cases]]
+title = "云原生架构"
+scenario = "展示云原生应用的架构, 包括负载均衡器、容器化服务、云数据库、对象存储、CDN 的集成关系"
+key_points = [
+  "负载均衡器使用 hexagon 形状, 作为流量入口",
+  "容器化服务使用 component 形状, 标注 Docker/Kubernetes",
+  "云服务使用 ellipse 形状, 填充淡蓝色",
+  "使用子图 cluster_k8s 标识 Kubernetes 集群",
+  "标注通信协议 (如 HTTPS, gRPC, S3 Protocol)"
+]
+
+[[use_cases]]
+title = "事件驱动架构"
+scenario = "展示基于事件总线的事件驱动架构, 包括事件生产者、事件总线、事件消费者、事件存储的关系"
+key_points = [
+  "事件总线使用 parallelogram 形状, 居中位置",
+  "生产者到事件总线使用虚线箭头 (label='发布事件')",
+  "事件总线到消费者使用虚线箭头 (label='订阅事件')",
+  "使用颜色区分不同业务域的服务",
+  "标注事件类型 (如 UserCreated, OrderPlaced)"
+]

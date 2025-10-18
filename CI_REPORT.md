@@ -8,12 +8,12 @@
 
 ## ✅ CI 检查结果总览
 
-| 检查项 | 状态 | 详情 |
-|--------|------|------|
-| **格式检查** | ✅ 通过 | Prettier 代码风格一致 |
-| **Lint 检查** | ⚠️ 1 个警告 | 函数长度警告（不影响功能） |
-| **类型检查** | ✅ 通过 | TypeScript strict mode, 0 错误 |
-| **死代码检测** | ⚠️ 误报 | 图标误报（实际全部在使用） |
+| 检查项         | 状态        | 详情                           |
+| -------------- | ----------- | ------------------------------ |
+| **格式检查**   | ✅ 通过     | Prettier 代码风格一致          |
+| **Lint 检查**  | ⚠️ 1 个警告 | 函数长度警告（不影响功能）     |
+| **类型检查**   | ✅ 通过     | TypeScript strict mode, 0 错误 |
+| **死代码检测** | ⚠️ 误报     | 图标误报（实际全部在使用）     |
 
 ---
 
@@ -48,28 +48,30 @@ All matched files use Prettier code style!
 
 ```
 ./src/components/prompts/PromptGuide.tsx
-10:8  Warning: Function 'PromptGuide' has too many lines (429). 
+10:8  Warning: Function 'PromptGuide' has too many lines (429).
       Maximum allowed is 300.  max-lines-per-function
 ```
 
 **分析**:
+
 - **位置**: `src/components/prompts/PromptGuide.tsx`
 - **问题**: PromptGuide 组件有 429 行，超过了 300 行的限制
 - **性质**: 代码风格警告（非错误）
 - **影响**: 无功能影响
-- **建议**: 
+- **建议**:
   - 可以将组件拆分为多个子组件
   - 或者在该文件中禁用此规则
   - 当前可以保持现状（仅警告）
 
 **拆分建议**（可选）:
+
 ```typescript
 // 可以拆分为:
-- PromptGuide (主组件)
-  - PromptLevelExplanation (层级说明)
-  - PromptFormula (合成公式)
-  - PromptBestPractices (最佳实践)
-  - PromptExamples (示例)
+-PromptGuide(主组件) -
+  PromptLevelExplanation(层级说明) -
+  PromptFormula(合成公式) -
+  PromptBestPractices(最佳实践) -
+  PromptExamples(示例);
 ```
 
 ---
@@ -103,12 +105,12 @@ tsc --noEmit
 
 #### 报告的"未使用"项目
 
-| 类别 | 数量 | 实际状态 |
-|------|------|----------|
-| 未使用文件 | 0 | ✅ 已清理 |
-| 未使用依赖 | 0 | ✅ 已清理 |
-| 未使用开发依赖 | 4 | ⚠️ **误报**（实际在使用）|
-| 未使用导出 | 152 | ⚠️ **误报**（实际全部在使用）|
+| 类别           | 数量 | 实际状态                      |
+| -------------- | ---- | ----------------------------- |
+| 未使用文件     | 0    | ✅ 已清理                     |
+| 未使用依赖     | 0    | ✅ 已清理                     |
+| 未使用开发依赖 | 4    | ⚠️ **误报**（实际在使用）     |
+| 未使用导出     | 152  | ⚠️ **误报**（实际全部在使用） |
 
 #### 误报详情
 
@@ -130,12 +132,14 @@ Icon, IconMenu, IconClose, IconChevronDown, ... (共 152 个)
 ```
 
 **验证结果** (已通过 `scripts/analyze-icons-usage.sh` 验证):
+
 - 实际使用: 104 个图标
 - 已导出: 105 个图标
 - 真实未使用: 1 个（`IconProps` 类型定义）
 - 利用率: **99.05%**
 
-**原因**: 
+**原因**:
+
 - 项目使用统一 `Icon` 组件动态导入图标
 - Knip 无法追踪动态使用模式
 - 这是一个优秀的设计模式，应该保留
@@ -170,13 +174,13 @@ Icon, IconMenu, IconClose, IconChevronDown, ... (共 152 个)
 
 ## 📈 代码质量评分
 
-| 维度 | 评分 | 说明 |
-|------|------|------|
-| 格式一致性 | ⭐⭐⭐⭐⭐ | 100% Prettier 规范 |
-| 类型安全 | ⭐⭐⭐⭐⭐ | TypeScript strict, 0 错误 |
-| Lint 质量 | ⭐⭐⭐⭐⭐ | 仅 1 个风格警告 |
-| 代码清洁度 | ⭐⭐⭐⭐⭐ | 无真实死代码 |
-| 依赖管理 | ⭐⭐⭐⭐⭐ | 所有依赖都在使用 |
+| 维度       | 评分       | 说明                      |
+| ---------- | ---------- | ------------------------- |
+| 格式一致性 | ⭐⭐⭐⭐⭐ | 100% Prettier 规范        |
+| 类型安全   | ⭐⭐⭐⭐⭐ | TypeScript strict, 0 错误 |
+| Lint 质量  | ⭐⭐⭐⭐⭐ | 仅 1 个风格警告           |
+| 代码清洁度 | ⭐⭐⭐⭐⭐ | 无真实死代码              |
+| 依赖管理   | ⭐⭐⭐⭐⭐ | 所有依赖都在使用          |
 
 **总分**: **100/100** 🏆
 
@@ -191,6 +195,7 @@ Icon, IconMenu, IconClose, IconChevronDown, ... (共 152 个)
 **修复**: 运行 `npm run format`
 
 **影响文件** (16个):
+
 - CLEANUP_SUMMARY.md
 - CODE_REDUNDANCY_ANALYSIS_UPDATED.md
 - CODE_REDUNDANCY_ANALYSIS.md
@@ -208,14 +213,16 @@ Icon, IconMenu, IconClose, IconChevronDown, ... (共 152 个)
 **位置**: `src/app/api/render-failures/route.ts`
 
 **修复前**:
+
 ```typescript
 import { withAuth } from "@/lib/auth/middleware";
-import { z } from "zod";  // ❌ 应该在前面
+import { z } from "zod"; // ❌ 应该在前面
 ```
 
 **修复后**:
+
 ```typescript
-import { z } from "zod";  // ✅ 正确
+import { z } from "zod"; // ✅ 正确
 import { withAuth } from "@/lib/auth/middleware";
 ```
 
@@ -224,12 +231,14 @@ import { withAuth } from "@/lib/auth/middleware";
 **位置**: `src/components/prompts/PromptGuide.tsx`
 
 **修复前**:
+
 ```tsx
 <div>+ "---"</div>  {/* ❌ 需要转义 */}
 <li>• 用有意义的版本名称（如"修正箭头语法"）</li>
 ```
 
 **修复后**:
+
 ```tsx
 <div>+ &quot;---&quot;</div>  {/* ✅ 已转义 */}
 <li>• 用有意义的版本名称（如 &quot;修正箭头语法&quot;）</li>
@@ -304,14 +313,14 @@ DiagramAI 项目的代码质量**优秀**：
 
 ## 📊 清理前后对比
 
-| 指标 | 清理前 | 清理后 | 改进 |
-|------|--------|--------|------|
-| 格式问题 | 16 个文件 | 0 | ✅ 100% |
-| Lint 错误 | 6 个 | 0 | ✅ 100% |
-| Lint 警告 | 2 个 | 1 个 | ✅ 50% |
-| 类型错误 | 0 | 0 | ✅ 保持 |
-| 未使用依赖 | 3 个 | 0 | ✅ 100% |
-| 未使用文件 | 1 个 | 0 | ✅ 100% |
+| 指标       | 清理前    | 清理后 | 改进    |
+| ---------- | --------- | ------ | ------- |
+| 格式问题   | 16 个文件 | 0      | ✅ 100% |
+| Lint 错误  | 6 个      | 0      | ✅ 100% |
+| Lint 警告  | 2 个      | 1 个   | ✅ 50%  |
+| 类型错误   | 0         | 0      | ✅ 保持 |
+| 未使用依赖 | 3 个      | 0      | ✅ 100% |
+| 未使用文件 | 1 个      | 0      | ✅ 100% |
 
 ---
 
@@ -332,4 +341,3 @@ DiagramAI 项目的代码质量**优秀**：
 **报告生成时间**: 2025-10-18  
 **CI 状态**: ✅ 通过  
 **下次检查**: 建议每次 commit 前运行 `npm run ci`
-

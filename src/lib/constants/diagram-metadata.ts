@@ -58,8 +58,8 @@ export const DOMAIN_RULES: readonly DomainRule[] = [
     languages: [
       { language: "mermaid", types: ["flowchart", "sequence", "journey"] },
       { language: "plantuml", types: ["activity", "sequence"] },
-      { language: "bpmn", types: ["process"], note: "业务标准" },
-      { language: "actdiag", types: ["swimlane"], note: "多角色协作" },
+      // { language: "bpmn", types: ["process"], note: "业务标准" },
+      // { language: "actdiag", types: ["swimlane"], note: "多角色协作" },
     ],
   },
   {
@@ -68,8 +68,8 @@ export const DOMAIN_RULES: readonly DomainRule[] = [
     languages: [
       { language: "dbml", types: ["schema", "erd", "migration"], note: "专业数据库语法" },
       { language: "mermaid", types: ["er"], note: "快速原型" },
-      { language: "erd", types: ["er"], note: "简洁语法" },
-      { language: "d2", types: ["er"], note: "现代美观" },
+      // { language: "erd", types: ["er"], note: "简洁语法" },
+      // { language: "d2", types: ["er"], note: "现代美观" },
     ],
   },
   {
@@ -77,26 +77,26 @@ export const DOMAIN_RULES: readonly DomainRule[] = [
     description: "系统组件、模块依赖、架构图",
     languages: [
       { language: "plantuml", types: ["class", "component", "deployment"], note: "UML 标准" },
-      { language: "d2", types: ["architecture", "class"], note: "现代化" },
-      { language: "nomnoml", types: ["architecture"], note: "简化 UML" },
-      {
-        language: "structurizr",
-        types: ["system_context", "container", "component"],
-        note: "C4 模型",
-      },
-      { language: "c4plantuml", types: ["context", "container", "component"], note: "C4 PlantUML" },
-      { language: "umlet", types: ["diagram"], note: "轻量级 UML" },
+      // { language: "d2", types: ["architecture", "class"], note: "现代化" },
+      // { language: "nomnoml", types: ["architecture"], note: "简化 UML" },
+      // {
+      //   language: "structurizr",
+      //   types: ["system_context", "container", "component"],
+      //   note: "C4 模型",
+      // },
+      // { language: "c4plantuml", types: ["context", "container", "component"], note: "C4 PlantUML" },
+      // { language: "umlet", types: ["diagram"], note: "轻量级 UML" },
     ],
   },
   {
     domain: "数据可视化",
     description: "数据图表、统计分析、趋势展示",
     languages: [
-      {
-        language: "vegalite",
-        types: ["bar", "line", "point", "area", "pie", "heatmap"],
-        note: "专业数据分析",
-      },
+      // {
+      //   language: "vegalite",
+      //   types: ["bar", "line", "point", "area", "pie", "heatmap"],
+      //   note: "专业数据分析",
+      // },
       { language: "mermaid", types: ["pie", "xychart", "sankey"], note: "快速可视化" },
     ],
   },
@@ -104,24 +104,24 @@ export const DOMAIN_RULES: readonly DomainRule[] = [
     domain: "网络拓扑",
     description: "网络架构、拓扑图、服务器布局",
     languages: [
-      { language: "nwdiag", types: ["network"], note: "网络专用" },
+      // { language: "nwdiag", types: ["network"], note: "网络专用" },
       { language: "graphviz", types: ["network"], note: "高度自定义" },
-      { language: "d2", types: ["network"], note: "现代美观" },
-      { language: "packetdiag", types: ["packet", "protocol"], note: "数据包" },
-      { language: "rackdiag", types: ["rack", "datacenter"], note: "机柜布局" },
+      // { language: "d2", types: ["network"], note: "现代美观" },
+      // { language: "packetdiag", types: ["packet", "protocol"], note: "数据包" },
+      // { language: "rackdiag", types: ["rack", "datacenter"], note: "机柜布局" },
     ],
   },
-  {
-    domain: "硬件/数字信号",
-    description: "信号波形、时序图、寄存器",
-    languages: [
-      {
-        language: "wavedrom",
-        types: ["timing", "signal", "register", "bitfield"],
-        note: "硬件专用",
-      },
-    ],
-  },
+  // {
+  //   domain: "硬件/数字信号",
+  //   description: "信号波形、时序图、寄存器",
+  //   languages: [
+  //     {
+  //       language: "wavedrom",
+  //       types: ["timing", "signal", "register", "bitfield"],
+  //       note: "硬件专用",
+  //     },
+  //   ],
+  // },
   {
     domain: "项目管理",
     description: "项目计划、甘特图、时间线",
@@ -149,14 +149,14 @@ export const DOMAIN_RULES: readonly DomainRule[] = [
       },
     ],
   },
-  {
-    domain: "ASCII 转图形",
-    description: "ASCII 字符图转换",
-    languages: [
-      { language: "ditaa", types: ["ascii"], note: "ASCII 艺术" },
-      { language: "svgbob", types: ["ascii"], note: "自动美化" },
-    ],
-  },
+  // {
+  //   domain: "ASCII 转图形",
+  //   description: "ASCII 字符图转换",
+  //   languages: [
+  //     { language: "ditaa", types: ["ascii"], note: "ASCII 艺术" },
+  //     { language: "svgbob", types: ["ascii"], note: "自动美化" },
+  //   ],
+  // },
 ] as const;
 
 /**
@@ -169,8 +169,8 @@ export const KEYWORD_RULES: readonly KeywordRule[] = [
     languages: [
       { language: "mermaid", type: "sequence", confidence: 0.95, reason: "简洁语法" },
       { language: "plantuml", type: "sequence", confidence: 0.9, reason: "UML 标准" },
-      { language: "seqdiag", type: "sequence", confidence: 0.75, reason: "BlockDiag 风格" },
-      { language: "d2", type: "sequence", confidence: 0.8, reason: "现代美观" },
+      // { language: "seqdiag", type: "sequence", confidence: 0.75, reason: "BlockDiag 风格" },
+      // { language: "d2", type: "sequence", confidence: 0.8, reason: "现代美观" },
     ],
   },
   {
@@ -178,7 +178,7 @@ export const KEYWORD_RULES: readonly KeywordRule[] = [
     targetType: "flowchart/process",
     languages: [
       { language: "mermaid", type: "flowchart", confidence: 0.92, reason: "通用场景" },
-      { language: "bpmn", type: "process", confidence: 0.9, reason: "业务标准" },
+      // { language: "bpmn", type: "process", confidence: 0.9, reason: "业务标准" },
       { language: "plantuml", type: "activity", confidence: 0.85, reason: "UML 活动图" },
       { language: "graphviz", type: "flowchart", confidence: 0.75, reason: "高度自定义" },
     ],
@@ -189,8 +189,8 @@ export const KEYWORD_RULES: readonly KeywordRule[] = [
     languages: [
       { language: "dbml", type: "schema", confidence: 0.95, reason: "专业数据库语法" },
       { language: "mermaid", type: "er", confidence: 0.85, reason: "快速原型" },
-      { language: "erd", type: "er", confidence: 0.8, reason: "简洁语法" },
-      { language: "d2", type: "er", confidence: 0.75, reason: "现代美观" },
+      // { language: "erd", type: "er", confidence: 0.8, reason: "简洁语法" },
+      // { language: "d2", type: "er", confidence: 0.75, reason: "现代美观" },
     ],
   },
   {
@@ -198,9 +198,9 @@ export const KEYWORD_RULES: readonly KeywordRule[] = [
     targetType: "component/architecture",
     languages: [
       { language: "plantuml", type: "component", confidence: 0.9, reason: "UML 标准" },
-      { language: "structurizr", type: "container", confidence: 0.95, reason: "C4 模型" },
-      { language: "d2", type: "architecture", confidence: 0.85, reason: "现代美观" },
-      { language: "nomnoml", type: "architecture", confidence: 0.75, reason: "简化 UML" },
+      // { language: "structurizr", type: "container", confidence: 0.95, reason: "C4 模型" },
+      // { language: "d2", type: "architecture", confidence: 0.85, reason: "现代美观" },
+      // { language: "nomnoml", type: "architecture", confidence: 0.75, reason: "简化 UML" },
     ],
   },
   {
@@ -209,8 +209,8 @@ export const KEYWORD_RULES: readonly KeywordRule[] = [
     languages: [
       { language: "plantuml", type: "class", confidence: 0.95, reason: "UML 标准" },
       { language: "mermaid", type: "class", confidence: 0.85, reason: "快速原型" },
-      { language: "d2", type: "class", confidence: 0.8, reason: "现代美观" },
-      { language: "nomnoml", type: "class", confidence: 0.75, reason: "简化 UML" },
+      // { language: "d2", type: "class", confidence: 0.8, reason: "现代美观" },
+      // { language: "nomnoml", type: "class", confidence: 0.75, reason: "简化 UML" },
     ],
   },
   {
@@ -233,8 +233,8 @@ export const KEYWORD_RULES: readonly KeywordRule[] = [
     keywords: ["数据可视化", "统计", "趋势", "对比", "分析"],
     targetType: "data visualization",
     languages: [
-      { language: "vegalite", type: "bar", confidence: 0.95, reason: "专业数据分析" },
-      { language: "vegalite", type: "line", confidence: 0.95, reason: "趋势分析" },
+      // { language: "vegalite", type: "bar", confidence: 0.95, reason: "专业数据分析" },
+      // { language: "vegalite", type: "line", confidence: 0.95, reason: "趋势分析" },
       { language: "mermaid", type: "xychart", confidence: 0.75, reason: "快速可视化" },
     ],
   },
@@ -242,19 +242,19 @@ export const KEYWORD_RULES: readonly KeywordRule[] = [
     keywords: ["网络", "拓扑", "服务器", "路由", "交换机"],
     targetType: "network",
     languages: [
-      { language: "nwdiag", type: "network", confidence: 0.95, reason: "网络专用" },
+      // { language: "nwdiag", type: "network", confidence: 0.95, reason: "网络专用" },
       { language: "graphviz", type: "network", confidence: 0.8, reason: "高度自定义" },
-      { language: "d2", type: "network", confidence: 0.85, reason: "现代美观" },
+      // { language: "d2", type: "network", confidence: 0.85, reason: "现代美观" },
     ],
   },
-  {
-    keywords: ["信号", "时序波形", "寄存器", "硬件"],
-    targetType: "timing/signal",
-    languages: [
-      { language: "wavedrom", type: "timing", confidence: 0.98, reason: "硬件专用" },
-      { language: "wavedrom", type: "signal", confidence: 0.95, reason: "信号分析" },
-    ],
-  },
+  // {
+  //   keywords: ["信号", "时序波形", "寄存器", "硬件"],
+  //   targetType: "timing/signal",
+  //   languages: [
+  //     { language: "wavedrom", type: "timing", confidence: 0.98, reason: "硬件专用" },
+  //     { language: "wavedrom", type: "signal", confidence: 0.95, reason: "信号分析" },
+  //   ],
+  // },
   {
     keywords: ["状态", "状态机", "流转", "工作流状态"],
     targetType: "state",
@@ -274,30 +274,30 @@ export const KEYWORD_RULES: readonly KeywordRule[] = [
     targetType: "gitgraph",
     languages: [{ language: "mermaid", type: "gitgraph", confidence: 0.98, reason: "Git 可视化" }],
   },
-  {
-    keywords: ["机柜", "机架", "U位", "数据中心物理布局"],
-    targetType: "rack",
-    languages: [
-      { language: "rackdiag", type: "rack", confidence: 0.98, reason: "机柜专用" },
-      { language: "rackdiag", type: "datacenter", confidence: 0.95, reason: "数据中心" },
-    ],
-  },
-  {
-    keywords: ["数据包", "协议头", "字段布局"],
-    targetType: "packet",
-    languages: [
-      { language: "packetdiag", type: "packet", confidence: 0.95, reason: "数据包专用" },
-      { language: "packetdiag", type: "protocol", confidence: 0.9, reason: "协议栈" },
-    ],
-  },
-  {
-    keywords: ["泳道", "多角色协作", "并行活动"],
-    targetType: "swimlane",
-    languages: [
-      { language: "actdiag", type: "swimlane", confidence: 0.95, reason: "泳道专用" },
-      { language: "actdiag", type: "activity", confidence: 0.85, reason: "并行活动" },
-    ],
-  },
+  // {
+  //   keywords: ["机柜", "机架", "U位", "数据中心物理布局"],
+  //   targetType: "rack",
+  //   languages: [
+  //     { language: "rackdiag", type: "rack", confidence: 0.98, reason: "机柜专用" },
+  //     { language: "rackdiag", type: "datacenter", confidence: 0.95, reason: "数据中心" },
+  //   ],
+  // },
+  // {
+  //   keywords: ["数据包", "协议头", "字段布局"],
+  //   targetType: "packet",
+  //   languages: [
+  //     { language: "packetdiag", type: "packet", confidence: 0.95, reason: "数据包专用" },
+  //     { language: "packetdiag", type: "protocol", confidence: 0.9, reason: "协议栈" },
+  //   ],
+  // },
+  // {
+  //   keywords: ["泳道", "多角色协作", "并行活动"],
+  //   targetType: "swimlane",
+  //   languages: [
+  //     { language: "actdiag", type: "swimlane", confidence: 0.95, reason: "泳道专用" },
+  //     { language: "actdiag", type: "activity", confidence: 0.85, reason: "并行活动" },
+  //   ],
+  // },
 ] as const;
 
 /**
@@ -316,62 +316,62 @@ export const PROFESSIONAL_RULES: readonly ProfessionalRule[] = [
     confidence: 0.95,
     reason: "最接近 SQL DDL",
   },
-  {
-    scenario: "C4 架构模型",
-    language: "structurizr",
-    confidence: 0.98,
-    reason: "C4 架构建模 DSL 专家",
-  },
-  {
-    scenario: "BPMN 业务流程",
-    language: "bpmn",
-    confidence: 0.95,
-    reason: "符合 BPMN 2.0 标准",
-  },
-  {
-    scenario: "数据分析报告",
-    language: "vegalite",
-    confidence: 0.95,
-    reason: "支持交互和数据绑定",
-  },
-  {
-    scenario: "硬件设计文档",
-    language: "wavedrom",
-    confidence: 0.98,
-    reason: "数字电路专用",
-  },
-  {
-    scenario: "网络架构文档",
-    language: "nwdiag",
-    confidence: 0.95,
-    reason: "网络工程师首选",
-  },
+  // {
+  //   scenario: "C4 架构模型",
+  //   language: "structurizr",
+  //   confidence: 0.98,
+  //   reason: "C4 架构建模 DSL 专家",
+  // },
+  // {
+  //   scenario: "BPMN 业务流程",
+  //   language: "bpmn",
+  //   confidence: 0.95,
+  //   reason: "符合 BPMN 2.0 标准",
+  // },
+  // {
+  //   scenario: "数据分析报告",
+  //   language: "vegalite",
+  //   confidence: 0.95,
+  //   reason: "支持交互和数据绑定",
+  // },
+  // {
+  //   scenario: "硬件设计文档",
+  //   language: "wavedrom",
+  //   confidence: 0.98,
+  //   reason: "数字电路专用",
+  // },
+  // {
+  //   scenario: "网络架构文档",
+  //   language: "nwdiag",
+  //   confidence: 0.95,
+  //   reason: "网络工程师首选",
+  // },
 ] as const;
 
 /**
  * 复杂度匹配规则
  */
 export const COMPLEXITY_RULES: readonly ComplexityRule[] = [
-  {
-    category: "快速原型",
-    description: "简单场景，快速迭代",
-    languages: ["mermaid", "nomnoml", "erd", "blockdiag"],
-  },
-  {
-    category: "专业文档",
-    description: "标准规范，正式输出",
-    languages: ["plantuml", "bpmn", "structurizr", "dbml"],
-  },
-  {
-    category: "现代美观",
-    description: "演示展示，视觉优先",
-    languages: ["d2", "excalidraw"],
-  },
-  {
-    category: "特定领域",
-    description: "专业场景专用工具",
-    languages: ["wavedrom", "nwdiag", "vegalite", "packetdiag", "rackdiag"],
-  },
+  // {
+  //   category: "快速原型",
+  //   description: "简单场景，快速迭代",
+  //   languages: ["mermaid", "nomnoml", "erd", "blockdiag"],
+  // },
+  // {
+  //   category: "专业文档",
+  //   description: "标准规范，正式输出",
+  //   languages: ["plantuml", "bpmn", "structurizr", "dbml"],
+  // },
+  // {
+  //   category: "现代美观",
+  //   description: "演示展示，视觉优先",
+  //   languages: ["d2", "excalidraw"],
+  // },
+  // {
+  //   category: "特定领域",
+  //   description: "专业场景专用工具",
+  //   languages: ["wavedrom", "nwdiag", "vegalite", "packetdiag", "rackdiag"],
+  // },
 ] as const;
 
 /**
@@ -416,7 +416,7 @@ export const PARTICIPANT_RULES: readonly ParticipantRule[] = [
     keywords: ["依赖"],
     recommendations: [
       { language: "plantuml", type: "component", confidence: 0.88 },
-      { language: "structurizr", type: "container", confidence: 0.85 },
+      // { language: "structurizr", type: "container", confidence: 0.85 },
     ],
   },
 ] as const;
@@ -460,7 +460,7 @@ export const TIME_FEATURE_RULES: readonly TimeFeatureRule[] = [
     feature: "数据趋势",
     keywords: ["趋势", "时间轴", "变化"],
     recommendations: [
-      { language: "vegalite", type: "line", confidence: 0.9 },
+      // { language: "vegalite", type: "line", confidence: 0.9 },
       { language: "mermaid", type: "xychart", confidence: 0.75 },
     ],
   },

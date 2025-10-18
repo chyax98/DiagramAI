@@ -1,0 +1,227 @@
+# ============================================
+# L3 类型层 v1.0.0
+# C4-PlantUML Component (组件图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "c4plantuml"
+diagram_type = "component"
+version = "1.0.0"
+description = "C4-PlantUML 组件图规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "high"
+target_length = 3000
+use_cases = ["代码组织设计", "分层架构设计", "组件职责划分", "设计模式应用"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "软件架构师 - 理解容器内部的代码组织结构和分层设计",
+  "代码设计专家 - 识别组件的职责边界和依赖关系"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **Component 图专用库引用**: 必须使用 `!include <C4/C4_Component>`:
+  ```plantuml
+  @startuml
+  !include <C4/C4_Component>
+  @enduml
+  ```
+  ❌ 绝对禁止空的 `!include`,这会导致 "Error 400: cannot include"。
+  """,
+
+  """
+  **组件定义约束**: 组件 (Component) 在 C4 模型中指容器内部的代码模块或类库:
+  - **业务逻辑组件**: Controller、Service、Repository、Manager
+  - **工具组件**: Logger、Cache Client、Config Manager
+  - **数据访问组件**: ORM、Data Access Layer、Query Builder
+
+  使用正确的组件宏:
+  - `Component(alias, "名称", "技术/框架", "描述")` - 业务逻辑组件
+  - `ComponentDb(alias, "名称", "ORM/Client", "描述")` - 数据访问组件
+  - `ComponentQueue(alias, "名称", "Client", "描述")` - 消息队列客户端
+  """,
+
+  """
+  **技术标注强制性**: 所有组件必须包含技术实现标注 (第三个参数):
+  ```plantuml
+  ✅ 正确: Component(ctrl, "Order Controller", "Spring MVC", "处理订单HTTP请求")
+  ❌ 错误: Component(ctrl, "Order Controller", "处理订单HTTP请求")  // 缺少技术栈
+  ```
+  标注框架、库、模式: Spring MVC、Spring Service、JPA Repository、Redis Client
+  """,
+
+  """
+  **容器边界使用约束**: 使用 `Container_Boundary` 定义容器范围:
+  ```plantuml
+  Container_Boundary(orderService, "订单服务") {
+      Component(ctrl, "Controller", "Spring MVC")
+      Component(svc, "Service", "Spring Service")
+      Component(repo, "Repository", "Spring Data JPA")
+  }
+  ```
+  - `Container_Boundary` 可包含: Component, ComponentDb, ComponentQueue
+  - 可选使用 `Component_Boundary` 进行组件逻辑分组 (如 API 层、业务层)
+  """,
+
+  """
+  **关系调用方式约束**: 关系描述应包含调用方式或交互类型:
+  - 同步调用: 方法调用、接口调用、函数调用
+  - 数据访问: SQL、ORM、Redis Protocol、缓存查询
+  - 消息传递: Event、消息发布/订阅、异步事件
+  示例:
+  - `Rel(ctrl, svc, "调用", "方法调用")`
+  - `Rel(repo, db, "查询/保存", "SQL/JDBC")`
+  """,
+
+  """
+  **粒度控制约束**: Component 图应保持适中复杂度:
+  - 组件数量: 5-20 个 (推荐)
+  - 总元素数: 建议 ≤ 30 个
+  - 过多组件应考虑:
+    - 使用 `Component_Boundary` 进行分层分组 (API 层、业务层、数据层)
+    - 拆分为多个独立的 Component 图 (按模块或子系统)
+    - 简化显示,只保留核心组件
+  """,
+
+  """
+  **抽象层次约束**: Component 图聚焦于代码组织,不深入到类或方法级别:
+  - ✅ 合适粒度: Controller、Service、Repository、Manager、Handler
+  - ❌ 过细粒度: 单个类 (OrderEntity)、单个方法 (validateOrder())
+  - 组件应代表一组相关的类或模块,而非单个类
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别代码分层和组件类型**:
+  - **经典三层架构**: Presentation (Controller) → Business (Service) → Data Access (Repository)
+  - **领域驱动设计 (DDD)**: API → Application Service → Domain Service → Infrastructure
+  - **六边形架构**: Adapters (Input/Output) → Application → Domain → Ports
+  - **微服务模式**: API Gateway → Service Handlers → Event Processors → Data Access
+  """,
+
+  """
+  **2. 选择组件宏**: 根据组件类型选择合适的 C4 宏:
+  - 控制器/API: `Component(alias, "名称", "Spring MVC / Express", "描述")`
+  - 业务逻辑: `Component(alias, "名称", "Spring Service / Business Logic", "描述")`
+  - 数据访问: `ComponentDb(alias, "名称", "JPA / TypeORM", "描述")`
+  - 消息处理: `ComponentQueue(alias, "名称", "RabbitMQ Client", "描述")`
+  """,
+
+  """
+  **3. 标注技术实现**: 为每个组件明确标注使用的框架或库:
+  - Java: Spring MVC、Spring Service、JPA Repository、Hibernate
+  - Node.js: Express Router、Service Layer、TypeORM、Mongoose
+  - Python: Django View、Service Module、SQLAlchemy、FastAPI
+  - .NET: MVC Controller、Service、Entity Framework
+  示例: `Component(ctrl, "Order Controller", "Spring MVC", "处理订单HTTP请求")`
+  """,
+
+  """
+  **4. 定义容器边界和分组**:
+  ```plantuml
+  Container_Boundary(orderService, "订单服务") {
+      Component_Boundary(api, "API 层") {
+          Component(rest, "REST Controller", "Spring MVC")
+      }
+      Component_Boundary(business, "业务层") {
+          Component(svc, "Order Service", "Spring Service")
+      }
+      Component_Boundary(data, "数据访问层") {
+          Component(repo, "Order Repository", "JPA")
+      }
+  }
+  ```
+  - `Container_Boundary` 定义容器范围
+  - `Component_Boundary` 进行分层分组 (可选,用于复杂架构)
+  """,
+
+  """
+  **5. 设计组件关系**: 定义组件之间的调用关系:
+  - 使用 `Rel(from, to, "描述", "调用方式")` 定义关系
+  - 体现分层调用: Controller → Service → Repository
+  - 标注调用方式: 方法调用、接口调用、事件、SQL
+  - 示例:
+    - `Rel(ctrl, svc, "调用业务逻辑", "方法调用")`
+    - `Rel(svc, repo, "数据操作", "接口调用")`
+    - `Rel(repo, db, "执行查询", "SQL/JDBC")`
+  """,
+
+  """
+  **6. 优化布局和可读性**:
+  - 推荐使用 `LAYOUT_TOP_DOWN()` (适合分层架构,从上到下)
+  - 或使用 `LAYOUT_LEFT_RIGHT()` (适合流程,从左到右)
+  - 推荐使用 `SHOW_FLOATING_LEGEND()` 节省空间
+  - 添加图表标题: `title 组件图 - 订单服务`
+  - 使用 `Component_Boundary` 增强分层清晰度
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **库引用完整性**:
+  - 必须包含 `@startuml/@enduml` 包裹
+  - 必须包含完整的库引用: `!include <C4/C4_Component>`
+  - 绝对不能出现空的 `!include`
+  - 能被 Kroki 成功渲染,无语法错误
+  """,
+
+  """
+  **技术标注完整性**:
+  - 所有 `Component`、`ComponentDb`、`ComponentQueue` 都包含技术标注参数
+  - 技术标注具体且准确 (如 "Spring MVC" 而非 "控制器")
+  - 关系描述包含调用方式 (方法调用、接口调用、SQL)
+  - 使用专用宏 (ComponentDb, ComponentQueue) 增强视觉识别度
+  """,
+
+  """
+  **组件粒度正确性**:
+  - 组件代表代码模块或类库,而非单个类或方法
+  - 组件数量适中 (5-20 个),避免过度细化
+  - 体现分层架构 (Presentation → Business → Data Access)
+  - 外部容器使用 `ContainerDb_Ext` 或 `Container_Ext` 标识
+  """,
+
+  """
+  **边界和分组合理性**:
+  - 使用 `Container_Boundary` 定义容器范围
+  - 可选使用 `Component_Boundary` 进行分层分组
+  - 边界内的组件属于同一逻辑层次或模块
+  - 分组增强架构清晰度,避免过度嵌套 (建议 ≤ 3 层)
+  """,
+
+  """
+  **可读性和专业性**:
+  - 推荐使用 `LAYOUT_TOP_DOWN()` (分层架构) 或 `LAYOUT_LEFT_RIGHT()` (流程)
+  - 推荐使用 `SHOW_FLOATING_LEGEND()` 节省空间
+  - 图表包含有意义的标题
+  - 布局合理,组件分布均匀,避免拥挤
+  - 关系线体现调用方向,不交叉或交叉最少
+  - 组件数量适中,过多时考虑拆分或简化
+  """
+]

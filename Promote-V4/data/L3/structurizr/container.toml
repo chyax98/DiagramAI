@@ -1,0 +1,207 @@
+# ============================================
+# L3 类型层 v1.0.0
+# Structurizr Container (容器图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "structurizr"
+diagram_type = "container"
+version = "1.0.0"
+description = "Structurizr 容器图规范 - C4 Level 2"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "medium"
+target_length = 2800
+use_cases = ["技术架构设计", "运行时容器展示", "微服务架构"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "技术架构师",
+  "微服务设计专家"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **Container 嵌套规范**: Container 必须定义在 Software System 内部,表示系统的内部组成。
+  错误: `container = container "名称" "描述" "技术"` (在 model 根层)
+  正确: 在 `softwareSystem { }` 块内部定义 container
+  """,
+
+  """
+  **技术栈必填**: Container 的第三个参数是技术栈,必须填写。
+  正确: `webApp = container "Web 应用" "前端" "React"`
+  错误: `webApp = container "Web 应用" "前端"` (缺少技术栈)
+  """,
+
+  """
+  **标签分类规范**: 使用标签对容器分类,常用标签:
+  - Frontend: 前端容器 (Web 应用、移动应用)
+  - Backend: 后端容器 (API 服务、微服务)
+  - Database: 数据容器 (数据库、缓存)
+  - MessageBus: 消息中间件 (消息队列、事件总线)
+  - Infrastructure: 基础设施 (负载均衡、API 网关)
+  """,
+
+  """
+  **关系技术协议**: 容器之间的关系应说明通信协议和技术。
+  正确: `webApp -> apiApp "调用 API" "HTTPS/REST"`
+  错误: `webApp -> apiApp "调用"` (缺少技术信息)
+  """,
+
+  """
+  **数据库关系方向**: 应用主动访问数据库,而不是数据库主动推送。
+  正确: `apiApp -> database "读写数据" "JDBC"`
+  错误: `database -> apiApp "推送数据"`
+  """,
+
+  """
+  **容器粒度合理性**: 容器是独立部署单元,不要过度细分。
+  错误: 把每个类都当作容器
+  正确: 容器是独立运行/部署的单元 (Web 应用、API 服务、数据库等)
+  """,
+
+  """
+  **Include 语句规范**: container 视图必须使用 include 语句指定元素。
+  正确: `include *` 或选择性包含容器
+  错误: 缺少 include 语句导致空白视图
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别运行时容器**:
+  - 前端容器: Web 应用 (React/Vue)、移动应用 (React Native/Flutter)
+  - 后端容器: API 服务、微服务 (Node.js/Java/Go)
+  - 数据容器: 数据库 (PostgreSQL/MongoDB)、缓存 (Redis)
+  - 中间件容器: 消息队列 (RabbitMQ/Kafka)、服务注册中心
+  - 基础设施: 负载均衡器、API 网关、CDN
+  """,
+
+  """
+  **2. 设计容器架构**:
+  - 在 softwareSystem 块内部定义所有 container
+  - 为每个容器指定名称、描述、技术栈
+  - 使用标签对容器分类 (Frontend, Backend, Database 等)
+  - 定义容器之间的关系,说明通信协议
+  """,
+
+  """
+  **3. 创建 container 视图**:
+  - 使用 `container system "key" "title"` 语法
+  - 使用 `include *` 包含所有容器
+  - 或选择性包含关键容器 `include frontend backend database`
+  - 使用 `autolayout tb/lr` 自动布局
+  """,
+
+  """
+  **4. 定义技术关系**:
+  - 前端 → 后端: HTTPS/REST, JSON/HTTPS, GraphQL
+  - 后端 → 数据库: JDBC, MongoDB Protocol, SQL
+  - 后端 → 缓存: Redis Protocol
+  - 后端 → 消息队列: AMQP, Kafka Protocol
+  - 后端 → 外部系统: HTTPS/REST, gRPC
+  """,
+
+  """
+  **5. 可选创建多个容器视图**:
+  - 完整容器架构: 包含所有容器
+  - 前端架构: 聚焦前端容器和 API 网关
+  - 后端微服务: 聚焦后端微服务和数据层
+  - 数据层架构: 聚焦数据库、缓存、消息队列
+  - 使用 include/exclude 表达式过滤容器
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **容器定义完整性**:
+  - 所有容器都定义在 softwareSystem 内部
+  - 每个容器都有技术栈参数 (第三个参数)
+  - 容器命名语义化,使用驼峰命名法
+  - 容器分类清晰 (使用标签)
+  """,
+
+  """
+  **技术架构清晰性**:
+  - 关系描述包含技术协议
+  - 通信方式明确 (同步/异步、协议类型)
+  - 数据流向清晰 (读/写、查询/更新)
+  - 容器布局合理,层次分明
+  """,
+
+  """
+  **容器粒度合理性**:
+  - 容器是独立部署单元,粒度适中
+  - 不过度细分 (每个类都是容器)
+  - 不过度粗糙 (整个系统一个容器)
+  - 反映真实的运行时架构
+  """,
+
+  """
+  **微服务架构专业性**:
+  - API 网关作为统一入口
+  - 微服务之间通过消息队列解耦
+  - 数据库按服务划分 (避免共享数据库)
+  - 基础设施容器标记清晰
+  """
+]
+
+# ============================================
+# Section 5: 使用场景 (Use Cases)
+# ============================================
+
+[[use_cases]]
+title = "电商系统容器架构"
+scenario = "展示电商系统的容器架构,包括 Web 应用、移动应用、API 应用、数据库、缓存、消息队列等容器,以及它们之间的通信协议"
+key_points = [
+  "Web 应用 (React) → API 应用 (Spring Boot): HTTPS/REST",
+  "移动应用 (React Native) → API 应用: HTTPS/REST",
+  "API 应用 → 数据库 (PostgreSQL): JDBC",
+  "API 应用 → 缓存 (Redis): Redis Protocol",
+  "API 应用 → 消息队列 (RabbitMQ): AMQP"
+]
+
+[[use_cases]]
+title = "微服务架构容器视图"
+scenario = "展示微服务系统的容器架构,包括 API 网关、多个微服务、各自的数据库、共享的缓存和消息队列"
+key_points = [
+  "API 网关 (Kong) 作为统一入口",
+  "用户服务 (Go) + 用户数据库 (PostgreSQL)",
+  "商品服务 (Java) + 商品数据库 (MongoDB)",
+  "订单服务 (Node.js) + 订单数据库 (MySQL)",
+  "共享缓存 (Redis) 和消息队列 (Kafka)"
+]
+
+[[use_cases]]
+title = "多容器视图 (分层展示)"
+scenario = "为复杂系统创建多个容器视图,包括完整视图、前端视图、后端视图、数据层视图、订单流程视图,使用 include/exclude 过滤元素"
+key_points = [
+  "完整视图: 包含所有容器",
+  "前端视图: Web/移动应用 + API 网关",
+  "后端视图: API 网关 + 微服务 + 数据库 + 缓存",
+  "数据层视图: 微服务 + 数据库 + 缓存 + 消息队列",
+  "订单流程视图: 涉及订单的容器"
+]

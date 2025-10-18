@@ -1,0 +1,200 @@
+# ============================================
+# L3 类型层 v1.0.0
+# Structurizr Filtered View (过滤视图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "structurizr"
+diagram_type = "filtered"
+version = "1.0.0"
+description = "Structurizr 过滤视图规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "low"
+target_length = 1800
+use_cases = ["定制受众视图", "标签过滤", "关注点分离"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "视图定制专家",
+  "架构文档管理专家"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **Filtered 视图基于基础视图**: filtered 视图是基于已有视图 (systemLandscape, systemContext, container, component) 创建的过滤版本。
+  正确: 先创建基础视图,再创建 filtered 视图引用它
+  错误: 单独创建 filtered 视图,没有基础视图
+  """,
+
+  """
+  **标签系统依赖**: filtered 视图依赖标签系统,所有过滤条件必须基于已定义的标签。
+  正确: 元素定义了 tags "External",filtered 视图使用 `include element.tag==External`
+  错误: filtered 视图使用不存在的标签
+  """,
+
+  """
+  **Include/Exclude 表达式规范**: 过滤视图使用 include/exclude 表达式选择元素。
+  正确表达式:
+  - `include element.tag==External` (包含带特定标签的元素)
+  - `exclude element.tag==Internal` (排除带特定标签的元素)
+  - `include element.tag==Critical || element.tag==Core` (逻辑或)
+  错误: 语法错误或引用不存在的标签
+  """,
+
+  """
+  **过滤条件合理性**: 过滤条件应有明确的业务目的,不应过度复杂。
+  正确: 基于业务需求过滤 (内部系统、外部依赖、关键系统)
+  错误: 过于复杂的嵌套条件,难以理解
+  """,
+
+  """
+  **视图命名清晰性**: filtered 视图的键值和标题应清晰说明过滤条件。
+  正确: "internal-only" "内部系统视图"
+  错误: "view1" "视图" (不清楚过滤了什么)
+  """,
+
+  """
+  **基础视图完整性**: 必须先有完整的基础视图,再创建 filtered 视图。
+  正确顺序: systemLandscape "full" → systemLandscape "internal-only" (filtered)
+  错误: 只有 filtered 视图,没有完整视图
+  """,
+
+  """
+  **逻辑运算符使用规范**: 过滤条件可以使用逻辑运算符组合多个条件。
+  正确: `include element.tag==Critical || element.tag==Core` (或运算)
+  正确: `include element.tag==Backend && element.tag==Critical` (与运算,但较少使用)
+  错误: 语法错误的逻辑表达式
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 设计标签系统**:
+  - 为元素分配有意义的标签 (External, Internal, Critical, Frontend, Backend 等)
+  - 标签应反映业务关注点 (安全级别、部门、优先级)
+  - 标签命名一致,易于理解
+  - 避免过度细分标签
+  """,
+
+  """
+  **2. 创建基础视图**:
+  - 先创建完整的基础视图 (systemLandscape, systemContext, container, component)
+  - 基础视图使用 `include *` 包含所有元素
+  - 确保基础视图完整且正确
+  """,
+
+  """
+  **3. 识别过滤需求**:
+  - 确定不同受众的关注点 (管理者关注战略、开发者关注技术)
+  - 识别需要过滤的元素类型 (内部/外部、前端/后端、关键/非关键)
+  - 规划多个过滤视图,满足不同受众需求
+  """,
+
+  """
+  **4. 创建 filtered 视图**:
+  - 使用 `filtered "key" { }` 语法
+  - 使用 `include element.tag==XXX` 包含带特定标签的元素
+  - 使用 `exclude element.tag==YYY` 排除带特定标签的元素
+  - 可选使用逻辑运算符 (||, &&) 组合条件
+  """,
+
+  """
+  **5. 验证过滤效果**:
+  - 检查过滤后的视图是否符合预期
+  - 确认关键元素没有被误过滤
+  - 验证视图对目标受众的可读性
+  - 调整过滤条件以优化视图
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **标签系统一致性**:
+  - 所有元素都有合适的标签
+  - 标签命名一致,易于理解
+  - 标签反映业务关注点
+  - 标签在 filtered 视图中正确使用
+  """,
+
+  """
+  **过滤条件清晰性**:
+  - 过滤条件有明确的业务目的
+  - 表达式语法正确
+  - 逻辑运算符使用合理
+  - 视图命名清晰说明过滤内容
+  """,
+
+  """
+  **视图完整性**:
+  - 先有完整的基础视图,再有 filtered 视图
+  - filtered 视图不缺失关键元素
+  - 每个 filtered 视图都有明确的目标受众
+  """,
+
+  """
+  **受众适配性**:
+  - 管理者视图: 聚焦战略系统和关键依赖
+  - 开发者视图: 聚焦技术架构和内部系统
+  - 安全视图: 聚焦外部系统和安全边界
+  - 每个视图满足特定受众需求
+  """
+]
+
+# ============================================
+# Section 5: 使用场景 (Use Cases)
+# ============================================
+
+[[use_cases]]
+title = "企业系统全景 (多视图过滤)"
+scenario = "为大型企业系统创建多个过滤视图,包括完整视图、内部系统视图、核心业务视图、后台支撑视图、数据流视图"
+key_points = [
+  "完整视图: include * (所有系统)",
+  "内部系统视图: include element.tag!=External (排除外部系统)",
+  "核心业务视图: include 前台 + 中台系统 (手动选择)",
+  "后台支撑视图: include CRM + ERP + 数据仓库 + 用户中心",
+  "数据流视图: include 数据仓库 + 数据源系统"
+]
+
+[[use_cases]]
+title = "电商平台上下文 (多视角过滤)"
+scenario = "为电商平台创建多个上下文视图,包括用户视角 (购物流程)、运营视角 (管理功能)、完整集成视角 (所有外部依赖)"
+key_points = [
+  "用户视角: include 客户 + 平台 + 支付网关 + 邮件系统",
+  "运营视角: include 管理员 + 平台 + ERP + 邮件系统",
+  "完整集成视角: include * (所有参与者 + 所有外部系统)",
+  "关键依赖视图: include element.tag==Critical (只显示关键系统)"
+]
+
+[[use_cases]]
+title = "微服务架构 (技术栈过滤)"
+scenario = "为微服务系统创建技术栈过滤视图,包括仅后端视图、仅前端视图、数据层视图"
+key_points = [
+  "仅后端视图: include element.tag==Backend || element.tag==Database",
+  "仅前端视图: include element.tag==Frontend",
+  "数据层视图: include element.tag==Database || element.tag==Cache",
+  "关键服务视图: include element.tag==Critical"
+]

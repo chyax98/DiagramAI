@@ -1,0 +1,172 @@
+# ============================================
+# L2 语言层 v1.0.0
+# Structurizr DSL 语言的通用规范
+# ============================================
+
+[meta]
+level = "L2"
+language = "structurizr"
+version = "1.0.0"
+description = "Structurizr DSL 语言通用规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 语言相关的元数据
+language_version = "1.30.0"
+kroki_support = true
+official_docs = "https://docs.structurizr.com/"
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "Structurizr DSL 语法专家",
+  "C4 模型架构师",
+  "软件架构建模专家"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **Workspace 根元素规范**: workspace 是唯一的根元素,必须包含 model 和 views 块。缺少 views 块会导致错误: 'workspace must contain at least one view'。
+  正确结构:
+  ```
+  workspace "名称" {
+      model { }
+      views { }
+  }
+  ```
+  """,
+
+  """
+  **视图 include 语句规范**: 所有视图必须显式使用 include 语句指定元素。缺少 include 会导致空白视图。
+  错误: views 中没有 include 语句
+  正确: 使用 `include *` 或 `include element1 element2`
+  """,
+
+  """
+  **元素层次嵌套规范**: 必须遵循 C4 模型的层次结构:
+  - Person 和 Software System 在 model 根层
+  - Container 必须定义在 Software System 内部
+  - Component 必须定义在 Container 内部
+  - Container Instance 必须定义在 Deployment Node 内部
+  违反后果: 'container must be defined inside a software system'
+  """,
+
+  """
+  **关系箭头符号规范**: Structurizr DSL 只支持 `->` 作为关系符号,不支持 `=>` 或 `-->` 等其他箭头。
+  错误: `user => system "使用"`
+  正确: `user -> system "使用"`
+  """,
+
+  """
+  **视图键值唯一性**: 每个视图必须有唯一的键值 (key) 标识,用于引用和区分不同视图。
+  错误: 两个视图使用相同的 key
+  正确: 每个视图使用唯一键值
+  """,
+
+  """
+  **自动布局参数**: 自动布局支持方向参数 (lr/rl/tb/bt),但在 Kroki 环境下不支持间距参数。
+  正确: `autolayout lr`
+  错误: `autolayout lr 200 200` (Kroki 不支持)
+  """,
+
+  """
+  **关系语法规范**: 关系定义格式为 `源 -> 目标 "描述" "技术"`。
+  - 箭头前后必须有空格
+  - 描述必须用双引号包裹
+  - 技术标签可选
+  正确: `user -> system "使用" "HTTPS"`
+  错误: `user->system "使用"` (缺少空格)
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 确定 C4 模型层次**: 根据需求选择合适的 C4 模型层次:
+  - Level 0 (Landscape): 企业级全景,多系统展示
+  - Level 1 (Context): 单个系统的边界和外部依赖
+  - Level 2 (Container): 系统内部的技术架构
+  - Level 3 (Component): 容器内部的代码结构
+  - Deployment: 部署环境和基础设施
+  - Dynamic: 运行时交互和业务流程
+  """,
+
+  """
+  **2. 设计 model 结构**:
+  - 声明所有参与者 (Person)
+  - 定义软件系统 (Software System),区分内部和外部系统 (使用 tags "External")
+  - 在系统内部定义容器 (Container),标注技术栈
+  - 在容器内部定义组件 (Component),标注技术实现
+  - 定义元素之间的关系,说明交互方式
+  """,
+
+  """
+  **3. 创建 views 视图**:
+  - 根据受众需求选择视图类型 (systemLandscape, systemContext, container, component, deployment, dynamic)
+  - 每个视图使用 `include *` 或选择性包含元素
+  - 使用 `autolayout lr/tb` 自动布局
+  - 为视图添加唯一的 key 和可选的 title
+  """,
+
+  """
+  **4. 应用 Structurizr DSL 语法**:
+  - 使用正确的关键字和语法格式
+  - 确保元素和关系的定义顺序正确 (先定义元素,再定义关系)
+  - 使用标签 (tags) 对元素分类
+  - 添加必要的描述和技术栈信息
+  """,
+
+  """
+  **5. 验证和优化**:
+  - 检查 workspace 包含 model 和 views
+  - 检查所有视图都有 include 语句
+  - 检查元素层次嵌套正确
+  - 检查关系箭头符号正确
+  - 检查视图键值唯一性
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **Structurizr DSL 语法正确性**: 代码必须符合 Structurizr DSL 官方语法规范,无语法错误,能被 Structurizr 解析器成功解析。
+  """,
+
+  """
+  **Kroki 渲染兼容性**: 代码必须能被 Kroki 成功渲染,避免使用 Kroki 不支持的特性 (如外部主题、文档嵌入、高级 DSL 特性)。
+  """,
+
+  """
+  **C4 模型完整性**:
+  - workspace 包含 model 和 views 两个核心部分
+  - 所有视图都有明确的 include 语句
+  - 元素层次嵌套符合 C4 模型规范
+  - 关系定义清晰,方向正确
+  """,
+
+  """
+  **架构建模专业性**:
+  - 元素命名语义化,使用驼峰命名法
+  - 关系描述清晰明确,包含必要的技术信息
+  - 标签使用一致,便于分类和样式化
+  - 视图布局合理,元素分布均匀
+  - 复杂架构使用分组 (group) 提升可读性
+  """
+]

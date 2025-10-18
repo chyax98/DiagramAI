@@ -1,0 +1,220 @@
+# ============================================
+# L3 类型层 v1.0.0
+# Structurizr Workspace (完整工作空间) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "structurizr"
+diagram_type = "workspace"
+version = "1.0.0"
+description = "Structurizr 完整工作空间规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "high"
+target_length = 3500
+use_cases = ["完整架构文档", "多视图架构展示", "企业级架构建模"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "架构文档专家",
+  "企业架构师"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **Workspace 结构完整性**: workspace 必须包含 model 和 views 两个核心部分,可选包含 configuration。
+  必须结构:
+  ```
+  workspace "名称" "描述" {
+      model { }
+      views { }
+      configuration { }  # 可选
+  }
+  ```
+  """,
+
+  """
+  **Model 层次完整性**: model 块必须包含完整的架构元素定义:
+  - 所有参与者 (Person)
+  - 所有软件系统 (Software System)
+  - 系统内部的容器 (Container)
+  - 容器内部的组件 (Component,可选)
+  - 所有元素之间的关系
+  """,
+
+  """
+  **Views 视图完整性**: views 块必须至少包含一个视图,建议包含多个视图以满足不同受众需求:
+  - 系统全景视图 (systemLandscape) - 适合高层管理者
+  - 系统上下文视图 (systemContext) - 适合业务分析师
+  - 容器视图 (container) - 适合开发团队
+  - 组件视图 (component) - 适合开发者
+  - 部署视图 (deployment) - 适合运维团队
+  - 动态视图 (dynamic) - 适合理解业务流程
+  """,
+
+  """
+  **视图键值唯一性**: 每个视图必须有唯一的键值 (key),避免键值冲突。
+  错误: 两个视图使用相同的 key "view1"
+  正确: 使用唯一键值如 "SystemContext", "Containers", "Components"
+  """,
+
+  """
+  **元素引用正确性**: views 中引用的元素必须在 model 中已定义,避免前向引用。
+  正确顺序: 先定义元素 → 再定义关系 → 最后在视图中引用
+  """,
+
+  """
+  **标签系统一致性**: 使用标签对元素分类,标签必须在 model 中定义,在 configuration 中应用样式。
+  常用标签: "External", "Internal", "Frontend", "Backend", "Database", "Infrastructure"
+  """,
+
+  """
+  **层次标识符策略**: 可选使用 `!identifiers hierarchical` 启用层次标识符,避免标识符冲突。
+  启用后元素自动继承父级前缀,如 `ecommerce.webApp` 而不是手动命名。
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 分析架构需求**:
+  - 确定架构范围 (单系统 vs 多系统)
+  - 识别所有参与者 (用户、管理员、外部角色)
+  - 识别所有系统 (内部系统、外部依赖)
+  - 确定技术栈和部署环境
+  - 确定需要展示的视图类型
+  """,
+
+  """
+  **2. 设计 model 结构**:
+  - 声明所有 Person (用户、管理员等)
+  - 声明所有 Software System,区分内部和外部 (使用 tags "External")
+  - 在内部系统中定义 Container,标注技术栈
+  - 在关键容器中定义 Component (可选)
+  - 定义所有关系,说明交互方式和技术协议
+  - 可选使用 group 对系统进行逻辑分组
+  """,
+
+  """
+  **3. 创建多视图架构**:
+  - systemLandscape: 企业级全景,展示所有系统和参与者
+  - systemContext: 聚焦单个系统的边界和外部依赖
+  - container: 系统内部的技术架构和运行时容器
+  - component: 关键容器的代码结构 (可选)
+  - deployment: 部署环境和基础设施架构 (可选)
+  - dynamic: 关键业务流程的时序交互 (可选)
+  每个视图使用唯一的 key 和清晰的 title
+  """,
+
+  """
+  **4. 配置样式和主题**:
+  - 在 configuration.styles 中定义元素样式
+  - 为不同类型的元素设置形状 (Person, RoundedBox, Cylinder 等)
+  - 为标签设置背景色和文字颜色
+  - 为关系设置线条样式 (solid, dashed)
+  - 注意: Kroki 对样式支持有限,建议简化
+  """,
+
+  """
+  **5. 验证和优化**:
+  - 检查 workspace 包含 model 和 views
+  - 检查所有视图都有 include 语句
+  - 检查元素层次嵌套正确
+  - 检查关系箭头符号和方向正确
+  - 检查视图键值唯一性
+  - 测试 Kroki 渲染是否成功
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **Workspace 结构完整性**:
+  - 包含 model 和 views 两个核心部分
+  - model 包含完整的元素和关系定义
+  - views 包含至少一个视图,建议多视图
+  - 所有视图都有唯一的 key
+  """,
+
+  """
+  **C4 模型层次正确性**:
+  - Person 和 Software System 在 model 根层
+  - Container 嵌套在 Software System 内部
+  - Component 嵌套在 Container 内部
+  - 关系定义清晰,方向正确
+  """,
+
+  """
+  **视图设计专业性**:
+  - 每个视图都有明确的 include 语句
+  - 视图类型选择符合受众需求
+  - 使用 autolayout 自动布局
+  - 复杂架构使用分组 (group) 提升可读性
+  """,
+
+  """
+  **架构文档完整性**:
+  - 元素命名语义化,使用驼峰命名法
+  - 关系描述清晰明确,包含技术信息
+  - 标签使用一致,便于分类和样式化
+  - 技术栈信息完整 (Container 的第三个参数)
+  - 多视图覆盖不同受众需求 (管理者、开发者、运维)
+  """
+]
+
+# ============================================
+# Section 5: 使用场景 (Use Cases)
+# ============================================
+
+[[use_cases]]
+title = "电商系统完整架构文档"
+scenario = "为电商平台创建完整的 C4 架构文档,包含系统全景、容器视图、部署视图和订单流程动态视图,供不同团队使用"
+key_points = [
+  "systemLandscape 展示所有系统和外部依赖",
+  "systemContext 聚焦电商系统的边界",
+  "container 展示前端、后端、数据库等容器",
+  "deployment 展示生产环境的 Kubernetes 部署",
+  "dynamic 展示下单流程的时序交互"
+]
+
+[[use_cases]]
+title = "微服务架构文档"
+scenario = "为微服务系统创建架构文档,包含系统全景、容器视图 (展示所有微服务)、组件视图 (展示关键服务的内部结构)"
+key_points = [
+  "systemLandscape 展示微服务生态",
+  "container 展示 API 网关、各个微服务、消息队列、数据库",
+  "component 展示订单服务的内部组件结构",
+  "使用标签区分前端、后端、数据、基础设施"
+]
+
+[[use_cases]]
+title = "企业级系统全景"
+scenario = "为大型企业创建系统全景图,包含前台、中台、后台系统,使用分组 (group) 提升可读性,创建多个过滤视图"
+key_points = [
+  "使用 group 对系统进行业务线分组",
+  "systemLandscape 完整视图展示所有系统",
+  "systemLandscape 过滤视图展示内部系统",
+  "systemLandscape 数据流视图展示数据仓库和分析系统",
+  "使用标签区分内部和外部系统"
+]

@@ -1,0 +1,240 @@
+# ============================================
+# L3 类型层 v1.0.0
+# Nomnoml Class (类图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "nomnoml"
+diagram_type = "class"
+version = "1.0.0"
+description = "Nomnoml 类图规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "medium"
+target_length = 2600
+use_cases = ["面向对象设计", "领域建模", "设计模式应用", "系统架构设计"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "面向对象设计专家 - 理解类的职责、属性、方法和关系",
+  "UML 类图专家 - 精通 UML 类图的标准符号和最佳实践"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **类定义语法约束**: 类的完整定义格式为 `[类名| 属性区 | 方法区]`:
+  ```nomnoml
+  [Person|
+    name: String;
+    age: int;
+    email: String
+  |
+    getName(): String;
+    setAge(age: int): void;
+    sendEmail(msg: String): boolean
+  ]
+  ```
+  - 使用 `|` 分隔三个区域 (类名、属性、方法)
+  - 属性和方法使用分号 `;` 或换行分隔,**不能使用逗号**
+  - 顺序必须是: 类名 | 属性 | 方法
+  """,
+
+  """
+  **分类器标签约束**: 分类器标签 (如 `<abstract>`, `<interface>`) 必须在类名**之前**:
+  ```nomnoml
+  ✅ 正确: [<abstract> Animal| name: String | eat(): void]
+  ❌ 错误: [Animal <abstract>| name: String | eat(): void]
+  ```
+  常用分类器标签:
+  - `<abstract>`: 抽象类 (斜体显示)
+  - `<interface>`: 接口
+  - `<instance>`: 实例/对象
+  """,
+
+  """
+  **继承关系方向约束**: 继承箭头 `-:>` 必须从子类指向父类 (UML 标准):
+  ```nomnoml
+  ✅ 正确: [Dog] -:> [Animal]  // Dog 继承 Animal
+  ❌ 错误: [Animal] -:> [Dog]  // 语义错误,父类指向子类
+  ```
+  """,
+
+  """
+  **关系类型约束**: 必须使用正确的 UML 关系符号:
+  - `<|--` 或 `-:>`: 继承/泛化 (实心三角形,extends)
+  - `<|..` 或 `--:>`: 实现接口 (空心三角形 + 虚线,implements)
+  - `*--` 或 `+->`: 组合 (实心菱形,强拥有,生命周期绑定)
+  - `o--` 或 `o->`: 聚合 (空心菱形,弱拥有,独立生命周期)
+  - `-->` 或 `-->`: 关联 (普通箭头)
+  - `..>` 或 `-->`: 依赖 (虚线箭头,临时使用)
+  """,
+
+  """
+  **组合 vs 聚合语义约束**:
+  - **组合** (`+->` 或 `*--`): 强拥有关系,部分不能脱离整体存在
+    - 示例: `[Car] +-> [Engine]` (引擎不能独立于汽车存在)
+  - **聚合** (`o->` 或 `o--`): 弱拥有关系,部分可以独立存在
+    - 示例: `[Department] o-> [Employee]` (员工可以独立于部门存在)
+  """,
+
+  """
+  **多重性标注约束**: 关联关系应该标注基数约束 (可选):
+  ```nomnoml
+  [Order] -> 1..*[OrderItem]     // 一对多
+  [Person] -> 0..1[Address]      // 零或一
+  [Student] -> *[Course]         // 多对多
+  ```
+  """,
+
+  """
+  **泛型类型参数约束**: 泛型类型使用尖括号包裹:
+  ```nomnoml
+  [List<T>|
+    items: T[];
+    size: int
+  |
+    add(item: T): void;
+    get(index: int): T;
+    remove(index: int): T
+  ]
+  ```
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别核心实体和类**: 分析需求,识别系统的核心实体:
+  - 业务实体: User、Order、Product、Customer
+  - 值对象: Address、Money、Email
+  - 服务类: UserService、OrderService、PaymentService
+  - 工具类: Logger、Cache、ConfigManager
+  - 接口: IUserService、IRepository
+  - 抽象类: BaseEntity、AbstractService
+  """,
+
+  """
+  **2. 定义类结构**: 为每个类定义属性和方法:
+  - **属性**: 数据字段,使用 `属性名: 类型` 格式
+  - **方法**: 行为操作,使用 `方法名(参数): 返回类型` 格式
+  - **分类器标签**: 使用 `<abstract>` 标注抽象类,`<interface>` 标注接口
+  - 示例:
+    ```nomnoml
+    [<abstract> Animal|
+      name: String
+    |
+      eat(): void;
+      sleep(): void
+    ]
+    ```
+  """,
+
+  """
+  **3. 设计类关系**: 识别类之间的关系类型:
+  - **继承** (is-a 关系): 使用 `-:>` ,子类指向父类
+    - 示例: `[Dog] -:> [Animal]`
+  - **实现** (implements): 使用 `--:>` ,实现类指向接口
+    - 示例: `[ArrayList] --:> [List]`
+  - **组合** (强拥有): 使用 `+->` ,整体拥有部分
+    - 示例: `[Car] +-> [Engine]`
+  - **聚合** (弱拥有): 使用 `o->` ,部分可独立存在
+    - 示例: `[Department] o-> [Employee]`
+  - **关联** (一般关系): 使用 `->`
+    - 示例: `[Person] -> [Address]`
+  - **依赖** (临时使用): 使用 `-->`
+    - 示例: `[Controller] --> [Service]`
+  """,
+
+  """
+  **4. 标注多重性**: 为关联关系标注基数约束 (可选):
+  - `1`: 一对一
+  - `0..1`: 零或一
+  - `1..*` 或 `1..n`: 一对多
+  - `0..*` 或 `*`: 零对多
+  - 示例: `[Order] -> 1..*[OrderItem]`
+  """,
+
+  """
+  **5. 应用指令配置**: 在文件开头设置样式指令 (可选):
+  ```nomnoml
+  #direction: down         // 布局方向 (down 适合继承树)
+  #spacing: 40             // 节点间距
+  #padding: 8              // 节点内边距
+  #stroke: #333            // 边框颜色
+  #fill: #f9f9f9           // 填充颜色
+  #fontSize: 12            // 字体大小
+  ```
+  """,
+
+  """
+  **6. 组织复杂结构**: 对于大型类图,使用分组增强可读性:
+  - 使用 `<package>` 或 `<frame>` 按模块分组
+  - 示例:
+    ```nomnoml
+    [<package> com.example.service|
+      [UserService]
+      [OrderService]
+    ]
+    ```
+  - 控制类数量 (建议 ≤ 30 个),过多时考虑拆分
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **Nomnoml 语法符合性**:
+  - 分类器标签 (如 `<abstract>`) 在类名之前
+  - 类定义顺序: 类名 | 属性 | 方法
+  - 属性和方法使用分号 `;` 或换行分隔,不使用逗号
+  - 继承箭头 `-:>` 从子类指向父类
+  - 所有指令 (#direction, #stroke 等) 在文件开头
+  """,
+
+  """
+  **UML 规范符合性**:
+  - 关系类型正确: 继承 (-:>)、实现 (--:>)、组合 (+->)、聚合 (o->)、关联 (->)、依赖 (-->)
+  - 关系方向正确: 继承从子类指向父类,组合/聚合从整体指向部分
+  - 多重性标注准确 (如 1, 0..1, 1..*, *)
+  - 抽象类和接口正确标注 (<abstract>, <interface>)
+  """,
+
+  """
+  **语义正确性**:
+  - 组合关系正确表达生命周期绑定 (如 Car +-> Engine)
+  - 聚合关系正确表达独立生命周期 (如 Department o-> Employee)
+  - 关联关系有明确的业务含义
+  - 依赖关系表达临时使用关系 (如方法参数、局部变量)
+  """,
+
+  """
+  **可读性和专业性**:
+  - 类命名使用大驼峰 (PascalCase),如 Person、OrderService
+  - 属性和方法命名使用小驼峰 (camelCase),如 userName、getName()
+  - 类数量适中 (建议 ≤ 30 个),过多时使用分组或拆分
+  - 布局合理,使用 #direction 控制方向 (down 适合继承树)
+  - 适当使用样式指令 (#stroke, #fill) 改善视觉效果
+  - 能被 Kroki 成功渲染,无语法错误
+  """
+]

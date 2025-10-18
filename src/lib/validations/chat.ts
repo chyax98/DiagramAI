@@ -39,7 +39,7 @@ export const ChatRequestSchema = z
       })
       .optional(),
 
-    renderError: z.string().max(1000, "错误信息最多 1000 个字符").optional().nullable(),
+    renderError: z.string().optional().nullable(),
   })
   .refine(
     (data) => {

@@ -1,0 +1,157 @@
+# ============================================
+# L3 类型层 v1.0.0
+# Nomnoml Component (组件图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "nomnoml"
+diagram_type = "component"
+version = "1.0.0"
+description = "Nomnoml 组件图规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "medium"
+target_length = 2700
+use_cases = ["系统架构设计", "组件依赖分析", "插件化架构", "微服务架构"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "系统架构设计师 - 识别系统核心组件及其职责",
+  "Nomnoml 组件图工程师 - 精通组件接口表示 (socket、lollipop)"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **组件定义语法约束**: 组件图区分于类图,不展示详细的类属性和方法。组件图关注物理组件及其依赖,允许展示技术栈 (如 React UI、Express Server),但不展示私有属性和方法。
+  """,
+
+  """
+  **组件接口表示约束**: 使用 `<lollipop>` 和 `<socket>` 表示接口:
+  - `<lollipop>`: 棒棒糖接口,表示组件提供的接口
+  - `<socket>`: 套接字接口,表示组件需要的接口
+  - `-/-`: 隐藏连接,表示接口匹配
+  """,
+
+  """
+  **依赖方向约束**: 组件依赖必须使用有向箭头明确方向。箭头方向表示依赖关系: A --> B 表示 A 依赖 B。
+  """,
+
+  """
+  **嵌套结构约束**: 使用嵌套表示组件包含关系,但不超过 3 层。过深嵌套降低可读性。
+  """,
+
+  """
+  **数据库组件标签约束**: 数据库组件必须使用 `<database>` 标签,这样可以自动应用数据库图标,增强视觉识别度。
+  """,
+
+  """
+  **Package 和 Frame 使用约束**: 正确区分 package 和 frame:
+  - `<frame>`: 系统边界或子系统
+  - `<package>`: 逻辑分组
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别核心组件**: 分析系统,识别主要的物理组件:
+  - **服务组件**: UserService, OrderService, PaymentService
+  - **UI 组件**: Web UI, Mobile UI, Admin Panel
+  - **数据存储**: Database, Cache, Message Queue
+  - **外部服务**: Email Service, Payment Gateway, Cloud Storage
+  - **基础设施**: API Gateway, Load Balancer, Service Registry
+  """,
+
+  """
+  **2. 定义组件结构**: 使用适当的分类器标签和嵌套结构:
+  - **基础组件**: `[ComponentName]`
+  - **包/模块**: `[<package> PackageName]`
+  - **框架/系统**: `[<frame> SystemName]`
+  - **数据库**: `[<database> DatabaseName]`
+  - **接口**: `[<lollipop> IInterface]` (提供) 或 `[<socket> IInterface]` (需要)
+  """,
+
+  """
+  **3. 设计组件依赖**: 使用箭头表示组件之间的依赖关系:
+  - **服务依赖**: `[Frontend] --> [Backend API]`
+  - **数据访问**: `[Service] --> [<database> Database]`
+  - **接口提供**: `[Service] - [<lollipop> IService]`
+  - **接口需要**: `[Client] --> [<socket> IService]`
+  - **接口匹配**: `[<socket> IService] -/- [<lollipop> IService]`
+  """,
+
+  """
+  **4. 组织复杂结构**: 使用分组增强可读性:
+  - **微服务架构**: 使用 `<package>` 包裹多个服务
+  - **插件化架构**: 使用 `<frame>` 包裹核心框架和插件
+  - **分层架构**: 按功能层次分组 (UI 层、服务层、数据层)
+  """,
+
+  """
+  **5. 应用指令配置**: 在文件开头设置样式指令 (可选):
+  - #direction: down (布局方向,down 适合分层架构)
+  - #spacing: 40 (节点间距,建议 40-50)
+  - #padding: 10 (节点内边距)
+  - #stroke: #2c3e50 (边框颜色)
+  - #fill: #ecf0f1 (填充颜色)
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **Nomnoml 语法符合性**:
+  - 所有指令 (#direction, #stroke 等) 在文件开头
+  - 嵌套层级适度 (建议 ≤ 3 层)
+  - 数据库组件使用 `<database>` 标签
+  - 接口使用 `<lollipop>` 和 `<socket>` 标签
+  - Package 和 Frame 使用正确
+  """,
+
+  """
+  **组件图特性符合性**:
+  - 组件图关注物理组件,不展示类的详细实现 (私有属性/方法)
+  - 允许展示组件使用的技术栈 (如 React、Express、PostgreSQL)
+  - 允许展示组件内部的子组件或模块划分
+  - 接口表示正确: `<lollipop>` (提供), `<socket>` (需要)
+  """,
+
+  """
+  **依赖关系正确性**:
+  - 依赖方向明确: 使用 `-->` 箭头,不使用无向连接 `-`
+  - 接口依赖正确: 组件通过接口解耦
+  - 数据流向清晰: 箭头方向反映数据访问方向
+  - 循环依赖检查: 避免组件之间的循环依赖
+  """,
+
+  """
+  **可读性和专业性**:
+  - 组件命名清晰,使用有意义的名称
+  - 组件数量适中 (建议 ≤ 30 个),过多时使用分组
+  - 布局合理,使用 #direction 控制方向
+  - 适当使用样式指令改善视觉效果
+  - 复杂架构使用分组增强结构清晰度
+  - 能被 Kroki 成功渲染,无语法错误
+  """
+]

@@ -146,6 +146,20 @@ export const ENABLE_FAILURE_LOGGING = process.env.ENABLE_FAILURE_LOGGING !== "fa
 export const USE_PROMOTE_V4 = process.env.USE_PROMOTE_V4 === "true";
 
 /**
+ * 渲染错误信息最大长度（字符数）
+ *
+ * 用于限制传递给 AI 修复的错误信息长度，避免请求过大导致失败
+ * 设置为 0 表示不限制长度
+ *
+ * @default 0 (不限制)
+ * @env MAX_RENDER_ERROR_LENGTH
+ */
+export const MAX_RENDER_ERROR_LENGTH = parseInt(
+  process.env.MAX_RENDER_ERROR_LENGTH || "0",
+  10
+);
+
+/**
  * 所有环境变量的导出对象
  *
  * 方便统一访问和类型推导
@@ -166,6 +180,7 @@ export const ENV = {
   JWT_EXPIRES_IN,
   ENABLE_FAILURE_LOGGING,
   USE_PROMOTE_V4,
+  MAX_RENDER_ERROR_LENGTH,
 } as const;
 
 /**

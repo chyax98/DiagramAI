@@ -1,0 +1,219 @@
+# ============================================
+# L3 类型层 v1.0.0
+# C4-PlantUML Container (容器图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "c4plantuml"
+diagram_type = "container"
+version = "1.0.0"
+description = "C4-PlantUML 容器图规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "medium"
+target_length = 2800
+use_cases = ["技术架构设计", "系统模块划分", "技术栈选型", "部署架构规划"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "技术架构师 - 理解系统的技术架构和模块划分",
+  "DevOps 工程师 - 识别可独立部署的应用、服务和数据存储"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **Container 图专用库引用**: 必须使用 `!include <C4/C4_Container>`:
+  ```plantuml
+  @startuml
+  !include <C4/C4_Container>
+  @enduml
+  ```
+  ❌ 绝对禁止空的 `!include`,这会导致 "Error 400: cannot include"。
+  """,
+
+  """
+  **容器定义约束**: 容器 (Container) 在 C4 模型中指独立部署的应用、服务或数据库:
+  - **应用容器**: Web 应用、移动应用、桌面应用
+  - **服务容器**: 微服务、API 网关、认证服务、消息处理器
+  - **数据存储容器**: 数据库、缓存、消息队列、对象存储
+
+  使用正确的容器宏:
+  - `Container(alias, "名称", "技术栈", "描述")` - 应用和服务
+  - `ContainerDb(alias, "名称", "数据库类型", "描述")` - 数据库
+  - `ContainerQueue(alias, "名称", "队列技术", "描述")` - 消息队列
+  """,
+
+  """
+  **技术栈标注强制性**: Container 和 Component 必须包含技术栈信息 (第三个参数):
+  ```plantuml
+  ✅ 正确: Container(web, "Web 应用", "React, TypeScript", "用户界面")
+  ❌ 错误: Container(web, "Web 应用", "用户界面")  // 缺少技术栈
+  ```
+  技术栈标注是 Container 图的核心价值,帮助技术团队理解实现方式。
+  """,
+
+  """
+  **系统边界使用约束**: 使用 `System_Boundary` 定义系统范围和模块分组:
+  ```plantuml
+  System_Boundary(alias, "系统名称") {
+      Container(web, "Web 应用", "React")
+      Container(api, "API 服务", "Node.js")
+      ContainerDb(db, "数据库", "PostgreSQL")
+  }
+  ```
+  - `System_Boundary` 可包含: Container, ContainerDb, ContainerQueue
+  - 不允许同类边界嵌套 (如 System_Boundary 内不能再嵌套 System_Boundary)
+  - 如需通用分组,使用 `Boundary(alias, "标签")`
+  """,
+
+  """
+  **关系技术标注约束**: 关系描述应包含技术协议或数据格式:
+  - Web 应用 ↔ API: REST/JSON、GraphQL、WebSocket
+  - 服务间通信: gRPC、REST、消息队列 (Kafka、RabbitMQ)
+  - 数据库访问: SQL/JDBC、NoSQL、ORM (Hibernate、TypeORM)
+  示例: `Rel(web, api, "调用 API", "REST/JSON")`
+  """,
+
+  """
+  **元素数量约束**: Container 图应保持适中复杂度:
+  - 容器数量: 5-15 个 (推荐)
+  - 总元素数: 建议 ≤ 25 个 (包括人员和外部系统)
+  - 过多容器应考虑:
+    - 使用 `System_Boundary` 进行模块分组
+    - 拆分为多个独立的 Container 图 (按子系统)
+  """,
+
+  """
+  **抽象层次约束**: Container 图不应包含 Component 级别的细节:
+  - ❌ 禁止使用 `Component`、`ComponentDb`、`ComponentQueue`
+  - ❌ 禁止展示代码级别的类、接口、模块
+  - 聚焦于可独立部署的运行时单元 (应用、服务、数据库)
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别容器类型**: 分析系统的技术架构,识别可独立部署的单元:
+  - **前端应用**: Web 应用 (React、Vue)、移动应用 (React Native、Flutter)
+  - **后端服务**: API 网关、业务服务、认证服务、微服务
+  - **数据存储**: 关系数据库 (PostgreSQL、MySQL)、NoSQL (MongoDB、Redis)
+  - **消息中间件**: 消息队列 (RabbitMQ、Kafka)、事件总线
+  - **其他组件**: 文件存储 (S3、MinIO)、缓存 (Redis、Memcached)
+  """,
+
+  """
+  **2. 选择容器宏**: 根据容器类型选择合适的 C4 宏:
+  - 应用和服务: `Container(alias, "名称", "技术栈", "描述")`
+  - 数据库: `ContainerDb(alias, "数据库名", "数据库类型", "描述")`
+  - 消息队列: `ContainerQueue(alias, "队列名", "队列技术", "描述")`
+  - 外部系统: `System_Ext(alias, "外部系统", "描述")`
+  """,
+
+  """
+  **3. 标注技术栈**: 为每个容器明确标注使用的技术栈:
+  - 前端: React, Vue, Angular, Next.js, TypeScript
+  - 后端: Node.js, Java/Spring Boot, Python/Django, Go, .NET
+  - 数据库: PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch
+  - 消息队列: RabbitMQ, Kafka, Redis Pub/Sub, AWS SQS
+  - 示例: `Container(api, "API 服务", "Node.js, Express, TypeScript", "RESTful API")`
+  """,
+
+  """
+  **4. 定义系统边界**: 使用 `System_Boundary` 组织容器:
+  ```plantuml
+  System_Boundary(backend, "后端系统") {
+      Container(api, "API 网关", "Kong")
+      Container(auth, "认证服务", "Node.js")
+      Container(order, "订单服务", "Java/Spring")
+  }
+  ```
+  - 将属于同一系统的容器放在边界内
+  - 可以有多个边界,分别代表不同的子系统或模块
+  """,
+
+  """
+  **5. 设计容器关系**: 定义容器之间的通信方式:
+  - 使用 `Rel(from, to, "描述", "技术协议")` 定义关系
+  - 标注清晰的技术协议: REST/JSON、gRPC、SQL/JDBC、消息队列
+  - 考虑数据流向: 单向、双向、同步、异步
+  - 示例:
+    - `Rel(web, api, "调用 API", "REST/JSON")`
+    - `Rel(api, db, "读写数据", "SQL/JDBC")`
+    - `Rel(service, queue, "发布事件", "AMQP")`
+  """,
+
+  """
+  **6. 优化布局和可读性**:
+  - 推荐使用 `LAYOUT_WITH_LEGEND()` 一步完成布局和图例
+  - 或使用 `LAYOUT_TOP_DOWN()` (分层架构) / `LAYOUT_LEFT_RIGHT()` (流程)
+  - 添加图表标题: `title 容器图 - XXX系统`
+  - 使用 `System_Boundary` 增强结构清晰度
+  - 考虑添加 Sprite 图标 (使用 PlantUML 标准库图标)
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **库引用完整性**:
+  - 必须包含 `@startuml/@enduml` 包裹
+  - 必须包含完整的库引用: `!include <C4/C4_Container>`
+  - 绝对不能出现空的 `!include`
+  - 能被 Kroki 成功渲染,无语法错误
+  """,
+
+  """
+  **技术栈标注完整性**:
+  - 所有 `Container`、`ContainerDb`、`ContainerQueue` 都包含技术栈参数
+  - 技术栈标注具体且准确 (如 "React, TypeScript" 而非 "前端框架")
+  - 关系描述包含技术协议 (REST/JSON、gRPC、SQL/JDBC)
+  - 使用专用宏 (ContainerDb, ContainerQueue) 增强视觉识别度
+  """,
+
+  """
+  **容器类型正确性**:
+  - 容器代表可独立部署的运行时单元 (应用、服务、数据库)
+  - 不混入 Component 级别的细节 (如类、接口、模块)
+  - 容器粒度适中,不过于细化也不过于粗糙
+  - 数据库使用 `ContainerDb`,消息队列使用 `ContainerQueue`
+  """,
+
+  """
+  **系统边界合理性**:
+  - 使用 `System_Boundary` 清晰划分系统范围
+  - 边界内的容器属于同一个逻辑系统或模块
+  - 不允许同类边界嵌套
+  - 外部系统使用 `System_Ext` 标识
+  """,
+
+  """
+  **可读性和专业性**:
+  - 推荐使用 `LAYOUT_WITH_LEGEND()` 或 `SHOW_FLOATING_LEGEND()`
+  - 图表包含有意义的标题
+  - 布局合理,容器分布均匀,避免拥挤
+  - 关系线不交叉或交叉最少
+  - 容器数量适中 (5-15 个),过多时考虑拆分或分组
+  """
+]

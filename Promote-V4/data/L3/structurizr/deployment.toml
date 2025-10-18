@@ -1,0 +1,207 @@
+# ============================================
+# L3 类型层 v1.0.0
+# Structurizr Deployment (部署图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "structurizr"
+diagram_type = "deployment"
+version = "1.0.0"
+description = "Structurizr 部署图规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "high"
+target_length = 3200
+use_cases = ["部署架构设计", "基础设施规划", "多环境对比"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "部署架构专家",
+  "DevOps 工程师",
+  "SRE 专家"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **DeploymentEnvironment 必需性**: 所有部署节点必须定义在 deploymentEnvironment 块内。
+  错误: 直接在 model 中定义 deploymentNode
+  正确: `deploymentEnvironment "生产环境" { deploymentNode ... }`
+  """,
+
+  """
+  **ContainerInstance 嵌套规范**: containerInstance 必须定义在 deploymentNode 内部。
+  错误: containerInstance 直接在 deploymentEnvironment 下
+  正确: containerInstance 嵌套在 deploymentNode 内部
+  """,
+
+  """
+  **ContainerInstance 引用正确性**: containerInstance 引用的 container 必须已在 model 中定义。
+  错误: `containerInstance webApp` (webApp 未定义)
+  正确: 先定义 container,再创建 containerInstance
+  """,
+
+  """
+  **DeploymentNode 层次合理性**: deploymentNode 可以嵌套,但建议不超过 3-4 层。
+  正确: 云服务商 → Kubernetes 集群 → Pod
+  错误: 嵌套 5-6 层导致复杂度过高
+  """,
+
+  """
+  **InfrastructureNode 与 DeploymentNode 区分**:
+  - deploymentNode: 运行容器实例 (应用、数据库)
+  - infrastructureNode: 不运行容器 (负载均衡、CDN、对象存储)
+  错误: 把 CDN 当作 deploymentNode
+  正确: CDN 使用 infrastructureNode
+  """,
+
+  """
+  **Deployment 视图环境匹配**: deployment 视图必须指定环境名称,与 deploymentEnvironment 匹配。
+  正确: `deployment system "生产环境" "key"`
+  错误: 环境名称与 deploymentEnvironment 不匹配
+  """,
+
+  """
+  **多环境命名规范**: 环境命名应清晰明确,常用名称:
+  - 开发环境: Development, Dev
+  - 测试环境: Testing, Test, Staging
+  - 生产环境: Production, Prod
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别部署环境**:
+  - 开发环境: 单机部署,Docker Desktop
+  - 测试环境: 简化集群,Docker Compose
+  - 生产环境: 高可用集群,Kubernetes
+  - 确定每个环境的容器实例数量和部署方式
+  """,
+
+  """
+  **2. 设计部署节点层次**:
+  - 第一层: 云服务提供商 (AWS, 阿里云, Azure)
+  - 第二层: 基础设施服务 (Kubernetes 集群, RDS, 负载均衡)
+  - 第三层: 运行时节点 (Pod, Docker 容器, 虚拟机)
+  - 第四层: 容器实例 (containerInstance)
+  - 基础设施节点: 负载均衡、CDN、对象存储
+  """,
+
+  """
+  **3. 创建 deploymentEnvironment**:
+  - 为每个环境创建 deploymentEnvironment 块
+  - 在环境内定义 deploymentNode 层次结构
+  - 在节点内创建 containerInstance,映射到 container
+  - 定义 infrastructureNode,标记基础设施
+  """,
+
+  """
+  **4. 创建 deployment 视图**:
+  - 使用 `deployment system "环境名称" "key" "title"` 语法
+  - 使用 `include *` 包含所有部署元素
+  - 使用 `autolayout tb/lr` 自动布局
+  - 为每个环境创建独立的部署视图
+  """,
+
+  """
+  **5. 定义部署关系**:
+  - 负载均衡 → 应用实例 (负载分发)
+  - 应用实例 → 数据库实例 (读/写操作)
+  - 应用实例 → 缓存实例 (缓存访问)
+  - 应用实例 → 对象存储 (文件存储)
+  - CDN → 负载均衡 (动态请求转发)
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **部署环境完整性**:
+  - 所有部署节点都在 deploymentEnvironment 内
+  - containerInstance 正确引用已定义的 container
+  - deploymentNode 层次嵌套合理 (不超过 3-4 层)
+  - infrastructureNode 标记清晰
+  """,
+
+  """
+  **基础设施架构清晰性**:
+  - 部署节点命名清晰,反映真实基础设施
+  - 节点技术栈标注完整 (Docker, Kubernetes, RDS 等)
+  - 容器实例数量合理,反映高可用需求
+  - 基础设施节点 (负载均衡、CDN) 独立标识
+  """,
+
+  """
+  **多环境对比合理性**:
+  - 开发环境: 单机部署,简化架构
+  - 测试环境: 简化集群,单实例部署
+  - 生产环境: 高可用集群,多实例部署,主从/集群架构
+  - 环境差异清晰,反映真实部署策略
+  """,
+
+  """
+  **部署视图专业性**:
+  - 每个环境有独立的 deployment 视图
+  - 视图键值唯一,易于识别
+  - 布局合理,节点分布均匀
+  - 关系清晰,反映网络拓扑
+  """
+]
+
+# ============================================
+# Section 5: 使用场景 (Use Cases)
+# ============================================
+
+[[use_cases]]
+title = "生产环境 Kubernetes 部署"
+scenario = "展示电商系统在生产环境的 Kubernetes 部署架构,包括负载均衡、Web Pod、API Pod、RDS、Redis 集群、对象存储"
+key_points = [
+  "阿里云 SLB 负载均衡器",
+  "ACK Kubernetes 集群: Web Pod (3 实例), API Pod (5 实例)",
+  "RDS MySQL 主从架构: 主库 + 从库",
+  "Redis 集群: 3 主 3 从",
+  "OSS 对象存储, CDN 内容分发"
+]
+
+[[use_cases]]
+title = "多环境对比部署图"
+scenario = "展示开发、测试、生产三个环境的部署差异,包括开发环境单机 Docker、测试环境 Docker Compose、生产环境 Kubernetes"
+key_points = [
+  "开发环境: MacBook Pro → Docker Desktop → 所有容器",
+  "测试环境: Ubuntu 服务器 → Docker Compose → 单实例部署",
+  "生产环境: 阿里云 → Kubernetes 集群 → 多实例高可用",
+  "创建三个独立的 deployment 视图",
+  "对比视图: 容器视图 (不关心部署)"
+]
+
+[[use_cases]]
+title = "外部系统实例部署"
+scenario = "展示部署视图中如何包含外部系统实例 (支付网关、物流 API),使用 softwareSystemInstance 标记外部依赖"
+key_points = [
+  "内部部署: 内网 Kubernetes 集群",
+  "外部系统实例: 第三方服务 → 支付网关实例 + 物流 API 实例",
+  "关系: API 应用实例 → 支付网关实例 (HTTPS)",
+  "关系: API 应用实例 → 物流 API 实例 (HTTPS)",
+  "使用标签区分内部和外部系统"
+]

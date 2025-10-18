@@ -133,7 +133,8 @@ graph TD
     Lib --> LibUtils["utils - 工具函数"]
     Lib --> LibValidations["validations - 验证"]
 
-    LibConstants --> Prompts["prompts - AI 提示词 (23 种语言)"]
+    LibConstants --> Prompts["prompts - AI 提示词系统"]
+    LibUtils --> PromptLoader["prompt-toml-loader.ts - V4 TOML 加载器"]
 
     Components --> CompAuth["auth - 认证组件"]
     Components --> CompEditor["editor - 编辑器"]
@@ -173,7 +174,9 @@ graph TD
 | **src/app/api/kroki**    | Kroki 代理 API             | [[...path]]/route.ts                                 | -                                       |
 | **src/lib/ai**           | AI 提供商抽象              | provider-factory.ts                                  | [查看详情](#ai-provider-factory)        |
 | **src/lib/auth**         | 认证系统：JWT + bcrypt     | jwt.ts, password.ts, middleware.ts                   | [查看详情](#认证系统)                   |
-| **src/lib/constants**    | 常量配置                   | diagram-types.ts, env.ts, prompts/                   | [查看详情](#类型定义管理)               |
+| **src/lib/constants**    | 常量配置                   | diagram-types.ts, env.ts                             | [查看详情](#类型定义管理)               |
+| **src/lib/utils**        | 工具函数                   | prompt-toml-loader.ts, kroki.ts, code-cleaner.ts     | [查看详情](#promote-v4-toml-prompt-系统) |
+| **Promote-V4/**          | V4 TOML Prompt 数据        | data/L1, data/L2, data/L3 (29 个 TOML 文件)         | [查看详情](#promote-v4-toml-prompt-系统) |
 | **src/lib/db**           | 数据库层                   | client.ts, schema.sql                                | [查看详情](#数据库-schema)              |
 | **src/lib/repositories** | 数据访问层                 | User/Model/History/ChatSession                       | [查看详情](#repository-层)              |
 | **src/lib/services**     | 业务逻辑层                 | DiagramGenerationService.ts, DiagramEditorService.ts | [查看详情](#diagram-generation-service) |
@@ -662,30 +665,38 @@ case 'your-provider':
 
 ---
 
-## 🔄 类型定义管理
+## 🚀 Promote-V4 TOML Prompt 系统
 
-### Prompt 层级结构
+### 系统概述
 
-DiagramAI 使用三层 Prompt 系统:
+**当前版本**: V4 (TOML 格式)
+**功能开关**: `USE_PROMOTE_V4` 环境变量控制
+**状态**: ✅ 已集成,生产就绪
+
+### 三层 Prompt 架构
 
 ```
-L1: universal.txt (641 行)
-    → 所有图表共享的通用规范
+L1: Promote-V4/data/L1/universal.toml
+    ↓ 通用图表生成规范 (适用所有语言和类型)
 
-L2: {language}/common.txt
-    → 每种语言的通用规范 (可选)
-    → 21/23 种语言有此文件
+L2: Promote-V4/data/L2/{language}.toml (可选)
+    ↓ 语言特定规范 (如 Mermaid, PlantUML)
 
-L3: {language}/{type}.txt
-    → 特定图表类型的规范 (必需)
-    → 必须与前端类型定义对齐
+L3: Promote-V4/data/L3/{language}/{type}.toml
+    ↓ 图表类型规范 (如 mermaid/flowchart)
+
+最终拼接: L1 + "═══..." + L2 + "═══..." + L3
 ```
 
-**Prompt 构建逻辑** (`src/lib/utils/prompt-loader.ts`):
+### TOML 格式优势
 
-```typescript
-最终 Prompt = L1 + L2 + L3 (用 --- 分隔)
-```
+| 特性 | V3 (Markdown) | V4 (TOML) |
+|------|--------------|-----------|
+| 格式 | .txt (自由文本) | .toml (结构化) |
+| 分隔符 | `---` | `═══...` |
+| 任务指令 | 内嵌在 Prompt | 前端动态注入 |
+| 版本控制 | 文件名 | meta.version |
+| 缩进依赖 | 是 | 否 (更健壮) |
 
 ### 类型定义对齐原则
 

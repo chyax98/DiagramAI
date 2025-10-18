@@ -1,0 +1,273 @@
+[meta]
+level = "L3"
+language = "pikchr"
+diagram_type = "diagram"
+version = "1.0.0"
+description = "Pikchr 通用图表生成规范 - 程序化精确控制"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关元数据
+complexity = "medium"
+target_length = 2800
+use_cases = ["流程图", "系统架构", "决策流程", "组件关系", "状态机", "网络拓扑"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "程序化图表布局专家",
+  "几何定位和精确控制专家"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **尺寸单位强制规则**: 所有尺寸属性(width, height, radius, 距离)必须明确指定单位。支持 `cm`(厘米,推荐)、`mm`(毫米)、`in`(英寸)、`px`(像素)。示例: `box width 2cm height 1cm`, `circle radius 0.5cm`, `arrow right 1cm`。缺少单位会导致 Pikchr 编译失败。
+  """,
+
+  """
+  **对象命名和引用规则**: 需要被引用的对象必须先命名,语法: `Name: object_type "label"`。引用对象使用 `from Name to OtherName` 或锚点语法 `Name.e`(东), `.w`(西), `.n`(北), `.s`(南), `.ne`, `.nw`, `.se`, `.sw`(四角)。未命名对象无法被引用。
+  """,
+
+  """
+  **方向语法规范**: 方向使用关键字(`right`, `left`, `up`, `down`),箭头使用符号(`->`, `<-`, `<->`)。不要混用!正确: `arrow right`, `arrow <-`。错误: `arrow -> right`, `arrow <- down`。组合方向使用 `then`: `arrow right 2cm then down 1cm`。
+  """,
+
+  """
+  **基础对象类型约束**: Pikchr 支持 13 种对象类型:
+  - 形状: box(矩形), circle(圆形), ellipse(椭圆), cylinder(圆柱体), file(文件形状)
+  - 线条: arrow(箭头), line(直线), spline(平滑曲线), arc(弧线)
+  - 辅助: dot(小圆点), move(移动光标), text(纯文本), oval(椭圆别名)
+  所有对象都可设置样式属性(fill, color, width, height)。
+  """,
+
+  """
+  **定位系统三种模式**:
+  - 相对定位: 元素按书写顺序从左到右、从上到下排列
+  - 绝对定位: `at x,y` 使用坐标系(原点左上角,X向右,Y向下,单位必需)
+  - 锚点定位: `at 2cm right of A`, `at 1cm below B` 相对已命名对象
+  混合使用三种模式实现灵活布局。
+  """,
+
+  """
+  **箭头和线条约束**:
+  - 箭头必须指定方向或起止点: `arrow right 2cm` 或 `arrow from A to B`
+  - 线条样式: `solid`(默认), `dashed`(虚线), `dotted`(点线), `thick`(加粗), `thin`(细线)
+  - 使用 `chop` 修剪箭头端点,避免穿透对象: `arrow from A to B chop`
+  - 复杂路径使用 `then`, `until`, `even with` 组合
+  """,
+
+  """
+  **高级属性使用约束**:
+  - `fit`: 自动调整对象大小以包含文本,用于文本长度不确定的场景
+  - `same`: 继承前一个同类型对象的所有属性(宽高、颜色、线型)
+  - `behind <object>`: 控制图层顺序,对象显示在指定对象后面
+  - `invisible`: 创建不可见占位对象,用于布局辅助定位
+  - `close`: 闭合路径,连接最后一点到起点,形成封闭图形
+  """,
+
+  """
+  **容器和模块化约束**: 使用 `[]` 创建子图容器,内部元素相对于容器定位。容器可以命名并引用其锚点。容器可嵌套,实现复杂的层次结构。容器可设置颜色和填充属性。示例:
+  ```pikchr
+  Container: [
+    box "元素1"
+    arrow right 1cm
+    box "元素2"
+  ] fill none color blue
+  ```
+  """,
+
+  """
+  **变量和表达式约束**:
+  - 变量赋值: `varName = value`,支持存储尺寸、颜色等值
+  - 算术运算: `+`, `-`, `*`, `/` 用于动态计算布局参数
+  - 数学函数: `sin()`, `cos()`, `sqrt()`, `abs()`, `min()`, `max()`
+  - **限制**: Pikchr 不支持 if/else 条件语句和 for/while 循环
+  - **注意**: 宏定义在 Kroki 中可能不稳定,建议使用基础语法
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 图表结构分析**:
+  - 识别图表类型和主要元素(节点、连接、分支)
+  - 确定布局策略(水平、垂直、放射状、网格)
+  - 规划定位方式(相对、绝对、锚点、混合)
+  - 评估是否需要变量、容器等高级特性
+  """,
+
+  """
+  **2. 变量定义和配置(可选)**:
+  - 定义布局变量统一尺寸和间距: `nodeWidth = 2.5cm`, `spacing = 1.5cm`
+  - 定义颜色变量统一配色: `primaryColor = lightblue`, `secondaryColor = lightgreen`
+  - 使用表达式计算动态参数: `height = width / 2`, `offset = radius * cos(angle)`
+  - 注意 Kroki 兼容性,避免过度依赖高级特性
+  """,
+
+  """
+  **3. 创建基础对象**:
+  - 为需要引用的对象命名: `A: box "节点A"`
+  - 设置对象属性,所有尺寸必须包含单位: `width 2cm height 1cm`
+  - 设置样式属性: `fill lightblue color blue`
+  - 使用 `fit` 让对象自动适应文本: `box "长文本" fit`
+  - 使用 `same` 继承样式: `box same "节点B"`
+  """,
+
+  """
+  **4. 定位对象位置**:
+  - 相对定位: 元素按书写顺序自然排列,使用 `move right Xcm` 调整间距
+  - 绝对定位: `at x,y` 精确控制位置(单位必需)
+  - 锚点定位: `at 2cm right of A`, `at 1cm below B` 相对已命名对象
+  - 复杂布局: 使用 `heading <angle>` 实现放射状、圆形布局
+  """,
+
+  """
+  **5. 添加连接线和箭头**:
+  - 使用命名引用: `arrow from A to B` 或 `arrow from A.e to B.w`
+  - 使用锚点精确控制连接点: `.n`(北), `.s`(南), `.e`(东), `.w`(西)
+  - 使用 `chop` 修剪端点: `arrow from A to B chop` 避免穿透对象
+  - 复杂路径: `arrow from A right until even with B then to B` 创建直角连接
+  - 设置线条样式: `dashed`, `dotted`, `thick` 控制外观
+  """,
+
+  """
+  **6. 应用容器和优化(可选)**:
+  - 使用容器组织复杂结构: `Container: [ ... ]`
+  - 使用 `behind` 控制图层: `box behind A`
+  - 使用 `invisible` 创建布局辅助: `box invisible at 3cm right of A`
+  - 验证所有对象命名、尺寸单位、引用关系正确
+  - 使用 Kroki 测试渲染效果
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **单位完整性验证**:
+  - 所有 width, height, radius 属性包含单位(cm, mm, in, px)
+  - 所有距离和偏移量包含单位
+  - 使用一致的单位系统(避免混用 cm 和 px)
+  - 无遗漏单位导致的编译错误
+  """,
+
+  """
+  **对象命名和引用一致性**:
+  - 所有被引用的对象已命名
+  - 命名语义化,使用驼峰或下划线
+  - 锚点引用语法正确(.n, .s, .e, .w 等)
+  - `from ... to ...` 引用的对象名称存在且正确
+  """,
+
+  """
+  **语法正确性检查**:
+  - 方向使用关键字(right, left, up, down),不与箭头符号混用
+  - 箭头符号(->, <-, <->)使用正确
+  - 复杂路径使用 then, until, even with 语法正确
+  - 角度使用 heading 指定,范围合理(0-360度)
+  """,
+
+  """
+  **布局质量评估**:
+  - 对象位置合理,无重叠或过度分散
+  - 对齐整齐,间距一致
+  - 连接线使用 chop 优化,端点整齐
+  - 复杂图表使用容器实现模块化
+  - 视觉层次清晰,重点突出
+  """,
+
+  """
+  **Kroki 渲染验证**:
+  - 代码成功解析,无语法错误
+  - 渲染结果符合预期,对象位置和样式正确
+  - 连接线方向和端点正确,无穿透或断裂
+  - 文本标签清晰可读,无乱码
+  - 整体视觉效果专业、美观
+  """
+]
+
+# ============================================
+# Section 5: 使用场景 (Use Cases)
+# ============================================
+
+[[use_cases]]
+title = "简单三步骤流程图"
+scenario = "展示基本的顺序流程,使用命名锚点和相对定位"
+key_points = [
+  "使用命名语法创建对象: `Start: box \"开始\"`",
+  "使用相对定位自然排列: `arrow right 1cm`",
+  "填充不同颜色区分步骤: `fill lightblue`, `fill lightgreen`, `fill pink`",
+  "所有尺寸包含单位(cm)",
+  "代码简洁,易于维护"
+]
+
+[[use_cases]]
+title = "包含判断分支的决策流程图"
+scenario = "展示条件判断和分支处理,使用椭圆表示判断点"
+key_points = [
+  "使用椭圆表示判断点: `Decision: ellipse \"判断?\" fill yellow`",
+  "使用锚点引用精确控制箭头连接: `from Decision.s`, `from Decision.e`",
+  "箭头标签说明条件: `arrow down 1cm from Decision.s \"是\"`",
+  "复杂路径创建汇合点: `arrow down 1cm from NoBox.s then left 2cm`",
+  "清晰的决策逻辑和路径"
+]
+
+[[use_cases]]
+title = "三层系统架构图"
+scenario = "展示分层架构,使用双向箭头表示交互关系"
+key_points = [
+  "使用统一的宽度和高度: `width 4cm height 1cm`",
+  "垂直布局表示层级: `at 1cm below UI.s`",
+  "双向箭头表示交互: `arrow <-> from UI.s to BL.n`",
+  "使用注释分隔层级,提高可读性",
+  "清晰的分层结构和依赖关系"
+]
+
+[[use_cases]]
+title = "微服务组件关系图"
+scenario = "展示微服务架构,使用绝对定位精确控制布局"
+key_points = [
+  "使用绝对定位精确控制: `at 2cm right of Frontend`, `at 2cm below Backend1`",
+  "填充不同颜色区分服务: `fill lightblue`, `fill lightgreen`, `fill pink`",
+  "箭头表示依赖关系,方向明确",
+  "布局紧凑,结构清晰",
+  "易于扩展和修改"
+]
+
+[[use_cases]]
+title = "使用变量和表达式的响应式布局"
+scenario = "展示高级特性,使用变量统一风格,表达式动态计算"
+key_points = [
+  "定义布局变量统一尺寸: `nodeWidth = 2.5cm`, `spacing = 1.5cm`",
+  "使用变量创建一致风格: `width nodeWidth height nodeHeight`",
+  "使用表达式计算派生值: `width baseSize*ratio`",
+  "修改一处变量,全局联动更新",
+  "代码可维护性强,扩展性好"
+]
+
+[[use_cases]]
+title = "使用 heading 实现放射状布局"
+scenario = "展示复杂几何布局,使用精确角度实现放射状结构"
+key_points = [
+  "中心节点: `Center: circle radius 0.3cm fill yellow`",
+  "使用 heading 精确角度: `at 2cm heading 60deg from Center`",
+  "均匀分布节点: 0°, 60°, 120°, 180°, 240°, 300°",
+  "使用 chop 优化连接: `arrow from Center to Node1 chop`",
+  "完美的圆形布局,视觉效果专业"
+]

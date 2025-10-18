@@ -1,0 +1,192 @@
+# ============================================
+# L3 类型层 v1.0.0
+# Structurizr System Context (系统上下文图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "structurizr"
+diagram_type = "context"
+version = "1.0.0"
+description = "Structurizr 系统上下文图规范 - C4 Level 1"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "low"
+target_length = 2000
+use_cases = ["系统边界定义", "外部依赖展示", "干系人视图"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "系统边界专家",
+  "业务分析师"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **聚焦单系统**: systemContext 视图必须聚焦单个 Software System,展示该系统的边界和外部依赖。
+  正确: `systemContext targetSystem "key" { }`
+  错误: 试图展示多个系统的详细内部结构
+  """,
+
+  """
+  **不包含 Container**: System Context 是 C4 Level 1,只展示系统边界,不应包含系统内部的 Container 或 Component。
+  错误: 在 softwareSystem 内部定义 container,然后在 systemContext 视图中显示
+  正确: 仅展示 Person 和 Software System 之间的关系
+  """,
+
+  """
+  **外部系统标记**: 所有外部系统必须使用 tags "External" 标记,便于区分内部和外部系统。
+  正确: `externalSystem = softwareSystem "外部系统" { tags "External" }`
+  """,
+
+  """
+  **关系业务化**: 关系描述应使用业务语言,避免技术细节。
+  正确: `user -> system "创建订单"`
+  错误: `user -> system "发送 HTTP POST 请求到 /api/v1/orders 端点"`
+  """,
+
+  """
+  **参与者完整性**: 必须包含所有直接与系统交互的 Person (用户、管理员、外部角色)。
+  """,
+
+  """
+  **Include 语句规范**: systemContext 视图必须使用 include 语句指定元素。
+  正确: `include *` 或 `include user admin targetSystem externalA`
+  错误: 缺少 include 语句导致空白视图
+  """,
+
+  """
+  **关系方向正确性**: 主动方向应该是系统发起,而不是被动接受。
+  正确: `targetSystem -> externalAPI "调用 API"`
+  错误: `externalAPI -> targetSystem "被调用"`
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别目标系统和参与者**:
+  - 确定要展示上下文的目标系统
+  - 识别所有直接与系统交互的用户 (Person)
+  - 识别所有外部依赖系统 (Software System)
+  - 区分内部和外部系统 (使用 tags "External")
+  """,
+
+  """
+  **2. 定义元素和关系**:
+  - 在 model 中声明所有 Person
+  - 声明目标 Software System
+  - 声明所有外部 Software System,标记 tags "External"
+  - 定义 Person 与系统的交互关系
+  - 定义系统与外部系统的集成关系
+  """,
+
+  """
+  **3. 创建 systemContext 视图**:
+  - 使用 `systemContext targetSystem "key" "title"` 语法
+  - 使用 `include *` 包含所有相关元素
+  - 或选择性包含关键元素 `include user admin targetSystem externalA`
+  - 使用 `autolayout lr/tb` 自动布局
+  """,
+
+  """
+  **4. 优化关系描述**:
+  - 使用业务语言描述关系 (避免技术细节)
+  - 明确用户做什么 (使用、管理、查询等)
+  - 明确系统与外部系统的集成方式 (调用 API、发送数据、同步信息等)
+  """,
+
+  """
+  **5. 可选创建多个上下文视图**:
+  - 完整上下文视图: 包含所有参与者和外部系统
+  - 用户视角视图: 聚焦用户交互
+  - 集成视角视图: 聚焦外部系统集成
+  - 使用 include/exclude 表达式过滤元素
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **系统边界清晰性**:
+  - 明确展示什么在系统内,什么在系统外
+  - 外部系统使用 tags "External" 标记
+  - 关系方向正确反映主动方
+  """,
+
+  """
+  **参与者完整性**:
+  - 包含所有直接与系统交互的 Person
+  - Person 类型正确 (用户、管理员、外部角色)
+  - 每个 Person 都有明确的交互关系
+  """,
+
+  """
+  **外部依赖完整性**:
+  - 包含所有外部系统依赖
+  - 外部系统标记清晰
+  - 集成关系描述清晰 (调用、同步、通知等)
+  """,
+
+  """
+  **业务语言清晰性**:
+  - 关系描述使用业务语言,避免技术细节
+  - 适合非技术干系人理解
+  - 聚焦业务价值和数据流向
+  """
+]
+
+# ============================================
+# Section 5: 使用场景 (Use Cases)
+# ============================================
+
+[[use_cases]]
+title = "订单管理系统上下文"
+scenario = "展示订单管理系统的边界,包括客户、管理员两类用户,以及支付网关、邮件系统、物流系统等外部依赖"
+key_points = [
+  "客户使用系统下单和查询",
+  "管理员管理订单和商品",
+  "系统调用支付网关处理支付",
+  "系统调用邮件系统发送通知",
+  "系统调用物流系统创建配送单"
+]
+
+[[use_cases]]
+title = "电商平台上下文 (多视角)"
+scenario = "为电商平台创建多个上下文视图,包括用户视角 (聚焦购物流程)、运营视角 (聚焦管理功能)、完整集成视角 (展示所有外部依赖)"
+key_points = [
+  "用户视角: 客户 → 平台 → 支付网关 + 邮件系统",
+  "运营视角: 管理员 → 平台 → ERP 系统 + 邮件系统",
+  "完整视角: 所有参与者 + 所有外部系统",
+  "使用 include/exclude 表达式过滤元素"
+]
+
+[[use_cases]]
+title = "微服务生态上下文"
+scenario = "展示微服务系统的上下文,包括多种外部集成模式 (同步 API、异步消息、数据同步)"
+key_points = [
+  "同步集成: 系统 → 支付 API (HTTPS/REST)",
+  "异步集成: 系统 → 消息队列 → 通知系统",
+  "数据同步: 系统 → 数据仓库 (ETL/Batch)",
+  "使用关系描述说明集成方式"
+]

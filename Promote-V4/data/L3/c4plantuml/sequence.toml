@@ -1,0 +1,256 @@
+# ============================================
+# L3 类型层 v1.0.0
+# C4-PlantUML Sequence (时序图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "c4plantuml"
+diagram_type = "sequence"
+version = "1.0.0"
+description = "C4-PlantUML 时序图规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "medium"
+target_length = 2600
+use_cases = ["业务流程分析", "系统交互设计", "API 调用流程", "异步处理流程"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "流程分析师 - 理解业务流程的时间顺序和交互逻辑",
+  "时序图工程师 - 精通 PlantUML 时序图语法和 C4 标注"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **时序图库引用约束**: C4 时序图使用标准 PlantUML 时序图语法,结合 C4 库标注:
+  ```plantuml
+  @startuml
+  !include <C4/C4_Container>
+  SHOW_PERSON_OUTLINE()  ' 可选,显示人形轮廓
+
+  title C4 Sequence - 用户下单流程
+  @enduml
+  ```
+  也可使用 `!include <C4/C4_Component>` (组件级时序图)。
+  ❌ 绝对禁止空的 `!include`,这会导致 "Error 400: cannot include"。
+  """,
+
+  """
+  **C4 Dynamic 图 vs 标准时序图**:
+  - **C4 Dynamic 图** (简化版):
+    - 使用 `!include <C4/C4_Dynamic>`
+    - 使用 `RelIndex(序号, from, to, "描述")` 宏,自动编号关系
+    - 适用于简单的顺序交互,强调步骤编号
+    - 无复杂控制流 (条件、循环)
+
+  - **标准时序图** (本文档主要内容):
+    - 使用 `!include <C4/C4_Container>` + PlantUML 时序图语法
+    - 适用于复杂交互流程,支持分组、条件、循环
+    - 使用 `participant`、`->`、`alt`、`loop` 等时序图语法
+  """,
+
+  """
+  **参与者定义约束**: 参与者使用 C4 标注增强语义:
+  ```plantuml
+  participant "用户" as user
+  participant "Web应用" as web <<Container>>
+  participant "API网关" as api <<Container>>
+  participant "订单服务" as order <<Container>>
+  participant "数据库" as db <<Container>>
+  ```
+  - 使用 `<<Container>>`、`<<Component>>`、`<<System>>`、`<<External System>>` 标注
+  - 标注帮助理解参与者在 C4 模型中的层次
+  """,
+
+  """
+  **消息类型约束**: 使用正确的箭头表示不同的消息类型:
+  - **同步调用** (实线箭头): `A -> B: 同步消息`
+  - **返回消息** (虚线箭头): `B --> A: 返回结果`
+  - **异步消息** (实线箭头,无返回): `A ->> B: 异步消息`
+  - **自调用**: `A -> A: 内部处理`
+  - **激活生命线**: `activate B` / `deactivate B`
+  """,
+
+  """
+  **控制流约束**: 支持条件、分组、循环等控制流:
+  - **分组块**: `group 支付流程 ... end`
+  - **条件分支**: `alt 支付成功 ... else 支付失败 ... end`
+  - **循环**: `loop 重试3次 ... end`
+  - **可选**: `opt 如果有优惠券 ... end`
+  - **注释**: `note over A,B: 这是一个重要的交互点`
+  """,
+
+  """
+  **流程复杂度约束**: 时序图应保持清晰可读:
+  - 参与者数量: 建议 3-8 个
+  - 消息数量: 建议 ≤ 30 条
+  - 嵌套深度: 建议 ≤ 3 层 (分组/条件/循环)
+  - 过多消息应考虑:
+    - 拆分为多个独立的时序图 (按业务阶段)
+    - 使用分组 (group) 折叠次要流程
+    - 简化显示,省略非关键交互
+  """,
+
+  """
+  **消息描述约束**: 消息描述应清晰表达业务操作或技术调用:
+  - 业务流程: "提交订单"、"验证库存"、"发起支付"
+  - 技术调用: "POST /orders"、"查询数据库"、"发布事件"
+  - 返回消息: "订单ID"、"支付结果"、"用户信息"
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别参与者**: 确定时序图中的所有参与者:
+  - **人员**: 用户、管理员、客服
+  - **前端应用**: Web 应用、移动应用
+  - **后端服务**: API 网关、业务服务、认证服务
+  - **数据存储**: 数据库、缓存、消息队列
+  - **外部系统**: 支付网关、短信服务、第三方 API
+  """,
+
+  """
+  **2. 定义参与者并标注 C4 层次**:
+  ```plantuml
+  participant "用户" as user
+  participant "Web应用" as web <<Container>>
+  participant "API服务" as api <<Container>>
+  participant "订单服务" as order <<Component>>
+  participant "数据库" as db <<Container>>
+  participant "支付网关" as payment <<External System>>
+  ```
+  - 使用 `<<Container>>`、`<<Component>>`、`<<System>>` 标注
+  - 参与者顺序从左到右,通常按交互顺序或层次排列
+  """,
+
+  """
+  **3. 设计交互流程**: 按时间顺序定义消息交互:
+  - 起始消息: 从触发者 (用户、外部系统) 开始
+  - 同步调用: 使用 `->` 表示请求,`-->` 表示响应
+  - 异步消息: 使用 `->>` 表示发送,不期望立即响应
+  - 自调用: 使用 `->` 指向自己,表示内部处理
+  - 示例:
+    ```plantuml
+    user -> web: 提交订单
+    web -> api: POST /orders
+    api -> order: 创建订单
+    order -> db: 保存订单数据
+    db --> order: 订单ID
+    order --> api: 订单信息
+    api --> web: 下单成功
+    web --> user: 显示订单详情
+    ```
+  """,
+
+  """
+  **4. 添加控制流**: 使用分组、条件、循环增强表达:
+  - **分组块**: 逻辑分组相关交互
+    ```plantuml
+    group 支付流程
+        api -> payment: 发起支付
+        payment --> api: 支付结果
+    end
+    ```
+  - **条件分支**: 处理不同场景
+    ```plantuml
+    alt 支付成功
+        api -> order: 创建订单
+    else 支付失败
+        api -> user: 支付失败提示
+    end
+    ```
+  - **循环**: 重复操作
+    ```plantuml
+    loop 重试3次
+        api -> payment: 请求支付
+        payment --> api: 响应
+    end
+    ```
+  """,
+
+  """
+  **5. 添加注释和说明**: 使用 `note` 增强理解:
+  ```plantuml
+  note over api,order: 这里验证用户权限和库存
+  note left of db: 使用事务确保数据一致性
+  note right of payment: 异步回调处理支付结果
+  ```
+  """,
+
+  """
+  **6. 优化可读性**:
+  - 添加图表标题: `title C4 Sequence - 用户下单流程`
+  - 可选使用 `SHOW_PERSON_OUTLINE()` 显示人形轮廓
+  - 使用激活生命线 (activate/deactivate) 突出活跃组件
+  - 合理使用分组折叠次要流程
+  - 保持参与者数量 (3-8 个) 和消息数量 (≤ 30 条) 适中
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **库引用完整性**:
+  - 必须包含 `@startuml/@enduml` 包裹
+  - 必须包含完整的库引用: `!include <C4/C4_Container>` 或 `!include <C4/C4_Component>`
+  - 绝对不能出现空的 `!include`
+  - 能被 Kroki 成功渲染,无语法错误
+  """,
+
+  """
+  **C4 标注正确性**:
+  - 参与者使用 `<<Container>>`、`<<Component>>`、`<<System>>` 标注
+  - 标注准确反映参与者在 C4 模型中的层次
+  - 外部系统使用 `<<External System>>` 标注
+  - 标注增强时序图的架构语义
+  """,
+
+  """
+  **消息类型正确性**:
+  - 同步调用使用 `->` (请求) 和 `-->` (响应)
+  - 异步消息使用 `->>` 表示
+  - 返回消息使用虚线箭头 `-->`
+  - 消息方向正确,体现调用关系
+  """,
+
+  """
+  **流程逻辑完整性**:
+  - 所有请求都有对应的响应 (除非是异步消息)
+  - 条件分支 (alt) 覆盖所有可能情况
+  - 循环 (loop) 有明确的退出条件
+  - 分组 (group) 逻辑清晰,不过度嵌套
+  - 流程有明确的起点和终点
+  """,
+
+  """
+  **可读性和专业性**:
+  - 图表包含有意义的标题 (如 "C4 Sequence - 用户下单流程")
+  - 参与者数量适中 (3-8 个),避免过多
+  - 消息数量合理 (≤ 30 条),过多时考虑拆分
+  - 使用分组 (group) 增强结构清晰度
+  - 适当使用注释 (note) 说明关键交互点
+  - 嵌套深度适中 (≤ 3 层),避免过度复杂
+  """
+]

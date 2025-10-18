@@ -15,6 +15,7 @@
 import { apiClient } from "@/lib/utils/api-client";
 import type { RenderLanguage } from "@/lib/constants/diagram-types";
 import { logger } from "@/lib/utils/logger";
+import { MAX_RENDER_ERROR_LENGTH } from "@/lib/constants/env";
 
 // ========== 请求参数类型 ==========
 
@@ -116,6 +117,33 @@ export interface FixDiagramResult {
 export interface SaveDiagramResult {
   /** 历史记录 ID */
   historyId: number;
+}
+
+// ========== 工具函数 ==========
+
+/**
+ * 截断渲染错误信息
+ *
+ * 根据环境变量 MAX_RENDER_ERROR_LENGTH 截断错误信息，避免请求过大
+ * 设置为 0 表示不限制长度
+ *
+ * @param error - 原始错误信息
+ * @returns 截断后的错误信息
+ *
+ * @example
+ * ```typescript
+ * const longError = "Syntax error...".repeat(100);
+ * const truncated = truncateRenderError(longError);
+ * // 如果 MAX_RENDER_ERROR_LENGTH=200: "Syntax error...(前200字符)...(已截断)"
+ * // 如果 MAX_RENDER_ERROR_LENGTH=0: 返回完整错误信息
+ * ```
+ */
+function truncateRenderError(error: string): string {
+  if (MAX_RENDER_ERROR_LENGTH === 0 || error.length <= MAX_RENDER_ERROR_LENGTH) {
+    return error;
+  }
+
+  return error.substring(0, MAX_RENDER_ERROR_LENGTH) + "...(已截断)";
 }
 
 // ========== Service 类 ==========
@@ -272,11 +300,16 @@ export class DiagramEditorService {
     // 参数验证
     this._validateFixParams(params);
 
+    // ⭐ 截断错误信息，避免请求过大
+    const truncatedError = truncateRenderError(params.renderError);
+
     // ✅ 简化消息：只提供错误信息，依赖任务标记 + L1 prompt 指导行为
-    const fixMessage = `渲染错误：${params.renderError}`;
+    const fixMessage = `渲染错误：${truncatedError}`;
 
     logger.info("🔨 调用图表修复服务:", {
       renderError: params.renderError.slice(0, 100) + "...",
+      truncatedLength: truncatedError.length,
+      originalLength: params.renderError.length,
       sessionId: params.sessionId,
       renderLanguage: params.renderLanguage,
       modelId: params.modelId,
@@ -290,7 +323,7 @@ export class DiagramEditorService {
         renderLanguage: params.renderLanguage,
         modelId: params.modelId,
         taskType: "fix", // ⭐ 显式指定：修复任务（会注入任务标记）
-        renderError: params.renderError, // ⭐ 传递渲染错误，用于自动记录失败日志
+        renderError: truncatedError, // ⭐ 传递截断后的渲染错误，用于自动记录失败日志
       });
 
       logger.info("✅ 图表修复成功:", {

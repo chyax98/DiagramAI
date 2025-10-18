@@ -1,0 +1,207 @@
+# ============================================
+# L3 类型层 v1.0.0
+# Structurizr Component (组件图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "structurizr"
+diagram_type = "component"
+version = "1.0.0"
+description = "Structurizr 组件图规范 - C4 Level 3"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "medium"
+target_length = 2800
+use_cases = ["代码结构设计", "分层架构展示", "模块职责划分"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "代码架构专家",
+  "分层设计专家"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **Component 嵌套规范**: Component 必须定义在 Container 内部,表示容器的内部模块。
+  错误: `component = component "名称" "描述" "技术"` (在 softwareSystem 或 model 根层)
+  正确: 在 `container { }` 块内部定义 component
+  """,
+
+  """
+  **技术实现必填**: Component 的第三个参数是技术实现,必须填写。
+  正确: `controller = component "用户控制器" "处理请求" "Spring MVC Controller"`
+  错误: `controller = component "用户控制器" "处理请求"` (缺少技术实现)
+  """,
+
+  """
+  **分层架构规范**: 组件应体现分层架构的依赖关系。
+  正确: Controller → Service → Repository
+  错误: Controller 直接访问 Repository (跳过 Service 层)
+  """,
+
+  """
+  **组件粒度合理性**: 组件是逻辑分组,不是单个类或方法。
+  错误: 每个方法都是组件 (getUserById, getUserByName)
+  正确: 按职责划分组件 (UserService, OrderService)
+  """,
+
+  """
+  **标签分类规范**: 使用标签对组件分类,常用标签:
+  - Controller: 控制器层
+  - Service: 服务层
+  - Repository: 仓储层
+  - Utility: 工具层
+  - CrossCutting: 横切关注点 (日志、审计、缓存)
+  """,
+
+  """
+  **Include 语句规范**: component 视图必须使用 include 语句指定元素。
+  正确: `include *` 或选择性包含组件
+  错误: 缺少 include 语句导致空白视图
+  """,
+
+  """
+  **视图聚焦单容器**: component 视图只聚焦一个容器内部的组件,不应包含其他容器。
+  正确: `component apiApp "key"`
+  错误: 在视图中混合多个容器的组件
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别容器内部组件**:
+  - 控制器层: 处理 HTTP 请求、API 端点 (Spring MVC Controller, Express Router)
+  - 服务层: 实现业务逻辑 (Spring Service, Business Logic)
+  - 仓储层: 数据访问层 (Spring Data JPA, DAO)
+  - 工具层: 通用工具和辅助功能 (缓存管理器、图片处理器)
+  - 横切关注点: 日志、审计、安全、事务
+  """,
+
+  """
+  **2. 设计组件结构**:
+  - 在 container 块内部定义所有 component
+  - 为每个组件指定名称、描述、技术实现
+  - 使用标签对组件分类 (Controller, Service, Repository 等)
+  - 定义组件之间的依赖关系,体现分层架构
+  """,
+
+  """
+  **3. 创建 component 视图**:
+  - 使用 `component container "key" "title"` 语法
+  - 使用 `include *` 包含所有组件
+  - 或选择性包含关键组件 `include controller service repository`
+  - 使用 `autolayout tb/lr` 自动布局
+  """,
+
+  """
+  **4. 定义组件依赖**:
+  - 垂直依赖: Controller → Service → Repository (典型分层)
+  - 水平依赖: Service ↔ Service (服务间协作)
+  - 跨层依赖: Service → Utility (特殊工具调用)
+  - 横切关注点: AuditService 被多个服务依赖
+  """,
+
+  """
+  **5. 可选创建多个组件视图**:
+  - 完整组件视图: 包含所有组件
+  - 分层视图: 按层次分组 (Controller → Service → Repository)
+  - 单个模块视图: 聚焦特定功能模块
+  - 横切关注点视图: 聚焦日志、审计等横切功能
+  - 使用 include/exclude 表达式过滤组件
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **组件定义完整性**:
+  - 所有组件都定义在 container 内部
+  - 每个组件都有技术实现参数 (第三个参数)
+  - 组件命名语义化,使用驼峰命名法
+  - 组件分类清晰 (使用标签)
+  """,
+
+  """
+  **分层架构清晰性**:
+  - 体现典型的分层设计 (MVC、DDD 等)
+  - 依赖关系符合分层原则 (单向依赖)
+  - 组件职责明确,符合单一职责原则
+  - 横切关注点识别清晰
+  """,
+
+  """
+  **组件粒度合理性**:
+  - 组件是逻辑分组,不是单个类或方法
+  - 不过度细分 (每个方法都是组件)
+  - 不过度粗糙 (整个层都是一个组件)
+  - 反映真实的代码组织结构
+  """,
+
+  """
+  **代码架构专业性**:
+  - 控制器只处理请求和响应
+  - 服务层实现业务逻辑
+  - 仓储层只负责数据访问
+  - 工具层提供通用功能
+  - 横切关注点独立管理
+  """
+]
+
+# ============================================
+# Section 5: 使用场景 (Use Cases)
+# ============================================
+
+[[use_cases]]
+title = "API 应用组件结构"
+scenario = "展示 API 应用的组件结构,包括用户控制器、订单控制器、用户服务、订单服务、用户仓储、订单仓储,体现 MVC 分层架构"
+key_points = [
+  "控制器层: UserController, OrderController",
+  "服务层: UserService, OrderService",
+  "仓储层: UserRepository, OrderRepository",
+  "依赖关系: Controller → Service → Repository",
+  "使用标签分类: Controller, Service, Repository"
+]
+
+[[use_cases]]
+title = "内容管理系统组件 (复杂依赖)"
+scenario = "展示内容管理系统的组件结构,包括垂直依赖 (分层)、水平依赖 (服务间)、跨层依赖 (工具)、横切关注点 (审计)"
+key_points = [
+  "垂直依赖: ContentController → ContentService → ContentRepository",
+  "水平依赖: ContentService → UserService (验证权限)",
+  "跨层依赖: ContentService → CacheManager (缓存内容)",
+  "横切关注点: AuditService 被多个服务依赖",
+  "工具层: ImageProcessor, CacheManager"
+]
+
+[[use_cases]]
+title = "多容器组件视图"
+scenario = "为电商系统创建多个组件视图,包括前端组件视图 (React Component) 和后端组件视图 (MVC),展示不同容器的组件组织方式"
+key_points = [
+  "前端组件视图: HomeComponent, CartComponent, CheckoutComponent",
+  "后端组件视图: ProductController, OrderController, ProductService, OrderService",
+  "前端组件依赖: Home → Cart → Checkout",
+  "后端组件依赖: Controller → Service → Repository",
+  "容器级别视图不显示组件"
+]

@@ -1,0 +1,202 @@
+# ============================================
+# L2 语言层 - BPMN 2.0 业务流程建模标准
+# ============================================
+
+[meta]
+level = "L2"
+language = "bpmn"
+version = "1.0.0"
+description = "L2: BPMN 2.0 业务流程建模标准通用规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 语言相关元数据
+language_version = "2.0"
+kroki_support = true
+official_docs = "https://www.omg.org/spec/BPMN/2.0/"
+
+# ============================================
+# Section 1: D 角色定义
+# ============================================
+
+[D_role]
+additional_roles = [
+  "BPMN 2.0 标准专家",
+  "业务流程分析师",
+  "流程优化顾问",
+  "BPM 引擎集成专家"
+]
+
+# ============================================
+# Section 2: E 约束条件
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **XML 结构完整性**: 必须包含完整的 XML 声明 `<?xml version="1.0" encoding="UTF-8"?>` 和 BPMN 2.0 命名空间 `xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"`。根元素必须是 `<definitions>`。
+  """,
+
+  """
+  **元素 ID 全局唯一**: 所有 BPMN 元素的 `id` 属性必须在整个文档中全局唯一。推荐使用语义化命名规则：`StartEvent_1`, `Task_Submit`, `Gateway_Amount`, `Flow_1` 等。
+  """,
+
+  """
+  **顺序流连接精确性**: 所有 `<sequenceFlow>` 的 `sourceRef` 和 `targetRef` 必须精确匹配实际存在的元素 ID。不允许引用不存在的元素或拼写错误。
+  """,
+
+  """
+  **开始和结束事件规则**:
+  - 开始事件不能有 incoming sequence flow，必须有至少一个 outgoing sequence flow
+  - 结束事件必须有至少一个 incoming sequence flow，不能有 outgoing sequence flow
+  - 每个流程必须有且仅有一个开始事件，至少有一个结束事件
+  """,
+
+  """
+  **网关条件完整性**:
+  - 排他网关（exclusiveGateway）必须指定 `default` 默认流，其他分支必须有 `<conditionExpression>`
+  - 包容网关（inclusiveGateway）必须有 `default` 默认流和条件表达式
+  - 并行网关（parallelGateway）不需要条件表达式，但必须成对使用（分支 + 汇聚）
+  """,
+
+  """
+  **XML 特殊字符编码**: 在条件表达式、属性值、文本内容中必须使用 XML 实体编码：
+  - `<` → `&lt;`
+  - `>` → `&gt;`
+  - `&` → `&amp;`
+  - `"` → `&quot;`
+  - `'` → `&apos;`
+  """,
+
+  """
+  **泳道结构规范**:
+  - Lane 必须在 LaneSet 中定义
+  - Lane 使用 `<flowNodeRef>` 指定包含的流程节点
+  - 一个流程节点只能属于一个 Lane
+  - Pool 之间使用 Message Flow 连接，不能使用 Sequence Flow
+  """,
+
+  """
+  **边界事件附加规范**:
+  - 边界事件必须用 `attachedToRef` 属性附加到 Activity（Task 或 SubProcess）
+  - `cancelActivity="true"` 表示中断型边界事件（中断活动）
+  - `cancelActivity="false"` 表示非中断型边界事件（并行执行）
+  - 边界事件不能有 incoming sequence flow
+  """,
+
+  """
+  **流程结构完整性**:
+  - 所有流程路径都必须有明确的终点（结束事件）
+  - 不允许出现悬空节点或断裂路径
+  - 决策网关的所有分支都必须处理，包括异常情况
+  - 循环逻辑必须有明确的退出条件
+  """,
+
+  """
+  **Kroki 兼容性**: 生成的 BPMN XML 必须能被 Kroki 的 bpmn-js 引擎成功渲染。避免使用 Kroki 不支持的高级特性（如复杂的数据关联、高级事件定义等）。视觉层（BPMNDiagram）可选，Kroki 可以自动布局。
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 需求分析与流程建模**:
+  - 识别流程的触发条件（开始事件类型：None、Message、Timer、Signal）
+  - 识别流程的核心步骤和任务类型（Task、UserTask、ServiceTask、ScriptTask 等）
+  - 识别决策点和分支逻辑（网关类型：Exclusive、Parallel、Inclusive、Event-Based）
+  - 识别流程的终止条件和结果（结束事件类型：None、Message、Error、Terminate）
+  - 识别异常处理路径（边界事件：Timer、Error、Message）
+  """,
+
+  """
+  **2. XML 结构设计**:
+  - 创建完整的 XML 声明和 BPMN 2.0 命名空间定义
+  - 设计全局唯一的元素 ID 命名规则（语义化、便于理解）
+  - 设计流程元素层次结构（Process → Flow Objects → Connecting Objects）
+  - 如果涉及多参与者，设计 Collaboration 和 Pool/Lane 结构
+  """,
+
+  """
+  **3. 逻辑层实现**:
+  - 在 `<process>` 中定义所有流程元素（事件、任务、网关）
+  - 定义 `<sequenceFlow>` 连接流程元素，确保 sourceRef 和 targetRef 精确匹配
+  - 为网关添加条件表达式（使用 XML 实体编码特殊字符）
+  - 为边界事件指定附加目标和类型
+  - 如果需要，定义 Lane 和 LaneSet
+  """,
+
+  """
+  **4. 语法规范检查**:
+  - 验证 XML 格式正确性（标签闭合、属性引号、实体编码）
+  - 验证元素 ID 全局唯一性
+  - 验证顺序流连接的精确性
+  - 验证网关条件完整性（default + conditionExpression）
+  - 验证开始和结束事件规则
+  - 验证边界事件附加正确性
+  """,
+
+  """
+  **5. 流程完整性验证**:
+  - 确保所有流程路径都有明确的终点
+  - 确保决策网关的所有分支都有处理（包括默认路径）
+  - 确保并行网关成对使用（分支网关 + 汇聚网关）
+  - 确保没有悬空节点或断裂路径
+  - 如果有循环逻辑，确保有退出条件
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **XML 语法正确性**:
+  - 完整的 XML 声明和 BPMN 2.0 命名空间
+  - 所有标签正确闭合，属性值正确引号
+  - XML 特殊字符正确编码
+  - 文档能被 XML 解析器成功解析
+  """,
+
+  """
+  **BPMN 2.0 规范符合性**:
+  - 元素 ID 全局唯一且语义化
+  - 顺序流连接精确无误
+  - 开始和结束事件规则正确
+  - 网关条件完整（default + conditionExpression）
+  - 边界事件正确附加到 Activity
+  - 泳道结构规范（LaneSet + flowNodeRef）
+  """,
+
+  """
+  **流程逻辑完整性**:
+  - 所有流程路径都有明确终点，无悬空节点
+  - 决策网关的所有分支都有处理（包括默认路径）
+  - 并行网关成对使用（分支 + 汇聚）
+  - 异常处理路径完整（边界事件 + 异常流）
+  - 循环逻辑有退出条件
+  """,
+
+  """
+  **业务语义清晰性**:
+  - 元素命名使用中文业务术语，易于理解
+  - 任务名称使用动宾结构（如 "审批订单"、"发送邮件"）
+  - 网关名称清晰表达判断条件（如 "金额检查"、"库存判断"）
+  - 顺序流标签说明分支逻辑（如 "审批通过"、"金额 > 1000"）
+  - 泳道名称明确表达角色职责（如 "销售部"、"财务审批人"）
+  """,
+
+  """
+  **Kroki 渲染成功**:
+  - 生成的 BPMN XML 能被 Kroki 成功渲染为 SVG 图像
+  - 无渲染错误或警告
+  - 图形布局清晰，节点和连接线无重叠
+  - 视觉层（BPMNDiagram）可选，Kroki 可自动布局
+  """
+]

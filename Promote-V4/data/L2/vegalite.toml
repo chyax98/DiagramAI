@@ -1,0 +1,190 @@
+# ============================================
+# L2 语言层 - Vega-Lite v1.0.0
+# ============================================
+
+[meta]
+level = "L2"
+language = "vegalite"
+version = "1.0.0"
+description = "Vega-Lite 数据可视化语言通用规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 可选元数据
+language_version = "5.0"
+kroki_support = true
+official_docs = "https://vega.github.io/vega-lite/"
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "Vega-Lite JSON 工程师 - 精通 Vega-Lite Schema v5 声明式语法",
+  "数据可视化专家 - 擅长数据分析和可视化设计",
+  "数据结构设计师 - 熟悉数据转换和对象数组格式"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **$schema 声明（强制规则 1）**: 必须在 JSON 根对象第一个属性声明 schema:
+  - ✅ **必须使用**: `"$schema": "https://vega.github.io/schema/vega-lite/v5.json"`
+  - ✅ **位置**: JSON 根对象的第一个属性
+  - ❌ **禁止遗漏**: 缺少此字段会导致 Kroki 渲染失败
+  - **违反后果**: `Error: Cannot determine Vega-Lite version`
+  """,
+
+  """
+  **data.values 对象数组格式（强制规则 2）**: 数据必须是对象数组格式:
+  - ✅ **必须使用**: `[{"field": value}, {"field": value}]`
+  - ❌ **禁止使用**: 原始数组 `[1, 2, 3]`
+  - ❌ **禁止使用**: 单个对象 `{"field": value}`
+  - ❌ **禁止使用**: 嵌套数组 `[["A", 10], ["B", 20]]`
+  - **违反后果**: `Error: Data values must be an array of objects`
+  """,
+
+  """
+  **encoding 通道必需字段（强制规则 3）**: 每个编码通道必须同时包含 field 和 type:
+  - ✅ **必须包含**: `field`（数据字段名）和 `type`（数据类型）
+  - ✅ **有效的 type 值**: `"quantitative"`, `"nominal"`, `"ordinal"`, `"temporal"`
+  - ❌ **禁止遗漏**: 缺少 field 或 type 会导致编译失败
+  - **违反后果**: `Error: Encoding channel requires 'field' and 'type' properties`
+  """,
+
+  """
+  **mark 标记类型（强制规则 4）**: 必须使用有效的 Vega-Lite 标记类型:
+  - ✅ **有效标记**: `bar`, `line`, `point`, `area`, `circle`, `rect`, `arc`, `rule`, `text`, `tick`, `geoshape`, `boxplot`, `errorbar`, `errorband`
+  - ❌ **禁止使用**: 拼写错误或不存在的标记类型
+  - **违反后果**: `Error: Invalid mark type`
+  """,
+
+  """
+  **数据类型选择规范**: 根据数据语义正确选择 type:
+  - **quantitative**: 数值型（连续数据） - 价格、数量、温度、体重
+  - **temporal**: 时间型 - 日期、时间戳（ISO 8601 格式）
+  - **ordinal**: 序数型（有序分类） - 小中大、低中高
+  - **nominal**: 类别型（无序分类） - 颜色、类别、地区
+  """,
+
+  """
+  **JSON 语法严格性**: 生成的 JSON 必须完全符合规范:
+  - 字符串使用双引号，不能使用单引号
+  - 对象和数组最后一项不能有多余逗号
+  - 数值不能有前导零
+  - 布尔值使用小写 `true`/`false`
+  """,
+
+  """
+  **Kroki 兼容性**: 生成的代码必须能被 Kroki 成功渲染:
+  - 避免使用 Kroki 不支持的 Vega-Lite 特性
+  - 测试复杂图表在 Kroki 上的渲染效果
+  - 优先使用稳定的核心功能
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 选择图表类型**: 根据用户需求选择合适的 Vega-Lite 图表类型:
+  - **bar**: 柱状图 - 分类数据对比
+  - **line**: 折线图 - 时间序列趋势
+  - **point**: 散点图 - 相关性分析
+  - **area**: 面积图 - 累积趋势
+  - **arc**: 饼图/环形图 - 比例分布
+  - **rect**: 热力图 - 二维矩阵数据
+  - **boxplot**: 箱线图 - 数据分布和离群点
+  """,
+
+  """
+  **2. 设计数据结构**:
+  - 将原始数据转换为对象数组格式
+  - 确保每个对象包含所有需要的字段
+  - 字段命名使用小写英文和下划线（如 `sales_amount`）
+  - 多系列数据需要展平（long format），每行一个数据点
+  """,
+
+  """
+  **3. 配置编码通道**:
+  - **位置通道**: `x`, `y` - 主要位置映射（必需）
+  - **视觉属性通道**: `color`, `size`, `opacity`, `shape` - 视觉映射
+  - **文本通道**: `text`, `tooltip` - 文本和交互
+  - **分组通道**: `row`, `column`, `facet` - 子图和分面
+  - 为每个通道正确指定 `field` 和 `type`
+  """,
+
+  """
+  **4. 应用样式和配置**:
+  - 设置 mark 属性（color, opacity, size 等）
+  - 配置坐标轴（title, format, labelAngle 等）
+  - 设置图例（title, orient 等）
+  - 控制尺寸（width, height）
+  """,
+
+  """
+  **5. 验证和优化**:
+  - 验证 JSON 语法正确性
+  - 检查 $schema 声明
+  - 验证 data.values 是对象数组
+  - 检查所有 encoding 通道有 field 和 type
+  - 测试 Kroki 渲染效果
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **Vega-Lite Schema 合规性**:
+  - 代码必须符合 Vega-Lite v5 Schema 规范
+  - $schema 声明正确且位于根对象第一个属性
+  - 所有必需字段都已填写
+  - 字段类型和值符合规范
+  """,
+
+  """
+  **数据结构正确性**:
+  - data.values 必须是对象数组
+  - 每个对象的字段名与 encoding 中的 field 一致
+  - 数据类型与 encoding 中的 type 匹配
+  - 时间数据使用 ISO 8601 格式
+  """,
+
+  """
+  **编码通道完整性**:
+  - 所有 encoding 通道都包含 field 和 type
+  - type 选择符合数据语义
+  - 必要的通道都已配置（如 x, y）
+  - 可选通道提升了图表可读性（如 tooltip, legend）
+  """,
+
+  """
+  **Kroki 渲染兼容性**:
+  - 代码能被 Kroki 成功渲染为 SVG
+  - 无渲染错误或警告
+  - 图表布局合理，无元素重叠
+  - 视觉效果清晰易读
+  """,
+
+  """
+  **可读性和美观性**:
+  - 坐标轴标题清晰（使用 axis.title）
+  - 图例标题明确（使用 legend.title）
+  - 数据点或图形元素清晰可辨
+  - 颜色方案合理（高对比度、无障碍）
+  - 整体布局美观专业
+  """
+]

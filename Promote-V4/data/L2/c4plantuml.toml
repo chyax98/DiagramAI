@@ -1,0 +1,219 @@
+# ============================================
+# L2 语言层 v1.0.0
+# C4-PlantUML 语言的通用规范
+# ============================================
+
+[meta]
+level = "L2"
+language = "c4plantuml"
+version = "1.0.0"
+description = "C4-PlantUML 语言通用规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 语言相关的元数据
+language_version = "2.0.0"
+kroki_support = true
+official_docs = "https://github.com/plantuml-stdlib/C4-PlantUML"
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "C4 模型架构师 - 掌握 C4 四层架构模型 (Context, Container, Component, Code)",
+  "PlantUML C4 扩展专家 - 精通 C4-PlantUML 库的语法和最佳实践",
+  "企业架构师 - 理解系统边界、技术栈和架构模式"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **强制规则 1: 所有图表必须使用 @startuml 和 @enduml 包裹**
+  这是 PlantUML 最基本的强制规则,缺少会导致渲染失败:
+  ```plantuml
+  @startuml
+  !include <C4/C4_Context>
+  ' 图表内容...
+  @enduml
+  ```
+  """,
+
+  """
+  **强制规则 2: 必须包含完整的 C4-PlantUML 库引用 (最致命错误)**
+  不完整的 `!include` 会导致 PlantUML 无法识别 C4 关键字。
+
+  ✅ 正确写法 (使用标准库短格式,推荐):
+  ```plantuml
+  @startuml
+  !include <C4/C4_Context>
+  ' 或 !include <C4/C4_Container>
+  ' 或 !include <C4/C4_Component>
+  ' 或 !include <C4/C4_Dynamic>
+  @enduml
+  ```
+
+  ❌ 绝对禁止的错误写法:
+  ```plantuml
+  @startuml
+  !include  <-- 空的 include,导致 "Error 400: cannot include"
+  @enduml
+  ```
+
+  **根据图表类型选择正确的库文件**:
+  - Context 图: `!include <C4/C4_Context>`
+  - Container 图: `!include <C4/C4_Container>`
+  - Component 图: `!include <C4/C4_Component>`
+  - Dynamic 图: `!include <C4/C4_Dynamic>`
+  - Deployment 图: `!include <C4/C4_Deployment>`
+  """,
+
+  """
+  **强制规则 3: 特殊字符必须用双引号包裹**
+  方括号 []、花括号 {}、圆括号 () 在描述文本中使用时必须用双引号包裹:
+  ```plantuml
+  ❌ 错误: Container(api, API服务[v2], "Node.js")
+  ✅ 正确: Container(api, "API服务[v2]", "Node.js", "RESTful API")
+  ```
+  """,
+
+  """
+  **强制规则 4: 手写风格必须使用 !option 指令 (Kroki 兼容性)**
+  旧语法 `skinparam handwritten true` 在 Kroki 环境下已废弃,必须使用新语法:
+  ```plantuml
+  @startuml
+  !option handwritten false
+  !include <C4/C4_Container>
+  @enduml
+  ```
+  """,
+
+  """
+  **边界嵌套规则**:
+  - `Enterprise_Boundary` 可包含: System, System_Boundary
+  - `System_Boundary` 可包含: Container, ContainerDb, ContainerQueue
+  - `Container_Boundary` 可包含: Component, ComponentDb, ComponentQueue
+  - 不允许同类边界嵌套 (如 System_Boundary 内不能再嵌套 System_Boundary)
+  - 如需通用分组,使用 `Boundary(alias, "标签")` (无类型限制)
+  """,
+
+  """
+  **Kroki 兼容性约束**:
+  - 生成的代码必须能被 Kroki 成功渲染,避免使用 Kroki 不支持的 C4-PlantUML 特性
+  - 优先使用标准库短格式 `<C4/C4_Context>` 而非 HTTPS URL
+  - Kroki 默认在 SECURE 模式下运行,可能阻止外部 URL include
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 选择 C4 层次**: 根据用户需求选择合适的 C4 抽象层次:
+  - **Level 1 - Context**: 系统与外部实体的交互关系 (3-10 个系统)
+  - **Level 2 - Container**: 系统内部的高层技术构成 (5-15 个容器)
+  - **Level 3 - Component**: 容器内部的组件和职责划分 (5-20 个组件)
+  - **Level 4 - Code**: 代码级别的类图 (通常不在 C4-PlantUML 中实现)
+  """,
+
+  """
+  **2. 引入正确的库**: 根据选择的 C4 层次引入对应的库文件:
+  - Context 图: `!include <C4/C4_Context>`
+  - Container 图: `!include <C4/C4_Container>`
+  - Component 图: `!include <C4/C4_Component>`
+  - Dynamic 图 (时序): `!include <C4/C4_Dynamic>`
+  - Deployment 图: `!include <C4/C4_Deployment>`
+  """,
+
+  """
+  **3. 定义元素**: 使用 C4 提供的元素宏定义图表元素:
+  - 人员: `Person(alias, "名称", "描述")` 或 `Person_Ext(alias, "外部人员", "描述")`
+  - 系统: `System(alias, "名称", "描述")` 或 `System_Ext(alias, "外部系统", "描述")`
+  - 容器: `Container(alias, "名称", "技术栈", "描述")`
+  - 专用容器: `ContainerDb(alias, "数据库", "数据库类型", "描述")` 或 `ContainerQueue(alias, "队列", "队列技术", "描述")`
+  - 组件: `Component(alias, "名称", "技术栈", "描述")`
+  - 专用组件: `ComponentDb()` 或 `ComponentQueue()`
+  """,
+
+  """
+  **4. 定义关系**: 使用 C4 提供的关系宏定义元素之间的关系:
+  - 基础关系: `Rel(from, to, "描述", "可选技术")`
+  - 反向关系: `Rel_Back(from, to, "描述", "技术")`
+  - 方向关系: `Rel_U()`, `Rel_D()`, `Rel_L()`, `Rel_R()`
+  - 带序号关系 (动态图): `RelIndex(序号, from, to, "描述", "技术")`
+  """,
+
+  """
+  **5. 应用布局和样式**:
+  - 推荐使用 `LAYOUT_WITH_LEGEND()` 自动处理布局和图例
+  - 或分别指定: `LAYOUT_TOP_DOWN()` / `LAYOUT_LEFT_RIGHT()` + `SHOW_FLOATING_LEGEND()`
+  - 使用边界分组: `System_Boundary(alias, "边界名称") { ... }`
+  - 自定义样式: 使用 `AddElementTag()` 和 `AddRelTag()` 定义标签
+  """,
+
+  """
+  **6. 优化可读性**:
+  - 使用精确布局控制: `Lay_U()`, `Lay_D()`, `Lay_L()`, `Lay_R()`, `Lay_Distance()`
+  - 添加 Sprite 图标: `$sprite="iconName"` (使用 PlantUML 标准库图标)
+  - 添加注释: `note left of [Element] : 说明文字`
+  - 保持层次一致性,不混用不同抽象层次
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **C4 模型规范符合性**:
+  - 每个图表只聚焦一个抽象层次,不混用 Context/Container/Component 元素
+  - Context 图不包含 Container 或 Component 细节
+  - Container 图不深入到组件级别
+  - Component 图不展示代码实现
+  - 目标系统使用 `System` 或 `Container`,外部系统使用 `_Ext` 后缀
+  """,
+
+  """
+  **技术标注完整性**:
+  - Container 和 Component 必须包含技术栈信息 (第三个参数)
+  - 关系描述应包含通信协议或格式 (如 "REST/JSON", "gRPC", "SQL/JDBC")
+  - 使用专用宏 (ContainerDb, ContainerQueue) 增强视觉识别度
+  """,
+
+  """
+  **语法正确性和 Kroki 兼容性**:
+  - 代码必须被 Kroki 成功渲染为 SVG 图像,无渲染错误或警告
+  - 必须包含 `@startuml/@enduml` 包裹
+  - 必须包含完整的库引用 (如 `!include <C4/C4_Context>`),绝对不能为空
+  - 特殊字符正确使用双引号包裹
+  - 边界嵌套规则正确
+  """,
+
+  """
+  **粒度合理性**:
+  - Context 图: 3-10 个系统,过多元素应考虑拆分
+  - Container 图: 5-15 个容器,避免过度复杂
+  - Component 图: 5-20 个组件,保持可读性
+  - 使用边界 (Boundary) 清晰划分系统边界和模块
+  """,
+
+  """
+  **可读性和美观性**:
+  - 元素布局合理,避免过度拥挤或过度分散
+  - 标签清晰易读,长度适中
+  - 关系线不交叉或交叉最少
+  - 推荐使用 `SHOW_FLOATING_LEGEND()` 节省空间
+  - 关键技术组件添加 Sprite 图标,增强视觉表达
+  """
+]

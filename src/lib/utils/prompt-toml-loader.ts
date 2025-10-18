@@ -1,50 +1,35 @@
 /**
- * Promote-V4 TOML Prompt 加载器
+ * Promote-V4 数据库 Prompt 加载器
  *
- * 用途: 从 Promote-V4 的 TOML 文件加载三层 Prompt 并拼接成最终 System Prompt
+ * 用途: 从 custom_prompts 表加载三层 Prompt 并拼接成最终 System Prompt
  * 架构:
- * - L1: universal.toml (通用规范)
- * - L2: {language}.toml (语言特定规范)
- * - L3: {language}/{type}.toml (类型特定规范)
+ * - L1: prompt_level=1 (通用规范)
+ * - L2: prompt_level=2 (语言特定规范)
+ * - L3: prompt_level=3 (类型特定规范)
  *
- * 任务指令分离:
- * - System Prompt: 从 TOML 加载 (能力定义)
- * - Task Instructions: 由前端在用户消息中注入 (GENERATE/ADJUST/FIX)
+ * 数据来源: custom_prompts 表 (系统默认 user_id=1)
  */
 
-import * as TOML from "@iarna/toml";
-import * as fs from "fs/promises";
+import Database from "better-sqlite3";
 import * as path from "path";
 import type { RenderLanguage } from "@/lib/constants/diagram-types";
 
 /**
- * TOML Prompt 结构定义
+ * 数据库 Prompt 记录
  */
-interface PromptTOML {
-  meta: {
-    level: "L1" | "L2" | "L3";
-    version: string;
-    description: string;
-    author: string;
-    created_at: string;
-    updated_at: string;
-    language?: string; // L2, L3
-    diagram_type?: string; // L3
-  };
-  D_role: {
-    target_task?: string; // L1
-    base_roles?: string[]; // L1
-    additional_roles?: string[]; // L2, L3
-  };
-  E_constraints: {
-    items: string[];
-  };
-  P_process: {
-    items: string[];
-  };
-  H_quality: {
-    items: string[];
-  };
+interface CustomPrompt {
+  id: number;
+  user_id: number;
+  prompt_level: number;
+  render_language: string | null;
+  diagram_type: string | null;
+  version: string;
+  version_name: string | null;
+  is_active: number;
+  content: string;
+  meta_info: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 /**
@@ -63,78 +48,61 @@ export interface PromptTOMLLoadResult {
 }
 
 /**
- * TOML 文件路径配置
+ * 数据库连接
  */
-const TOML_BASE_DIR = path.join(process.cwd(), "Promote-V4", "data");
+const dbPath = path.join(process.cwd(), "data/diagram-ai.db");
+const db = new Database(dbPath);
 
 /**
- * 读取并解析 TOML 文件
+ * 系统默认 Prompt 的 user_id
  */
-async function loadTOMLFile(filePath: string): Promise<PromptTOML> {
-  try {
-    const content = await fs.readFile(filePath, "utf-8");
-    return TOML.parse(content) as unknown as PromptTOML;
-  } catch (error) {
-    throw new Error(
-      `Failed to load TOML file ${filePath}: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
-}
+const SYSTEM_USER_ID = 1;
 
 /**
- * 将 TOML 结构转换为文本 Prompt
+ * 从数据库加载 Prompt
  *
- * 转换规则:
- * - [D_role] → "## 角色定义"
- * - [E_constraints] → "## 约束条件"
- * - [P_process] → "## 执行流程"
- * - [H_quality] → "## 质量标准"
+ * @param promptLevel - Prompt 层级 (1/2/3)
+ * @param renderLanguage - 渲染语言 (L2/L3 需要)
+ * @param diagramType - 图表类型 (L3 需要)
+ * @returns CustomPrompt 记录或 null
  */
-function tomlToPrompt(toml: PromptTOML): string {
-  const sections: string[] = [];
+function loadPromptFromDB(
+  promptLevel: number,
+  renderLanguage?: string,
+  diagramType?: string
+): CustomPrompt | null {
+  try {
+    let query = `
+      SELECT * FROM custom_prompts
+      WHERE user_id = ?
+        AND prompt_level = ?
+        AND is_active = 1
+    `;
+    const params: (string | number)[] = [SYSTEM_USER_ID, promptLevel];
 
-  // D_role: 角色定义
-  const roles: string[] = [];
-  if (toml.D_role.target_task) {
-    roles.push(toml.D_role.target_task.trim());
-  }
-  if (toml.D_role.base_roles && toml.D_role.base_roles.length > 0) {
-    roles.push("**基础角色**:");
-    roles.push(...toml.D_role.base_roles.map((r) => `- ${r.trim()}`));
-  }
-  if (toml.D_role.additional_roles && toml.D_role.additional_roles.length > 0) {
-    roles.push("**附加角色**:");
-    roles.push(...toml.D_role.additional_roles.map((r) => `- ${r.trim()}`));
-  }
-  if (roles.length > 0) {
-    sections.push("## 角色定义\n\n" + roles.join("\n"));
-  }
+    if (promptLevel === 2) {
+      // L2: 需要 render_language
+      query += " AND render_language = ? AND diagram_type IS NULL";
+      params.push(renderLanguage!);
+    } else if (promptLevel === 3) {
+      // L3: 需要 render_language + diagram_type
+      query += " AND render_language = ? AND diagram_type = ?";
+      params.push(renderLanguage!, diagramType!);
+    } else {
+      // L1: 不需要 language 和 type
+      query += " AND render_language IS NULL AND diagram_type IS NULL";
+    }
 
-  // E_constraints: 约束条件
-  if (toml.E_constraints.items.length > 0) {
-    sections.push(
-      "## 约束条件\n\n" +
-        toml.E_constraints.items.map((item) => item.trim()).join("\n\n")
-    );
-  }
+    query += " ORDER BY version DESC LIMIT 1"; // 获取最新版本
 
-  // P_process: 执行流程
-  if (toml.P_process.items.length > 0) {
-    sections.push(
-      "## 执行流程\n\n" + toml.P_process.items.map((item) => item.trim()).join("\n\n")
-    );
-  }
+    const stmt = db.prepare(query);
+    const result = stmt.get(...params) as CustomPrompt | undefined;
 
-  // H_quality: 质量标准
-  if (toml.H_quality.items.length > 0) {
-    sections.push(
-      "## 质量标准\n\n" + toml.H_quality.items.map((item) => item.trim()).join("\n\n")
-    );
+    return result || null;
+  } catch (error) {
+    console.error(`Failed to load prompt from DB (L${promptLevel}):`, error);
+    return null;
   }
-
-  return sections.join("\n\n---\n\n");
 }
 
 /**
@@ -143,7 +111,7 @@ function tomlToPrompt(toml: PromptTOML): string {
  * @param renderLanguage - 渲染语言 (如 mermaid, plantuml)
  * @param diagramType - 图表类型 (如 flowchart, sequence)
  * @returns PromptTOMLLoadResult - 三层 Prompt 内容 + 最终 System Prompt + 版本信息
- * @throws Error - 如果 L1 或 L3 文件不存在
+ * @throws Error - 如果 L1 或 L3 不存在
  */
 export async function loadPromptTOML(
   renderLanguage: RenderLanguage,
@@ -153,34 +121,31 @@ export async function loadPromptTOML(
     // ========================================================================
     // L1: 通用层 (必须存在)
     // ========================================================================
-    const l1Path = path.join(TOML_BASE_DIR, "L1", "universal.toml");
-    const l1TOML = await loadTOMLFile(l1Path);
-    const l1_content = tomlToPrompt(l1TOML);
-    const l1_version = l1TOML.meta.version;
+    const l1Prompt = loadPromptFromDB(1);
+    if (!l1Prompt) {
+      throw new Error("L1 universal prompt not found in database");
+    }
+    const l1_content = l1Prompt.content;
+    const l1_version = l1Prompt.version;
 
     // ========================================================================
     // L2: 语言层 (可选)
     // ========================================================================
-    const l2Path = path.join(TOML_BASE_DIR, "L2", `${renderLanguage}.toml`);
-    let l2_content: string | null = null;
-    let l2_version: string | undefined = undefined;
-
-    try {
-      const l2TOML = await loadTOMLFile(l2Path);
-      l2_content = tomlToPrompt(l2TOML);
-      l2_version = l2TOML.meta.version;
-    } catch (error) {
-      // L2 可选，不存在时使用 null
-      console.warn(`L2 not found for ${renderLanguage}, using null`);
-    }
+    const l2Prompt = loadPromptFromDB(2, renderLanguage);
+    const l2_content = l2Prompt ? l2Prompt.content : null;
+    const l2_version = l2Prompt ? l2Prompt.version : undefined;
 
     // ========================================================================
     // L3: 类型层 (必须存在)
     // ========================================================================
-    const l3Path = path.join(TOML_BASE_DIR, "L3", renderLanguage, `${diagramType}.toml`);
-    const l3TOML = await loadTOMLFile(l3Path);
-    const l3_content = tomlToPrompt(l3TOML);
-    const l3_version = l3TOML.meta.version;
+    const l3Prompt = loadPromptFromDB(3, renderLanguage, diagramType);
+    if (!l3Prompt) {
+      throw new Error(
+        `L3 prompt not found in database for ${renderLanguage}/${diagramType}`
+      );
+    }
+    const l3_content = l3Prompt.content;
+    const l3_version = l3Prompt.version;
 
     // ========================================================================
     // 拼接最终 System Prompt
@@ -197,7 +162,9 @@ export async function loadPromptTOML(
     parts.push(`# L3: ${renderLanguage} - ${diagramType} 类型规范 (v${l3_version})`);
     parts.push(l3_content);
 
-    const final_system_prompt = parts.join("\n\n═══════════════════════════════════════════════════════════════\n\n");
+    const final_system_prompt = parts.join(
+      "\n\n═══════════════════════════════════════════════════════════════\n\n"
+    );
 
     // ========================================================================
     // 返回结果
@@ -215,7 +182,7 @@ export async function loadPromptTOML(
     };
   } catch (error) {
     throw new Error(
-      `Failed to load TOML prompts for ${renderLanguage}/${diagramType}: ${
+      `Failed to load prompts from database for ${renderLanguage}/${diagramType}: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

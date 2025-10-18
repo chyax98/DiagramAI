@@ -7,8 +7,8 @@ import mermaid from "mermaid";
 
 import type { RenderLanguage } from "@/lib/constants/diagram-types";
 import type { ExportActions } from "@/hooks/useExportActions";
-import { KROKI_MAX_RETRIES, KROKI_RETRY_DELAY, KROKI_TIMEOUT } from "@/lib/constants/env";
-import { generateKrokiURL, type KrokiDiagramType } from "@/lib/utils/kroki";
+import { KROKI_MAX_RETRIES, KROKI_RETRY_DELAY } from "@/lib/constants/env";
+import { renderKrokiDiagram, type KrokiDiagramType } from "@/lib/utils/kroki";
 import { logger } from "@/lib/utils/logger";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ZoomableContainer } from "./ZoomableContainer";
@@ -91,49 +91,30 @@ async function renderWithMermaid(code: string, theme: "light" | "dark"): Promise
 
 /**
  * Kroki 远程渲染 (用于除 Mermaid 外的所有图表)
+ * ⚡ 使用 POST 方式,无 URL 长度限制,无需编码
  */
 async function renderWithKroki(
   code: string,
   diagramType: RenderLanguage,
   retries = KROKI_MAX_RETRIES
 ): Promise<string> {
-  const url = generateKrokiURL(code, diagramType as KrokiDiagramType, "svg");
-
-  // 创建 AbortController 用于超时控制
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), KROKI_TIMEOUT);
-
   try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: { Accept: "image/svg+xml" },
-      signal: controller.signal, // 添加超时信号
-    });
+    // ⚡ 使用 POST 方式渲染 - 返回 blob URL
+    const blobUrl = await renderKrokiDiagram(code, diagramType as KrokiDiagramType, "svg");
 
-    // 清除超时定时器
-    clearTimeout(timeoutId);
-
+    // 从 blob URL 获取 SVG 文本
+    const response = await fetch(blobUrl);
     if (!response.ok) {
-      const errorText = await response.text();
-      logger.error(`❌ [Kroki] API 错误 ${response.status}:`, errorText);
-      const error = new Error(
-        `Kroki 渲染失败 (${response.status}): ${errorText || response.statusText}`
-      );
-      return Promise.reject(error);
+      throw new Error(`Failed to fetch blob: ${response.statusText}`);
     }
 
-    return await response.text();
+    const svgText = await response.text();
+
+    // 清理 blob URL (避免内存泄漏)
+    URL.revokeObjectURL(blobUrl);
+
+    return svgText;
   } catch (error) {
-    // 清除超时定时器
-    clearTimeout(timeoutId);
-
-    // 检查是否是超时错误
-    if (error instanceof Error && error.name === "AbortError") {
-      logger.error(`⏱️ [Kroki] 请求超时 (${KROKI_TIMEOUT}ms)`);
-      const timeoutError = new Error(`Kroki 渲染超时 (${KROKI_TIMEOUT}ms)`);
-      return Promise.reject(timeoutError);
-    }
-
     logger.error(`❌ [Kroki] 渲染失败 (剩余重试: ${retries - 1})`, error);
     if (retries > 1) {
       await new Promise((resolve) => setTimeout(resolve, KROKI_RETRY_DELAY));

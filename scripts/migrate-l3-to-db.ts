@@ -63,7 +63,7 @@ async function migrateL3ToDatabase() {
     }
 
     // 2. 查找所有 L3 TOML 文件
-    const l3Dir = path.join(process.cwd(), 'Promote-V4/data/L3');
+    const l3Dir = path.join(process.cwd(), 'data/Promote-V4/data/L3');
     const l3Files = findTomlFiles(l3Dir);
     stats.total = l3Files.length;
 
@@ -106,13 +106,9 @@ async function migrateL3ToDatabase() {
           // 读取文件内容
           const content = fs.readFileSync(filePath, 'utf-8');
 
-          // 简单解析版本号 (从 TOML meta 部分)
-          const versionMatch = content.match(/version\s*=\s*"([^"]+)"/);
-          const version = versionMatch ? versionMatch[1] : '1.0.0';
-
-          // 解析 description 作为 version_name
-          const descMatch = content.match(/description\s*=\s*"([^"]+)"/);
-          const versionName = descMatch ? descMatch[1] : null;
+          // 固定版本号: 所有迁移的 Prompt 使用统一版本
+          const version = '1.0.0';
+          const versionName = 'Initial migration from TOML files';
 
           // 检查是否已存在
           const existing = checkStmt.get(

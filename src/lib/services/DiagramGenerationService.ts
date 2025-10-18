@@ -9,8 +9,9 @@ import { cleanCode } from "@/lib/utils/code-cleaner";
 import type { ChatSessionData, ChatMessage } from "@/types/database";
 import type { RenderLanguage } from "@/lib/constants/diagram-types";
 import { getGeneratePrompt } from "@/lib/constants/prompts";
-import { MAX_CHAT_ROUNDS, AI_TEMPERATURE, AI_MAX_RETRIES } from "@/lib/constants/env";
+import { MAX_CHAT_ROUNDS, AI_TEMPERATURE, AI_MAX_RETRIES, USE_PROMOTE_V4 } from "@/lib/constants/env";
 import { loadPrompt } from "@/lib/utils/prompt-loader";
+import { loadPromptTOML } from "@/lib/utils/prompt-toml-loader";
 import { logger } from "@/lib/utils/logger";
 import { FailureLogService } from "./FailureLogService";
 
@@ -206,9 +207,20 @@ export class DiagramGenerationService {
       throw new Error("图表类型不能为空");
     }
 
+    // ⭐ Promote-V4: 根据功能开关选择 Prompt 系统
+    let systemPrompt: string;
+    if (USE_PROMOTE_V4) {
+      logger.info("[Promote-V4] 使用 TOML Prompt 系统");
+      const tomlResult = await loadPromptTOML(params.renderLanguage, params.diagramType);
+      systemPrompt = tomlResult.final_system_prompt;
+    } else {
+      logger.info("[V3] 使用 TXT Prompt 系统");
+      systemPrompt = getGeneratePrompt(params.renderLanguage, params.diagramType);
+    }
+
     const { text: generatedCode } = await generateText({
       model,
-      system: getGeneratePrompt(params.renderLanguage, params.diagramType),
+      system: systemPrompt,
       messages: [
         {
           role: "user",
@@ -313,9 +325,20 @@ export class DiagramGenerationService {
       throw new Error("会话数据损坏：缺少图表类型信息");
     }
 
+    // ⭐ Promote-V4: 根据功能开关选择 Prompt 系统
+    let systemPrompt: string;
+    if (USE_PROMOTE_V4) {
+      logger.info("[Promote-V4] 使用 TOML Prompt 系统");
+      const tomlResult = await loadPromptTOML(params.renderLanguage, sessionData.diagramType);
+      systemPrompt = tomlResult.final_system_prompt;
+    } else {
+      logger.info("[V3] 使用 TXT Prompt 系统");
+      systemPrompt = getGeneratePrompt(params.renderLanguage, sessionData.diagramType);
+    }
+
     const result = await generateText({
       model,
-      system: getGeneratePrompt(params.renderLanguage, sessionData.diagramType),
+      system: systemPrompt,
       messages,
       temperature: AI_TEMPERATURE,
       maxRetries: AI_MAX_RETRIES,

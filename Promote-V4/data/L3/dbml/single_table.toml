@@ -1,0 +1,541 @@
+# ============================================
+# L3 类型层 - DBML Single Table v1.0.0
+# DBML 单表设计规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "dbml"
+diagram_type = "single_table"
+version = "1.0.0"
+description = "DBML 单表设计规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "low"
+target_length = 2500
+use_cases = ["单表详细设计", "字段规范定义", "索引优化", "约束设计"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "数据建模专家",
+  "字段类型优化专家",
+  "索引策略专家"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **单表设计核心要求 - 字段完整性**: 单表必须包含完整的字段定义,体现业务需求的所有数据。
+
+  ✅ **正确做法**:
+  ```dbml
+  Table employees {
+    id integer [pk, increment]
+    employee_code varchar(20) [not null, unique, note: '工号']
+    name varchar(100) [not null]
+    email varchar(100) [unique]
+    phone varchar(20)
+    department varchar(50) [not null]
+    position varchar(50)
+    salary decimal(10,2)
+    hire_date date [not null]
+    is_active boolean [default: true]
+    created_at timestamp [default: \\`now()\\`]
+    updated_at timestamp [default: \\`now()\\`]
+
+    indexes {
+      employee_code
+      department
+      (department, is_active)
+    }
+
+    Note: '员工信息表'
+  }
+  ```
+
+  **必需字段**:
+  - **主键**: `id integer [pk, increment]`
+  - **业务字段**: 根据需求定义 (如 name, email, department)
+  - **时间戳**: `created_at`, `updated_at` (推荐)
+
+  **可选字段**:
+  - **软删除**: `deleted_at`, `is_deleted`
+  - **版本控制**: `version` (乐观锁)
+  - **审计字段**: `created_by`, `updated_by`
+  """,
+
+  """
+  **字段约束合理性 - 必须添加合适的约束**: 字段约束确保数据完整性和业务规则。
+
+  **约束类型**:
+  - **NOT NULL**: 必填字段 `[not null]`
+  - **UNIQUE**: 唯一字段 `[unique]`
+  - **DEFAULT**: 默认值 `[default: value]`
+  - **CHECK**: 检查约束 (DBML 语法支持,但 Kroki 可能不显示)
+
+  ✅ **正确示例**:
+  ```dbml
+  Table users {
+    id integer [pk, increment]
+    username varchar(50) [not null, unique, note: '用户名,3-50 字符']
+    email varchar(100) [not null, unique, note: '邮箱地址']
+    is_active boolean [not null, default: true]
+    created_at timestamp [not null, default: \\`now()\\`]
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table users {
+    username varchar(50)        // 缺少 not null 和 unique
+    email varchar(100)          // 缺少 not null 和 unique
+    is_active boolean           // 缺少默认值
+    created_at timestamp        // 缺少默认值
+  }
+  ```
+
+  **约束设计原则**:
+  - 必填字段: `[not null]`
+  - 唯一标识: `[unique]` (如 username, email, employee_code)
+  - 布尔字段: `[default: true/false]`
+  - 时间戳: `[default: \\`now()\\`]`
+  """,
+
+  """
+  **数据类型选择 - 必须根据业务需求选择合适的类型**: 正确的数据类型可以节省存储、提高性能、确保数据完整性。
+
+  **数值类型**:
+  - `integer`: 通用整数 (-2^31 to 2^31-1)
+  - `bigint`: 大整数 (-2^63 to 2^63-1, 用于大数据)
+  - `smallint`: 小整数 (-32768 to 32767, 节省空间)
+  - `decimal(p,s)`: 精确小数 (金额、比例)
+  - `float`: 浮点数 (科学计算)
+
+  **字符类型**:
+  - `varchar(n)`: 可变长度字符串 (短文本, n ≤ 255)
+  - `text`: 长文本 (描述、内容)
+
+  **日期时间类型**:
+  - `timestamp`: 日期时间 (含时区)
+  - `date`: 日期 (不含时间)
+  - `time`: 时间 (不含日期)
+
+  **其他类型**:
+  - `boolean`: 布尔值 (true/false)
+  - `json`: JSON 数据
+  - `uuid`: UUID
+
+  ✅ **正确示例**:
+  ```dbml
+  Table products {
+    id integer [pk]
+    sku varchar(50) [unique]
+    name varchar(200)
+    description text
+    price decimal(10,2)  // 金额
+    stock integer        // 库存
+    weight decimal(8,2)  // 重量
+    is_active boolean
+    created_at timestamp
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table products {
+    price varchar(20)      // 错误:金额应该用 decimal
+    stock varchar(10)      // 错误:数量应该用 integer
+    is_active varchar(5)   // 错误:布尔应该用 boolean
+  }
+  ```
+  """,
+
+  """
+  **索引策略 - 必须为常用查询条件创建索引**: 索引显著提升查询性能,是单表设计的重要组成部分。
+
+  **索引创建原则**:
+  - **唯一索引**: 为唯一约束字段创建索引 (如 username, email)
+  - **查询索引**: 为常用查询条件创建索引 (如 status, department)
+  - **复合索引**: 为多条件查询创建复合索引 (如 department + is_active)
+  - **排序索引**: 为常用排序字段创建索引 (如 created_at)
+
+  ✅ **正确示例**:
+  ```dbml
+  Table orders {
+    id integer [pk]
+    user_id integer
+    status varchar(20)
+    created_at timestamp
+
+    indexes {
+      user_id                 // 常用查询:按用户查订单
+      status                  // 常用查询:按状态筛选
+      (user_id, status)       // 常用查询:用户的某状态订单
+      created_at              // 常用排序:时间范围
+    }
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table orders {
+    user_id integer
+    status varchar(20)
+    created_at timestamp
+    // 缺少索引定义!
+  }
+  ```
+
+  **索引优化建议**:
+  - 按查询频率和选择性优先创建索引
+  - 复合索引按选择性从高到低排序
+  - 避免过度索引 (影响写入性能)
+  - 字符串字段可以考虑前缀索引 (DBML 不支持,但可以在注释说明)
+  """,
+
+  """
+  **命名规范 - 字段命名必须清晰且一致**: 清晰的命名提高代码可读性和可维护性。
+
+  **表名规范**:
+  - 使用复数小写: `users`, `orders`, `products`
+  - 多个单词用下划线: `order_items`, `user_profiles`
+
+  **字段名规范**:
+  - 小写下划线: `user_id`, `created_at`, `is_active`
+  - 主键: `id`
+  - 外键: `{目标表单数}_id` (如 `user_id`, `product_id`)
+  - 布尔字段: `is_`, `has_`, `can_` 前缀
+  - 时间戳: `created_at`, `updated_at`, `deleted_at`
+
+  ✅ **正确示例**:
+  ```dbml
+  Table user_profiles {
+    id integer [pk]
+    user_id integer
+    first_name varchar(50)
+    last_name varchar(50)
+    is_verified boolean
+    has_avatar boolean
+    created_at timestamp
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table UserProfile {           // 错误:驼峰命名
+    ID integer [pk]             // 错误:大写
+    userId integer              // 错误:驼峰命名
+    firstName varchar(50)       // 错误:驼峰命名
+    verified boolean            // 错误:缺少 is_ 前缀
+    createTime timestamp        // 错误:应该用 created_at
+  }
+  ```
+  """,
+
+  """
+  **时间戳字段 - 必须包含 created_at 和 updated_at**: 时间戳字段是审计和追踪的基础。
+
+  ✅ **正确示例**:
+  ```dbml
+  Table users {
+    id integer [pk]
+    username varchar(50)
+    created_at timestamp [not null, default: \\`now()\\`, note: '创建时间']
+    updated_at timestamp [not null, default: \\`now()\\`, note: '更新时间']
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table users {
+    id integer [pk]
+    username varchar(50)
+    create_time timestamp       // 错误:命名不规范
+    update_time timestamp       // 错误:命名不规范
+  }
+
+  Table products {
+    id integer [pk]
+    name varchar(200)
+    // 错误:缺少时间戳字段!
+  }
+  ```
+
+  **时间戳字段规范**:
+  - **created_at**: 记录创建时间,`[not null, default: \\`now()\\`]`
+  - **updated_at**: 最后更新时间,`[default: \\`now()\\`]`,需要触发器自动更新
+  - **deleted_at**: 软删除时间,`[note: '软删除时间']`,允许 NULL
+
+  **注意**: DBML 的 default 值使用反引号 `` ` `` 包裹函数调用
+  """,
+
+  """
+  **注释文档 - 必须为表和关键字段添加注释**: 注释帮助团队理解字段含义、取值范围、业务规则。
+
+  ✅ **正确示例**:
+  ```dbml
+  Table products {
+    id integer [pk, increment]
+    sku varchar(50) [not null, unique, note: 'Stock Keeping Unit,唯一商品编码']
+    name varchar(200) [not null, note: '商品名称']
+    status varchar(20) [not null, default: 'draft', note: 'draft/active/inactive/discontinued']
+    stock integer [not null, default: 0, note: '当前库存数量']
+    min_stock integer [default: 10, note: '最低库存预警值']
+
+    Note: '商品信息表 - 存储商品的所有基本信息和库存数据'
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table products {
+    id integer [pk]
+    sku varchar(50)
+    status varchar(20)
+    stock integer
+    // 缺少注释!
+  }
+  ```
+
+  **注释内容建议**:
+  - **表注释**: 说明表的用途和业务含义
+  - **字段注释**: 说明取值范围、格式、业务规则
+  - **状态字段**: 列出所有可能的状态值
+  - **特殊字段**: 说明字段的特殊用途或约束
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 理解业务需求**: 从用户需求中识别表的核心字段和业务规则。
+
+  **识别方法**:
+  - **必填字段**: 业务必需的字段 (如 name, email)
+  - **可选字段**: 业务可选的字段 (如 phone, description)
+  - **唯一标识**: 唯一标识字段 (如 username, email, employee_code)
+  - **状态字段**: 状态、类型、分类等字段
+  - **数量字段**: 库存、数量、金额等字段
+  - **时间字段**: 创建时间、更新时间、过期时间等
+
+  **示例**:
+  - 需求: "设计员工信息表,包含工号、姓名、部门、职位、入职日期"
+  - 识别字段:
+    - 主键: `id`
+    - 唯一标识: `employee_code` (工号)
+    - 必填: `name`, `department`, `hire_date`
+    - 可选: `email`, `phone`, `position`, `salary`
+    - 状态: `is_active` (是否在职)
+    - 时间戳: `created_at`, `updated_at`
+  """,
+
+  """
+  **2. 选择合适的数据类型**: 根据字段特性选择最合适的数据类型。
+
+  **选择原则**:
+  - **整数**: 数量、计数、ID → `integer`
+  - **大整数**: 大数据、时间戳 → `bigint`
+  - **精确小数**: 金额、比例 → `decimal(10,2)`
+  - **短文本**: 名称、标题 → `varchar(50-200)`
+  - **长文本**: 描述、内容 → `text`
+  - **布尔**: 开关、状态 → `boolean`
+  - **日期时间**: 时间戳 → `timestamp`
+
+  **示例**:
+  ```dbml
+  Table products {
+    id integer [pk]              // 主键:整数
+    sku varchar(50)              // 商品编码:短文本
+    name varchar(200)            // 商品名称:短文本
+    description text             // 商品描述:长文本
+    price decimal(10,2)          // 价格:精确小数
+    stock integer                // 库存:整数
+    weight decimal(8,2)          // 重量:小数
+    is_active boolean            // 是否上架:布尔
+    created_at timestamp         // 创建时间:时间戳
+  }
+  ```
+  """,
+
+  """
+  **3. 添加字段约束**: 为字段添加合适的约束,确保数据完整性。
+
+  **约束类型**:
+  - **NOT NULL**: 必填字段
+  - **UNIQUE**: 唯一字段 (如 username, email, employee_code)
+  - **DEFAULT**: 默认值 (如 `default: true`, `default: 0`)
+  - **PRIMARY KEY**: 主键 (通常是 `id`)
+
+  **示例**:
+  ```dbml
+  Table users {
+    id integer [pk, increment]
+    username varchar(50) [not null, unique]
+    email varchar(100) [not null, unique]
+    is_active boolean [not null, default: true]
+    created_at timestamp [not null, default: \\`now()\\`]
+  }
+  ```
+
+  **约束设计建议**:
+  - 所有必填字段添加 `[not null]`
+  - 所有唯一标识添加 `[unique]`
+  - 布尔字段添加默认值 `[default: true/false]`
+  - 时间戳字段添加默认值 `[default: \\`now()\\`]`
+  """,
+
+  """
+  **4. 设计索引策略**: 为常用查询条件和排序字段创建索引。
+
+  **索引设计原则**:
+  - **唯一索引**: 为唯一约束字段创建索引 (如 username, email)
+  - **查询索引**: 为常用查询条件创建索引 (如 status, department)
+  - **复合索引**: 为多条件查询创建复合索引 (如 department + is_active)
+  - **排序索引**: 为常用排序字段创建索引 (如 created_at, name)
+
+  **示例**:
+  ```dbml
+  Table employees {
+    id integer [pk]
+    employee_code varchar(20) [unique]
+    department varchar(50)
+    is_active boolean
+    created_at timestamp
+
+    indexes {
+      employee_code           // 唯一标识
+      department              // 常用查询:按部门
+      (department, is_active) // 常用查询:部门的在职员工
+      created_at              // 常用排序:按入职时间
+    }
+  }
+  ```
+
+  **索引优化建议**:
+  - 单表通常 3-6 个索引
+  - 复合索引按选择性从高到低排序
+  - 避免对低选择性字段创建索引 (如性别、是否删除)
+  - 大表的常用查询考虑覆盖索引
+  """,
+
+  """
+  **5. 添加字段注释**: 为表和关键字段添加清晰的注释。
+
+  **注释内容**:
+  - **表注释**: 说明表的用途和业务含义
+  - **字段注释**: 说明取值范围、格式、业务规则
+  - **状态字段**: 列出所有可能的状态值
+  - **特殊字段**: 说明字段的特殊用途或约束
+
+  **示例**:
+  ```dbml
+  Table products {
+    id integer [pk, increment]
+    sku varchar(50) [note: 'Stock Keeping Unit,唯一商品编码']
+    status varchar(20) [note: 'draft/active/inactive/discontinued']
+    stock integer [note: '当前库存数量']
+    min_stock integer [note: '最低库存预警值']
+
+    Note: '商品信息表 - 存储商品的所有基本信息和库存数据'
+  }
+  ```
+  """,
+
+  """
+  **6. 检查表结构完整性**: 确保表结构符合规范和业务需求。
+
+  **检查清单**:
+  - [ ] 主键正确: `id integer [pk, increment]`
+  - [ ] 必填字段有 `[not null]`
+  - [ ] 唯一字段有 `[unique]`
+  - [ ] 布尔字段有默认值
+  - [ ] 时间戳字段有 `created_at`, `updated_at` 和默认值
+  - [ ] 数据类型合理 (金额用 decimal, 数量用 integer)
+  - [ ] 索引策略合理 (唯一字段、查询条件、排序字段)
+  - [ ] 表有 `Note:` 注释
+  - [ ] 关键字段有内联注释
+  - [ ] 命名规范一致 (小写下划线)
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **主键规范性**:
+  - 使用 `id integer [pk, increment]` 作为主键
+  - 主键字段在表定义的第一行
+  - 主键有 `increment` 或 `auto_increment` 属性
+  """,
+
+  """
+  **数据类型合理性**:
+  - 金额使用 `decimal(10,2)` (不使用 varchar 或 float)
+  - 数量使用 `integer` (不使用 varchar)
+  - 布尔使用 `boolean` (不使用 varchar 或 integer)
+  - 短文本使用 `varchar(n)` (n ≤ 255)
+  - 长文本使用 `text`
+  - 时间戳使用 `timestamp`
+  """,
+
+  """
+  **约束完整性**:
+  - 必填字段有 `[not null]`
+  - 唯一字段有 `[unique]`
+  - 布尔字段有默认值 `[default: true/false]`
+  - 时间戳字段有默认值 `[default: \\`now()\\`]`
+  - 状态字段有默认值
+  """,
+
+  """
+  **索引策略合理性**:
+  - 唯一字段有索引
+  - 常用查询条件有索引
+  - 复合索引按选择性从高到低排序
+  - 索引数量合理 (3-6 个)
+  - 避免过度索引
+  """,
+
+  """
+  **时间戳字段完整性**:
+  - 有 `created_at` 字段
+  - 有 `updated_at` 字段
+  - 时间戳字段有 `[default: \\`now()\\`]`
+  - 时间戳字段使用 `timestamp` 类型
+  """,
+
+  """
+  **命名规范一致性**:
+  - 表名: 复数小写下划线 (users, order_items)
+  - 字段名: 小写下划线 (user_id, created_at)
+  - 布尔字段: `is_`, `has_`, `can_` 前缀
+  - 时间戳: `created_at`, `updated_at`, `deleted_at`
+  - 外键格式: `{目标表单数}_id`
+  """,
+
+  """
+  **文档完整性**:
+  - 表有 `Note:` 说明用途
+  - 关键字段有内联 `[note: ...]` 注释
+  - 状态字段列出所有可能的值
+  - 特殊字段有说明 (如格式、约束、业务规则)
+  """
+]

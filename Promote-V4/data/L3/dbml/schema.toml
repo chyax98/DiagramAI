@@ -1,0 +1,571 @@
+# ============================================
+# L3 类型层 - DBML Schema v1.0.0
+# DBML 完整 Schema 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "dbml"
+diagram_type = "schema"
+version = "1.0.0"
+description = "DBML 完整数据库 Schema 规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "high"
+target_length = 3500
+use_cases = ["完整数据库设计", "多表系统架构", "生产环境 Schema", "团队协作文档"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "数据库架构师",
+  "多表关联设计师",
+  "索引优化专家",
+  "数据规范化专家"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **完整 Schema 核心要求 - 多表关联**: 必须包含至少 **5 个表**,展示完整的业务系统架构。
+
+  ✅ **正确做法**:
+  - 识别核心业务实体 (如用户、商品、订单、订单项、支付)
+  - 每个实体对应一个表
+  - 表之间有明确的关系定义
+  - 覆盖一对一、一对多、多对多关系
+
+  ❌ **错误做法**:
+  ```dbml
+  Table users { ... }  // 只有 1-2 个表,不是完整 Schema
+  ```
+
+  **表数量建议**:
+  - 基础系统: 5-8 个表
+  - 中等系统: 8-15 个表
+  - 复杂系统: 15+ 个表
+  """,
+
+  """
+  **外键关系完整性 - 所有关联表必须定义关系**: 所有有关联的表都必须通过 `ref` 或 `Ref:` 定义关系。
+
+  ✅ **正确做法**:
+  ```dbml
+  Table orders {
+    id integer [pk, increment]
+    user_id integer [not null, ref: > users.id]  // 内联定义
+  }
+
+  Table order_items {
+    order_id integer [not null]
+    product_id integer [not null]
+  }
+
+  Ref: order_items.order_id > orders.id  // 独立定义
+  Ref: order_items.product_id > products.id
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table orders {
+    user_id integer  // 缺少 ref 定义!
+  }
+  ```
+
+  **关系定义方式**:
+  - **内联**: `[ref: > users.id]` (简洁,推荐用于简单关系)
+  - **独立**: `Ref: orders.user_id > users.id` (清晰,推荐用于复杂关系)
+  - 两种方式可以混用,但同一关系不要重复定义
+  """,
+
+  """
+  **主键约束 - 每个表必须有主键**: 每个表都必须定义主键,通常使用自增整数 `id`。
+
+  ✅ **正确做法**:
+  ```dbml
+  Table users {
+    id integer [pk, increment]  // 单列主键
+    username varchar(50)
+  }
+
+  Table user_roles {
+    user_id integer
+    role_id integer
+
+    indexes {
+      (user_id, role_id) [pk]  // 复合主键
+    }
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table users {
+    username varchar(50) [unique]  // 缺少主键!
+  }
+  ```
+
+  **主键设计原则**:
+  - **单表**: 使用 `id integer [pk, increment]`
+  - **中间表**: 使用复合主键 `(field1, field2) [pk]`
+  - **UUID**: 使用 `id uuid [pk, default: \\`gen_random_uuid()\\`]`
+  """,
+
+  """
+  **索引策略 - 必须为外键和常用查询条件创建索引**: 索引显著提升查询性能,是完整 Schema 的重要组成部分。
+
+  ✅ **正确做法**:
+  ```dbml
+  Table orders {
+    id integer [pk, increment]
+    user_id integer [not null, ref: > users.id]
+    status varchar(20) [not null]
+    created_at timestamp [default: \\`now()\\`]
+
+    indexes {
+      user_id                 // 外键索引
+      status                  // 常用查询条件
+      (user_id, status)       // 复合查询索引
+      created_at              // 时间范围查询
+    }
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table orders {
+    user_id integer [ref: > users.id]
+    status varchar(20)
+    // 缺少索引定义!
+  }
+  ```
+
+  **索引类型**:
+  - **单列索引**: `user_id`, `status`
+  - **复合索引**: `(user_id, status)` (按选择性排序)
+  - **唯一索引**: `email [unique]` 或 `email` 在 `indexes { ... }`
+  - **全文索引**: (DBML 语法支持,但 Kroki 可能不渲染)
+  """,
+
+  """
+  **枚举类型优先 - 状态字段使用 Enum**: 状态、角色等字段应该使用 `Enum` 而非 `varchar`,提高类型安全和可读性。
+
+  ✅ **正确做法**:
+  ```dbml
+  Enum order_status {
+    pending
+    processing
+    shipped
+    completed
+    cancelled
+
+    [note: '订单状态枚举']
+  }
+
+  Table orders {
+    id integer [pk]
+    status order_status [not null, default: 'pending']
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table orders {
+    status varchar(20)  // 不如使用 Enum
+  }
+  ```
+
+  **Enum 使用场景**:
+  - 状态字段: `order_status`, `payment_status`
+  - 角色字段: `user_role`, `permission_level`
+  - 类型字段: `product_type`, `address_type`
+  - 固定选项: `priority`, `category`
+  """,
+
+  """
+  **时间戳字段 - 核心表必须有 created_at 和 updated_at**: 时间戳字段是审计和追踪的基础。
+
+  ✅ **正确做法**:
+  ```dbml
+  Table users {
+    id integer [pk, increment]
+    username varchar(50)
+    created_at timestamp [not null, default: \\`now()\\`, note: '创建时间']
+    updated_at timestamp [not null, default: \\`now()\\`, note: '更新时间']
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Table users {
+    id integer [pk]
+    username varchar(50)
+    // 缺少时间戳字段!
+  }
+  ```
+
+  **时间戳字段规范**:
+  - **created_at**: 记录创建时间,`[not null, default: \\`now()\\`]`
+  - **updated_at**: 最后更新时间,`[default: \\`now()\\`]`,需要触发器自动更新
+  - **deleted_at**: 软删除时间,`[note: '软删除时间']`,允许 NULL
+
+  **注意**: DBML 的 default 值使用反引号 `` ` `` 包裹函数调用
+  """,
+
+  """
+  **多对多关系 - 必须使用中间表**: 多对多关系必须通过中间表实现,中间表应该有复合主键或唯一索引。
+
+  ✅ **正确做法**:
+  ```dbml
+  Table students {
+    id integer [pk]
+    name varchar(100)
+  }
+
+  Table courses {
+    id integer [pk]
+    name varchar(200)
+  }
+
+  Table enrollments {
+    student_id integer [not null, ref: > students.id]
+    course_id integer [not null, ref: > courses.id]
+    enrolled_at timestamp [default: \\`now()\\`]
+
+    indexes {
+      (student_id, course_id) [pk]  // 复合主键,防止重复
+    }
+
+    Note: '选课记录 (多对多中间表)'
+  }
+  ```
+
+  ❌ **错误做法**:
+  ```dbml
+  Ref: students.id <> courses.id  // 不推荐,不清晰
+  ```
+
+  **中间表设计原则**:
+  - 包含两个外键字段
+  - 使用复合主键 `(field1, field2) [pk]` 防止重复
+  - 可以添加额外字段 (如 `enrolled_at`, `status`)
+  - 添加清晰的 `Note:` 说明用途
+  """,
+
+  """
+  **表组织和文档 - 使用 TableGroup 和注释**: 使用 TableGroup 组织相关表,为所有表和字段添加清晰的注释。
+
+  ✅ **正确做法**:
+  ```dbml
+  TableGroup e_commerce [note: '电商核心表组'] {
+    users
+    products
+    orders
+    order_items
+  }
+
+  Table users {
+    id integer [pk, increment]
+    username varchar(50) [not null, unique, note: '用户名,3-50 字符']
+    email varchar(100) [not null, unique, note: '邮箱地址']
+
+    Note: '用户账户表 - 存储用户基本信息和认证凭据'
+  }
+  ```
+
+  **组织最佳实践**:
+  - 使用 TableGroup 按业务模块分组 (如 `e_commerce`, `auth`, `payment`)
+  - 每个表添加 `Note:` 说明用途
+  - 关键字段添加内联 `[note: ...]` 说明取值范围
+  - 复杂约束添加注释说明业务规则
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别核心业务实体**: 从用户需求中提取核心业务实体,确定表的数量和结构。
+
+  **识别方法**:
+  - 名词分析: 找出需求中的关键名词 (如"用户"、"商品"、"订单")
+  - 业务对象: 需要存储和管理的业务对象
+  - 实体关系: 分析实体间的关系 (一对一、一对多、多对多)
+
+  **示例**:
+  - 需求: "设计电商系统,包含用户、商品、订单、订单项、支付"
+  - 识别实体: users, products, orders, order_items, payments (5 个核心表)
+  - 关系分析:
+    - users → orders (一对多)
+    - orders → order_items (一对多)
+    - products ← order_items (一对多)
+    - orders → payments (一对一)
+
+  **表数量规划**:
+  - 基础系统: 5-8 个表 (核心业务实体)
+  - 中等系统: 8-15 个表 (核心 + 辅助实体)
+  - 复杂系统: 15+ 个表 (完整业务系统)
+  """,
+
+  """
+  **2. 设计表结构**: 为每个实体设计详细的表结构,包括字段、类型、约束。
+
+  **字段设计原则**:
+  - **主键**: 每个表必须有主键 `id integer [pk, increment]`
+  - **外键**: 关联字段命名格式 `{目标表单数}_id`
+  - **必填字段**: 添加 `[not null]` 约束
+  - **唯一字段**: 添加 `[unique]` 约束
+  - **默认值**: 为字段添加合理的默认值 `[default: value]`
+  - **时间戳**: 添加 `created_at`, `updated_at` 字段
+
+  **数据类型选择**:
+  - **整数**: `integer` (通用), `bigint` (大数据), `smallint` (小范围)
+  - **小数**: `decimal(10,2)` (金额), `float` (科学计算)
+  - **字符串**: `varchar(n)` (短文本), `text` (长文本)
+  - **日期时间**: `timestamp` (含时区), `date` (日期), `time` (时间)
+  - **布尔**: `boolean`
+  - **其他**: `json`, `uuid`
+
+  **示例**:
+  ```dbml
+  Table users {
+    id integer [pk, increment]
+    username varchar(50) [not null, unique]
+    email varchar(100) [not null, unique]
+    password_hash varchar(255) [not null]
+    phone varchar(20)
+    is_active boolean [default: true]
+    created_at timestamp [default: \\`now()\\`]
+    updated_at timestamp [default: \\`now()\\`]
+  }
+  ```
+  """,
+
+  """
+  **3. 定义关系**: 为所有有关联的表定义外键关系。
+
+  **关系定义方式**:
+  - **内联定义**: `user_id integer [ref: > users.id]` (简洁)
+  - **独立定义**: `Ref: orders.user_id > users.id` (清晰)
+
+  **关系类型**:
+  - **一对多**: `ref: >` (如订单 → 用户)
+  - **一对一**: `ref: -` (如订单 → 支付)
+  - **多对多**: 使用中间表 (如学生 ↔ 课程)
+
+  **示例**:
+  ```dbml
+  Table orders {
+    user_id integer [not null, ref: > users.id]
+  }
+
+  Table order_items {
+    order_id integer [not null]
+    product_id integer [not null]
+  }
+
+  Ref: order_items.order_id > orders.id
+  Ref: order_items.product_id > products.id
+  ```
+  """,
+
+  """
+  **4. 设计索引策略**: 为外键和常用查询条件创建索引。
+
+  **索引创建原则**:
+  - **外键索引**: 为所有外键字段创建索引
+  - **查询索引**: 为常用查询条件创建索引 (如 status, created_at)
+  - **复合索引**: 为多条件查询创建复合索引 (按选择性排序)
+  - **唯一索引**: 为唯一约束字段创建唯一索引
+
+  **示例**:
+  ```dbml
+  Table orders {
+    id integer [pk]
+    user_id integer [ref: > users.id]
+    status varchar(20)
+    created_at timestamp
+
+    indexes {
+      user_id                 // 外键索引
+      status                  // 常用查询条件
+      (user_id, status)       // 复合查询索引
+      created_at              // 时间范围查询
+    }
+  }
+  ```
+
+  **索引优化建议**:
+  - 按查询频率和选择性优先创建索引
+  - 复合索引按选择性从高到低排序
+  - 避免过度索引 (影响写入性能)
+  - 为大表的常用查询创建覆盖索引
+  """,
+
+  """
+  **5. 使用枚举类型**: 为状态、角色等固定选项字段定义枚举。
+
+  **枚举定义**:
+  ```dbml
+  Enum order_status {
+    pending
+    processing
+    shipped
+    completed
+    cancelled
+
+    [note: '订单状态枚举']
+  }
+
+  Table orders {
+    status order_status [not null, default: 'pending']
+  }
+  ```
+
+  **枚举使用场景**:
+  - 状态字段: `order_status`, `payment_status`, `user_status`
+  - 角色字段: `user_role`, `permission_level`
+  - 类型字段: `product_type`, `address_type`, `payment_method`
+  - 固定选项: `priority` (low/medium/high), `grade` (A/B/C/D/F)
+
+  **枚举命名规范**:
+  - 枚举名: 单数小写 (如 `status`, `role`, `order_type`)
+  - 枚举值: 小写下划线 (如 `pending`, `pending_review`)
+  - 特殊字符: 使用双引号 (如 `"A+"`, `"Not Yet Set"`)
+  """,
+
+  """
+  **6. 添加注释和文档**: 为表、字段、关系添加清晰的注释。
+
+  **注释类型**:
+  - **表注释**: `Note: '用户账户表 - 存储用户基本信息'`
+  - **字段注释**: `username varchar(50) [note: '用户名,3-50 字符']`
+  - **关系注释**: `Ref: orders.user_id > users.id [note: '一对多']`
+  - **枚举注释**: `Enum status { ... [note: '状态枚举'] }`
+
+  **注释内容建议**:
+  - 表: 说明用途和业务含义
+  - 字段: 说明取值范围、格式、业务规则
+  - 关系: 说明关系类型和业务含义
+  - 枚举: 说明用途和取值含义
+  """,
+
+  """
+  **7. 组织表结构 (可选)**: 使用 TableGroup 和 Project 组织表结构。
+
+  **TableGroup 示例**:
+  ```dbml
+  TableGroup auth [note: '认证授权模块'] {
+    users
+    roles
+    permissions
+    user_roles
+  }
+
+  TableGroup e_commerce [note: '电商核心模块'] {
+    products
+    orders
+    order_items
+    payments
+  }
+  ```
+
+  **Project 元数据**:
+  ```dbml
+  Project e_commerce_system {
+    database_type: 'PostgreSQL'
+    Note: '''
+    电商系统数据库 Schema
+    版本: v1.0.0
+    创建日期: 2024-01-01
+    '''
+  }
+  ```
+
+  **组织原则**:
+  - 按业务模块分组 (如 auth, e_commerce, payment)
+  - 相关表放在一起 (如 users, user_profiles, user_addresses)
+  - 使用 Project 声明数据库类型和版本信息
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **实体识别完整性**:
+  - 至少包含 5 个表 (核心业务实体)
+  - 所有核心业务对象都已建表
+  - 表之间有明确的关系定义
+  - 覆盖一对一、一对多、多对多关系
+  """,
+
+  """
+  **关系定义正确性**:
+  - 所有外键都有 `ref` 或 `Ref:` 定义
+  - 关系箭头方向正确 (`ref: >` 指向"一")
+  - 多对多关系使用中间表
+  - 中间表有复合主键或唯一索引
+  - 引用的表和字段都存在
+  """,
+
+  """
+  **表结构规范性**:
+  - 每个表都有主键 `id integer [pk, increment]`
+  - 必填字段有 `[not null]` 约束
+  - 唯一字段有 `[unique]` 约束
+  - 时间戳字段有默认值 `default: \\`now()\\``
+  - 外键命名格式: `{目标表单数}_id`
+  """,
+
+  """
+  **索引策略合理性**:
+  - 所有外键字段都有索引
+  - 常用查询条件有索引 (如 status, created_at)
+  - 复合索引按选择性从高到低排序
+  - 索引数量合理 (不过度索引)
+  - 大表的常用查询有覆盖索引
+  """,
+
+  """
+  **枚举类型使用**:
+  - 状态、角色等字段使用 Enum
+  - 枚举值命名规范 (小写下划线)
+  - 枚举有清晰的注释说明
+  - 默认值必须是枚举值之一
+  """,
+
+  """
+  **命名规范一致性**:
+  - 表名: 复数小写下划线 (users, order_items)
+  - 字段名: 小写下划线 (user_id, created_at)
+  - 外键格式: `{目标表单数}_id`
+  - 布尔字段前缀: `is_`, `has_`, `can_`
+  - 时间戳: `created_at`, `updated_at`, `deleted_at`
+  """,
+
+  """
+  **文档完整性**:
+  - 所有表都有 `Note:` 说明用途
+  - 关键字段有内联 `[note: ...]` 注释
+  - 关系有注释说明业务含义
+  - 枚举有注释说明取值范围
+  - 复杂约束有注释说明业务规则
+  """
+]

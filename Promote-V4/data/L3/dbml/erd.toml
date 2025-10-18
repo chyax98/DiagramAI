@@ -1,0 +1,424 @@
+# ============================================
+# L3 类型层 - DBML ER 图 v1.0.0
+# DBML 实体关系图规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "dbml"
+diagram_type = "erd"
+version = "1.0.0"
+description = "DBML 实体关系图 (ER Diagram) 规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关的元数据
+complexity = "medium"
+target_length = 2800
+use_cases = ["业务领域建模", "数据库设计", "系统架构展示", "多表关系分析"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "ER 建模专家",
+  "业务领域建模专家",
+  "DBML ER 设计师"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **ER 图设计原则 - 简洁性**: ER 图的重点是展示**实体间的关系**,而非完整表结构。
+
+  ✅ **正确做法**:
+  - 只保留**关键字段** (主键、外键、核心业务字段)
+  - 不包含过多细节字段 (如 created_at, updated_at, description 等)
+  - 突出实体间的关系,而非字段细节
+
+  ❌ **错误做法**:
+  ```dbml
+  Table users {
+    id integer [pk]
+    username varchar(50)
+    email varchar(100)
+    password_hash varchar(255)
+    first_name varchar(50)
+    last_name varchar(50)
+    phone varchar(20)
+    address text
+    city varchar(50)
+    // ... 20+ 个字段 (过于详细!)
+  }
+  ```
+
+  ✅ **正确示例**:
+  ```dbml
+  Table users {
+    id integer [pk]
+    username varchar(50) [unique]
+    email varchar(100) [unique]
+
+    Note: '用户'
+  }
+  ```
+  """,
+
+  """
+  **ER 图关系定义 - 使用独立 Ref**: 推荐使用独立的 `Ref:` 定义突出显示关系,而非内联 `[ref: ...]`。
+
+  ❌ **内联定义** (不推荐用于 ER 图):
+  ```dbml
+  Table orders {
+    user_id integer [ref: > users.id]
+  }
+  ```
+
+  ✅ **独立定义** (推荐用于 ER 图):
+  ```dbml
+  Table orders {
+    user_id integer [not null]
+  }
+
+  Ref: orders.user_id > users.id [note: '一对多:一个用户可以有多个订单']
+  ```
+
+  **优势**:
+  - 关系更加突出,易于识别
+  - 方便添加关系注释说明业务含义
+  - Kroki 渲染时关系线更清晰
+  """,
+
+  """
+  **ER 图关系注释 - 必须说明业务含义**: 所有 `Ref:` 都必须添加 `[note: ...]` 说明关系的业务含义和基数。
+
+  ❌ **错误** (缺少注释):
+  ```dbml
+  Ref: orders.user_id > users.id
+  ```
+
+  ✅ **正确** (包含业务含义和基数):
+  ```dbml
+  Ref: orders.user_id > users.id [note: '一对多:一个用户可以有多个订单']
+  Ref: order_items.order_id > orders.id [note: '一对多:一个订单包含多个订单项']
+  ```
+
+  **注释格式建议**:
+  - 明确关系类型: "一对一"、"一对多"、"多对多"
+  - 说明业务关系: "一个用户可以有多个订单"
+  - 必要时说明约束: "必填"、"可选"、"级联删除"
+  """,
+
+  """
+  **ER 图实体命名 - 使用业务术语**: 表名应该使用业务领域术语,每个表必须添加 `Note:` 说明实体含义。
+
+  ✅ **正确示例**:
+  ```dbml
+  Table readers {
+    id integer [pk]
+    reader_code varchar(20) [unique, note: '读者证号']
+
+    Note: '读者信息'
+  }
+
+  Table books {
+    id integer [pk]
+    isbn varchar(20) [unique]
+    title varchar(200)
+
+    Note: '图书信息'
+  }
+
+  Table borrowing_records {
+    id integer [pk]
+    reader_id integer
+    book_id integer
+    borrow_date date
+    due_date date
+
+    Note: '借阅记录'
+  }
+  ```
+
+  **原因**: ER 图是业务沟通工具,术语必须让非技术人员也能理解。
+  """,
+
+  """
+  **ER 图多对多关系 - 必须使用中间表**: 多对多关系不能用 `<>` 符号,必须使用中间表清晰表示。
+
+  ❌ **错误做法** (不推荐):
+  ```dbml
+  Ref: students.id <> courses.id  // 不清晰!
+  ```
+
+  ✅ **正确做法**:
+  ```dbml
+  Table students {
+    id integer [pk]
+    name varchar(100)
+
+    Note: '学生'
+  }
+
+  Table courses {
+    id integer [pk]
+    name varchar(200)
+
+    Note: '课程'
+  }
+
+  Table enrollments {
+    student_id integer [not null]
+    course_id integer [not null]
+
+    indexes {
+      (student_id, course_id) [pk]
+    }
+
+    Note: '选课记录 (多对多中间表)'
+  }
+
+  Ref: enrollments.student_id > students.id [note: '一对多:一个学生可以选修多门课程']
+  Ref: enrollments.course_id > courses.id [note: '一对多:一门课程可以被多个学生选修']
+  ```
+
+  **原因**: 中间表清晰展示多对多关系的实现方式,避免误解。
+  """,
+
+  """
+  **ER 图关系方向 - 箭头指向"一"的一方**: 确保关系方向正确,避免业务逻辑错误。
+
+  ❌ **错误方向**:
+  ```dbml
+  // 业务逻辑:一个用户有多个订单
+  Ref: orders.user_id < users.id  // 错误:表示一个订单有多个用户!
+  ```
+
+  ✅ **正确方向**:
+  ```dbml
+  Ref: orders.user_id > users.id [note: '一对多:一个用户可以有多个订单']
+  ```
+
+  **记忆方法**: 箭头指向"父表"(一的一方)。多个订单 → 一个用户。
+  """,
+
+  """
+  **ER 图自引用关系 - 必须明确说明**: 自引用关系 (如树状结构、社交关系) 需要特别说明。
+
+  ✅ **正确示例**:
+  ```dbml
+  Table categories {
+    id integer [pk]
+    name varchar(100)
+    parent_id integer [note: '父分类ID,用于构建分类树']
+
+    Note: '商品分类 (树状结构)'
+  }
+
+  Ref: categories.parent_id > categories.id [note: '自引用:父子分类关系']
+  ```
+
+  ✅ **社交关系示例**:
+  ```dbml
+  Table user_follows {
+    follower_id integer [not null, note: '关注者ID']
+    followee_id integer [not null, note: '被关注者ID']
+
+    indexes {
+      (follower_id, followee_id) [pk]
+    }
+
+    Note: '用户关注关系'
+  }
+
+  Ref: user_follows.follower_id > users.id [note: '多对多:用户可以关注多个用户']
+  Ref: user_follows.followee_id > users.id [note: '多对多:用户可以被多个用户关注']
+  ```
+
+  **原因**: 自引用关系容易混淆,必须清晰说明业务含义。
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别核心实体**: 从用户需求中提取业务领域的核心实体。
+
+  **识别方法**:
+  - 名词分析: 找出需求中的关键名词 (如"用户"、"订单"、"商品")
+  - 业务对象: 需要存储和管理的业务对象
+  - 核心实体优先: 优先识别主体实体,再识别关联实体
+
+  **示例**:
+  - 需求: "设计图书管理系统,包含读者、图书、借阅记录"
+  - 识别实体: readers (读者), books (图书), borrowing_records (借阅记录)
+  """,
+
+  """
+  **2. 分析实体关系**: 识别实体间的关系类型 (一对一、一对多、多对多)。
+
+  **分析方法**:
+  - 一对一: 一个实体只对应另一个实体 (如用户 ↔ 用户配置)
+  - 一对多: 一个实体对应多个实体 (如用户 → 订单)
+  - 多对多: 多个实体互相对应 (如学生 ↔ 课程,需要中间表)
+
+  **关系验证**:
+  - 从两个方向验证关系: "一个 A 可以有多个 B" → "一个 B 属于一个 A"
+  - 考虑业务约束: 是否必填、是否唯一、是否级联删除
+  """,
+
+  """
+  **3. 简化表结构**: ER 图重在关系,表结构应该简化。
+
+  **简化原则**:
+  - 只保留**主键** (id)、**外键** (user_id)、**核心业务字段** (name, code, status)
+  - 移除**辅助字段** (created_at, updated_at, description, notes)
+  - 移除**冗余字段** (可以通过关联查询获得的字段)
+
+  **示例**:
+  ```dbml
+  // ER 图简化版
+  Table users {
+    id integer [pk]
+    username varchar(50) [unique]
+    email varchar(100) [unique]
+
+    Note: '用户'
+  }
+
+  // 完整 Schema 版 (用于其他场景,非 ER 图)
+  Table users {
+    id integer [pk]
+    username varchar(50) [unique]
+    email varchar(100) [unique]
+    password_hash varchar(255)
+    first_name varchar(50)
+    last_name varchar(50)
+    phone varchar(20)
+    created_at timestamp
+    updated_at timestamp
+
+    Note: '用户'
+  }
+  ```
+  """,
+
+  """
+  **4. 使用独立 Ref 定义关系**: 所有关系使用独立的 `Ref:` 定义,并添加注释。
+
+  **定义格式**:
+  ```dbml
+  Ref: 子表.外键字段 > 父表.主键字段 [note: '关系类型:业务含义']
+  ```
+
+  **示例**:
+  ```dbml
+  Ref: orders.user_id > users.id [note: '一对多:一个用户可以有多个订单']
+  Ref: order_items.order_id > orders.id [note: '一对多:一个订单包含多个订单项']
+  Ref: order_items.product_id > products.id [note: '一对多:一个商品可以在多个订单中']
+  ```
+
+  **注释要求**:
+  - 明确关系类型 (一对一、一对多、多对多)
+  - 说明业务含义 (从业务角度描述关系)
+  - 必要时说明约束 (必填、可选、级联删除)
+  """,
+
+  """
+  **5. 添加实体和关系注释**: 为每个表和关系添加清晰的注释。
+
+  **表注释**:
+  ```dbml
+  Table readers {
+    Note: '读者信息'
+  }
+  ```
+
+  **字段注释** (关键字段):
+  ```dbml
+  reader_code varchar(20) [unique, note: '读者证号']
+  ```
+
+  **关系注释**:
+  ```dbml
+  Ref: borrowing_records.reader_id > readers.id [note: '一对多:一个读者可以有多条借阅记录']
+  ```
+  """,
+
+  """
+  **6. 检查关系完整性**: 确保所有关系定义正确且完整。
+
+  **检查清单**:
+  - [ ] 所有外键都有对应的 `Ref:` 定义
+  - [ ] 所有 `Ref:` 的箭头方向正确 (指向"一"的一方)
+  - [ ] 所有 `Ref:` 都有业务含义注释
+  - [ ] 多对多关系使用中间表,不使用 `<>` 符号
+  - [ ] 自引用关系有明确说明
+  - [ ] 引用的表和字段都存在
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **实体识别完整性**:
+  - 所有核心业务实体都已建表
+  - 实体命名使用业务术语
+  - 每个实体都有清晰的 `Note:` 说明
+  """,
+
+  """
+  **关系类型正确性**:
+  - 一对一关系使用 `ref: -`
+  - 一对多关系使用 `ref: >` (箭头指向"一")
+  - 多对多关系使用中间表 (不使用 `<>`)
+  - 所有关系箭头方向正确
+  """,
+
+  """
+  **关系注释完整性**:
+  - 所有 `Ref:` 都有 `[note: ...]` 说明
+  - 注释包含关系类型 (一对一、一对多、多对多)
+  - 注释包含业务含义 (如"一个用户可以有多个订单")
+  - 自引用关系有特别说明
+  """,
+
+  """
+  **表结构简化度**:
+  - 只保留关键字段 (主键、外键、核心业务字段)
+  - 不包含过多细节字段 (时间戳、描述等)
+  - 不包含冗余字段 (可通过关联查询获得)
+  - 字段数量合理 (通常 3-8 个字段)
+  """,
+
+  """
+  **多对多关系实现**:
+  - 多对多关系使用中间表
+  - 中间表包含两个外键
+  - 中间表有复合主键 `(field1, field2) [pk]`
+  - 中间表有清晰的 `Note:` 说明用途
+  """,
+
+  """
+  **ER 图可读性**:
+  - 使用独立 `Ref:` 定义,不使用内联 `[ref: ...]`
+  - 关系分组注释,逻辑清晰
+  - 实体命名语义化,易于理解
+  - 代码结构清晰,便于阅读
+  """
+]

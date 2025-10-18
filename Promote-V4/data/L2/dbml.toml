@@ -1,0 +1,321 @@
+# ============================================
+# L2 语言层 - DBML v1.0.0
+# DBML 语言的通用规范
+# ============================================
+
+[meta]
+level = "L2"
+language = "dbml"
+version = "1.0.0"
+description = "DBML (Database Markup Language) 语言通用规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 语言相关的元数据
+language_version = "2.6.0"
+kroki_support = true
+official_docs = "https://dbml.dbdiagram.io/docs/"
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "DBML 语法专家",
+  "数据库架构师",
+  "数据建模专家",
+  "ER 图设计师"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **强制规则 1 - Table 关键字大小写**: DBML 对大小写敏感,表定义必须使用 `Table`(首字母大写)。
+
+  ❌ **错误**:
+  ```dbml
+  table users {              // 编译失败!
+    id integer [pk]
+  }
+  ```
+
+  ✅ **正确**:
+  ```dbml
+  Table users {              // 正确:首字母大写
+    id integer [pk]
+  }
+  ```
+
+  **Kroki 错误**: `Syntax error: Expected 'Table' keyword, got 'table'`
+  """,
+
+  """
+  **强制规则 2 - varchar 和 decimal 必须指定长度/精度**: DBML 语法要求,Kroki 渲染时需要明确的类型参数。
+
+  ❌ **错误**:
+  ```dbml
+  Table users {
+    name varchar             // 缺少长度!
+    price decimal            // 缺少精度!
+  }
+  ```
+
+  ✅ **正确**:
+  ```dbml
+  Table users {
+    name varchar(100)        // 指定长度
+    price decimal(10,2)      // 指定精度 (总位数, 小数位)
+  }
+  ```
+
+  **Kroki 错误**: `Type 'varchar' requires length parameter`
+  """,
+
+  """
+  **强制规则 3 - 关系箭头方向**: 箭头 `>` 必须指向"一"的一方(多对一关系)。
+
+  ❌ **错误**:
+  ```dbml
+  // 业务逻辑:一个用户有多个订单
+  Table orders {
+    user_id integer [ref: < users.id]  // 箭头方向错误!
+  }
+  ```
+
+  ✅ **正确**:
+  ```dbml
+  Table orders {
+    user_id integer [ref: > users.id]  // 箭头指向"一"(users)
+  }
+  ```
+
+  **记忆方法**:
+  - `ref: >` = 多对一 (Many-to-One) - 常用
+  - `ref: <` = 一对多 (One-to-Many) - 很少用
+  - `ref: -` = 一对一 (One-to-One)
+  - `ref: <>` = 多对多 (Many-to-Many)
+  """,
+
+  """
+  **强制规则 4 - 引用完整性**: 引用的表和字段必须存在。
+
+  ❌ **错误**:
+  ```dbml
+  Table orders {
+    user_id integer [ref: > users.id]  // users 表不存在!
+  }
+  ```
+
+  ✅ **正确**:
+  ```dbml
+  Table users {
+    id integer [pk, increment]
+  }
+
+  Table orders {
+    user_id integer [ref: > users.id]  // users 表已定义
+  }
+  ```
+
+  **Kroki 错误**: `Reference error: Table 'users' not found`
+  """,
+
+  """
+  **强制规则 5 - 主键约束语法**: 主键必须使用 `[pk]` 或 `[primary key]`(小写,有空格)。
+
+  ❌ **错误**:
+  ```dbml
+  Table users {
+    id integer [primary_key]     // 下划线而非空格!
+    id integer [PRIMARY KEY]     // 全大写不支持!
+  }
+  ```
+
+  ✅ **正确**:
+  ```dbml
+  Table users {
+    id integer [pk, increment]        // 简写形式(推荐)
+    id integer [primary key]          // 完整形式
+  }
+  ```
+
+  **Kroki 错误**: `Unknown constraint 'primary_key'`
+  """,
+
+  """
+  **强制规则 6 - 标准数据类型**: 必须使用 DBML 标准数据类型,不支持编程语言类型。
+
+  ❌ **错误**:
+  ```dbml
+  Table products {
+    name string              // 不支持!
+    price number             // 不支持!
+    tags array               // 不支持!
+  }
+  ```
+
+  ✅ **正确**:
+  ```dbml
+  Table products {
+    name varchar(100)        // 使用 varchar
+    price decimal(10,2)      // 使用 decimal/integer
+    tags json                // 使用 json 或关联表
+  }
+  ```
+
+  **支持的类型**: integer, bigint, varchar(n), decimal(p,s), text, timestamp, boolean, json, uuid
+
+  **Kroki 错误**: `Unknown type 'string'`
+  """,
+
+  """
+  **命名规范 - 表名**: 使用复数小写,多个单词用下划线连接。
+
+  ✅ **推荐**: `users`, `orders`, `order_items`, `user_profiles`
+
+  ❌ **避免**: `User`, `userProfiles`, `Order-Items`
+  """,
+
+  """
+  **命名规范 - 字段名**: 使用小写下划线,布尔字段加前缀,时间戳统一命名。
+
+  ✅ **推荐**:
+  - 主键: `id`
+  - 外键: `user_id`, `product_id` (目标表单数_id)
+  - 布尔: `is_active`, `has_permission`, `can_edit`
+  - 时间: `created_at`, `updated_at`, `deleted_at`
+
+  ❌ **避免**: `userId`, `create_time`, `active`
+  """,
+
+  """
+  **Kroki 兼容性**: 生成的代码必须能被 Kroki 成功渲染,避免使用 Kroki 不支持的 DBML 特性。
+
+  **Kroki 支持的特性**:
+  - ✅ Table, Ref, Enum, TableGroup, Project
+  - ✅ 字段约束: pk, unique, not null, default, increment
+  - ✅ 索引定义: indexes { ... }
+  - ⚠️ TablePartial: 语法支持但渲染可能不显示
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 理解需求,选择适合的 DBML 应用场景**:
+  - **ER 图**: 展示实体关系,简化字段,突出关系
+  - **完整 Schema**: 多表设计,包含索引和约束
+  - **单表设计**: 详细字段定义,索引优化
+  - **数据库迁移**: 对比新旧版本,标注变更
+  """,
+
+  """
+  **2. 设计表结构**:
+  - **主键设计**: 每个表必须有主键,通常使用 `id integer [pk, increment]`
+  - **字段类型**: 根据业务选择合适类型 (金额用 decimal, 状态用 Enum)
+  - **约束定义**: 添加 not null, unique, default 等约束
+  - **时间戳**: 添加 `created_at`, `updated_at` 字段
+  """,
+
+  """
+  **3. 定义关系**:
+  - **外键关系**: 使用 `[ref: > table.field]` 定义多对一关系
+  - **独立 Ref**: 使用 `Ref: table1.field > table2.field` 定义关系(推荐用于 ER 图)
+  - **多对多**: 创建中间表,包含两个外键和复合主键
+  - **关系注释**: 为 Ref 添加 `[note: ...]` 说明业务含义
+  """,
+
+  """
+  **4. 优化索引**:
+  - **外键索引**: 为所有外键字段创建索引
+  - **查询索引**: 为常用查询条件创建索引
+  - **复合索引**: 为多条件查询创建复合索引 (按选择性排序)
+  - **唯一索引**: 为唯一约束字段使用 `[unique]`
+  """,
+
+  """
+  **5. 添加注释文档**:
+  - **表注释**: 每个表添加 `Note:` 说明用途
+  - **字段注释**: 关键字段添加内联 `[note: ...]` 说明取值范围
+  - **关系注释**: Ref 添加 `[note: ...]` 说明业务关系
+  - **枚举注释**: Enum 添加 `[note: ...]` 说明用途
+  """,
+
+  """
+  **6. 组织结构 (可选)**:
+  - **TableGroup**: 使用 TableGroup 组织相关表
+  - **Enum**: 使用 Enum 定义枚举类型 (状态、角色等)
+  - **Project**: 添加 Project 元数据 (数据库类型、项目描述)
+  - **TablePartial**: 使用 TablePartial 定义可重用模板 (时间戳、软删除)
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **DBML 语法验证**:
+  - 使用 `Table` (首字母大写) 定义表
+  - varchar/decimal 类型指定长度/精度
+  - 主键使用 `[pk]` 或 `[primary key]`
+  - 使用标准数据类型 (integer, varchar, decimal等)
+  - 所有语法符合 DBML 官方规范
+  """,
+
+  """
+  **Kroki 渲染测试**: 代码必须能被 Kroki 成功渲染为 SVG/PNG 图像,无渲染错误。
+  """,
+
+  """
+  **关系完整性**:
+  - 所有外键引用的表和字段必须存在
+  - 关系箭头方向正确 (`ref: >` 指向"一"的一方)
+  - 多对多关系使用中间表
+  - 关系有清晰的注释说明
+  """,
+
+  """
+  **表结构规范**:
+  - 每个表都有主键 (通常是 `id`)
+  - 必填字段有 `not null` 约束
+  - 唯一字段有 `unique` 约束
+  - 时间戳字段有默认值 `default: \\`now()\\``
+  """,
+
+  """
+  **索引策略合理**:
+  - 所有外键字段都有索引
+  - 常用查询条件有索引
+  - 复合索引按选择性从高到低排序
+  - 索引数量合理 (不过度索引)
+  """,
+
+  """
+  **命名规范一致**:
+  - 表名使用复数小写下划线: `users`, `order_items`
+  - 字段名使用小写下划线: `user_id`, `created_at`
+  - 外键格式: `{目标表单数}_id`
+  - 布尔字段前缀: `is_`, `has_`, `can_`
+  """,
+
+  """
+  **文档完整性**:
+  - 所有表都有 `Note:` 说明用途
+  - 关键字段有内联 `[note: ...]` 注释
+  - 关系有 `[note: ...]` 说明业务含义
+  - 枚举有注释说明取值范围
+  """
+]

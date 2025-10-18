@@ -135,6 +135,17 @@ export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 export const ENABLE_FAILURE_LOGGING = process.env.ENABLE_FAILURE_LOGGING !== "false";
 
 /**
+ * Promote-V4 TOML Prompt 系统开关
+ *
+ * true: 使用 Promote-V4 的 TOML 格式 Prompt
+ * false: 使用 V3 的 TXT 格式 Prompt (默认)
+ *
+ * @default false
+ * @env USE_PROMOTE_V4
+ */
+export const USE_PROMOTE_V4 = process.env.USE_PROMOTE_V4 === "true";
+
+/**
  * 所有环境变量的导出对象
  *
  * 方便统一访问和类型推导
@@ -154,6 +165,7 @@ export const ENV = {
   API_TEST_TIMEOUT,
   JWT_EXPIRES_IN,
   ENABLE_FAILURE_LOGGING,
+  USE_PROMOTE_V4,
 } as const;
 
 /**

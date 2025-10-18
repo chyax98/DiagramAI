@@ -1,0 +1,226 @@
+# ============================================
+# L3 类型层 - GraphViz ER Diagram (实体关系图) 规范
+# ============================================
+
+[meta]
+level = "L3"
+language = "graphviz"
+diagram_type = "er"
+version = "1.0.0"
+description = "GraphViz ER 图规范"
+author = "DiagramAI Team"
+created_at = "2025-10-19"
+updated_at = "2025-10-19"
+
+# 类型相关元数据
+complexity = "high"
+target_length = 3200
+use_cases = ["数据库设计", "ER 建模", "表结构展示", "数据关系分析", "系统数据架构"]
+
+# ============================================
+# Section 1: D 角色定义 (Role Definition)
+# ============================================
+
+[D_role]
+additional_roles = [
+  "数据库设计专家",
+  "ER 图建模专家",
+  "关系数据库架构师"
+]
+
+# ============================================
+# Section 2: E 约束条件 (Constraints)
+# ============================================
+
+[E_constraints]
+items = [
+  """
+  **ER 图必须使用 digraph**: ER 图表达有向的关系 (外键指向), 必须使用 `digraph` 声明和 `->` 连接符。
+  ```dot
+  // ✅ 正确
+  digraph ER {
+    User -> Order [label="1:N"];
+  }
+
+  // ❌ 错误 - ER 图不能用 graph
+  graph ER {
+    User -- Order;
+  }
+  ```
+  """,
+
+  """
+  **表结构必须使用 shape=record**: ER 图的表定义必须使用 `shape=record` 或 `shape=Mrecord` (圆角), 这是展示表结构的标准形状。
+  ```dot
+  // ✅ 正确 - 使用 record
+  node [shape=record];
+  User [label="{User|id: int\\l|name: string\\l}"];
+
+  // ❌ 错误 - 不能用 box
+  node [shape=box];
+  User [label="User\nid\nname"];
+  ```
+  """,
+
+  """
+  **字段必须使用 \\l 左对齐**: 表的字段必须使用 `\\l` 实现左对齐, 这是 record 形状的标准格式:
+  ```dot
+  // ✅ 正确 - 字段左对齐
+  User [label="{User|id: int\\l|name: string\\l|email: string\\l}"];
+
+  // ❌ 错误 - 缺少 \\l 会导致居中
+  User [label="{User|id: int|name: string|email: string}"];
+  ```
+  每个字段末尾都必须添加 `\\l`。
+  """,
+
+  """
+  **主键和外键必须明确标识**: 主键和外键字段必须明确标注:
+  - 主键: 使用 `(PK)` 标注 + `<pk>` 端口标记
+  - 外键: 使用 `(FK)` 标注 + `<fk>` 端口标记
+  ```dot
+  User [label="{User|<pk> id: int (PK)\\l|username: string\\l}"];
+  Order [label="{Order|<pk> id: int (PK)\\l|<fk> user_id: int (FK)\\l}"];
+  ```
+  """,
+
+  """
+  **关系必须使用端口引用**: 表之间的关系应该使用端口引用, 精确连接到特定字段:
+  ```dot
+  // ✅ 正确 - 使用端口引用
+  User:pk -> Order:fk [label="1:N"];
+
+  // ❌ 错误 - 缺少端口引用
+  User -> Order [label="1:N"];
+  ```
+  """,
+
+  """
+  **关系基数必须标注**: 所有关系的边都必须标注基数 (cardinality):
+  - `1:1` - 一对一关系
+  - `1:N` - 一对多关系
+  - `M:N` - 多对多关系 (必须通过关联表实现)
+  ```dot
+  User:pk -> Order:fk [label="1:N"];
+  Product:pk -> ProductTag:fk1 [label="1:N"];
+  Tag:pk -> ProductTag:fk2 [label="1:N"];
+  ```
+  """,
+
+  """
+  **多对多必须使用关联表**: 多对多关系不能直接连接, 必须通过中间表实现:
+  ```dot
+  // ✅ 正确 - 使用关联表
+  ProductTag [label="{ProductTag|<pk> id: int (PK)\\l|<fk1> product_id: int (FK)\\l|<fk2> tag_id: int (FK)\\l}"];
+  Product:pk -> ProductTag:fk1 [label="1:N"];
+  Tag:pk -> ProductTag:fk2 [label="1:N"];
+
+  // ❌ 错误 - 直接连接
+  Product -> Tag [label="M:N"];
+  ```
+  """,
+
+  """
+  **字段类型必须标注**: 每个字段都应该标注数据类型:
+  ```dot
+  User [label="{User|<pk> id: int (PK)\\l|username: string\\l|email: string\\l|created_at: datetime\\l}"];
+  ```
+  常用类型: int, string, text, decimal, datetime, boolean, enum
+  """
+]
+
+# ============================================
+# Section 3: P 流程规范 (Process)
+# ============================================
+
+[P_process]
+items = [
+  """
+  **1. 识别实体和属性**:
+  - 实体: 系统中的核心对象 (如 User, Order, Product)
+  - 属性: 实体的字段 (如 id, name, email)
+  - 主键: 唯一标识实体的字段 (通常是 id)
+  - 外键: 指向其他实体主键的字段
+  - 数据类型: 每个字段的数据类型
+  """,
+
+  """
+  **2. 提取实体关系**:
+  - 一对一: 用户和用户详情 (User 1:1 UserProfile)
+  - 一对多: 用户和订单 (User 1:N Order)
+  - 多对多: 商品和标签 (Product M:N Tag, 通过 ProductTag)
+  - 自关联: 分类树 (Category 1:N Category)
+  - 关系基数: 明确每种关系的基数
+  """,
+
+  """
+  **3. 设计表结构**:
+  - 使用 `shape=record` 定义表
+  - 使用 `\\l` 实现字段左对齐
+  - 使用 `|` 分隔表名和字段
+  - 使用 `<pk>`, `<fk>` 标记端口
+  - 使用 `(PK)`, `(FK)` 标注主键外键
+  - 标注字段数据类型
+  """,
+
+  """
+  **4. 设计关系连接**:
+  - 使用端口引用精确连接 `表名:端口 -> 表名:端口`
+  - 使用 label 标注关系基数 `[label="1:N"]`
+  - 多对多通过关联表连接
+  - 自关联使用不同颜色区分 `[color="blue"]`
+  """,
+
+  """
+  **5. 优化 ER 图结构**:
+  - 布局方向: `rankdir=LR` (水平) 适合多表关系, `rankdir=TB` (垂直) 适合分层展示
+  - 使用颜色区分不同类型的表
+  - 关联表使用特殊颜色 (如黄色 `#fff9c4`)
+  - 核心表使用醒目颜色 (如蓝色 `#90caf9`)
+  - 复杂 ER 图考虑使用子图分组
+  """
+]
+
+# ============================================
+# Section 4: H 质量标准 (Quality Standards)
+# ============================================
+
+[H_quality]
+items = [
+  """
+  **表结构规范性**:
+  - 所有表使用 `shape=record`
+  - 所有字段使用 `\\l` 左对齐
+  - 表名和字段用 `|` 分隔
+  - 主键标注 `(PK)` 和 `<pk>`
+  - 外键标注 `(FK)` 和 `<fk>`
+  - 字段类型清晰标注
+  """,
+
+  """
+  **关系完整性**:
+  - 所有关系使用端口引用 `表名:端口`
+  - 所有关系标注基数 `1:1`, `1:N`, `M:N`
+  - 多对多使用关联表实现
+  - 自关联清晰标识 (如 "1:N (parent-child)")
+  - 无悬空表 (所有表都有关系或独立存在的理由)
+  """,
+
+  """
+  **字段命名规范**:
+  - 主键通常命名为 `id`
+  - 外键命名为 `表名_id` (如 `user_id`, `order_id`)
+  - 字段名使用下划线命名 (如 `created_at`, `total_amount`)
+  - 避免使用保留字或特殊字符
+  """,
+
+  """
+  **ER 图可读性**:
+  - 布局合理, 表分布均匀
+  - 关系线不交叉或交叉最少
+  - 颜色区分不同类型的表
+  - 关联表使用特殊颜色标识
+  - 核心表突出显示
+  - 复杂 ER 图使用子图分组
+  """
+]

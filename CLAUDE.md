@@ -841,16 +841,20 @@ export async function GET(request: NextRequest) {
 **文件**: `src/lib/utils/kroki.ts`
 
 ```typescript
-// 生成 Kroki URL (deflate + base64url 编码)
-export function generateKrokiURL(
+// ⚡ POST 方式渲染 - 无 URL 长度限制,无需编码
+export async function renderKrokiDiagram(
   code: string,
   diagramType: KrokiDiagramType,
   outputFormat: KrokiOutputFormat = "svg"
-): string {
-  const compressed = pako.deflate(code, { level: 9 });
-  const encoded = base64UrlEncode(compressed);
-  return `${KROKI_URL}/${diagramType}/${outputFormat}/${encoded}`;
-  // 返回: /api/kroki/mermaid/svg/eNpL...
+): Promise<string> {
+  const response = await fetch(`${KROKI_URL}/${diagramType}/${outputFormat}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, language: diagramType, type: outputFormat }),
+  });
+
+  const blob = await response.blob();
+  return URL.createObjectURL(blob); // 返回 blob URL
 }
 ```
 
@@ -858,24 +862,25 @@ export function generateKrokiURL(
 
 ```mermaid
 graph LR
-    A[DiagramPreview 组件] --> B[generateKrokiURL]
-    B --> C[/api/kroki/mermaid/svg/...]
+    A[DiagramPreview 组件] --> B[renderKrokiDiagram]
+    B -->|POST| C[/api/kroki/mermaid/svg]
     C --> D[Kroki API Route]
-    D --> E{Kroki 服务}
+    D -->|POST| E{Kroki 服务}
     E -->|公共| F[https://kroki.io]
     E -->|Docker| G[http://localhost:8000]
     E -->|远程| H[http://kroki-server:8000]
     F --> I[返回 SVG]
     G --> I
     H --> I
-    I --> J[缓存 & 显示]
+    I --> J[Blob URL & 显示]
 ```
 
 ### 性能优化
 
-- **客户端缓存**: 1 小时缓存已渲染的图表
-- **压缩**: 使用 pako.deflate (level 9) 优化 URL 大小
-- **Base64 URL**: URL 安全编码所有图表代码
+- ⚡ **POST 方式**: 无 URL 长度限制,支持大型图表
+- 🚀 **无需编码**: 直接发送代码,性能更好
+- 📦 **Blob URL**: 高效的内存管理,自动清理
+- 🗑️ **移除 pako**: 减少依赖,简化代码
 
 ---
 

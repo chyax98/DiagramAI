@@ -1,7 +1,5 @@
-/** Kroki 工具 - 支持 POST 和 GET 两种方式 */
+/** Kroki 渲染工具 - POST 方式,通过后端代理访问 */
 
-import pako from "pako";
-import { KROKI_URL } from "@/lib/constants/env";
 import { type RenderLanguage } from "@/lib/constants/diagram-types";
 
 // 类型定义
@@ -9,49 +7,18 @@ export type KrokiDiagramType = RenderLanguage;
 export type KrokiOutputFormat = "svg" | "png" | "pdf" | "jpeg";
 
 /**
- * Base64 URL Safe 编码 (用于 GET 请求)
- */
-function base64UrlEncode(data: Uint8Array): string {
-  const base64 = Buffer.from(data).toString("base64");
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-}
-
-/**
- * 生成 Kroki GET URL (编码方式,有长度限制)
+ * 渲染 Kroki 图表 (POST 方式,通过后端代理)
  *
- * @deprecated 推荐使用 renderKrokiDiagram (POST 方式) 以支持大型图表
+ * 优势:
+ * - ⚡ 无 URL 长度限制,支持大型图表
+ * - 🚀 无需编码/解码,性能更好
+ * - 🧹 代码更简洁,移除 pako 依赖
+ * - 🔒 后端代理统一访问,避免 CORS
  *
  * @param code - 图表代码
  * @param diagramType - 图表类型 (mermaid, plantuml, etc.)
  * @param outputFormat - 输出格式 (svg, png, pdf, jpeg)
- * @returns Kroki API URL
- *
- * @example
- * generateKrokiURL("graph TD\n  A-->B", "mermaid", "svg")
- * // => "/api/kroki/mermaid/svg/eNpL..."
- */
-export function generateKrokiURL(
-  code: string,
-  diagramType: KrokiDiagramType,
-  outputFormat: KrokiOutputFormat = "svg"
-): string {
-  const compressed = pako.deflate(code, { level: 9 });
-  const encoded = base64UrlEncode(compressed);
-  return `${KROKI_URL}/${diagramType}/${outputFormat}/${encoded}`;
-}
-
-/**
- * 渲染 Kroki 图表 (推荐使用 POST 方式)
- *
- * 优势:
- * - 无 URL 长度限制,支持大型图表
- * - 无需编码/解码,性能更好
- * - 代码更简洁
- *
- * @param code - 图表代码
- * @param diagramType - 图表类型
- * @param outputFormat - 输出格式
- * @returns 图表 URL (blob URL)
+ * @returns Blob URL (用于图片显示)
  *
  * @example
  * const url = await renderKrokiDiagram("graph TD\n  A-->B", "mermaid", "svg")
@@ -62,7 +29,8 @@ export async function renderKrokiDiagram(
   diagramType: KrokiDiagramType,
   outputFormat: KrokiOutputFormat = "svg"
 ): Promise<string> {
-  const response = await fetch(`${KROKI_URL}/${diagramType}/${outputFormat}`, {
+  // 通过后端代理访问 Kroki
+  const response = await fetch(`/api/kroki/${diagramType}/${outputFormat}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

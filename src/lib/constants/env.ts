@@ -58,48 +58,32 @@ export const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10
 export const DB_TIMEOUT = parseInt(process.env.DB_TIMEOUT || "5000", 10);
 
 /**
- * Kroki 客户端 URL (浏览器访问)
+ * Kroki 服务 URL (后端代理统一访问)
  *
- * 客户端始终通过 API 代理访问,避免 CORS 问题
- *
- * @default '/api/kroki'
- * @env NEXT_PUBLIC_KROKI_URL
- */
-export const KROKI_URL = process.env.NEXT_PUBLIC_KROKI_URL || "/api/kroki";
-
-/**
- * Kroki 服务端 URL (服务器端访问)
- *
- * 默认使用公共 Kroki 服务
+ * DiagramAI 使用后端代理统一访问 Kroki 服务:
+ * - 前端: 通过 /api/kroki (避免 CORS)
+ * - 后端: 直接访问 KROKI_URL 配置的服务
  *
  * @default 'https://kroki.io'
- * @env KROKI_INTERNAL_URL
+ * @env KROKI_URL
  */
-export const KROKI_INTERNAL_URL = process.env.KROKI_INTERNAL_URL || "https://kroki.io";
-
-/**
- * Kroki 请求超时时间（毫秒）
- *
- * @default 5000
- * @env NEXT_PUBLIC_KROKI_TIMEOUT
- */
-export const KROKI_TIMEOUT = parseInt(process.env.NEXT_PUBLIC_KROKI_TIMEOUT || "5000", 10);
+export const KROKI_URL = process.env.KROKI_URL || "https://kroki.io";
 
 /**
  * Kroki 最大重试次数
  *
  * @default 3
- * @env NEXT_PUBLIC_KROKI_MAX_RETRIES
+ * @env KROKI_MAX_RETRIES
  */
-export const KROKI_MAX_RETRIES = parseInt(process.env.NEXT_PUBLIC_KROKI_MAX_RETRIES || "3", 10);
+export const KROKI_MAX_RETRIES = parseInt(process.env.KROKI_MAX_RETRIES || "3", 10);
 
 /**
  * Kroki 重试延迟时间（毫秒）
  *
  * @default 1000
- * @env NEXT_PUBLIC_KROKI_RETRY_DELAY
+ * @env KROKI_RETRY_DELAY
  */
-export const KROKI_RETRY_DELAY = parseInt(process.env.NEXT_PUBLIC_KROKI_RETRY_DELAY || "1000", 10);
+export const KROKI_RETRY_DELAY = parseInt(process.env.KROKI_RETRY_DELAY || "1000", 10);
 
 /**
  * 数据库文件路径
@@ -152,8 +136,6 @@ export const ENV = {
   BCRYPT_SALT_ROUNDS,
   DB_TIMEOUT,
   KROKI_URL,
-  KROKI_INTERNAL_URL,
-  KROKI_TIMEOUT,
   KROKI_MAX_RETRIES,
   KROKI_RETRY_DELAY,
   DB_PATH,

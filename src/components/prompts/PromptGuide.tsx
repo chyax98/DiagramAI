@@ -48,6 +48,93 @@ export function PromptGuide() {
           </div>
         </div>
 
+        {/* 长度控制建议 - 新增 */}
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-6 space-y-4">
+          <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+            <AlertCircle className="h-5 w-5" />
+            <h2 className="text-xl font-semibold">⚠️ 提示词长度控制</h2>
+          </div>
+
+          <p className="text-sm text-foreground leading-relaxed">
+            提示词过长会导致<strong>成本增加、性能下降、模型注意力分散</strong>。 根据 2025 年 LLM
+            最佳实践，建议将每层提示词控制在合理范围内。
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="bg-background/50 rounded-lg p-4 border border-blue-500/20">
+              <div className="font-semibold text-blue-600 dark:text-blue-400 mb-2">L1 通用层</div>
+              <div className="space-y-1 text-muted-foreground">
+                <div>
+                  推荐: <strong className="text-foreground">3,200 字符</strong>
+                </div>
+                <div>
+                  约: <strong className="text-foreground">800 tokens</strong>
+                </div>
+                <div className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                  ⚠️ 当前可能超标，建议压缩 75%
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-background/50 rounded-lg p-4 border border-amber-500/20">
+              <div className="font-semibold text-amber-600 dark:text-amber-400 mb-2">L2 语言层</div>
+              <div className="space-y-1 text-muted-foreground">
+                <div>
+                  推荐: <strong className="text-foreground">1,600 字符</strong>
+                </div>
+                <div>
+                  约: <strong className="text-foreground">400 tokens</strong>
+                </div>
+                <div className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                  ⚠️ 当前可能超标，建议压缩 60%
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-background/50 rounded-lg p-4 border border-purple-500/20">
+              <div className="font-semibold text-purple-600 dark:text-purple-400 mb-2">
+                L3 类型层
+              </div>
+              <div className="space-y-1 text-muted-foreground">
+                <div>
+                  推荐: <strong className="text-foreground">3,200 字符</strong>
+                </div>
+                <div>
+                  约: <strong className="text-foreground">800 tokens</strong>
+                </div>
+                <div className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                  ⚠️ 当前可能超标，建议压缩 70%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-background/80 rounded-lg p-4 space-y-2 text-sm">
+            <div className="font-medium text-foreground">💰 优化效果预期</div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <div>
+                • 总长度: <strong className="text-foreground">9,100 → 2,000 tokens</strong>
+              </div>
+              <div>
+                • 压缩率: <strong className="text-green-600">↓ 78%</strong>
+              </div>
+              <div>
+                • 成本节省: <strong className="text-green-600">↓ 78%</strong>
+              </div>
+              <div>
+                • 响应速度: <strong className="text-green-600">↑ 60%</strong>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            💡 详见项目根目录的{" "}
+            <code className="bg-background/80 px-1.5 py-0.5 rounded text-amber-600">
+              提示词长度优化指南.md
+            </code>
+          </p>
+        </div>
+
         {/* 三层分工 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* L1 通用层 */}
@@ -102,14 +189,19 @@ export function PromptGuide() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-red-500 shrink-0">×</span>
-                    <span>语言特有的保留关键字</span>
+                    <span>过长的示例和教程</span>
                   </li>
                 </ul>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-border text-xs text-muted-foreground">
-              <strong>复用率:</strong> 2,300+ 次（23 种语言 × 100+ 种类型）
+            <div className="pt-3 border-t border-border space-y-1 text-xs">
+              <div className="text-muted-foreground">
+                <strong>推荐长度:</strong> 3,200 字符 (800 tokens)
+              </div>
+              <div className="text-muted-foreground">
+                <strong>复用率:</strong> 2,300+ 次（23 种语言 × 100+ 种类型）
+              </div>
             </div>
           </div>
 
@@ -171,8 +263,13 @@ export function PromptGuide() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-border text-xs text-muted-foreground">
-              <strong>复用率:</strong> 平均 5 次/语言（如 Mermaid 14 种类型）
+            <div className="pt-3 border-t border-border space-y-1 text-xs">
+              <div className="text-muted-foreground">
+                <strong>推荐长度:</strong> 1,600 字符 (400 tokens)
+              </div>
+              <div className="text-muted-foreground">
+                <strong>复用率:</strong> 平均 5 次/语言（如 Mermaid 14 种类型）
+              </div>
             </div>
           </div>
 
@@ -234,8 +331,13 @@ export function PromptGuide() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-border text-xs text-muted-foreground">
-              <strong>复用率:</strong> 1 次（每个图表类型独有）
+            <div className="pt-3 border-t border-border space-y-1 text-xs">
+              <div className="text-muted-foreground">
+                <strong>推荐长度:</strong> 3,200 字符 (800 tokens)
+              </div>
+              <div className="text-muted-foreground">
+                <strong>复用率:</strong> 1 次（每个图表类型独有）
+              </div>
             </div>
           </div>
         </div>
@@ -249,15 +351,15 @@ export function PromptGuide() {
           <div className="bg-background/50 rounded-lg p-4 font-mono text-sm">
             <div className="text-center space-y-2">
               <div className="text-foreground">最终 Prompt = L1（通用，必需）</div>
-              <div className="text-muted-foreground">+ "---"</div>
+              <div className="text-muted-foreground">+ &quot;---&quot;</div>
               <div className="text-foreground">+ L2（语言，可选）</div>
-              <div className="text-muted-foreground">+ "---"</div>
+              <div className="text-muted-foreground">+ &quot;---&quot;</div>
               <div className="text-foreground">+ L3（类型，必需）</div>
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-4">
-            三层提示词使用 <code className="bg-background/80 px-1.5 py-0.5 rounded">---</code> 分隔符连接，
-            最终发送给 AI 模型。L2 层是可选的，不影响系统运行。
+            三层提示词使用 <code className="bg-background/80 px-1.5 py-0.5 rounded">---</code>{" "}
+            分隔符连接， 最终发送给 AI 模型。L2 层是可选的，不影响系统运行。
           </p>
         </div>
 
@@ -283,7 +385,7 @@ export function PromptGuide() {
                 <li>• 避免冗余，每条规则只在合适的层级出现一次</li>
                 <li>• 保持层级之间的独立性</li>
                 <li>• 测试修改后的效果再保存</li>
-                <li>• 用有意义的版本名称（如"修正箭头语法"）</li>
+                <li>• 用有意义的版本名称（如 &quot;修正箭头语法&quot;）</li>
               </ul>
             </div>
             <div className="space-y-2">
@@ -317,9 +419,7 @@ export function PromptGuide() {
               </div>
               <div>
                 <div className="font-medium text-foreground">选择层级</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  从左侧选择 L1/L2/L3
-                </div>
+                <div className="text-xs text-muted-foreground mt-1">从左侧选择 L1/L2/L3</div>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 bg-background rounded-lg">
@@ -328,9 +428,7 @@ export function PromptGuide() {
               </div>
               <div>
                 <div className="font-medium text-foreground">选择范围</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  选择语言和类型（如需）
-                </div>
+                <div className="text-xs text-muted-foreground mt-1">选择语言和类型（如需）</div>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 bg-background rounded-lg">
@@ -339,9 +437,7 @@ export function PromptGuide() {
               </div>
               <div>
                 <div className="font-medium text-foreground">编辑内容</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  在编辑器中修改提示词
-                </div>
+                <div className="text-xs text-muted-foreground mt-1">在编辑器中修改提示词</div>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 bg-background rounded-lg">
@@ -350,9 +446,7 @@ export function PromptGuide() {
               </div>
               <div>
                 <div className="font-medium text-foreground">保存版本</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  输入版本名称并保存
-                </div>
+                <div className="text-xs text-muted-foreground mt-1">输入版本名称并保存</div>
               </div>
             </div>
           </div>
@@ -366,4 +460,3 @@ export function PromptGuide() {
     </div>
   );
 }
-

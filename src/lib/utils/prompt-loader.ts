@@ -52,7 +52,7 @@ export async function loadPrompt(
     // L2: 语言级提示词（可选）
     // ========================================================================
     const l2 = promptRepo.findActive(2, renderLanguage);
-    
+
     const l2_content = l2?.content || null;
     const l2_version = l2?.version;
     const l2_id = l2?.id;
@@ -62,9 +62,7 @@ export async function loadPrompt(
     // ========================================================================
     const l3 = promptRepo.findActive(3, renderLanguage, diagramType);
     if (!l3) {
-      throw new Error(
-        `L3 提示词不存在: ${renderLanguage}/${diagramType}，请检查数据库初始化`
-      );
+      throw new Error(`L3 提示词不存在: ${renderLanguage}/${diagramType}，请检查数据库初始化`);
     }
 
     const l3_content = l3.content;

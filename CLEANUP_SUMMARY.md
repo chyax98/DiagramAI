@@ -9,11 +9,11 @@
 
 ### 1. 删除未使用的 NPM 依赖 ✅
 
-| 依赖包 | 大小 | 原因 |
-|--------|------|------|
-| `@ai-sdk/cerebras` | ~1 MB | 改用 `createOpenAICompatible` |
-| `@ai-sdk/provider-utils` | ~500 KB | 完全未使用 |
-| `critters` | ~1 MB | Next.js 15 不再需要 |
+| 依赖包                   | 大小    | 原因                          |
+| ------------------------ | ------- | ----------------------------- |
+| `@ai-sdk/cerebras`       | ~1 MB   | 改用 `createOpenAICompatible` |
+| `@ai-sdk/provider-utils` | ~500 KB | 完全未使用                    |
+| `critters`               | ~1 MB   | Next.js 15 不再需要           |
 
 **总节省**: ~2.5 MB node_modules 空间
 
@@ -29,6 +29,7 @@
 #### `src/lib/services/FailureLogService.ts`
 
 **删除的代码**:
+
 ```typescript
 // ❌ 删除: 向后兼容的 promptIds 查询逻辑 (13行)
 if (!entry.promptIds) {
@@ -43,18 +44,21 @@ if (!entry.promptIds) {
 }
 ```
 
-**原因**: 
+**原因**:
+
 - 所有调用都已传入 `promptIds`
 - 向后兼容代码永远不会执行
 - 删除后代码更简洁
 
 **同时删除的 imports**:
+
 - `PromptRepository` (不再使用)
 - `getDatabaseInstance` (不再使用)
 
 #### `src/lib/repositories/RenderFailureLogRepository.ts`
 
 **更新的注释**:
+
 ```typescript
 // 旧注释: "单例导出（用于向后兼容）"
 // 新注释: "单例导出"
@@ -63,9 +67,10 @@ if (!entry.promptIds) {
 ### 4. 修复配置错误 ✅
 
 **`knip.json`**:
+
 ```json
 // ❌ 删除不存在的配置
-"src/middleware.ts"  // 此文件不存在
+"src/middleware.ts" // 此文件不存在
 ```
 
 ---
@@ -74,12 +79,12 @@ if (!entry.promptIds) {
 
 ### 代码体积
 
-| 指标 | 清理前 | 清理后 | 减少 |
-|------|--------|--------|------|
-| node_modules | ~500 MB | ~497.5 MB | ~2.5 MB |
-| 源代码文件 | N+1 | N | 1 个文件 |
-| 向后兼容代码 | ~15 行 | 0 | 15 行 |
-| 未使用 imports | 2 | 0 | 2 个 |
+| 指标           | 清理前  | 清理后    | 减少     |
+| -------------- | ------- | --------- | -------- |
+| node_modules   | ~500 MB | ~497.5 MB | ~2.5 MB  |
+| 源代码文件     | N+1     | N         | 1 个文件 |
+| 向后兼容代码   | ~15 行  | 0         | 15 行    |
+| 未使用 imports | 2       | 0         | 2 个     |
 
 ### 代码质量
 
@@ -91,6 +96,7 @@ if (!entry.promptIds) {
 ### Knip 检测结果
 
 **清理前**:
+
 ```
 Unused files (1)
 Unused dependencies (3)
@@ -99,9 +105,10 @@ Unused exports (151)
 ```
 
 **清理后**:
+
 ```
 Unused files (0)              ✅ 改进
-Unused dependencies (0)       ✅ 改进  
+Unused dependencies (0)       ✅ 改进
 Unused devDependencies (4)    ⚠️ 误报（实际在使用）
 Unused exports (152)          ⚠️ 误报（统一 Icon 组件模式）
 ```
@@ -113,11 +120,13 @@ Unused exports (152)          ⚠️ 误报（统一 Icon 组件模式）
 ### 1. Knip 工具的局限性
 
 **误报情况**:
+
 - **图标导出**: 报告 151 个未使用，实际只有 1 个未使用
 - **开发依赖**: 报告 4 个未使用，实际全部在使用
 - **误报率**: 高达 99%
 
-**原因**: 
+**原因**:
+
 - 无法追踪统一 Icon 组件的动态使用
 - 无法识别构建工具依赖（tailwindcss, eslint 等）
 
@@ -126,6 +135,7 @@ Unused exports (152)          ⚠️ 误报（统一 Icon 组件模式）
 ### 2. 向后兼容代码的问题
 
 **发现**:
+
 ```typescript
 // 这段代码永远不会执行
 if (!entry.promptIds) {
@@ -135,7 +145,8 @@ if (!entry.promptIds) {
 
 **原因**: 所有调用都已传入 `promptIds`
 
-**教训**: 
+**教训**:
+
 - 定期审查向后兼容代码
 - 确认是否还需要
 - 及时清理不再使用的兼容逻辑
@@ -143,11 +154,13 @@ if (!entry.promptIds) {
 ### 3. 未使用依赖的积累
 
 **原因分析**:
+
 - `@ai-sdk/cerebras`: 最初计划使用，后改用通用接口
 - `@ai-sdk/provider-utils`: 误添加或计划功能未实现
 - `critters`: 从项目模板继承，Next.js 15 不再需要
 
 **建议**:
+
 - 添加依赖前明确用途
 - 定期运行 `npm run dead-code:deps`
 - 使用 Git commit message 记录依赖用途
@@ -202,19 +215,19 @@ git commit -m "feat: 添加 xxx 依赖用于实现 yyy 功能"
 
 ### 清理前
 
-| 指标 | 分数 |
-|------|------|
-| 代码整洁度 | ⭐⭐⭐⭐☆ (92/100) |
-| 依赖管理 | ⭐⭐⭐⭐☆ (90/100) |
-| 代码质量 | ⭐⭐⭐⭐⭐ (95/100) |
+| 指标       | 分数                |
+| ---------- | ------------------- |
+| 代码整洁度 | ⭐⭐⭐⭐☆ (92/100)  |
+| 依赖管理   | ⭐⭐⭐⭐☆ (90/100)  |
+| 代码质量   | ⭐⭐⭐⭐⭐ (95/100) |
 
 ### 清理后
 
-| 指标 | 分数 | 改进 |
-|------|------|------|
-| 代码整洁度 | ⭐⭐⭐⭐⭐ (98/100) | +6 |
-| 依赖管理 | ⭐⭐⭐⭐⭐ (100/100) | +10 |
-| 代码质量 | ⭐⭐⭐⭐⭐ (96/100) | +1 |
+| 指标       | 分数                 | 改进 |
+| ---------- | -------------------- | ---- |
+| 代码整洁度 | ⭐⭐⭐⭐⭐ (98/100)  | +6   |
+| 依赖管理   | ⭐⭐⭐⭐⭐ (100/100) | +10  |
+| 代码质量   | ⭐⭐⭐⭐⭐ (96/100)  | +1   |
 
 **总分提升**: 92 → 98 (+6 分)
 
@@ -259,4 +272,3 @@ git commit -m "feat: 添加 xxx 依赖用于实现 yyy 功能"
 **清理完成时间**: 2025-10-18  
 **提交哈希**: 8bc7990  
 **状态**: ✅ 完成
-

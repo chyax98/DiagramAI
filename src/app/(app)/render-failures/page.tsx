@@ -77,9 +77,7 @@ export default function RenderFailuresPage() {
       <main className="container mx-auto p-6 max-w-7xl">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">渲染失败日志</h1>
-          <p className="text-muted-foreground">
-            共 {total} 条失败记录,用于分析和优化 AI Prompt
-          </p>
+          <p className="text-muted-foreground">共 {total} 条失败记录,用于分析和优化 AI Prompt</p>
         </div>
 
         {loading ? (
@@ -110,12 +108,8 @@ export default function RenderFailuresPage() {
                         {new Date(log.created_at).toLocaleString("zh-CN")}
                       </span>
                     </div>
-                    <p className="text-sm font-medium mb-1">
-                      用户输入: {log.user_input}
-                    </p>
-                    <p className="text-sm text-destructive">
-                      错误: {log.error_message}
-                    </p>
+                    <p className="text-sm font-medium mb-1">用户输入: {log.user_input}</p>
+                    <p className="text-sm text-destructive">错误: {log.error_message}</p>
                   </div>
                   <button
                     onClick={() => handleDelete(log.id)}

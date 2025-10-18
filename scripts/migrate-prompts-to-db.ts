@@ -7,12 +7,12 @@
  * 使用: npx tsx scripts/migrate-prompts-to-db.ts
  */
 
-import fs from 'fs';
-import path from 'path';
-import { getDatabaseInstance } from '../src/lib/db/client';
-import { PromptRepository } from '../src/lib/repositories/PromptRepository';
+import fs from "fs";
+import path from "path";
+import { getDatabaseInstance } from "../src/lib/db/client";
+import { PromptRepository } from "../src/lib/repositories/PromptRepository";
 
-const PROMPTS_DIR = path.join(process.cwd(), 'data', 'prompts');
+const PROMPTS_DIR = path.join(process.cwd(), "data", "prompts");
 const SYSTEM_USER_ID = 0; // 系统用户 ID (用于存储默认 prompts)
 
 interface PromptFile {
@@ -30,32 +30,33 @@ function scanPromptsDirectory(): PromptFile[] {
   const prompts: PromptFile[] = [];
 
   // L1: universal.txt
-  const universalPath = path.join(PROMPTS_DIR, 'universal.txt');
+  const universalPath = path.join(PROMPTS_DIR, "universal.txt");
   if (fs.existsSync(universalPath)) {
     prompts.push({
       level: 1,
       filePath: universalPath,
-      content: fs.readFileSync(universalPath, 'utf-8'),
+      content: fs.readFileSync(universalPath, "utf-8"),
     });
   }
 
   // L2/L3: 扫描所有语言目录
-  const languageDirs = fs.readdirSync(PROMPTS_DIR, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name);
+  const languageDirs = fs
+    .readdirSync(PROMPTS_DIR, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name);
 
   for (const language of languageDirs) {
     const languageDir = path.join(PROMPTS_DIR, language);
     const files = fs.readdirSync(languageDir);
 
     for (const file of files) {
-      if (!file.endsWith('.txt')) continue;
+      if (!file.endsWith(".txt")) continue;
 
       const filePath = path.join(languageDir, file);
-      const content = fs.readFileSync(filePath, 'utf-8');
-      const typeName = file.replace('.txt', '');
+      const content = fs.readFileSync(filePath, "utf-8");
+      const typeName = file.replace(".txt", "");
 
-      if (typeName === 'common') {
+      if (typeName === "common") {
         // L2: 语言通用 prompt
         prompts.push({
           level: 2,
@@ -83,14 +84,14 @@ function scanPromptsDirectory(): PromptFile[] {
  * 迁移 prompts 到数据库
  */
 async function migratePrompts() {
-  console.log('🚀 开始迁移 prompts 到数据库...\n');
+  console.log("🚀 开始迁移 prompts 到数据库...\n");
 
   const db = getDatabaseInstance();
   const repo = new PromptRepository(db);
 
   // 清空现有数据
-  db.prepare('DELETE FROM custom_prompts WHERE user_id = ?').run(SYSTEM_USER_ID);
-  console.log('✅ 清空现有系统 prompts\n');
+  db.prepare("DELETE FROM custom_prompts WHERE user_id = ?").run(SYSTEM_USER_ID);
+  console.log("✅ 清空现有系统 prompts\n");
 
   // 扫描文件
   const prompts = scanPromptsDirectory();
@@ -102,11 +103,12 @@ async function migratePrompts() {
   // 迁移每个 prompt
   for (const prompt of prompts) {
     try {
-      const displayName = prompt.level === 1
-        ? 'L1 (Universal)'
-        : prompt.level === 2
-        ? `L2 (${prompt.language})`
-        : `L3 (${prompt.language}/${prompt.type})`;
+      const displayName =
+        prompt.level === 1
+          ? "L1 (Universal)"
+          : prompt.level === 2
+            ? `L2 (${prompt.language})`
+            : `L3 (${prompt.language}/${prompt.type})`;
 
       // 直接插入数据库 (避免 Repository 的版本生成逻辑)
       const stmt = db.prepare(`
@@ -121,12 +123,12 @@ async function migratePrompts() {
         prompt.level,
         prompt.language || null,
         prompt.type || null,
-        'v1.0.0',
-        'System Default',
+        "v1.0.0",
+        "System Default",
         1,
         prompt.content,
         JSON.stringify({
-          source: 'file_migration',
+          source: "file_migration",
           original_path: prompt.filePath,
           migrated_at: new Date().toISOString(),
         })
@@ -146,17 +148,19 @@ async function migratePrompts() {
   console.log(`   📝 总计: ${prompts.length}`);
 
   // 验证
-  const count = db.prepare('SELECT COUNT(*) as count FROM custom_prompts WHERE user_id = ?').get(SYSTEM_USER_ID) as { count: number };
+  const count = db
+    .prepare("SELECT COUNT(*) as count FROM custom_prompts WHERE user_id = ?")
+    .get(SYSTEM_USER_ID) as { count: number };
   console.log(`\n✅ 数据库中共有 ${count.count} 条系统 prompts`);
 }
 
 // 执行迁移
 migratePrompts()
   .then(() => {
-    console.log('\n🎉 迁移成功完成!');
+    console.log("\n🎉 迁移成功完成!");
     process.exit(0);
   })
   .catch((error) => {
-    console.error('\n❌ 迁移失败:', error);
+    console.error("\n❌ 迁移失败:", error);
     process.exit(1);
   });

@@ -2,7 +2,7 @@
 
 "use client";
 
-import { Wand2, Wrench, Save, Settings, History, FileText } from "lucide-react";
+import { Wand2, Wrench, Save, Settings, History, FileText, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDiagramStore } from "@/lib/stores/diagram-store";
 import {
@@ -21,6 +21,7 @@ interface EditorHeaderProps {
   onModelsClick: () => void;
   onHistoryClick: () => void;
   onPromptsClick?: () => void;
+  onFailureLogsClick?: () => void;
 }
 
 export function EditorHeader({
@@ -31,6 +32,7 @@ export function EditorHeader({
   onModelsClick,
   onHistoryClick,
   onPromptsClick,
+  onFailureLogsClick,
 }: EditorHeaderProps) {
   const selectedModelId = useDiagramStore((state) => state.selectedModelId);
   const renderLanguage = useDiagramStore((state) => state.renderLanguage);
@@ -80,6 +82,12 @@ export function EditorHeader({
         <Button variant="ghost" size="sm" onClick={onPromptsClick}>
           <FileText className="mr-1.5 h-4 w-4" />
           提示词
+        </Button>
+      )}
+      {onFailureLogsClick && (
+        <Button variant="ghost" size="sm" onClick={onFailureLogsClick}>
+          <AlertCircle className="mr-1.5 h-4 w-4" />
+          失败日志
         </Button>
       )}
       <UserMenu />

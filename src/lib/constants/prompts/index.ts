@@ -15,23 +15,19 @@ export * from "./types";
  *
  * 返回完整的 prompt: L1 + L2 + L3
  * 不包含用户输入（用户输入由 AI 服务单独传递）
- * 支持用户自定义版本（优先使用用户版本，无自定义时使用系统默认）
  *
  * @param renderLanguage - 渲染语言
  * @param diagramType - 图表类型
- * @param userId - 用户 ID (可选，用于加载自定义版本)
  * @returns 完整的 prompt 文本
  */
 export function getGeneratePrompt(
   renderLanguage: RenderLanguage,
-  diagramType: DiagramType,
-  _userId?: number // 已废弃,保留兼容性
+  diagramType: DiagramType
 ): string {
   const db = getDatabaseInstance();
   const repo = new PromptRepository(db);
 
-  // 全局共享 Prompt,不再按用户隔离
-  // userId 参数已废弃,保留参数兼容性
+  // 全局共享 Prompt (所有用户使用相同的激活版本)
 
   // 1. L1: 通用规范 (所有图表共享)
   const l1 = repo.findActive(1);

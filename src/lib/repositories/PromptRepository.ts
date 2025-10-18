@@ -4,7 +4,6 @@
  * 核心变更 (相较于旧版本):
  * ❌ 移除 user_id 参数 - 全局共享
  * ✅ 自动生成版本号 (v1, v2, v3...)
- * ✅ 软删除支持 (deleted_at)
  * ✅ 审计字段 (created_by)
  * ✅ 事务保护
  */
@@ -56,7 +55,6 @@ export class PromptRepository {
         AND (render_language = ? OR (render_language IS NULL AND ? IS NULL))
         AND (diagram_type = ? OR (diagram_type IS NULL AND ? IS NULL))
         AND is_active = 1
-        AND deleted_at IS NULL
       LIMIT 1
     `);
 
@@ -81,7 +79,6 @@ export class PromptRepository {
       WHERE prompt_level = ?
         AND (render_language = ? OR (render_language IS NULL AND ? IS NULL))
         AND (diagram_type = ? OR (diagram_type IS NULL AND ? IS NULL))
-        AND deleted_at IS NULL
       ORDER BY version DESC, created_at DESC
     `);
 
@@ -113,12 +110,10 @@ export class PromptRepository {
         created_by,
         created_at,
         updated_at,
-        deleted_at
       FROM custom_prompts
       WHERE prompt_level = ?
         AND (render_language = ? OR (render_language IS NULL AND ? IS NULL))
         AND (diagram_type = ? OR (diagram_type IS NULL AND ? IS NULL))
-        AND deleted_at IS NULL
       ORDER BY version DESC, created_at DESC
     `);
 
@@ -331,7 +326,6 @@ export class PromptRepository {
         WHERE prompt_level = ?
           AND (render_language = ? OR (render_language IS NULL AND ? IS NULL))
           AND (diagram_type = ? OR (diagram_type IS NULL AND ? IS NULL))
-          AND deleted_at IS NULL
           AND id != ?
       `);
 
@@ -358,7 +352,7 @@ export class PromptRepository {
   }
 
   /**
-   * 软删除提示词
+   * 删除提示词 (硬删除)
    *
    * @param id - 提示词 ID
    *
@@ -367,14 +361,12 @@ export class PromptRepository {
    * repo.delete(123);
    * ```
    */
-  delete(id: number): void {
-    const stmt = this.db.prepare(`
-      UPDATE custom_prompts
-      SET deleted_at = datetime('now')
-      WHERE id = ?
-    `);
-
-    stmt.run(id);
+  delete(_id: number): void {
+    // ❌ 不允许删除 Prompt!
+    // Prompt 版本历史必须永久保留,通过 activate() 方法切换版本
+    throw new Error(
+      "删除操作不被允许。Prompt 版本必须永久保留,请使用 activate() 方法切换到其他版本。"
+    );
   }
 
   // ============================================================================
@@ -402,7 +394,6 @@ export class PromptRepository {
       WHERE prompt_level = ?
         AND (render_language = ? OR (render_language IS NULL AND ? IS NULL))
         AND (diagram_type = ? OR (diagram_type IS NULL AND ? IS NULL))
-        AND deleted_at IS NULL
       ORDER BY version DESC
       LIMIT 1
     `);
@@ -450,11 +441,9 @@ export class PromptRepository {
             AND (cp2.render_language = cp1.render_language OR (cp2.render_language IS NULL AND cp1.render_language IS NULL))
             AND (cp2.diagram_type = cp1.diagram_type OR (cp2.diagram_type IS NULL AND cp1.diagram_type IS NULL))
             AND cp2.is_active = 1
-            AND cp2.deleted_at IS NULL
           LIMIT 1
         ) as active_version
       FROM custom_prompts cp1
-      WHERE deleted_at IS NULL
       ORDER BY prompt_level, render_language, diagram_type
     `);
 

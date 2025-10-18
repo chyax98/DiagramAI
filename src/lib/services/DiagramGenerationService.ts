@@ -208,7 +208,7 @@ export class DiagramGenerationService {
 
     const { text: generatedCode } = await generateText({
       model,
-      system: getGeneratePrompt(params.renderLanguage, params.diagramType, params.userId),
+      system: getGeneratePrompt(params.renderLanguage, params.diagramType),
       messages: [
         {
           role: "user",
@@ -315,7 +315,7 @@ export class DiagramGenerationService {
 
     const result = await generateText({
       model,
-      system: getGeneratePrompt(params.renderLanguage, sessionData.diagramType, params.userId),
+      system: getGeneratePrompt(params.renderLanguage, sessionData.diagramType),
       messages,
       temperature: AI_TEMPERATURE,
       maxRetries: AI_MAX_RETRIES,

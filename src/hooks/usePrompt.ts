@@ -18,7 +18,7 @@ interface UsePromptReturn {
   error: string | null;
   savePrompt: (content: string, versionName?: string) => Promise<string>;
   activateVersion: (versionId: number) => Promise<void>;
-  deleteVersion: (versionId: number) => Promise<void>;
+  // deleteVersion: (versionId: number) => Promise<void>; // ❌ 已移除: Prompt 不允许删除
   refresh: () => Promise<void>;
 }
 
@@ -173,26 +173,9 @@ export function usePrompt(selection: PromptSelection): UsePromptReturn {
     }
   };
 
-  // 删除版本
-  const deleteVersion = async (versionId: number) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      await apiClient.delete(`/api/prompts/versions/${versionId}`);
-
-      logger.info("✅ 版本删除成功", { versionId });
-
-      // 刷新数据
-      await loadPrompt();
-    } catch (err) {
-      logger.error("❌ 版本删除失败", err);
-      setError(err instanceof Error ? err.message : "删除失败");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ❌ deleteVersion 已移除
+  // Prompt 版本历史必须永久保留,不允许删除
+  // 如需切换版本,请使用 activateVersion()
 
   // ✅ 性能优化: 当选择变化时重新加载 (带防抖,减少 50% API 请求)
   useEffect(() => {
@@ -222,7 +205,7 @@ export function usePrompt(selection: PromptSelection): UsePromptReturn {
     error,
     savePrompt,
     activateVersion,
-    deleteVersion,
+    // deleteVersion, // ❌ 已移除
     refresh: loadPrompt,
   };
 }

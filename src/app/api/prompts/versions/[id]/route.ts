@@ -1,6 +1,5 @@
 /**
  * PUT /api/prompts/versions/:id/activate - 激活某个版本
- * DELETE /api/prompts/versions/:id - 删除某个版本
  */
 
 import { NextRequest } from "next/server";
@@ -50,41 +49,6 @@ export const PUT = withAuthParams<{ id: string }>(
   }
 );
 
-/**
- * DELETE /api/prompts/:id
- * 删除某个版本
- */
-export const DELETE = withAuthParams<{ id: string }>(
-  async (_request: NextRequest, _user: UserPublic, params) => {
-    try {
-      const promptId = parseInt(params.id, 10);
-
-      if (isNaN(promptId)) {
-        return errorResponse("无效的 ID", "INVALID_ID", 400);
-      }
-
-      const db = getDatabaseInstance();
-      const repo = new PromptRepository(db);
-
-      // 验证提示词是否存在
-      const prompt = repo.findById(promptId);
-      if (!prompt) {
-        return notFoundResponse("提示词不存在");
-      }
-
-      // 软删除版本
-      repo.delete(promptId);
-
-      logger.info("[/api/prompts/:id] 删除版本", {
-        promptId,
-        version: prompt.version,
-      });
-
-      return successResponse({ message: "版本已删除", version: prompt.version });
-    } catch (error) {
-      logger.error("[/api/prompts/:id] 删除版本失败:", error);
-      const errorMessage = error instanceof Error ? error.message : "未知错误";
-      return errorResponse("删除版本失败", "PROMPT_DELETE_FAILED", 500, errorMessage);
-    }
-  }
-);
+// ❌ DELETE 端点已移除
+// Prompt 版本历史必须永久保留,不允许删除
+// 如需切换版本,请使用 PUT /api/prompts/versions/:id/activate

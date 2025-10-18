@@ -47,6 +47,7 @@ export default function HomePage() {
     handleNavigateModels,
     handleNavigateHistory,
     handleNavigatePrompts,
+    handleNavigateFailureLogs,
   } = useEditorActions();
 
   // 模态框状态
@@ -157,6 +158,7 @@ export default function HomePage() {
         onModelsClick={handleNavigateModels}
         onHistoryClick={handleNavigateHistory}
         onPromptsClick={handleNavigatePrompts}
+        onFailureLogsClick={handleNavigateFailureLogs}
       />
 
       {/* 主编辑区 */}

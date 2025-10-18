@@ -361,5 +361,84 @@ END;
 
 
 -- ============================================================================
+-- 7. render_failure_logs 表 - 渲染失败日志
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS render_failure_logs (
+  -- 主键
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+  -- 外键: 关联用户
+  user_id INTEGER NOT NULL,
+
+  -- 用户输入的原始描述
+  user_input TEXT NOT NULL CHECK(length(user_input) > 0),
+
+  -- 渲染语言
+  -- ⚠️ 维护警告: 此枚举必须与 diagram-types.ts 保持 100% 同步
+  -- 参见 generation_histories 表注释 (第 122-132 行) 获取完整的同步要求
+  render_language TEXT NOT NULL CHECK (
+    render_language IN (
+      'mermaid', 'plantuml', 'd2', 'graphviz', 'wavedrom', 'nomnoml',
+      'excalidraw', 'c4plantuml', 'vegalite', 'dbml', 'bpmn', 'ditaa',
+      'nwdiag', 'blockdiag', 'actdiag', 'packetdiag', 'rackdiag',
+      'seqdiag', 'structurizr', 'erd', 'pikchr', 'svgbob', 'umlet'
+    )
+  ),
+
+  -- 图表类型
+  diagram_type TEXT NOT NULL CHECK(length(diagram_type) > 0),
+
+  -- AI 生成的代码 (失败的代码)
+  generated_code TEXT NOT NULL CHECK(length(generated_code) > 0),
+
+  -- 渲染错误信息
+  error_message TEXT NOT NULL CHECK(length(error_message) > 0),
+
+  -- AI 提供商
+  ai_provider TEXT NOT NULL CHECK(length(ai_provider) > 0),
+
+  -- AI 模型 ID
+  ai_model TEXT NOT NULL CHECK(length(ai_model) > 0),
+
+  -- Prompt 版本 ID (L1/L2/L3)
+  -- 允许为 NULL (Prompt 可能被删除)
+  prompt_l1_id INTEGER,
+  prompt_l2_id INTEGER,
+  prompt_l3_id INTEGER,
+
+  -- 创建时间（UTC 时间）
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+
+  -- 外键约束
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (prompt_l1_id) REFERENCES custom_prompts(id) ON DELETE SET NULL,
+  FOREIGN KEY (prompt_l2_id) REFERENCES custom_prompts(id) ON DELETE SET NULL,
+  FOREIGN KEY (prompt_l3_id) REFERENCES custom_prompts(id) ON DELETE SET NULL
+);
+
+-- 索引: 按用户和时间查询
+CREATE INDEX IF NOT EXISTS idx_failure_logs_user_time
+  ON render_failure_logs(user_id, created_at DESC);
+
+-- 索引: 按语言和类型统计
+CREATE INDEX IF NOT EXISTS idx_failure_logs_language_type
+  ON render_failure_logs(render_language, diagram_type, created_at DESC);
+
+-- 索引: 按 Prompt 查询失败案例
+CREATE INDEX IF NOT EXISTS idx_failure_logs_prompt_l1
+  ON render_failure_logs(prompt_l1_id)
+  WHERE prompt_l1_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_failure_logs_prompt_l2
+  ON render_failure_logs(prompt_l2_id)
+  WHERE prompt_l2_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_failure_logs_prompt_l3
+  ON render_failure_logs(prompt_l3_id)
+  WHERE prompt_l3_id IS NOT NULL;
+
+
+-- ============================================================================
 -- Schema 创建完成
 -- ============================================================================

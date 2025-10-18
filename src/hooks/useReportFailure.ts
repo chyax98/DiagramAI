@@ -32,7 +32,7 @@ export function useReportFailure() {
       setIsReporting(true);
 
       try {
-        const response = await fetch("/api/admin/render-failures", {
+        const response = await fetch("/api/render-failures", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

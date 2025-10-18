@@ -320,7 +320,7 @@ export class RenderFailureLogRepository {
 }
 
 // ============================================================================
-// 单例导出（用于向后兼容）
+// 单例导出
 // ============================================================================
 
 export const renderFailureLogRepository = new RenderFailureLogRepository(getDatabaseInstance());

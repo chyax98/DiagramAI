@@ -16,6 +16,7 @@ import { VersionSelector } from "./VersionSelector";
 import { PromptCodeEditor } from "./PromptCodeEditor";
 import { VersionSaveDialog } from "./VersionSaveDialog";
 import { EmptyState } from "./EmptyState";
+import { PromptGuide } from "./PromptGuide";
 
 interface Props {
   selection: PromptSelection;
@@ -84,20 +85,9 @@ export function PromptEditor({ selection }: Props) {
     }
   };
 
-  // ✅ 使用 EmptyState 组件替换重复的空状态 UI
+  // ✅ 显示三级提示词分工说明
   if (!selection.level) {
-    return (
-      <EmptyState
-        title="欢迎使用 Prompt 管理"
-        description="请按照以下步骤操作:"
-        steps={[
-          { label: "选择提示词层级 (L1/L2/L3)" },
-          { label: "选择渲染语言 (如 Mermaid, PlantUML)" },
-          { label: "选择图表类型 (L3 自动选择第一个)" },
-          { label: "编辑并保存为新版本" },
-        ]}
-      />
-    );
+    return <PromptGuide />;
   }
 
   // L2 或 L3 需要选择语言

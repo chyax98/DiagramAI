@@ -5,8 +5,6 @@
 
 import { logger } from "@/lib/utils/logger";
 import { renderFailureLogRepository } from "@/lib/repositories/RenderFailureLogRepository";
-import { PromptRepository } from "@/lib/repositories/PromptRepository";
-import { getDatabaseInstance } from "@/lib/db/client";
 
 /**
  * 失败日志条目接口
@@ -79,23 +77,10 @@ export class FailureLogService {
     }
 
     try {
-      // 优先使用传入的 Prompt IDs（来自 loadPrompt）
-      // 如果没有传入，则查询当前激活的 Prompt ID（向后兼容）
-      let promptL1Id = entry.promptIds?.l1_id || null;
-      let promptL2Id = entry.promptIds?.l2_id || null;
-      let promptL3Id = entry.promptIds?.l3_id || null;
-
-      if (!entry.promptIds) {
-        // 向后兼容：如果没有传入 promptIds，查询当前激活的 Prompt
-        const db = getDatabaseInstance();
-        const promptRepo = new PromptRepository(db);
-        const l1 = promptRepo.findActive(1);
-        const l2 = promptRepo.findActive(2, entry.renderLanguage);
-        const l3 = promptRepo.findActive(3, entry.renderLanguage, entry.diagramType);
-        promptL1Id = l1?.id || null;
-        promptL2Id = l2?.id || null;
-        promptL3Id = l3?.id || null;
-      }
+      // 使用传入的 Prompt IDs（来自 loadPrompt）
+      const promptL1Id = entry.promptIds?.l1_id || null;
+      const promptL2Id = entry.promptIds?.l2_id || null;
+      const promptL3Id = entry.promptIds?.l3_id || null;
 
       // 写入数据库（只存 Prompt ID，不存完整内容）
       renderFailureLogRepository.create({

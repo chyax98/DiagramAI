@@ -1,0 +1,375 @@
+实际使用的图标:
+==================
+
+IconActivity
+IconAdjust
+IconAlert
+IconAlignCenter
+IconAlignLeft
+IconAlignRight
+IconArrowDown
+IconArrowLeft
+IconArrowRight
+IconArrowUp
+IconAt
+IconBold
+IconBookmark
+IconBox
+IconCategory
+IconCheck
+IconCheckCircle
+IconChevronDown
+IconChevronLeft
+IconChevronRight
+IconChevronUp
+IconCircle
+IconClass
+IconClose
+IconCode
+IconComment
+IconComponent
+IconCopy
+IconCpu
+IconDatabase
+IconDiagram
+IconDownload
+IconDrag
+IconEdit
+IconError
+IconErrorCircle
+IconExternalLink
+IconEye
+IconEyeOff
+IconFile
+IconFilter
+IconFlag
+IconFlowchart
+IconFolder
+IconGrid
+IconHash
+IconHeart
+IconHelp
+IconHistory
+IconImage
+IconInfo
+IconItalic
+IconKey
+IconLayers
+IconLink
+IconList
+IconLoading
+IconLock
+IconLogin
+IconLogout
+IconMail
+IconMaximize
+IconMenu
+IconMinimize
+IconMinus
+IconMonitor
+IconMoon
+IconMoreHorizontal
+IconMoreVertical
+IconMove
+IconName
+IconNext
+IconNotification
+IconNotificationOff
+IconOrderedList
+IconPause
+IconPlay
+IconPlus
+IconPrevious
+IconRedo
+IconRefresh
+IconSave
+IconSearch
+IconSecurity
+IconSend
+IconSequence
+IconSettings
+IconShare
+IconSparkles
+IconStar
+IconStop
+IconSun
+IconTag
+IconText
+IconTrash
+IconUnderline
+IconUndo
+IconUnlock
+IconUpload
+IconUser
+IconUsers
+IconWorkflow
+IconZoomIn
+IconZoomOut
+
+==================
+
+
+使用频率统计:
+==================
+
+   6 IconCopy
+   4 IconTrash
+   4 IconLoading
+   4 IconDownload
+   3 IconUser
+   3 IconSparkles
+   3 IconName
+   3 IconLogout
+   3 IconLogin
+   3 IconCategory
+   2 IconRefresh
+   1 IconZoomOut
+   1 IconZoomIn
+   1 IconWorkflow
+   1 IconUsers
+   1 IconUpload
+   1 IconUnlock
+   1 IconUndo
+   1 IconUnderline
+   1 IconText
+   1 IconTag
+   1 IconSun
+   1 IconStop
+   1 IconStar
+   1 IconShare
+   1 IconSettings
+   1 IconSequence
+   1 IconSend
+   1 IconSecurity
+   1 IconSearch
+   1 IconSave
+   1 IconRedo
+   1 IconPrevious
+   1 IconPlus
+   1 IconPlay
+   1 IconPause
+   1 IconOrderedList
+   1 IconNotificationOff
+   1 IconNotification
+   1 IconNext
+   1 IconMove
+   1 IconMoreVertical
+   1 IconMoreHorizontal
+   1 IconMoon
+   1 IconMonitor
+   1 IconMinus
+   1 IconMinimize
+   1 IconMenu
+   1 IconMaximize
+   1 IconMail
+   1 IconLock
+   1 IconList
+   1 IconLink
+   1 IconLayers
+   1 IconKey
+   1 IconItalic
+   1 IconInfo
+   1 IconImage
+   1 IconHistory
+   1 IconHelp
+   1 IconHeart
+   1 IconHash
+   1 IconGrid
+   1 IconFolder
+   1 IconFlowchart
+   1 IconFlag
+   1 IconFilter
+   1 IconFile
+   1 IconEyeOff
+   1 IconEye
+   1 IconExternalLink
+   1 IconErrorCircle
+   1 IconError
+   1 IconEdit
+   1 IconDrag
+   1 IconDiagram
+   1 IconDatabase
+   1 IconCpu
+   1 IconComponent
+   1 IconComment
+   1 IconCode
+   1 IconClose
+   1 IconClass
+   1 IconCircle
+   1 IconChevronUp
+   1 IconChevronRight
+   1 IconChevronLeft
+   1 IconChevronDown
+   1 IconCheckCircle
+   1 IconCheck
+   1 IconBox
+   1 IconBookmark
+   1 IconBold
+   1 IconAt
+   1 IconArrowUp
+   1 IconArrowRight
+   1 IconArrowLeft
+   1 IconArrowDown
+   1 IconAlignRight
+   1 IconAlignLeft
+   1 IconAlignCenter
+   1 IconAlert
+   1 IconAdjust
+   1 IconActivity
+
+==================
+
+
+所有导出的图标:
+==================
+
+IconActivity
+IconAdjust
+IconAlert
+IconAlignCenter
+IconAlignLeft
+IconAlignRight
+IconArrowDown
+IconArrowLeft
+IconArrowRight
+IconArrowUp
+IconAt
+IconBold
+IconBookmark
+IconBox
+IconCategory
+IconCheck
+IconCheckCircle
+IconChevronDown
+IconChevronLeft
+IconChevronRight
+IconChevronUp
+IconCircle
+IconClass
+IconClose
+IconCode
+IconComment
+IconComponent
+IconCopy
+IconCpu
+IconDatabase
+IconDiagram
+IconDownload
+IconDrag
+IconEdit
+IconError
+IconErrorCircle
+IconExternalLink
+IconEye
+IconEyeOff
+IconFile
+IconFilter
+IconFlag
+IconFlowchart
+IconFolder
+IconGrid
+IconHash
+IconHeart
+IconHelp
+IconHistory
+IconImage
+IconInfo
+IconItalic
+IconKey
+IconLayers
+IconLink
+IconList
+IconLoading
+IconLock
+IconLogin
+IconLogout
+IconMail
+IconMaximize
+IconMenu
+IconMinimize
+IconMinus
+IconMonitor
+IconMoon
+IconMoreHorizontal
+IconMoreVertical
+IconMove
+IconName
+IconNext
+IconNotification
+IconNotificationOff
+IconOrderedList
+IconPause
+IconPlay
+IconPlus
+IconPrevious
+IconProps
+IconRedo
+IconRefresh
+IconSave
+IconSearch
+IconSecurity
+IconSend
+IconSequence
+IconSettings
+IconShare
+IconSparkles
+IconStar
+IconStop
+IconSun
+IconTag
+IconText
+IconTrash
+IconUnderline
+IconUndo
+IconUnlock
+IconUpload
+IconUser
+IconUsers
+IconWorkflow
+IconZoomIn
+IconZoomOut
+
+==================
+
+📊 统计摘要
+==================
+实际使用: 104 个图标
+已导出: 105 个图标
+未使用: 1 个图标
+冗余率: 0%
+
+
+建议的 src/components/icons/index.ts 内容:
+==================
+
+/**
+ * 图标导出 - 仅包含实际使用的图标
+ * 
+ * 注意: 此文件由 analyze-icons-usage.sh 生成
+ * 请根据实际使用情况调整
+ */
+
+// 基础操作图标
+export {
+  Download as IconDownload,
+  Trash2 as IconTrash,
+  Copy as IconCopy,
+} from "lucide-react";
+
+// 状态指示图标
+export {
+  Loader2 as IconLoading,
+  AlertCircle as IconAlertCircle,
+  Sparkles as IconSparkles,
+} from "lucide-react";
+
+// 主题切换图标
+export {
+  Sun as IconSun,
+  Moon as IconMoon,
+} from "lucide-react";
+
+// 统一图标组件（保留）
+export { Icon } from "./Icon";
+export type { IconProps } from "./Icon";
+

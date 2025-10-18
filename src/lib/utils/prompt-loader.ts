@@ -1,16 +1,15 @@
 /**
  * Prompt 三层加载工具
  *
- * 用途: 加载 L1/L2/L3 三层 Prompt 内容 (自定义版本优先,Fallback 到文件系统)
+ * 用途: 从数据库加载 L1/L2/L3 三层 Prompt 内容
  * 职责:
- * 1. 从数据库加载激活的自定义版本
- * 2. Fallback 到文件系统的默认 Prompt
- * 3. 返回 Prompt ID 用于失败日志记录
+ * 1. 从数据库加载激活的 Prompt 版本
+ * 2. 返回 Prompt ID 用于失败日志记录
+ * 3. L1 和 L3 必须存在，L2 可选
+ *
+ * 注意: 系统初始化时会将所有默认提示词导入数据库，因此不需要文件系统兜底
  */
 
-import { readFile } from "fs/promises";
-import { join } from "path";
-import { PROMPTS_DIR } from "@/lib/constants/env";
 import { getDatabaseInstance } from "@/lib/db/client";
 import { PromptRepository } from "@/lib/repositories/PromptRepository";
 import type { PromptLoadResult } from "@/types/prompt";
@@ -20,13 +19,14 @@ import type { RenderLanguage } from "@/lib/constants/diagram-types";
  * 加载指定语言和类型的 Prompt 内容
  *
  * 加载策略:
- * - L1: 自定义版本 > data/prompts/universal.txt
- * - L2: 自定义版本 > data/prompts/{language}/common.txt (可选)
- * - L3: 自定义版本 > data/prompts/{language}/{type}.txt
+ * - L1: 从数据库加载（必须存在）
+ * - L2: 从数据库加载（可选）
+ * - L3: 从数据库加载（必须存在）
  *
  * @param renderLanguage - 渲染语言 (如 mermaid, plantuml)
  * @param diagramType - 图表类型 (如 flowchart, sequence)
  * @returns PromptLoadResult - 三层 Prompt 内容 + 版本信息 + Prompt IDs
+ * @throws Error - 如果 L1 或 L3 不存在
  */
 export async function loadPrompt(
   renderLanguage: RenderLanguage,
@@ -37,69 +37,39 @@ export async function loadPrompt(
     const promptRepo = new PromptRepository(db);
 
     // ========================================================================
-    // L1: 通用提示词
+    // L1: 通用提示词（必须存在）
     // ========================================================================
-    let l1_content: string | null = null;
-    let l1_version: string | undefined = undefined;
-    let l1_id: number | undefined = undefined;
-
-    const l1Custom = promptRepo.findActive(1);
-    if (l1Custom) {
-      l1_content = l1Custom.content;
-      l1_version = l1Custom.version;
-      l1_id = l1Custom.id;
-    } else {
-      // Fallback 到文件系统
-      const universalPath = join(PROMPTS_DIR, "universal.txt");
-      try {
-        l1_content = await readFile(universalPath, "utf-8");
-        l1_version = "system-default";
-      } catch (_error) {
-        l1_content = null;
-      }
+    const l1 = promptRepo.findActive(1);
+    if (!l1) {
+      throw new Error("L1 通用提示词不存在，请检查数据库初始化");
     }
 
-    // ========================================================================
-    // L2: 语言级提示词 (可选)
-    // ========================================================================
-    let l2_content: string | null = null;
-    let l2_version: string | undefined = undefined;
-    let l2_id: number | undefined = undefined;
+    const l1_content = l1.content;
+    const l1_version = l1.version;
+    const l1_id = l1.id;
 
-    const l2Custom = promptRepo.findActive(2, renderLanguage);
-    if (l2Custom) {
-      l2_content = l2Custom.content;
-      l2_version = l2Custom.version;
-      l2_id = l2Custom.id;
-    } else {
-      // Fallback 到文件系统
-      const languagePath = join(PROMPTS_DIR, renderLanguage, "common.txt");
-      try {
-        l2_content = await readFile(languagePath, "utf-8");
-        l2_version = "system-default";
-      } catch (_error) {
-        l2_content = null; // L2 可选,不存在不报错
-      }
+    // ========================================================================
+    // L2: 语言级提示词（可选）
+    // ========================================================================
+    const l2 = promptRepo.findActive(2, renderLanguage);
+    
+    const l2_content = l2?.content || null;
+    const l2_version = l2?.version;
+    const l2_id = l2?.id;
+
+    // ========================================================================
+    // L3: 类型级提示词（必须存在）
+    // ========================================================================
+    const l3 = promptRepo.findActive(3, renderLanguage, diagramType);
+    if (!l3) {
+      throw new Error(
+        `L3 提示词不存在: ${renderLanguage}/${diagramType}，请检查数据库初始化`
+      );
     }
 
-    // ========================================================================
-    // L3: 类型级提示词 (必需)
-    // ========================================================================
-    let l3_content: string | null = null;
-    let l3_version: string | undefined = undefined;
-    let l3_id: number | undefined = undefined;
-
-    const l3Custom = promptRepo.findActive(3, renderLanguage, diagramType);
-    if (l3Custom) {
-      l3_content = l3Custom.content;
-      l3_version = l3Custom.version;
-      l3_id = l3Custom.id;
-    } else {
-      // Fallback 到文件系统
-      const typePath = join(PROMPTS_DIR, renderLanguage, `${diagramType}.txt`);
-      l3_content = await readFile(typePath, "utf-8");
-      l3_version = "system-default";
-    }
+    const l3_content = l3.content;
+    const l3_version = l3.version;
+    const l3_id = l3.id;
 
     // ========================================================================
     // 组合最终 Prompt

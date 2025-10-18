@@ -17,6 +17,7 @@
  */
 
 import * as jose from "jose";
+import { ENV } from "@/lib/constants/env";
 
 /**
  * JWT 配置
@@ -34,7 +35,7 @@ const JWT_SECRET = (() => {
   return secret;
 })();
 
-const JWT_EXPIRATION = "7d"; // 7 天有效期
+const JWT_EXPIRATION = ENV.JWT_EXPIRES_IN; // 从环境变量读取,默认 7 天
 
 /**
  * Token Payload 类型定义

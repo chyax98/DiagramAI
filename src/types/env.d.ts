@@ -79,6 +79,24 @@ declare global {
       AI_MAX_RETRIES?: string;
 
       /**
+       * JWT 过期时间
+       *
+       * 用途: JWT Token 的有效期
+       * 格式: 数字+单位 (如 '7d', '24h', '3600s')
+       * 默认值: '7d' (7天)
+       */
+      JWT_EXPIRES_IN?: string;
+
+      /**
+       * 失败日志记录开关
+       *
+       * 用途: 是否记录渲染失败日志
+       * 值: 'true' | 'false'
+       * 默认值: 'true'
+       */
+      ENABLE_FAILURE_LOGGING?: string;
+
+      /**
        * Node 环境
        *
        * 值: 'development' | 'production' | 'test'
@@ -86,25 +104,19 @@ declare global {
        */
       NODE_ENV?: "development" | "production" | "test";
 
-      // ===== 客户端可访问变量 (NEXT_PUBLIC_*) =====
+      // ===== 外部服务配置 =====
 
       /**
-       * Kroki 服务 URL
+       * Kroki 服务 URL (后端专用)
        *
-       * 用途: Kroki 图表渲染服务地址
+       * 用途: 后端代理访问 Kroki 图表渲染服务
        * 默认值: 'https://kroki.io'
        *
-       * 可选: 本地部署时使用 'http://localhost:8000'
+       * 说明:
+       * - 前端通过 /api/kroki 代理访问，无需配置客户端变量
+       * - 可选: 本地部署时使用 'http://localhost:8000'
        */
-      NEXT_PUBLIC_KROKI_URL?: string;
-
-      /**
-       * Kroki 请求超时时间
-       *
-       * 用途: Kroki 请求的超时限制（毫秒）
-       * 默认值: '5000' (5秒)
-       */
-      NEXT_PUBLIC_KROKI_TIMEOUT?: string;
+      KROKI_URL?: string;
 
       /**
        * Kroki 最大重试次数
@@ -112,7 +124,7 @@ declare global {
        * 用途: Kroki 请求失败后的重试次数
        * 默认值: '3'
        */
-      NEXT_PUBLIC_KROKI_MAX_RETRIES?: string;
+      KROKI_MAX_RETRIES?: string;
 
       /**
        * Kroki 重试延迟时间
@@ -120,7 +132,9 @@ declare global {
        * 用途: Kroki 请求失败后的重试延迟（毫秒）
        * 默认值: '1000' (1秒)
        */
-      NEXT_PUBLIC_KROKI_RETRY_DELAY?: string;
+      KROKI_RETRY_DELAY?: string;
+
+      // ===== 客户端可访问变量 (NEXT_PUBLIC_*) =====
 
       /**
        * 最大输入字符数

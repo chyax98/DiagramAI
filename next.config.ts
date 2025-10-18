@@ -139,11 +139,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-
-  // 环境变量配置提示
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
-  },
 };
 
 // Sentry 错误监控配置（暂时禁用）

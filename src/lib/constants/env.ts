@@ -115,13 +115,24 @@ export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000
 export const API_TEST_TIMEOUT = parseInt(process.env.API_TEST_TIMEOUT || "30000", 10);
 
 /**
- * Prompts 目录路径
+ * JWT 过期时间
  *
- * 用于加载 AI Prompts 文件
+ * 格式: 数字+单位 (如 '7d', '24h', '3600s')
  *
- * @default "src/lib/constants/prompts"
+ * @default '7d'
+ * @env JWT_EXPIRES_IN
  */
-export const PROMPTS_DIR = "src/lib/constants/prompts";
+export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+
+/**
+ * 失败日志记录开关
+ *
+ * 用于控制是否记录渲染失败日志
+ *
+ * @default true
+ * @env ENABLE_FAILURE_LOGGING
+ */
+export const ENABLE_FAILURE_LOGGING = process.env.ENABLE_FAILURE_LOGGING !== "false";
 
 /**
  * 所有环境变量的导出对象
@@ -141,5 +152,13 @@ export const ENV = {
   DB_PATH,
   APP_URL,
   API_TEST_TIMEOUT,
-  PROMPTS_DIR,
+  JWT_EXPIRES_IN,
+  ENABLE_FAILURE_LOGGING,
 } as const;
+
+/**
+ * Prompts 目录路径 (项目常量,非环境变量)
+ *
+ * 用于加载 AI Prompts 文件
+ */
+export const PROMPTS_DIR = "src/lib/constants/prompts";
